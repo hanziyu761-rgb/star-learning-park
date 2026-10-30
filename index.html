@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
 <meta name="description" content="星星闯关乐园V5.0：小学一至六年级知识主题练习、语音讲解、随机出题、英文冒险、错题复习与打印。">
-<title>星星闯关乐园 V5.0 · 零基础美式英语与 DeepSeek AI 老师版</title>
+<title>星星闯关乐园 V5.1 · 考试随时退出与恢复版</title>
 <style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
 
 /* V4.2 AI learning assistant: child-friendly dialog with responsive controls */
@@ -160,6 +160,12 @@ body.v5-special #aiTeacherFab,body.v5-special #v44LevelBar{display:none!importan
 .exam-chip-line{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.exam-chip{padding:12px 14px;min-height:45px;min-width:55px;border:2px solid #dedcfb;background:#f6f4ff;color:#5449a3;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer}.exam-chip.picked{border-color:#39b98f;background:#edfaf4;color:#238464}.exam-sorted{padding:12px;border-radius:12px;background:#f7f9ff;border:1px dashed #d6ddf4;margin:16px 0}.exam-sorted small{color:#62718d}.exam-scene{text-align:center;font-size:clamp(46px,10vw,72px);background:#fff5e6;padding:20px 10px;border-radius:18px;letter-spacing:5px}.exam-oral p{font-size:15px;line-height:1.8}
 .exam-navigation{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}.exam-no-feedback{font-size:12px;line-height:1.7;color:#8692a7;text-align:center}.exam-score{text-align:center;font-size:70px;font-weight:950;color:#775be5;line-height:1.1}.exam-score small{font-size:18px;color:#8190aa}.exam-topic{border-bottom:1px solid #e8ebf6;padding:15px 0}.exam-topic .track{margin-top:8px}.exam-topic p{margin-bottom:0}.exam-solution{background:#f8faff;border:1px solid #e5e9f8;border-radius:13px;padding:13px 15px;margin:10px 0;line-height:1.8}.exam-solution summary{font-weight:850;cursor:pointer;color:#384e75}.exam-solution p{font-size:14px;overflow-wrap:anywhere}.exam-config .note{margin-top:12px;line-height:1.8}
 body.exam-running #aiTeacherFab,body.exam-running #v44LevelBar{display:none!important}
+.exam-exit-trigger{min-height:44px;border:2px solid #f1c9bb!important;background:#fff8f5!important;color:#ad4e34!important}
+.exam-exit-overlay{position:fixed;inset:0;z-index:1200;background:#222b4da8;display:flex;align-items:center;justify-content:center;padding:18px;overflow-y:auto}
+.exam-exit-panel{width:min(440px,100%);background:#fff;border-radius:24px;box-shadow:0 20px 70px #11173a55;padding:24px 20px;text-align:center;max-height:calc(100dvh - 36px);overflow-y:auto}
+.exam-exit-panel h2{font-size:22px;margin:0 0 12px}.exam-exit-panel p{line-height:1.9;margin:6px 0 20px;color:#69758f}.exam-exit-panel .btn{min-height:52px;margin-top:11px}
+.exam-danger{color:#aa443a!important;border-color:#f7c0b8!important;background:#fff6f4!important}
+.exam-paused{border:2px solid #b6a2ff;background:linear-gradient(145deg,#fff,#f5f0ff)}.exam-paused h2{font-size:20px;margin:0 0 10px}.exam-paused p{line-height:1.85}.exam-paused .btn{margin-top:10px;min-height:50px}
 @media(max-width:390px){.modebar{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.mode{font-size:12px}.exam-types{gap:6px}.exam-type{min-height:82px;padding:10px 3px}.exam-type strong{font-size:12px}.exam-type small{font-size:10px}.exam-options{grid-template-columns:1fr}.exam-jump{grid-template-columns:repeat(8,minmax(0,1fr))}.exam-stem{font-size:18px}}
 @media print{.exam-types,.exam-jump,.exam-navigation,.exam-no-feedback,.exam-listen{display:none!important}}
 
@@ -167,7 +173,7 @@ body.exam-running #aiTeacherFab,body.exam-running #v44LevelBar{display:none!impo
 <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" sizes="192x192">
 </head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V5.0</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V5.1</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
@@ -1252,9 +1258,43 @@ function examSafeInit(){
  saveData.examActive=saveData.examActive&&saveData.examActive.v===1&&Array.isArray(saveData.examActive.questions)?saveData.examActive:null;
  if(saveData.examActive?.status==='active'){view='exam';saveData.subject=saveData.examActive.subject;saveData.grade=saveData.examActive.g;saveData.term=saveData.examActive.t;}
 }
-let examKind='unit',examUnit=0,examReviewIndex=null;
+let examKind='unit',examUnit=0,examReviewIndex=null,examExitDialog='';
 examSafeInit();
 function examIsActive(){return saveData.examActive?.status==='active';}
+function examIsPaused(){return saveData.examActive?.status==='paused';}
+function examPauseAndExit(){
+ if(!examIsActive())return;
+ const remaining=examTimeRemaining();
+ if(remaining<=0){examSubmit(true);return;}
+ const ex=saveData.examActive;ex.savedSeconds=remaining;ex.status='paused';ex.deadline=null;
+ examExitDialog='';view='home';store();render();window.scrollTo(0,0);
+ toast('考试进度已保存，倒计时暂停。下次点击“考试模式”即可继续。');
+}
+function examDiscardAndExit(){
+ if(!saveData.examActive||!['active','paused'].includes(saveData.examActive.status))return;
+ saveData.examActive=null;examExitDialog='';view='home';document.body.classList.remove('exam-running');
+ store();render();window.scrollTo(0,0);toast('已放弃本次考试，不计分，也不记录错题。');
+}
+function examResumeSaved(){
+ const ex=saveData.examActive;
+ if(ex?.status!=='paused')return;
+ const n=Number(ex.savedSeconds);
+ ex.deadline=Date.now()+1000*(Number.isFinite(n)&&n>0?n:Math.max(1,ex.minutes*60));
+ delete ex.savedSeconds;ex.status='active';
+ saveData.subject=ex.subject;saveData.grade=ex.g;saveData.term=ex.t;
+ view='exam';examExitDialog='';store();render();window.scrollTo(0,0);
+}
+function examExitUi(){
+ const ex=saveData.examActive;
+ if(!examExitDialog||!ex||!['active','paused'].includes(ex.status))return '';
+ const confirmDiscard=examExitDialog==='confirm-discard';
+ return `<div class="exam-exit-overlay"><section class="exam-exit-panel" role="dialog" aria-modal="true" aria-labelledby="examExitTitle">
+ <h2 id="examExitTitle">${confirmDiscard?'确定放弃这张试卷吗？':'🚪 要退出考试吗？'}</h2>
+ <p>${confirmDiscard?'放弃后，本次作答记录将被清除，不计算成绩，也不会新增错题。':`已完成 ${examAnsweredCount(ex)} / ${ex.count} 题。你可以先保存，稍后继续做，剩余考试时间也会暂停。`}</p>
+ ${confirmDiscard?`<button type="button" data-exam="exit-discard" class="btn ghost block exam-danger">确认放弃，不保存</button><button type="button" data-exam="exit-cancel-discard" class="btn primary block">返回，不放弃</button>`:
+ `<button type="button" data-exam="exit-pause" class="btn primary block">⏸ 保存进度并退出</button><button type="button" data-exam="exit-keep" class="btn ghost block">继续做题</button><button type="button" data-exam="confirm-discard" class="btn ghost block exam-danger">🗑 放弃本次考试</button>`}
+ </section></div>`;
+}
 function examTimeRemaining(){return Math.max(0,Math.ceil(((saveData.examActive?.deadline||0)-Date.now())/1000));}
 function examTimeLabel(sec){return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;}
 function examAnswered(q,v){if(v==null||v==='')return false;if(q.kind==='match')return !!v&&typeof v==='object'&&q.pairs.every(p=>String(v[p[0]]||'').length>0);if(q.kind==='multi'||q.kind==='order')return Array.isArray(v)&&v.length>0;if(q.kind==='oral')return v==='full'||v==='part'||v==='none';return true;}
@@ -1281,11 +1321,11 @@ function examResponseControl(q,index,val){const isEnglish=q.subject==='english';
 function examQuestionCard(exam){const idx=exam.current,q=exam.questions[idx],val=exam.answers[idx];const total=exam.count;
  return `<section class="card exam-card"><div class="row wrap"><span class="chip">第 ${idx+1} / ${total} 题</span><span class="chip">${examHtmlEscape(q.topic)}</span><span class="chip">${({single:'单选',numeric:q.format==='error'?'找错改正':q.format==='reading'?'应用题':'填空',judge:'判断',multi:'多选',match:'连线',order:'排序',dictation:'听写',oral:'口头表达'})[q.kind]||'练习'}</span></div><div class="exam-stem" ${q.subject==='english'?'lang="en-US"':''}>${examFriendly(q.ask)}</div>${q.passage?`<div class="exam-passage" ${q.subject==='english'?'lang="en-US"':''}>${examFriendly(q.passage)}</div>`:''}${q.face?`<div class="exam-face" ${q.subject==='english'?'lang="en-US"':''}>${examHtmlEscape(q.face)}</div>`:''}${examResponseControl(q,idx,val)}<div class="exam-navigation"><button type="button" data-exam="previous" class="btn ghost" ${idx===0?'disabled':''}>⬅ 上一题</button><button type="button" data-exam="next" class="btn primary">${idx===total-1?'查看答题进度':'下一题 ➜'}</button></div><p class="exam-no-feedback">🔒 考试中不会显示对错、答案或提示，交卷后统一评分。</p></section>`;
 }
-function examRenderSetup(){const latest=saveData.examHistory.filter(h=>h.subject===saveData.subject&&h.g===saveData.grade&&h.t===saveData.term).slice(-3).reverse();
- return `<section class="hero ${saveData.subject}"><div class="overline">EXAM · 模拟测评</div><h1>📝 考试模式</h1><p>单元、期中、期末三种试卷。固定题量、独立计时，交卷后统一看成绩。</p></section><section class="card exam-config"><h2 class="title">选择试卷类型</h2><div class="exam-types">${Object.entries(EXAM_PLANS).map(([key,p])=>`<button type="button" data-exam="type" data-value="${key}" class="exam-type ${examKind===key?'active':''}"><strong>${p.name}</strong><small>${p.count}题 · ${p.minutes}分钟</small></button>`).join('')}</div>${examKind==='unit'?`<label class="exam-unit-label">选择测验单元 <select id="examUnit" data-exam-input="unit">${unitsFor(saveData.subject).map((x,i)=>`<option value="${i}" ${i===examUnit?'selected':''}>第${i+1}知识主题 · ${examHtmlEscape(x)}</option>`).join('')}</select></label>`:`<div class="tipbox">${examKind==='mid'?'期中范围：本册前两个知识主题。':'期末范围：本册四个知识主题。'}</div>`}<p class="small">当前：${saveData.grade}年级${labelTerm(saveData.term)} · ${NAME[saveData.subject]}${saveData.subject==='english'?` · 英语能力 L${saveData.englishAbility}`:''}</p><button type="button" data-exam="start" class="btn primary block">🚀 开始${EXAM_PLANS[examKind].name}</button><p class="note">题目为按知识主题生成的原创模拟题，不是官方试卷，也不等同于当地学校每个单元的实际测试范围。语文口头看图写话和英语口头表达由家长评分。</p></section><section class="card"><h2 class="title">📊 最近考试记录</h2>${latest.length?latest.map(h=>`<div class="exam-history-row"><span>${examHtmlEscape(h.label)}<small>${examHtmlEscape(h.at.slice(0,10))}${h.objectiveCount!=null?' · 客观题成绩':' · 旧版综合成绩'}</small></span><b>${h.score}分</b></div>`).join(''):'<p class="small">还没有考试记录。完成一张试卷后这里会出现成绩。</p>'}</section>`;
+function examRenderSetup(){const paused=examIsPaused()?saveData.examActive:null;const latest=saveData.examHistory.filter(h=>h.subject===saveData.subject&&h.g===saveData.grade&&h.t===saveData.term).slice(-3).reverse();
+ return `${paused?`<section class="card exam-paused"><h2>⏸ 有一张已保存的试卷</h2><p>${examHtmlEscape(examPaperLabel(paused))} · 已完成 ${examAnsweredCount(paused)} / ${paused.count} 题 · 剩余 ${examTimeLabel(paused.savedSeconds||0)}</p><button type="button" class="btn primary block" data-exam="resume">▶ 继续上次考试</button><button type="button" class="btn ghost block" data-exam="confirm-discard">🗑 放弃这张试卷</button><p class="small">暂停期间不计时。继续后会恢复原来题目和已填写的答案。</p></section>`:''}<section class="hero ${saveData.subject}"><div class="overline">EXAM · 模拟测评</div><h1>📝 考试模式</h1><p>单元、期中、期末三种试卷。固定题量、独立计时，交卷后统一看成绩。</p></section><section class="card exam-config"><h2 class="title">选择试卷类型</h2><div class="exam-types">${Object.entries(EXAM_PLANS).map(([key,p])=>`<button type="button" data-exam="type" data-value="${key}" class="exam-type ${examKind===key?'active':''}"><strong>${p.name}</strong><small>${p.count}题 · ${p.minutes}分钟</small></button>`).join('')}</div>${examKind==='unit'?`<label class="exam-unit-label">选择测验单元 <select id="examUnit" data-exam-input="unit">${unitsFor(saveData.subject).map((x,i)=>`<option value="${i}" ${i===examUnit?'selected':''}>第${i+1}知识主题 · ${examHtmlEscape(x)}</option>`).join('')}</select></label>`:`<div class="tipbox">${examKind==='mid'?'期中范围：本册前两个知识主题。':'期末范围：本册四个知识主题。'}</div>`}<p class="small">当前：${saveData.grade}年级${labelTerm(saveData.term)} · ${NAME[saveData.subject]}${saveData.subject==='english'?` · 英语能力 L${saveData.englishAbility}`:''}</p><button type="button" data-exam="start" class="btn primary block" ${paused?'disabled aria-disabled="true"':''}>🚀 开始${EXAM_PLANS[examKind].name}</button><p class="note">题目为按知识主题生成的原创模拟题，不是官方试卷，也不等同于当地学校每个单元的实际测试范围。语文口头看图写话和英语口头表达由家长评分。</p></section><section class="card"><h2 class="title">📊 最近考试记录</h2>${latest.length?latest.map(h=>`<div class="exam-history-row"><span>${examHtmlEscape(h.label)}<small>${examHtmlEscape(h.at.slice(0,10))}${h.objectiveCount!=null?' · 客观题成绩':' · 旧版综合成绩'}</small></span><b>${h.score}分</b></div>`).join(''):'<p class="small">还没有考试记录。完成一张试卷后这里会出现成绩。</p>'}</section>`;
 }
 function examRenderRunning(){const exam=saveData.examActive,remaining=examTimeRemaining();if(!remaining){examSubmit(true);return examRenderResults();}document.body.classList.add('exam-running');
- return `<section class="hero ${exam.subject}"><div class="overline">EXAM IN PROGRESS · 请独立完成</div><h1>📝 ${EXAM_PLANS[exam.type].name}</h1><p>${examPaperLabel(exam)} · ${exam.count}题 / ${exam.minutes}分钟</p></section><section class="card exam-top"><div class="row wrap"><span class="chip">✅ 已作答 ${examAnsweredCount(exam)} / ${exam.count}</span><span class="exam-timer" id="examClock" role="timer">⏱ ${examTimeLabel(remaining)}</span></div>${progress(examAnsweredCount(exam),exam.count)}<div class="exam-jump">${exam.questions.map((q,i)=>`<button data-exam="jump" data-value="${i}" class="exam-jump-chip ${exam.current===i?'current':''} ${examAnswered(q,exam.answers[i])?'done':''}" aria-label="第${i+1}题">${i+1}</button>`).join('')}</div></section>${examQuestionCard(exam)}<section class="card"><button type="button" class="btn primary block" data-exam="submit">📨 交卷并查看成绩</button><p class="small" style="text-align:center">未完成全部题目时不可提前交卷；时间结束会自动提交，空题计0分。</p></section>`;
+ return `<section class="hero ${exam.subject}"><div class="overline">EXAM IN PROGRESS · 请独立完成</div><h1>📝 ${EXAM_PLANS[exam.type].name}</h1><p>${examPaperLabel(exam)} · ${exam.count}题 / ${exam.minutes}分钟</p></section><section class="card exam-top"><div class="row" style="justify-content:flex-end;margin-bottom:10px"><button type="button" class="btn ghost tiny exam-exit-trigger" data-exam="exit">🚪 退出考试</button></div><div class="row wrap"><span class="chip">✅ 已作答 ${examAnsweredCount(exam)} / ${exam.count}</span><span class="exam-timer" id="examClock" role="timer">⏱ ${examTimeLabel(remaining)}</span></div>${progress(examAnsweredCount(exam),exam.count)}<div class="exam-jump">${exam.questions.map((q,i)=>`<button data-exam="jump" data-value="${i}" class="exam-jump-chip ${exam.current===i?'current':''} ${examAnswered(q,exam.answers[i])?'done':''}" aria-label="第${i+1}题">${i+1}</button>`).join('')}</div></section>${examQuestionCard(exam)}<section class="card"><button type="button" class="btn primary block" data-exam="submit">📨 交卷并查看成绩</button><p class="small" style="text-align:center">未完成全部题目时不可提前交卷；时间结束会自动提交，空题计0分。</p></section>`;
 }
 function examAnswerCorrect(q,v){if(!examAnswered(q,v))return false;
  if(q.kind==='oral')return v==='full';
@@ -1329,15 +1369,23 @@ function examRenderResults(){const ex=saveData.examActive;if(!ex||!ex.summary)re
  const missedKinds=Object.entries(kinds).filter(([_,v])=>v.lost).sort((a,b)=>b[1].lost-a[1].lost);
  return `<section class="hero ${ex.subject}"><div class="overline">EXAM FINISHED · 已交卷</div><h1>🏅 本次测验完成</h1><p>${examHtmlEscape(h.label)}</p></section><section class="card exam-results"><div class="exam-score">${h.score??"—"}<small> / 100 分</small></div><p style="text-align:center">客观题 ${h.objectiveCount??ex.count} 题 · ${h.wrong} 题未得满分${h.byTimeout?' · 时间到自动交卷':''}</p>${h.oral?`<div class="tipbox">🎤 口头表达单列（家长评价，不计入客观题百分制）：完成 ${h.oralRatings?.full??0}，部分完成 ${h.oralRatings?.part??0}，未完成 ${h.oralRatings?.none??0}。这不是 AI 发音评分。</div>`:''}<h2 class="title">📊 知识点成绩分析</h2>${topicRows.map(t=>`<div class="exam-topic"><div class="row"><b>${examHtmlEscape(t.name)}</b><span>${Math.round(100*t.points/t.max)}% · ${t.max}题</span></div>${progress(t.points,t.max)}${t.wrong?`<p class="small">需复习 ${t.wrong} 题：${examHtmlEscape(EXAM_TOPICS_HELP[ex.subject])}</p>`:''}</div>`).join('')}<h2 class="title" style="margin-top:18px">🧩 失分题型</h2>${missedKinds.length?missedKinds.map(([name,r])=>`<div class="exam-history-row"><span>${examHtmlEscape(name)}</span><b style="font-size:15px">${r.lost} / ${r.total} 题待加强</b></div>`).join(''): '<p class="small">各题型没有失分项。</p>'}<div class="tipbox">${weak.length?`建议优先复习：${weak.map(x=>x.name).join('、')}。客观错题已加入错题本，安排次日复习。`:'基础知识掌握不错！可以继续用不同方法解释答案，并练习表达。'}</div></section><section class="card"><h2 class="title">📋 逐题订正（交卷后才显示答案）</h2>${ex.questions.map((q,i)=>{const a=ex.answers[i],v=examGradeValue(q,a);return `<details class="exam-solution"><summary>第${i+1}题 · ${examHtmlEscape(q.topic)}　${v===1?'✅':v===0?'❌':'🟠'}</summary><p><strong>${examHtmlEscape(q.ask)}</strong></p>${q.passage?`<p>${examHtmlEscape(q.passage)}</p>`:''}<p>你的答案：${examHtmlEscape(examPrintableResponse(q,a))}</p><p>参考答案：${examHtmlEscape(examExpected(q))}</p><p>解析：${examHtmlEscape(q.explain)}</p></details>`}).join('')}</section><section class="card"><button class="btn primary block" data-exam="new">📝 再来一张新试卷</button><button class="btn ghost block" data-exam="wrongbook">📔 去错题本复习</button></section>`;
 }
-function examRender(){document.body.classList.toggle('exam-running',examIsActive());if(examIsActive())return examRenderRunning();if(saveData.examActive?.status==='done'&&saveData.examActive?.summary&&saveData.examActive.subject===saveData.subject&&saveData.examActive.g===saveData.grade&&saveData.examActive.t===saveData.term)return examRenderResults();return examRenderSetup();}
+function examRender(){document.body.classList.toggle('exam-running',examIsActive());if(examIsActive())return examRenderRunning()+examExitUi();if(saveData.examActive?.status==='done'&&saveData.examActive?.summary&&saveData.examActive.subject===saveData.subject&&saveData.examActive.g===saveData.grade&&saveData.examActive.t===saveData.term)return examRenderResults();return examRenderSetup()+examExitUi();}
 const examPreviousRender=render;
-render=function(){examPreviousRender();document.body.classList.toggle('exam-running',view==='exam'&&examIsActive());if(view==='exam'){app.innerHTML=examRender();if(aiIsOpen)aiClose();get('#v44LevelBar').classList.remove('active');}}
+render=function(){examPreviousRender();document.body.classList.toggle('exam-running',view==='exam'&&examIsActive());const examLink=document.querySelector('[data-view="exam"]');if(examLink)examLink.textContent=examIsPaused()?'📝 继续考试':'📝 考试模式';if(view==='exam'){app.innerHTML=examRender();if(aiIsOpen)aiClose();get('#v44LevelBar').classList.remove('active');}}
 function examSetAnswer(value){const ex=saveData.examActive;if(!examIsActive())return;ex.answers[ex.current]=value;store();}
 function examDraw(){if(view==='exam')render();}
 function examActions(button){const a=button.dataset.exam,v=button.dataset.value,ex=saveData.examActive;
+ if(a==='resume'){examResumeSaved();return;}
+ if(a==='exit'){if(!examIsActive())return;examExitDialog='choose';examDraw();return;}
+ if(a==='exit-keep'){examExitDialog='';examDraw();return;}
+ if(a==='exit-pause'){examPauseAndExit();return;}
+ if(a==='confirm-discard'){examExitDialog='confirm-discard';examDraw();return;}
+ if(a==='exit-cancel-discard'){examExitDialog=examIsActive()?'choose':'';examDraw();return;}
+ if(a==='exit-discard'){examDiscardAndExit();return;}
+ if(examExitDialog)return;
  if(a==='type'){examKind=v;examDraw();return;}
  if(a==='start'){
-  if(examIsActive()){toast('已有进行中的考试');return;}
+  if(examIsActive()||examIsPaused()){toast('请先继续或放弃已保存的试卷。');return;}
   saveData.examActive=examSetupPaper(examKind,examUnit);view='exam';store();examDraw();window.scrollTo(0,0);return;
  }
  if(a==='new'){saveData.examActive=null;store();examDraw();return;}
@@ -1436,13 +1484,13 @@ function v5Init(){
   const exam=nav.querySelector('[data-view="exam"]');
   exam?.insertAdjacentHTML('beforebegin','<button type="button" class="mode" data-view="speaking">🗣️ 英语口语</button><button type="button" class="mode" data-view="thinking">🧠 思维训练</button>');
  }
- document.querySelector('.brand span')?.replaceChildren(document.createTextNode('V5.0'));
- document.title='星星闯关乐园 V5.0 · 思维与英语口语成长版';
+ document.querySelector('.brand span')?.replaceChildren(document.createTextNode('V5.1'));
+ document.title='星星闯关乐园 V5.1 · 考试随时退出版';
 }
 function v5Voice(text){if(!text)return;try{speakSequence([{text:String(text).slice(0,200),lang:'en-US'}]);}catch{toast('此设备暂无法播放英文语音，可直接阅读提示。');}}
 function v5SlowVoice(text){if(!text)return;try{if(!('speechSynthesis'in window)||typeof SpeechSynthesisUtterance==='undefined')throw Error('speech');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text).slice(0,200));u.lang='en-US';u.rate=.7;const v=pickVoice('en-US');if(v)u.voice=v;speechSynthesis.speak(u);}catch{toast('当前设备无法慢速播放，可用普通播放键。');}}
 function v5Text(text){if(!text)return;try{sayZh(String(text).slice(0,150));}catch{}}
-function v5Header(title,sub){return `<section class="v5-hero"><div class="v5-tag">🌈 V5.0 · ${sub}</div><h1>${v5Html(title)}</h1><p>${sub==='Speaking Club'?'像玩游戏一样听、说、交流。每次只做三轮，不需要先会读英语。':'先想，再解释。家长可以听孩子说思路，不必强迫写很多字。'}</p></section>`;}
+function v5Header(title,sub){return `<section class="v5-hero"><div class="v5-tag">🌈 V5.1 · ${sub}</div><h1>${v5Html(title)}</h1><p>${sub==='Speaking Club'?'像玩游戏一样听、说、交流。每次只做三轮，不需要先会读英语。':'先想，再解释。家长可以听孩子说思路，不必强迫写很多字。'}</p></section>`;}
 function v5SpeechScene(){return V5_SCENES[v5Speak.scene]||null;}
 function v5TeacherPrompt(scene,step){const it=scene.prompts[step];if(!it)return'';return it.q;}
 function v5SpeakUi(){
