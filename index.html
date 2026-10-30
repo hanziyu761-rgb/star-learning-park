@@ -183,7 +183,7 @@ body.exam-running #aiTeacherFab,body.exam-running #v44LevelBar{display:none!impo
 .p52-field{display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:800;margin:12px 0}
 .p52-field select{padding:12px;border:2px solid #e0e6f5;border-radius:12px;background:#fff;color:#303f62;min-height:46px;max-width:100%}
 .p52-note{background:#eff5ff;color:#566786;padding:12px;border-radius:12px;line-height:1.8;font-size:13px}
-# printArea.paper-v52{color:#111}
+#printArea.paper-v52{color:#111}
 @media print{
  @page{size:A4;margin:15mm 13mm}
  html,body{background:#fff!important}
@@ -220,7 +220,7 @@ body.exam-running #aiTeacherFab,body.exam-running #v44LevelBar{display:none!impo
 }
 </style></head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V5.1</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V5.2</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
@@ -1950,10 +1950,11 @@ document.addEventListener('click',function(ev){
  if(op==='study'){P52.sheet=p52MakeStudy(P52.studyCount);render();p52Print(P52.sheet,'student');return;}
  if(op==='draft'){
   var paper=examSetupPaper(P52.examType,P52.examUnit);
+  paper.status="draft";
   P52.sheet=p52FromExam(paper);render();p52Print(P52.sheet,'student');return;
  }
  if(op==='exam-draft'){
-  var paper2=examSetupPaper(examKind,examUnit);P52.sheet=p52FromExam(paper2);
+  var paper2=examSetupPaper(examKind,examUnit);paper2.status="draft";P52.sheet=p52FromExam(paper2);
   p52Print(P52.sheet,'student');return;
  }
  if(op==='sheet'){p52Print(P52.sheet,'student');return;}
