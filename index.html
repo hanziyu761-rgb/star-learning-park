@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
-<meta name="description" content="星星闯关乐园V4.4：小学一至六年级知识主题练习、语音讲解、随机出题、英文冒险、错题复习与打印。">
-<title>星星闯关乐园 V4.4 · 零基础美式英语与 DeepSeek AI 老师版</title>
+<meta name="description" content="星星闯关乐园V4.5：小学一至六年级知识主题练习、语音讲解、随机出题、英文冒险、错题复习与打印。">
+<title>星星闯关乐园 V4.5 · 零基础美式英语与 DeepSeek AI 老师版</title>
 <style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
 
 /* V4.2 AI learning assistant: child-friendly dialog with responsive controls */
@@ -118,11 +118,31 @@ body.voice-dialog-open{overflow:hidden}
 
 /* V4 supplementary offline styles */
 .think-card{margin-top:15px;border:2px solid #ffdf91;background:linear-gradient(155deg,#fffaf0,#fff2e7);border-radius:19px;padding:15px;color:#7e5422}.think-head{font-size:17px;font-weight:950;line-height:1.7;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px}.think-desc{font-size:15px;line-height:2;font-weight:850;margin:11px 0}.split-equation{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:21px}.split-equation input{background:#fff;border:2px solid #ecbf73;border-radius:14px;text-align:center;width:74px;height:58px;font-size:25px;font-weight:900;color:#614e38}.split-collection{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.split-collection span{border-radius:999px;background:white;border:1px solid #f9dba4;padding:8px 10px;font-weight:850;font-size:13px}.parent-area{border:1px dashed #ebb958;border-radius:14px;padding:11px;margin-top:13px;background:#fff9e9}.parent-area p{font-size:14px;line-height:1.85}.spoken-note,.dictation-input{display:block;width:100%;padding:12px;font-size:16px;border-radius:15px;border:2px solid #e1e6f4;background:#fff;min-height:55px;line-height:1.7}.spoken-note{resize:vertical;min-height:80px}.interact-zone{background:#f7f9ff;padding:13px;border-radius:18px;margin-bottom:10px}.order-tiles{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:15px 0}.order-tile,.order-picked{min-width:60px;min-height:59px;background:#fff;border:2px solid #b7caff;border-radius:15px;color:#4a64b0;font-size:24px;font-weight:950;display:inline-grid;place-items:center;padding:6px;touch-action:manipulation}.order-tile{cursor:grab}.order-picked{background:#dbf9e9;border-color:#81d8a1;color:#168255;min-height:46px;min-width:49px;margin:3px}.match-columns{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:10px 0}.match-columns>div{display:grid;gap:10px}.match-tile{border:2px solid #dce3f4;background:white;border-radius:15px;min-height:64px;padding:9px;font-size:19px;font-weight:850;color:#425a86;overflow-wrap:anywhere}.match-tile.active{border-color:#8a72df;background:#f0ebff}.match-tile.done{background:#e5faec;border-color:#9ee4b8}.dictation-input{font-size:23px;text-align:center;margin-bottom:13px}.petbox{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:11px;border:2px solid #e1d4ff;background:linear-gradient(140deg,#fff,#f6f0ff)}.pet-art{font-size:85px;text-align:center;line-height:1.5}.petbox .track{margin:8px 0}@media(max-width:355px){.petbox{grid-template-columns:75px 1fr}.pet-art{font-size:61px}.split-equation input{width:55px}}@media print{.think-card{border-color:#ddd;background:#fff}}
+/* V4.5 accessible, mobile-first exam interface */
+.modebar{grid-template-columns:repeat(5,minmax(0,1fr))}.mode{font-size:clamp(10px,2.4vw,12px);line-height:1.35;min-height:48px;padding:6px 2px}
+.exam-types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:14px 0}
+.exam-type{border:2px solid #e2e7fa;background:#f7f9ff;border-radius:15px;padding:12px 6px;min-height:86px;display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:center;color:#445679;font:inherit;cursor:pointer}
+.exam-type.active{border-color:#8363eb;background:#f0ecff;color:#5c46bd}.exam-type strong{font-size:14px}.exam-type small{font-size:11px;white-space:nowrap}
+.exam-unit-label{display:flex;flex-direction:column;gap:8px;margin:16px 0;font-weight:800}.exam-unit-label select{width:100%;border:1px solid #dbe3f3;padding:11px;border-radius:12px;background:white;color:#34415f;font-size:15px}
+.exam-history-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #edf0fa}.exam-history-row span{font-size:13px;font-weight:750}.exam-history-row small{display:block;margin-top:6px;color:#8894a8;font-weight:500}.exam-history-row b{font-size:20px;color:#745be6;white-space:nowrap}
+.exam-top{padding:15px!important}.exam-timer{font-size:20px;font-weight:950;color:#c15c35;background:#fff2e8;padding:6px 10px;border-radius:11px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.exam-jump{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;margin-top:15px}.exam-jump-chip{font:inherit;font-weight:800;font-size:12px;border:1px solid #dce3f7;color:#72829b;background:#f4f7ff;border-radius:8px;min-height:34px;cursor:pointer;padding:2px}.exam-jump-chip.done{border-color:#3abb92;background:#e9f8f3;color:#168560}.exam-jump-chip.current{outline:2px solid #8866e6;outline-offset:1px}
+.exam-stem{font-size:20px;font-weight:900;line-height:1.8;margin:18px 0 10px;overflow-wrap:anywhere}.exam-stem ruby rt{font-size:.55em}.exam-face{background:#f5f7ff;border:1px solid #dfe6fd;border-radius:18px;padding:18px 12px;text-align:center;font-size:clamp(22px,5vw,34px);font-weight:900;margin:12px 0 18px;line-height:1.6;overflow-wrap:anywhere}.exam-passage{background:#fffaf0;border-left:5px solid #fac562;padding:18px;border-radius:12px;line-height:2.05;font-size:17px;white-space:pre-line;overflow-wrap:anywhere}
+.exam-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}.exam-option{position:relative;display:flex;align-items:center;gap:10px;border:2px solid #e2e8fa;border-radius:15px;background:#f8faff;padding:14px 11px;min-height:60px;cursor:pointer;overflow-wrap:anywhere}.exam-option:has(input:checked){background:#eeebff;border-color:#8b70ee}.exam-option input{width:20px;height:20px;accent-color:#7559df;flex-shrink:0}.exam-option span{font-size:16px;font-weight:850;line-height:1.5;overflow-wrap:anywhere}
+.exam-text-answer{width:100%;min-height:60px;font-size:21px!important;border:2px solid #dce4fb;border-radius:14px;padding:13px;background:white;color:#293753}.exam-text-answer:focus{outline:3px solid #dfd7ff;border-color:#8566e7}
+.exam-listen{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:14px 0}.exam-listen span{font-size:13px;color:#73809d}
+.exam-match{display:grid;gap:10px}.exam-match-line{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1.5fr);gap:8px;align-items:center;padding:10px;background:#f9faff;border:1px solid #e8eafa;border-radius:14px}.exam-match-line strong{font-size:17px;overflow-wrap:anywhere}.exam-match-line select{min-width:0;width:100%;padding:10px 6px;border:1px solid #dbe3f4;border-radius:10px;font-size:15px;background:white}
+.exam-chip-line{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.exam-chip{padding:12px 14px;min-height:45px;min-width:55px;border:2px solid #dedcfb;background:#f6f4ff;color:#5449a3;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer}.exam-chip.picked{border-color:#39b98f;background:#edfaf4;color:#238464}.exam-sorted{padding:12px;border-radius:12px;background:#f7f9ff;border:1px dashed #d6ddf4;margin:16px 0}.exam-sorted small{color:#62718d}.exam-scene{text-align:center;font-size:clamp(46px,10vw,72px);background:#fff5e6;padding:20px 10px;border-radius:18px;letter-spacing:5px}.exam-oral p{font-size:15px;line-height:1.8}
+.exam-navigation{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}.exam-no-feedback{font-size:12px;line-height:1.7;color:#8692a7;text-align:center}.exam-score{text-align:center;font-size:70px;font-weight:950;color:#775be5;line-height:1.1}.exam-score small{font-size:18px;color:#8190aa}.exam-topic{border-bottom:1px solid #e8ebf6;padding:15px 0}.exam-topic .track{margin-top:8px}.exam-topic p{margin-bottom:0}.exam-solution{background:#f8faff;border:1px solid #e5e9f8;border-radius:13px;padding:13px 15px;margin:10px 0;line-height:1.8}.exam-solution summary{font-weight:850;cursor:pointer;color:#384e75}.exam-solution p{font-size:14px;overflow-wrap:anywhere}.exam-config .note{margin-top:12px;line-height:1.8}
+body.exam-running #aiTeacherFab,body.exam-running #v44LevelBar{display:none!important}
+@media(max-width:390px){.modebar{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.mode{font-size:12px}.exam-types{gap:6px}.exam-type{min-height:82px;padding:10px 3px}.exam-type strong{font-size:12px}.exam-type small{font-size:10px}.exam-options{grid-template-columns:1fr}.exam-jump{grid-template-columns:repeat(8,minmax(0,1fr))}.exam-stem{font-size:18px}}
+@media print{.exam-types,.exam-jump,.exam-navigation,.exam-no-feedback,.exam-listen{display:none!important}}
+
 </style>
 <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" sizes="192x192">
 </head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V4.4</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V4.5</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
@@ -132,7 +152,7 @@ body.voice-dialog-open{overflow:hidden}
  <div class="en-level-grid" id="v44LevelButtons"></div>
  <p class="en-guide" id="v44LevelDescription">先听说、看图，再慢慢学习拼读。</p>
 </section>
-<nav class="modebar" aria-label="功能导航"><button class="mode" data-view="home">🏠 今日任务</button><button class="mode active" data-view="practice">🧩 学习闯关</button><button class="mode" data-view="wrongbook">📔 错题复习</button><button class="mode" data-view="report">👨‍👩‍👧 家长中心</button></nav>
+<nav class="modebar" aria-label="功能导航"><button class="mode" data-view="home">🏠 今日任务</button><button class="mode active" data-view="practice">🧩 学习闯关</button><button class="mode" data-view="wrongbook">📔 错题复习</button><button class="mode" data-view="exam">📝 考试模式</button><button class="mode" data-view="report">👨‍👩‍👧 家长中心</button></nav>
 <main id="app" aria-live="polite"></main><footer class="footer">🌿 每次约10分钟，适时休息 · 本地练习不上传数据；经家长开启的在线AI对话会向DeepSeek发送题目与提问 · 练习内容是原创知识主题练习，非官方逐页同步题库</footer>
 </div><div class="toast hidden" id="toast" role="status"></div><div class="voice-overlay hidden" id="voiceSettingsPanel" role="dialog" aria-modal="true" aria-labelledby="voiceSettingsTitle">
 <div class="voice-dialog">
@@ -1063,6 +1083,286 @@ const v44OldFirst=recordFirst;
 recordFirst=function(q,correct){const before=saveData.attempts.length;v44OldFirst(q,correct);if(q?.v44&&saveData.attempts.length>=before){const last=saveData.attempts.at(-1);if(last?.sub==='english')last.englishAbility=saveData.englishAbility;}};
 // A fresh ability-specific game keeps existing grade, math/chinese, badges and data intact.
 store();
+
+// ===== V4.5: independent exam mode (unit / midterm / final) =====
+// Exam marks are shown only after submission or deadline. Objective marking never runs on the question screen.
+const EXAM_PLANS={unit:{name:'单元测验',count:10,minutes:15},mid:{name:'期中模拟卷',count:20,minutes:30},final:{name:'期末模拟卷',count:30,minutes:45}};
+const EXAM_SCHEDULE={
+ math:['numeric','single','judge','multi','match','order','error','reading','numeric','single'],
+ chinese:['single','judge','multi','match','order','dictation','reading','reading','single','oral'],
+ english:['single','judge','multi','match','order','dictation','reading','reading','single','oral']
+};
+const EXAM_TOPICS_HELP={math:'先看清数量关系和计算规则，再核对每一步。',chinese:'结合拼音、字词、语境及短文信息认真辨认。',english:'Listen for sounds, use context, and read carefully.'};
+const EXAM_CHINESE_PASSAGES={
+ 1:[['春天到了，花儿开了。小鸟在树上唱歌。','小鸟在哪里唱歌？',['在树上','在水里','在教室','在车上'],'在树上','短文明确说“小鸟在树上唱歌”。'],['小明带了两本书去学校。放学后，他把书放回书包。','小明放学后做了什么？',['把书放回书包','去了动物园','买了玩具','洗了鞋子'],'把书放回书包','注意短文最后一句。']],
+ 2:[['小雨每天给花浇水。过了几天，花开得更鲜艳了。','花为什么开得更好？',['小雨认真照顾','花被摘掉了','天气一直下雪','花没有水喝'],'小雨认真照顾','短文讲述小雨每天浇水。']],
+ 3:[['小松鼠发现一颗橡果，想马上吃掉，又想到冬天食物少，于是把它埋在树下。','小松鼠为什么埋橡果？',['为冬天储备食物','因为不喜欢橡果','为了送给小鱼','为了种花'],'为冬天储备食物','结合“冬天食物少”来推断。']],
+ 4:[['周末，社区组织清理河岸的活动。孩子们分组捡拾垃圾，把塑料瓶放进可回收箱。河岸渐渐干净起来。','哪一项最能概括这段话？',['大家合作保护环境','孩子们去钓鱼','社区举办运动会','河里出现小鱼'],'大家合作保护环境','各组行动都围绕清洁河岸展开。']],
+ 5:[['一次小组实验中，两组同学采用不同方法种植同一种豆子。他们记录光照、浇水和生长情况，再比较结果。','为什么需要记录实验条件？',['便于比较并寻找原因','为了让本子更漂亮','避免观察植物','让实验永不结束'],'便于比较并寻找原因','记录条件是为了有依据地比较结果。']],
+ 6:[['有同学主张延长校园阅读时间，认为可以丰富知识；也有人担心占用运动时间。班级决定先调查同学的日常安排，再讨论合理方案。','班级的决定体现了什么思维？',['收集证据后再决定','先否定所有意见','只听一个人的想法','完全不考虑运动'],'收集证据后再决定','调查安排是为了用事实支持决策。']]
+};
+const EXAM_SCENES=[['🌳 👧 🐦 🌸','公园里有什么？谁在做什么？请用两三句话讲一讲。'],['🌧️ ☂️ 👦 🐱','下雨了，图中的人和小动物可能发生什么事？讲一讲。'],['🏫 👧 📚 🤝','想象同学在学校互相帮助的情景，按先后顺序讲故事。'],['🌱 ☀️ 💧 👦','观察植物生长的情景，说出发生了什么，以及你发现的变化。']];
+const examHtmlEscape=v=>esc(String(v==null?'':v));
+const examGet=(sel,root=document)=>root.querySelector(sel);
+const examPick=a=>a[randint(0,a.length-1)];
+const examShuffle=a=>shuffle(a.slice());
+const examKey=(sub,g,t,u,k,ask)=>[sub,g,t,u,k,ask].join('|').slice(0,260);
+const examSpeak=(text,sub)=>{if(sub==='english')speakSequence([{text:String(text).slice(0,500),lang:'en-US'}]);else sayZh(String(text).slice(0,500));};
+const examTopic=(sub,g,t,u)=>unitsFor(sub,g,t)[Math.max(0,u)]||'综合知识';
+
+function examMathSample(g,t){
+ if(g===1){const cap=t===1?10:20,b=randint(1,Math.floor(cap/2)),a=randint(0,cap-b);return {face:`${a} + ${b}`,answer:a+b,explain:`${a}加${b}得${a+b}。`};}
+ if(g===2){const a=randint(15,65),b=randint(5,90-a);return {face:`${a} + ${b}`,answer:a+b,explain:`对齐数位相加，得到${a+b}。`};}
+ if(g===3){const a=randint(12,45),b=randint(3,9);return {face:`${a} × ${b}`,answer:a*b,explain:`${a}乘${b}得到${a*b}。`};}
+ if(g===4){const a=randint(105,799),b=randint(12,49);return {face:`${a} × ${b}`,answer:a*b,explain:`两位数乘法按数位计算，结果为${a*b}。`};}
+ if(g===5){const a=randint(12,99)/10,b=randint(2,35)/10,v=Math.round((a+b)*10)/10;return {face:`${a} + ${b}`,answer:v,explain:`小数点对齐，${a}+${b}=${v}。`};}
+ const rate=examPick([10,20,25,50]),base=examPick([40,80,120,200,240]),ans=rate*base/100;
+ return {face:`${base} 的 ${rate}%`,answer:ans,explain:`${base}乘${rate}/100=${ans}。`};
+}
+
+function examQuestion(sub,g,t,u,kind,idx){
+ const topic=examTopic(sub,g,t,u),common={subject:sub,g,t,unit:u,topic,ability:sub==='english'?saveData.englishAbility:null,kind,points:1,explain:'',ask:'',face:'',options:[],answer:'',passage:'',audio:'',art:'',parentRated:false};
+ let q={...common};
+ if(sub==='math'){
+  const cap=g===1?(t===1?10:20):g===2?100:g===3?1000:g===4?1000:g===5?200:g===6?300:100;
+  const ra=()=>randint(1,Math.min(30,cap));
+  if(kind==='numeric'||kind==='single'){
+   let z=null;for(let j=0;j<50;j++){const candidate=mathQuestion(g,t,u,'mid');if(candidate.kind===(kind==='numeric'?'numeric':'choice')){z=candidate;break;} if(j===49)z=candidate;}
+   if(kind==='numeric'&&z.kind==='numeric')q={...q,ask:z.ask,face:String(z.face),answer:String(z.answer),explain:z.explain,kind:'numeric'};
+   else if(kind==='single'&&z.kind==='choice')q={...q,ask:z.ask,face:String(z.face),answer:String(z.answer),options:z.options.map(String),explain:z.explain,kind:'single'};
+   else{const a=ra(),b=ra(),r=a+b; q={...q,ask:'算一算，填写正确的结果。',face:`${a} + ${b} = □`,answer:String(r),explain:`${a}加${b}等于${r}。`,kind:'numeric'};if(kind==='single'){q.kind='single';q.options=examShuffle([String(r),String(r+1),String(r-1),String(r+2)]);}}
+  }else if(kind==='judge'){
+   const sample=examMathSample(g,t),truth=Math.random()>.5,shown=sample.answer+(truth?0:examPick([-2,-1,1,2]));
+   q={...q,kind:'judge',ask:'判断下面的算式是否正确。',face:`${sample.face} = ${Number(shown.toFixed(2))}`,answer:truth?'true':'false',explain:sample.explain};
+  }else if(kind==='multi'){
+   const a=ra(),b=ra(),n=a+b,avoid=n>1?2:1;
+   q={...q,kind:'multi',ask:`请选择所有结果等于 ${n} 的算式。`,options:examShuffle([`${a}+${b}`,`${Math.max(0,n-1)}+1`,`${a}+${b+1}`,`${a}+${Math.max(0,b-1)}`]),answer:[],explain:`正确的算式都应计算得到${n}。`};
+   // Ensure the four equations have unique text, and compute their true keys rather than assuming option positions.
+   q.options=[`${a}+${b}`,`${a+1}+${Math.max(0,b-1)}`,`${a}+${b+1}`,`${a}+${Math.max(0,b-1)}`];
+   if(b===0)q.options[1]=`${a+2}+${b-2}`;
+   q.options=examShuffle(q.options);q.answer=q.options.filter(x=>{const m=x.match(/^(-?\d+)\+(-?\d+)$/);return m&&Number(m[1])+Number(m[2])===n;});
+   if(g>=3){const target=g===3?60:g===4?240:g===5?2:g===6?50:60;const options=g===3?['12×5','20×3','10×5','15×5']:g===4?['60×4','80×3','30×4','40×5']:g===5?['1.2+0.8','4÷2','2.2+0.8','4-1']:['1/2','0.5','1/4','0.25'];q.ask=g===6?'下面哪些数表示50%？（多选）':`选择所有结果等于 ${target} 的算式。`;q.options=examShuffle(options);q.answer=options.slice(0,2);q.explain=g===6?'50%等于1/2，也等于0.5。':`选项中的正确算式结果都等于${target}。`;}
+  }else if(kind==='match'){
+   const pairs=[],results=new Set(),faces=new Set();let attempts=0;
+   while(pairs.length<3&&attempts++<100){const sample=examMathSample(g,t),v=String(sample.answer);if(results.has(v)||faces.has(sample.face))continue;results.add(v);faces.add(sample.face);pairs.push([sample.face,v]);}
+   q={...q,kind:'match',ask:'把每个算式和正确结果连起来。',pairs,answer:pairs.map(x=>x.join('→')).join('|'),explain:'每个算式都要先计算，再找到对应结果。'};
+  }else if(kind==='order'){
+   const set=new Set();while(set.size<4)set.add(randint(1,Math.max(10,Math.min(cap,99))));const nums=examShuffle([...set]);
+   q={...q,kind:'order',ask:'按从小到大的顺序排列数字。',tokens:nums,answer:nums.slice().sort((a,b)=>a-b).join(','),explain:'比较每个数的大小，按从小到大依次排列。'};
+  }else if(kind==='error'){
+   const sample=examMathSample(g,t),wrong=Number((sample.answer+examPick([-2,-1,1,2])).toFixed(2));
+   q={...q,kind:'numeric',format:'error',ask:'找出错误并改正：下面算式的结果算错了，请写出正确结果。',face:`${sample.face} = ${wrong}（错）`,answer:String(sample.answer),explain:`原来算错了，应该是${sample.face}=${sample.answer}。`};
+  }else if(kind==='reading'){
+   const sample=examMathSample(g,t);
+   const nums=sample.face.match(/\d+(?:\.\d+)?/g)||[];
+   const text=g<=2?`小朋友原来有${nums[0]}个积木，又拿来${nums[1]}个积木，现在一共有多少个？`:g===3?`有${nums[1]}盒彩笔，每盒${nums[0]}支，一共有多少支彩笔？`:g===4?`一箱物品有${nums[0]}个，共有${nums[1]}箱，一共有多少个？`:g===5?`水果店称得${nums[0]}千克苹果和${nums[1]}千克梨，合计多少千克？`:`全校共有${nums[0]}名学生，其中${nums[1]}%参加兴趣活动，参加的学生有多少名？`;
+   q={...q,kind:'numeric',format:'reading',ask:g<=2?'读应用题，计算一共多少个。':'读题，算出正确数量。',passage:text,answer:String(sample.answer),explain:sample.explain};
+  }
+ }else if(sub==='chinese'){
+  const words=getChineseWords(g,t).filter(w=>w.han&&w.pinyin);
+  const w=examPick(words),other=examPick(words.filter(x=>x.han!==w.han&&x.pinyin!==w.pinyin));
+  if(kind==='single'){
+   const base=chineseQuestion(g,t,u),opts=(base.options||[]).map(String);
+   q={...q,kind:'single',ask:base.ask,face:String(base.face||''),answer:String(base.answer),options:opts,explain:base.explain};
+  }else if(kind==='judge'){
+   const truth=Math.random()>.5,spoken=truth?w.pinyin:other.pinyin;
+   q={...q,ask:'判断下面的汉字读音是否正确。',face:`“${w.han}”读作 ${spoken}。`,answer:truth?'true':'false',kind:'judge',explain:`“${w.han}”的正确拼音是${w.pinyin}。`};
+  }else if(kind==='multi'){
+   const target=w.han[0],correct=[`${target}字`,`${target}音`],badChar=words.map(x=>x.han[0]).find(x=>x!==target&&x!=='花'&&x!=='书')||'月',wrong=[`${badChar}书`,`花园`].map(x=>x.includes(target)?'天空':x);
+   q={...q,kind:'multi',ask:`下面哪些词组含有“${target}”字？（多选）`,options:examShuffle([...correct,...wrong]),answer:correct,explain:`含有“${target}”字的选项都应选上。`};
+  }else if(kind==='match'){
+   const unique=examShuffle(words).filter((x,i,a)=>a.findIndex(y=>y.han===x.han)===i).slice(0,3);
+   const pairs=unique.filter((x,i,a)=>a.findIndex(y=>y.pinyin===x.pinyin)===i).slice(0,3).map(x=>[x.han,x.pinyin]);q={...q,kind:'match',ask:'把汉字和正确拼音连起来。',pairs,answer:pairs.map(x=>x.join('→')).join('|'),explain:pairs.map(x=>`${x[0]}读作${x[1]}`).join('；')+'。'};
+  }else if(kind==='order'){
+   const sets=[['先洗手','再吃饭','最后收拾餐具'],['早晨起床','白天学习','晚上睡觉'],['先播种','然后浇水','最后发芽']];const tokens=examPick(sets);
+   q={...q,kind:'order',ask:'按事情发生的先后顺序排列。',tokens:examShuffle(tokens),answer:tokens.join('||'),explain:'注意先后顺序，先发生的事情排在前面。'};
+  }else if(kind==='dictation'){
+   q={...q,kind:'dictation',ask:'听写：点击播放后，输入听到的汉字或词语。',audio:w.han,answer:w.han,explain:`听写的是“${w.han}”，读作${w.pinyin}。`};
+  }else if(kind==='reading'){
+   const bank=EXAM_CHINESE_PASSAGES[g]||EXAM_CHINESE_PASSAGES[1],p=examPick(bank);
+   q={...q,kind:'single',format:'reading',passage:p[0],ask:p[1],options:examShuffle(p[2]),answer:p[3],explain:p[4]};
+  }else if(kind==='oral'){
+   const p=examPick(EXAM_SCENES);q={...q,kind:'oral',format:'oral',ask:g<=2?'看图说话：讲出图中有什么、发生了什么。':'看图讲述：说出事情的起因、经过和结果，并尝试解释原因。',art:p[0],prompt:p[1],answer:null,parentRated:true,explain:'开放表达应由家长按内容完整、语句清楚和是否独立完成进行评价。'};
+  }
+ }else{
+  // English-language arts: learner ability is independent of the school grade.
+  const ability=Math.max(0,Math.min(3,Number(saveData.englishAbility)||0)),bank=US_WORDS[ability<=1?1:g]||US_WORDS[1];
+  const entry=examPick(bank),w=entry[0],icon=entry[1],distractors=examShuffle(bank.filter(z=>z[0]!==w)).slice(0,3);
+  if(kind==='single'){
+   q={...q,kind:'single',ask:'Look at the picture. Choose the word.',face:icon,options:examShuffle([w,...distractors.map(x=>x[0])]),answer:w,explain:`The picture shows ${w}.`};
+  }else if(kind==='judge'){
+   const truth=Math.random()>.5,shown=truth?w:examPick(distractors)[0];
+   q={...q,kind:'judge',ask:'Is the word correct for the picture?',face:`${icon}   ${shown}`,answer:truth?'true':'false',explain:`This picture is ${w}.`};
+  }else if(kind==='multi'){
+     // Identify two valid examples and two credible near-misses.
+   if(ability>=2&&g>=4){const options=['According to the text','The evidence shows','It is green','Once upon a time'];q={...q,kind:'multi',ask:'Choose ALL phrases that introduce evidence.',options:examShuffle(options),answer:options.slice(0,2),explain:'Evidence connects a claim to supporting facts.'};}
+   else{const suffix=ability<=1?'at':'ing',options=ability<=1?['cat','hat','sun','dog']:['sing','ring','sun','dog'];q={...q,kind:'multi',ask:`Choose ALL words that end in “${suffix}”.`,options:examShuffle(options),answer:options.filter(x=>x.endsWith(suffix)),explain:`Listen for the ending ${suffix} sound.`};}
+  }else if(kind==='match'){
+   const uniq=examShuffle(bank).filter((x,i,a)=>a.findIndex(y=>y[1]===x[1])===i).slice(0,3);const pairs=uniq.map(x=>[x[1],x[0]]);q={...q,kind:'match',ask:'Match each picture with the English word.',pairs,answer:pairs.map(x=>x.join('→')).join('|'),explain:'Each picture matches its English name.'};
+  }else if(kind==='order'){
+   const sets=ability<=1?['I','see','a','cat.']:ability===2?['We','read','a','book.']:['They','carefully','checked','the evidence.'];
+   q={...q,kind:'order',ask:'Put the words in the correct order.',tokens:examShuffle(sets),answer:sets.join('||'),explain:`A correct sentence is: ${sets.join(' ')}`};
+  }else if(kind==='dictation'){
+   q={...q,kind:'dictation',ask:'Listen. Type the word you hear.',audio:w,answer:w,explain:`You heard the word “${w}”.`};
+  }else if(kind==='reading'){
+   const readingGrade=ability<=1?1:g;const s=examPick(US_STORIES[readingGrade]||US_STORIES[1]);q={...q,kind:'single',format:'reading',passage:s.story,ask:s.ask,options:examShuffle(s.opts),answer:s.answer,explain:'Look for the detail in the story.'};
+  }else if(kind==='oral'){
+   const art=icon;q={...q,kind:'oral',ask:ability<=1?'Look and say one word or a short sentence.':'Look at the picture. Tell your grown-up two sentences in English.',art,answer:null,prompt:ability<=1?'Say the word. Try: I see a ...':'Describe what you notice and explain one idea.',parentRated:true,explain:'A grown-up checks clarity and effort; speech is not automatically scored.'};
+  }
+ }
+ q.id=`${examKey(sub,g,t,u,kind,q.ask)}-${idx}-${Date.now()}`;
+ q.kind=q.kind||kind;q.format=q.format||kind;if(q.kind==='match')q.matchRight=examShuffle([...new Set(q.pairs.map(p=>p[1]))]);
+ return q;
+}
+function examSetupPaper(type,unit){
+ const plan=EXAM_PLANS[type],s=saveData.subject,g=saveData.grade,t=saveData.term;
+ const scope=type==='unit'?[unit]:type==='mid'?[0,1]:[0,1,2,3],list=[];
+ const items=Array.from({length:plan.count},(_,i)=>EXAM_SCHEDULE[s][i%10]);
+ // Keep a natural exam order: basic items first, comprehension and speaking near the end.
+ items.forEach((kind,i)=>list.push(examQuestion(s,g,t,scope[i%scope.length],kind,i)));
+ return {v:1,id:`exam-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,type,unit,subject:s,g,t,ability:s==='english'?saveData.englishAbility:null,startedAt:Date.now(),deadline:Date.now()+plan.minutes*60*1000,minutes:plan.minutes,count:plan.count,current:0,questions:list,answers:{},status:'active'};
+}
+function examSafeInit(){
+ saveData.examHistory=Array.isArray(saveData.examHistory)?saveData.examHistory.slice(-80):[];
+ saveData.examActive=saveData.examActive&&saveData.examActive.v===1&&Array.isArray(saveData.examActive.questions)?saveData.examActive:null;
+ if(saveData.examActive?.status==='active'){view='exam';saveData.subject=saveData.examActive.subject;saveData.grade=saveData.examActive.g;saveData.term=saveData.examActive.t;}
+}
+let examKind='unit',examUnit=0,examReviewIndex=null;
+examSafeInit();
+function examIsActive(){return saveData.examActive?.status==='active';}
+function examTimeRemaining(){return Math.max(0,Math.ceil(((saveData.examActive?.deadline||0)-Date.now())/1000));}
+function examTimeLabel(sec){return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;}
+function examAnswered(q,v){if(v==null||v==='')return false;if(q.kind==='match')return !!v&&typeof v==='object'&&q.pairs.every(p=>String(v[p[0]]||'').length>0);if(q.kind==='multi'||q.kind==='order')return Array.isArray(v)&&v.length>0;if(q.kind==='oral')return v==='full'||v==='part'||v==='none';return true;}
+function examAnsweredCount(exam){return exam.questions.reduce((n,q,i)=>n+Number(examAnswered(q,exam.answers[i])),0);}
+function examPaperLabel(exam){return `${exam.g}年级${exam.t===1?'上册':'下册'} · ${NAME[exam.subject]} · ${EXAM_PLANS[exam.type].name}`;}
+function examFriendly(txt){return saveData.subject==='math'?examHtmlEscape(txt):saveData.subject==='chinese'?ruby(txt):examHtmlEscape(txt);}
+function examOptionRow(text,selected,index,questionIndex,kind){const checked=selected?' checked':'';return `<label class="exam-option"><input type="${kind==='multi'?'checkbox':'radio'}" name="examAnswer" value="${examHtmlEscape(text)}" data-exam-input="answer" data-question="${questionIndex}"${checked}><span>${examHtmlEscape(text)}</span></label>`;}
+function examResponseControl(q,index,val){const isEnglish=q.subject==='english';
+ if(q.kind==='judge')return `<div class="exam-options">${[['true',isEnglish?'True':'正确'],['false',isEnglish?'False':'错误']].map(x=>examOptionRow(x[1],val===x[0],index,index,'single').replace(`value="${examHtmlEscape(x[1])}"`,`value="${x[0]}"`)).join('')}</div>`;
+ if(q.kind==='single'||q.kind==='multi')return `<div class="exam-options">${q.options.map((o,j)=>examOptionRow(o,q.kind==='multi'?(Array.isArray(val)&&val.includes(o)):val===o,j,index,q.kind)).join('')}</div>`;
+ if(q.kind==='numeric')return `<input class="exam-text-answer" data-exam-input="text" inputmode="decimal" aria-label="输入答案" placeholder="填写答案" value="${examHtmlEscape(val||'')}"/>`;
+ if(q.kind==='dictation')return `<div class="exam-listen"><button type="button" data-exam="audio" class="btn ghost">🔊 ${isEnglish?'Listen again':'播放听写'}</button><span>${isEnglish?'Listen and spell.':'听清后输入汉字。'}</span></div><input class="exam-text-answer" data-exam-input="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="${isEnglish?'Type the word':'输入听到的字词'}" value="${examHtmlEscape(val||'')}"/>`;
+ if(q.kind==='match'){
+  const right=q.matchRight || q.pairs.map(p=>p[1]);
+  return `<div class="exam-match">${q.pairs.map(pair=>`<label class="exam-match-line"><strong>${examHtmlEscape(pair[0])}</strong><span>→</span><select data-exam-input="match" data-left="${examHtmlEscape(pair[0])}" aria-label="为${examHtmlEscape(pair[0])}匹配答案"><option value="">请选择</option>${right.map(v=>`<option value="${examHtmlEscape(v)}" ${val?.[pair[0]]===v?'selected':''}>${examHtmlEscape(v)}</option>`).join('')}</select></label>`).join('')}</div>`;
+ }
+ if(q.kind==='order'){
+  const array=Array.isArray(val)?val:[],remaining=q.tokens.filter(x=>!array.includes(x));
+  return `<div class="exam-sorted"><small>${isEnglish?'Your order:':'已排序：'}</small><div class="exam-chip-line">${array.map(x=>`<button type="button" class="exam-chip picked" data-exam="unorder" data-value="${examHtmlEscape(x)}">${examHtmlEscape(x)} ×</button>`).join('')||'<span class="small">点击下面词语或数字排序</span>'}</div></div><div class="exam-chip-line">${remaining.map(x=>`<button type="button" class="exam-chip" data-exam="order" data-value="${examHtmlEscape(x)}">${examHtmlEscape(x)}</button>`).join('')}</div><button type="button" data-exam="reset-order" class="btn tiny ghost">${isEnglish?'Reset order':'重新排列'}</button>`;
+ }
+ if(q.kind==='oral')return `<div class="exam-oral"><div class="exam-scene" role="img" aria-label="看图讲述">${examHtmlEscape(q.art||'📚')}</div><p>${examHtmlEscape(q.prompt)}</p><p class="small">${isEnglish?'A grown-up listens. No recording is uploaded.':'请孩子口头讲，家长根据完成情况评价，不录音、不上传。'}</p><div class="exam-options">${[['full','讲得清楚、基本独立完成（满分）'],['part','有表达，但需要提醒（半分）'],['none','暂未完成（0分）']].map(o=>examOptionRow(o[1],val===o[0],index,index,'single').replace(`value="${examHtmlEscape(o[1])}"`,`value="${o[0]}"`)).join('')}</div></div>`;
+ return '';
+}
+function examQuestionCard(exam){const idx=exam.current,q=exam.questions[idx],val=exam.answers[idx];const total=exam.count;
+ return `<section class="card exam-card"><div class="row wrap"><span class="chip">第 ${idx+1} / ${total} 题</span><span class="chip">${examHtmlEscape(q.topic)}</span><span class="chip">${({single:'单选',numeric:q.format==='error'?'找错改正':q.format==='reading'?'应用题':'填空',judge:'判断',multi:'多选',match:'连线',order:'排序',dictation:'听写',oral:'口头表达'})[q.kind]||'练习'}</span></div><div class="exam-stem" ${q.subject==='english'?'lang="en-US"':''}>${examFriendly(q.ask)}</div>${q.passage?`<div class="exam-passage" ${q.subject==='english'?'lang="en-US"':''}>${examFriendly(q.passage)}</div>`:''}${q.face?`<div class="exam-face" ${q.subject==='english'?'lang="en-US"':''}>${examHtmlEscape(q.face)}</div>`:''}${examResponseControl(q,idx,val)}<div class="exam-navigation"><button type="button" data-exam="previous" class="btn ghost" ${idx===0?'disabled':''}>⬅ 上一题</button><button type="button" data-exam="next" class="btn primary">${idx===total-1?'查看答题进度':'下一题 ➜'}</button></div><p class="exam-no-feedback">🔒 考试中不会显示对错、答案或提示，交卷后统一评分。</p></section>`;
+}
+function examRenderSetup(){const latest=saveData.examHistory.filter(h=>h.subject===saveData.subject&&h.g===saveData.grade&&h.t===saveData.term).slice(-3).reverse();
+ return `<section class="hero ${saveData.subject}"><div class="overline">EXAM · 模拟测评</div><h1>📝 考试模式</h1><p>单元、期中、期末三种试卷。固定题量、独立计时，交卷后统一看成绩。</p></section><section class="card exam-config"><h2 class="title">选择试卷类型</h2><div class="exam-types">${Object.entries(EXAM_PLANS).map(([key,p])=>`<button type="button" data-exam="type" data-value="${key}" class="exam-type ${examKind===key?'active':''}"><strong>${p.name}</strong><small>${p.count}题 · ${p.minutes}分钟</small></button>`).join('')}</div>${examKind==='unit'?`<label class="exam-unit-label">选择测验单元 <select id="examUnit" data-exam-input="unit">${unitsFor(saveData.subject).map((x,i)=>`<option value="${i}" ${i===examUnit?'selected':''}>第${i+1}知识主题 · ${examHtmlEscape(x)}</option>`).join('')}</select></label>`:`<div class="tipbox">${examKind==='mid'?'期中范围：本册前两个知识主题。':'期末范围：本册四个知识主题。'}</div>`}<p class="small">当前：${saveData.grade}年级${labelTerm(saveData.term)} · ${NAME[saveData.subject]}${saveData.subject==='english'?` · 英语能力 L${saveData.englishAbility}`:''}</p><button type="button" data-exam="start" class="btn primary block">🚀 开始${EXAM_PLANS[examKind].name}</button><p class="note">题目为按知识主题生成的原创模拟题，不是官方试卷，也不等同于当地学校每个单元的实际测试范围。语文口头看图写话和英语口头表达由家长评分。</p></section><section class="card"><h2 class="title">📊 最近考试记录</h2>${latest.length?latest.map(h=>`<div class="exam-history-row"><span>${examHtmlEscape(h.label)}<small>${examHtmlEscape(h.at.slice(0,10))}</small></span><b>${h.score}分</b></div>`).join(''):'<p class="small">还没有考试记录。完成一张试卷后这里会出现成绩。</p>'}</section>`;
+}
+function examRenderRunning(){const exam=saveData.examActive,remaining=examTimeRemaining();if(!remaining){examSubmit(true);return examRenderResults();}document.body.classList.add('exam-running');
+ return `<section class="hero ${exam.subject}"><div class="overline">EXAM IN PROGRESS · 请独立完成</div><h1>📝 ${EXAM_PLANS[exam.type].name}</h1><p>${examPaperLabel(exam)} · ${exam.count}题 / ${exam.minutes}分钟</p></section><section class="card exam-top"><div class="row wrap"><span class="chip">✅ 已作答 ${examAnsweredCount(exam)} / ${exam.count}</span><span class="exam-timer" id="examClock" role="timer">⏱ ${examTimeLabel(remaining)}</span></div>${progress(examAnsweredCount(exam),exam.count)}<div class="exam-jump">${exam.questions.map((q,i)=>`<button data-exam="jump" data-value="${i}" class="exam-jump-chip ${exam.current===i?'current':''} ${examAnswered(q,exam.answers[i])?'done':''}" aria-label="第${i+1}题">${i+1}</button>`).join('')}</div></section>${examQuestionCard(exam)}<section class="card"><button type="button" class="btn primary block" data-exam="submit">📨 交卷并查看成绩</button><p class="small" style="text-align:center">未完成全部题目时不可提前交卷；时间结束会自动提交，空题计0分。</p></section>`;
+}
+function examAnswerCorrect(q,v){if(!examAnswered(q,v))return false;
+ if(q.kind==='oral')return v==='full';
+ if(q.kind==='match')return q.pairs.every(p=>String(v[p[0]])===String(p[1]));
+ if(q.kind==='multi')return Array.isArray(v)&&v.length===q.answer.length&&q.answer.every(x=>v.includes(x));
+ if(q.kind==='order')return Array.isArray(v)&&v.map(String).join(q.answer.includes('||')?'||':',')===String(q.answer);
+ if(q.kind==='numeric')return Number(String(v).trim())===Number(q.answer)&&String(v).trim()!=='';
+ if(q.kind==='dictation')return String(v).trim().replace(/\s+/g,'').toLowerCase()===String(q.answer).replace(/\s+/g,'').toLowerCase();
+ return String(v).trim()===String(q.answer).trim();
+}
+function examGradeValue(q,v){return q.kind==='oral'?(v==='full'?1:v==='part'?.5:0):Number(examAnswerCorrect(q,v));}
+function examExpected(q){if(q.kind==='oral')return '由家长评价，建议讲述完整、表达清楚';if(q.kind==='match')return q.pairs.map(x=>x.join(' → ')).join('；');if(Array.isArray(q.answer))return q.answer.join('、');if(q.kind==='order')return q.answer.includes('||')?q.answer.replaceAll('||',' → '):q.answer.split(',').join(' → ');if(q.kind==='judge')return q.answer==='true'?'正确 / True':'错误 / False';return String(q.answer);}
+function examPrintableResponse(q,v){if(v==null||v==='')return '未作答';if(Array.isArray(v))return v.join('、');if(typeof v==='object')return Object.entries(v).map(x=>x.join(' → ')).join('；');if(q.kind==='oral')return v==='full'?'家长评：完成':v==='part'?'家长评：部分完成':'家长评：暂未完成';return String(v);}
+function examReviewQuestion(q){
+ // Convert multi-part exam mistakes to a single independently reviewable practice question.
+ const base={id:'examReview-'+examKey(q.subject,q.g,q.t,q.unit,q.format||q.kind,q.ask+q.face+q.passage),subject:q.subject,g:q.g,t:q.t,unit:q.unit,topic:q.topic,v44:q.subject==='english',us:q.subject==='english',ability:q.ability,voiceEn:q.subject==='english'?String(q.audio||q.ask):'',face:q.face||q.passage||'📝',ask:q.ask,answer:'',options:[],kind:'choice',explain:q.explain||EXAM_TOPICS_HELP[q.subject],why:'请用自己的话说说为什么这样作答。',tip:EXAM_TOPICS_HELP[q.subject]};
+ if(q.kind==='numeric'){base.kind='numeric';base.answer=String(q.answer);return base;}
+ if(q.kind==='judge'){base.answer=q.answer==='true'?'正确':'错误';base.options=['正确','错误'];return base;}
+ if(q.kind==='dictation'){
+  base.ask=q.subject==='english'?'Choose the correct spelling.':'选择听写的正确字词。';base.face=q.subject==='english'?q.answer:'🖊️';base.answer=String(q.answer);
+  base.options=[base.answer,...(q.subject==='english'?[base.answer+'s',base.answer+'e',base.answer.slice(0,-1)]:['书','花','山'])].filter((x,i,a)=>x&&a.indexOf(x)===i).slice(0,4);return base;
+ }
+ if(q.kind==='match'){const [left,right]=q.pairs[0];base.ask=`${left} 应该连向哪一项？`;base.face=left;base.answer=right;base.options=[right,...q.pairs.slice(1).map(p=>p[1])];return base;}
+ if(q.kind==='order'){const tok=q.answer.includes('||')?q.answer.split('||'):q.answer.split(',');base.ask='从选项中选出正确的排列顺序。';base.face='🔢 ↔';base.answer=tok.join(' → ');base.options=[base.answer,tok.slice().reverse().join(' → '),[...tok.slice(1),tok[0]].join(' → '),[tok[0],tok[2],tok[1],...tok.slice(3)].join(' → ')].filter((x,i,a)=>a.indexOf(x)===i);return base;}
+ if(q.kind==='multi'){const first=q.answer[0];base.ask=q.subject==='english'?'Which ONE choice fits the rule?':'下面哪一项符合题目要求？';base.answer=first;base.options=[first,...q.options.filter(x=>!q.answer.includes(x))].slice(0,4);return base;}
+ base.kind='choice';base.answer=String(q.answer);base.options=q.options.map(String);return base;
+}
+function examPutWrong(q,answer){const entryQ=examReviewQuestion(q);const book=saveData.wrongbooks[q.subject],existing=book.find(e=>e.id===entryQ.id);const now=new Date().toISOString();if(existing){existing.count=(existing.count||1)+1;existing.lastWrong=examPrintableResponse(q,answer);existing.lastAt=now;existing.reviewCount=0;existing.corrected=false;existing.mastered=false;existing.due=localDate(1);existing.question=entryQ;}else{book.unshift({id:entryQ.id,g:q.g,t:q.t,unit:q.unit,question:entryQ,count:1,lastWrong:examPrintableResponse(q,answer),lastAt:now,reviewCount:0,corrected:false,mastered:false,due:localDate(1),source:'exam'});}if(book.length>350)book.length=350;}
+function examSubmit(byTimeout=false){const exam=saveData.examActive;if(!examIsActive())return;
+ if(!byTimeout&&examAnsweredCount(exam)!==exam.count){toast('请先答完全部题目，或等待时间结束自动交卷。');return;}
+ const rows=exam.questions.map((q,i)=>{const answer=exam.answers[i],value=examGradeValue(q,answer);return {topic:q.topic,kind:q.kind,format:q.format,unit:q.unit,points:value,possible:1,correct:value===1,answered:examAnswered(q,answer)};});
+ const raw=rows.reduce((n,r)=>n+r.points,0),score=Math.round(100*raw/rows.length),topics={};
+ rows.forEach((r,i)=>{const key=`${r.unit}-${r.topic}`,a=topics[key]||(topics[key]={name:r.topic,unit:r.unit,points:0,max:0,wrong:0});a.points+=r.points;a.max++;if(r.points<1)a.wrong++;const q=exam.questions[i];if(r.points<1&&q.kind!=='oral')examPutWrong(q,exam.answers[i]);saveData.attempts.push({at:new Date().toISOString(),day:localDate(),sub:q.subject,grade:q.g,term:q.t,unit:q.unit,topic:q.topic,firstCorrect:r.correct,help:false,source:'exam'});});
+ saveData.attempts=saveData.attempts.slice(-MAX_ATTEMPTS);
+ const summary={id:exam.id,at:new Date().toISOString(),label:examPaperLabel(exam),subject:exam.subject,g:exam.g,t:exam.t,type:exam.type,count:exam.count,score,byTimeout,topics:Object.values(topics),wrong:rows.filter(r=>r.points<1).length,oral:rows.filter(r=>r.kind==='oral').length};
+ saveData.examHistory.push(summary);saveData.examHistory=saveData.examHistory.slice(-80);exam.status='done';exam.finishedAt=Date.now();exam.summary=summary;document.body.classList.remove('exam-running');store();render();
+}
+function examRenderResults(){const ex=saveData.examActive;if(!ex||!ex.summary)return examRenderSetup();const h=ex.summary;
+ const topicRows=h.topics.slice().sort((a,b)=>(a.points/a.max)-(b.points/b.max));const weak=topicRows.filter(x=>x.points/x.max<0.8);
+ const kinds={};ex.questions.forEach((q,i)=>{const k=q.format==='error'?'找错改正':q.format==='reading'?'阅读与应用':({numeric:'计算填空',single:'单项选择',judge:'判断',multi:'多项选择',match:'连线配对',order:'排序',dictation:'听写',oral:'口头表达'})[q.kind]||'综合';const row=kinds[k]||(kinds[k]={total:0,lost:0});row.total++;if(examGradeValue(q,ex.answers[i])<1)row.lost++;});
+ const missedKinds=Object.entries(kinds).filter(([_,v])=>v.lost).sort((a,b)=>b[1].lost-a[1].lost);
+ return `<section class="hero ${ex.subject}"><div class="overline">EXAM FINISHED · 已交卷</div><h1>🏅 本次测验完成</h1><p>${examHtmlEscape(h.label)}</p></section><section class="card exam-results"><div class="exam-score">${h.score}<small> / 100 分</small></div><p style="text-align:center">共${ex.count}题 · ${h.wrong}题未得满分${h.byTimeout?' · 时间到自动交卷':''}</p>${h.oral?`<div class="tipbox">🎤 本卷含 ${h.oral} 道家长评定的口头表达题，口头部分不是 AI 自动评分。</div>`:''}<h2 class="title">📊 知识点成绩分析</h2>${topicRows.map(t=>`<div class="exam-topic"><div class="row"><b>${examHtmlEscape(t.name)}</b><span>${Math.round(100*t.points/t.max)}% · ${t.max}题</span></div>${progress(t.points,t.max)}${t.wrong?`<p class="small">需复习 ${t.wrong} 题：${examHtmlEscape(EXAM_TOPICS_HELP[ex.subject])}</p>`:''}</div>`).join('')}<h2 class="title" style="margin-top:18px">🧩 失分题型</h2>${missedKinds.length?missedKinds.map(([name,r])=>`<div class="exam-history-row"><span>${examHtmlEscape(name)}</span><b style="font-size:15px">${r.lost} / ${r.total} 题待加强</b></div>`).join(''): '<p class="small">各题型没有失分项。</p>'}<div class="tipbox">${weak.length?`建议优先复习：${weak.map(x=>x.name).join('、')}。客观错题已加入错题本，安排次日复习。`:'基础知识掌握不错！可以继续用不同方法解释答案，并练习表达。'}</div></section><section class="card"><h2 class="title">📋 逐题订正（交卷后才显示答案）</h2>${ex.questions.map((q,i)=>{const a=ex.answers[i],v=examGradeValue(q,a);return `<details class="exam-solution"><summary>第${i+1}题 · ${examHtmlEscape(q.topic)}　${v===1?'✅':v===0?'❌':'🟠'}</summary><p><strong>${examHtmlEscape(q.ask)}</strong></p>${q.passage?`<p>${examHtmlEscape(q.passage)}</p>`:''}<p>你的答案：${examHtmlEscape(examPrintableResponse(q,a))}</p><p>参考答案：${examHtmlEscape(examExpected(q))}</p><p>解析：${examHtmlEscape(q.explain)}</p></details>`}).join('')}</section><section class="card"><button class="btn primary block" data-exam="new">📝 再来一张新试卷</button><button class="btn ghost block" data-exam="wrongbook">📔 去错题本复习</button></section>`;
+}
+function examRender(){document.body.classList.toggle('exam-running',examIsActive());if(examIsActive())return examRenderRunning();if(saveData.examActive?.status==='done'&&saveData.examActive?.summary&&saveData.examActive.subject===saveData.subject&&saveData.examActive.g===saveData.grade&&saveData.examActive.t===saveData.term)return examRenderResults();return examRenderSetup();}
+const examPreviousRender=render;
+render=function(){examPreviousRender();document.body.classList.toggle('exam-running',view==='exam'&&examIsActive());if(view==='exam'){app.innerHTML=examRender();if(aiIsOpen)aiClose();get('#v44LevelBar').classList.remove('active');}}
+function examSetAnswer(value){const ex=saveData.examActive;if(!examIsActive())return;ex.answers[ex.current]=value;store();}
+function examDraw(){if(view==='exam')render();}
+function examActions(button){const a=button.dataset.exam,v=button.dataset.value,ex=saveData.examActive;
+ if(a==='type'){examKind=v;examDraw();return;}
+ if(a==='start'){
+  if(examIsActive()){toast('已有进行中的考试');return;}
+  saveData.examActive=examSetupPaper(examKind,examUnit);view='exam';store();examDraw();window.scrollTo(0,0);return;
+ }
+ if(a==='new'){saveData.examActive=null;store();examDraw();return;}
+ if(a==='wrongbook'){saveData.examActive=null;store();changeView('wrongbook');return;}
+ if(!examIsActive())return;
+ if(examTimeRemaining()<=0){examSubmit(true);return;}
+ if(a==='previous'){ex.current=Math.max(0,ex.current-1);store();examDraw();return;}
+ if(a==='next'){ex.current=Math.min(ex.count-1,ex.current+1);store();examDraw();return;}
+ if(a==='jump'){ex.current=Math.max(0,Math.min(ex.count-1,Number(v)));store();examDraw();return;}
+ if(a==='submit'){examSubmit(false);return;}
+ const q=ex.questions[ex.current],prev=ex.answers[ex.current];
+ if(a==='audio'){examSpeak(q.audio||q.passage||q.ask,q.subject);return;}
+ if(a==='order'||a==='unorder'||a==='reset-order'){
+  let list=Array.isArray(prev)?prev.slice():[];
+  if(a==='order'&&!list.includes(v))list.push(q.tokens.find(x=>String(x)===String(v)));
+  if(a==='unorder')list=list.filter(x=>String(x)!==String(v));
+  if(a==='reset-order')list=[];
+  examSetAnswer(list);examDraw();return;
+ }
+}
+// Capture exam navigation before the old practice event listeners.
+document.addEventListener('click',e=>{
+ const go=e.target.closest('[data-view="exam"]');if(go){e.preventDefault();e.stopImmediatePropagation();view='exam';examDraw();window.scrollTo(0,0);return;}
+ if(view==='exam'&&examIsActive()){
+  if(e.target.closest('[data-subject],[data-view],#aiTeacherFab,[data-v44-level]')){e.preventDefault();e.stopImmediatePropagation();toast('考试正在计时，请先完成或等待自动交卷。');return;}
+ }
+ const b=e.target.closest('[data-exam]');if(b&&view==='exam'){e.preventDefault();e.stopImmediatePropagation();examActions(b);}
+},true);
+document.addEventListener('input',e=>{if(view!=='exam'||!examIsActive()||!e.target.matches('[data-exam-input="text"]'))return;examSetAnswer(e.target.value);});
+document.addEventListener('change',e=>{
+ if(view==='exam'&&examIsActive()&&e.target.matches('#gradeSel,#termSel,#unitSel')){e.preventDefault();e.stopImmediatePropagation();render();toast('考试期间不能切换学科、年级或单元。');return;}
+ if(view!=='exam')return;
+ if(e.target.id==='examUnit'){examUnit=Number(e.target.value)||0;return;}
+ if(!examIsActive())return;
+ const ex=saveData.examActive,q=ex.questions[ex.current];
+ if(e.target.dataset.examInput==='answer'){
+  if(q.kind==='multi'){
+   const ans=Array.isArray(ex.answers[ex.current])?ex.answers[ex.current].slice():[];
+   const v=e.target.value;if(e.target.checked&&!ans.includes(v))ans.push(v);if(!e.target.checked){const k=ans.indexOf(v);if(k>=0)ans.splice(k,1);}examSetAnswer(ans);
+  }else examSetAnswer(e.target.value);
+  return;
+ }
+ if(e.target.dataset.examInput==='match'){
+  const answer=(ex.answers[ex.current]&&typeof ex.answers[ex.current]==='object')?{...ex.answers[ex.current]}:{};answer[e.target.dataset.left]=e.target.value;examSetAnswer(answer);
+ }
+},true);
+setInterval(()=>{if(view==='exam'&&examIsActive()){const remaining=examTimeRemaining();if(!remaining){examSubmit(true);return;}const clock=get('#examClock');if(clock)clock.textContent='⏱ '+examTimeLabel(remaining);}},1000);
+// Active paper is persisted across refreshes, and its real deadline continues to run.
+if(examIsActive()){view='exam';}
+
 
 render();
 
