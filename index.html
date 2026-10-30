@@ -1771,11 +1771,15 @@ function p52OptionLetters(opts,kind){
   return '<span class="p52-choice">'+(kind==='multi'?'□ ':'○ ')+String.fromCharCode(65+i)+'. '+px(x)+'</span>';
  }).join('')+'</div>';
 }
+function p52StudentStem(q,txt){
+ if(q.subject==='chinese'&&saveData.pinyinOn&&!/[“”《》「」]/.test(txt)&&!/读作|正确拼音/.test(txt))return ruby(txt);
+ return px(txt);
+}
 function p52PrintedQ(q,index,sheet){
  var kind=p52PrintableKind(q),sub=sheet.subject;
  var typeMap={single:'选择题',multi:'多选题',numeric:'填空与计算',judge:'判断题',match:'连线题',order:'排序题',dictation:'听写题',oral:'口头表达'};
  var title=sub==='english'?(q.ask||'Answer the question.'):(q.ask||'认真作答。');
- var c='<article class="p52-item"><p class="p52-question">'+(index+1)+'. '+px(title)+
+ var c='<article class="p52-item"><p class="p52-question">'+(index+1)+'. '+p52StudentStem(q,title)+
  '<span class="p52-topic">（'+px(q.topic||typeMap[kind]||'练习')+'）</span></p>';
  if(q.passage)c+='<div class="p52-passage">'+px(q.passage)+'</div>';
  if(kind!=='dictation'&&kind!=='oral'&&q.face)c+='<div class="p52-face">'+px(q.audioQuiz?'🎧 听音题':q.face)+'</div>';
@@ -1880,7 +1884,7 @@ function p52Hub(){
  '<label class="p52-field">打印题量<select id="p52StudyCount" data-p52-change="count">'+
  [8,12,20].map(function(n){return '<option value="'+n+'"'+(P52.studyCount===n?' selected':'')+'>'+n+'题</option>'}).join('')+'</select></label>'+
  '<button type="button" class="p52-button primary" data-p52="study">🎲 生成学习练习卷</button>'+
- '<p class="p52-note">题目为知识主题原创练习，包含计算、判断、选择、连线、排序、听写和思考表达。答案另页打印。</p></section>';
+ '<p class="p52-note">题目为原创知识主题练习，包含计算、判断、选择、连线、排序、听写和思考表达。语文普通指令可带拼音，但考查的生字不提前注音，以免泄题。答案另页打印。</p></section>';
  html+='<section class="p52-panel"><h2>📝 打印单元、期中、期末模拟卷</h2>'+
  '<label class="p52-field">试卷类型<select id="p52ExamType" data-p52-change="type">'+
  Object.keys(EXAM_PLANS).map(function(k){var x=EXAM_PLANS[k];return '<option value="'+k+'"'+(P52.examType===k?' selected':'')+'>'+px(x.name)+' · '+x.count+'题</option>'}).join('')+'</select></label>';
