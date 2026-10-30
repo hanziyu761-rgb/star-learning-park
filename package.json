@@ -1,6 +1,6 @@
 {
   "name": "star-learning-park-family",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "private": true,
   "description": "Family-only US ELA English, Chinese and math learning with a protected DeepSeek tutor",
   "scripts": {"start":"node server.js","check":"node --check server.js"},
