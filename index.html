@@ -171,7 +171,54 @@ body.exam-running #aiTeacherFab,body.exam-running #v44LevelBar{display:none!impo
 
 </style>
 <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" sizes="192x192">
-</head><body>
+
+<style id="p52PrintStyles">
+.p52-launch,.p52-tools{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.p52-button{border:2px solid #d4defb;border-radius:14px;background:white;color:#3b538a;padding:11px 14px;min-height:45px;font-weight:850;font-size:14px;cursor:pointer}
+.p52-button.primary{background:#7b61e8;color:#fff;border-color:#7b61e8}
+.p52-button.soft{background:#f0f4ff}
+.p52-panel{background:#fff;border:1px solid #dfe5f7;border-radius:18px;padding:17px;margin:14px 0;box-shadow:0 6px 20px #6679aa08}
+.p52-panel h2{font-size:19px;margin:0 0 10px}
+.p52-panel p{line-height:1.8;font-size:14px}
+.p52-field{display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:800;margin:12px 0}
+.p52-field select{padding:12px;border:2px solid #e0e6f5;border-radius:12px;background:#fff;color:#303f62;min-height:46px;max-width:100%}
+.p52-note{background:#eff5ff;color:#566786;padding:12px;border-radius:12px;line-height:1.8;font-size:13px}
+# printArea.paper-v52{color:#111}
+@media print{
+ @page{size:A4;margin:15mm 13mm}
+ html,body{background:#fff!important}
+ #printArea.paper-v52{display:block!important;background:white!important;color:#111!important;font-family:"Microsoft YaHei","Noto Sans CJK SC",Arial,sans-serif!important;font-size:12pt;line-height:1.65}
+ #printArea.paper-v52 *{color:#111!important;box-shadow:none!important;text-shadow:none!important}
+ #printArea .p52-doc{max-width:none}
+ #printArea .p52-head{border-bottom:2px solid #222;padding:0 0 7mm;margin-bottom:6mm}
+ #printArea .p52-head h1{margin:0 0 5px;font-size:20pt;line-height:1.5}
+ #printArea .p52-metadata{font-size:10pt;color:#555!important}
+ #printArea .p52-name{margin:9px 0 0;font-size:11pt;white-space:normal}
+ #printArea .p52-section-title{font-size:14pt;border-bottom:1px solid #555;margin:15px 0 10px;padding-bottom:3px}
+ #printArea .p52-item{break-inside:avoid;page-break-inside:avoid;border-bottom:1px dashed #b5b5b5;padding:10px 0 15px;margin-bottom:4px}
+ #printArea .p52-question{font-size:12pt;font-weight:700;margin:0 0 8px;line-height:1.75}
+ #printArea .p52-topic{font-size:9pt;font-weight:400;margin-left:8px}
+ #printArea .p52-passage{font-size:11pt;white-space:pre-line;background:#f6f6f6!important;padding:8px 12px;margin:8px 0}
+ #printArea .p52-face{font-size:15pt;font-weight:750;margin:9px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+ #printArea .p52-choices{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;font-size:11pt;margin:8px 0}
+ #printArea .p52-choice{min-width:0;overflow-wrap:anywhere}
+ #printArea .p52-lines{font-size:11pt;letter-spacing:2px;line-height:2.7;white-space:normal;margin:6px 0}
+ #printArea .p52-matching{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:9px 0;font-size:12pt}
+ #printArea .p52-matching>div{display:grid;gap:8px}
+ #printArea .p52-matching span{display:block;min-height:24px}
+ #printArea .p52-footnote{font-size:9pt;margin-top:9px}
+ #printArea .p52-end{font-size:10pt;text-align:center;margin-top:14mm}
+ #printArea .p52-answer-page{break-before:page;page-break-before:always}
+ #printArea .p52-answer-page .p52-item{padding:7px 0 9px}
+ #printArea .p52-answer{font-weight:700;margin:4px 0}
+ #printArea .p52-answer-details{font-size:10pt;margin:4px 0}
+ #printArea .p52-results{border:1px solid #555;padding:14px 18px;margin:10px 0 18px}
+ #printArea .p52-score{font-size:26pt;font-weight:900}
+ #printArea ruby{ruby-position:over}
+ #printArea rt{font-size:.57em}
+ #printArea.paper-v52 .p52-doc{display:block}
+}
+</style></head><body>
 <div class="shell mx-auto w-full">
 <header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V5.1</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
@@ -1672,4 +1719,267 @@ document.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target
 v5Init();render();
 })();
 
+</script>
+<script id="p52PrintScript">
+/* V5.2: print classroom worksheets and separate exam papers without changing the exam state */
+(function(){
+'use strict';
+var P52={sheet:null,studyCount:12,examType:'unit',examUnit:0};
+var printNav=document.querySelector('.modebar');
+if(printNav&&!printNav.querySelector('[data-view="printcenter"]')){
+ printNav.insertAdjacentHTML('beforeend','<button type="button" class="mode" data-view="printcenter">🖨️ 打印中心</button>');
+}
+function px(x){return esc(String(x==null?'':x));}
+function gradeLabel(g,t){return g+'年级'+(t===1?'上册':'下册');}
+function paperContext(){return saveData.subject+'-'+saveData.grade+'-'+saveData.term;}
+function p52FromExam(ex){
+ return {source:'exam',subject:ex.subject,g:ex.g,t:ex.t,unit:ex.unit,type:ex.type,
+  name:EXAM_PLANS[ex.type]?EXAM_PLANS[ex.type].name:'模拟卷',questions:ex.questions.slice(),ex:ex,
+  count:ex.questions.length,created:new Date().toLocaleDateString('zh-CN')};
+}
+function p52MakeStudy(count){
+ var sub=saveData.subject,g=saveData.grade,t=saveData.term,unit=unitSelection(sub),qs=[];
+ for(var i=0;i<count;i++){
+  var selected=unit>=0?unit:i%4;
+  var kinds=EXAM_SCHEDULE[sub]||EXAM_SCHEDULE.math;
+  qs.push(examQuestion(sub,g,t,selected,kinds[i%kinds.length],i));
+ }
+ return {source:'study',subject:sub,g:g,t:t,unit:unit,name:unit<0?'综合练习卷':unitsFor(sub,g,t)[unit]+' · 同步练习',
+  questions:qs,count:qs.length,created:new Date().toLocaleDateString('zh-CN')};
+}
+function p52CurrentQuestion(){
+ var q=currentQuestion();
+ if(!q){toast('请先进入一道练习题，再打印当前题。');return null;}
+ return {source:'current',subject:q.subject,g:q.g,t:q.t,unit:q.unit,
+  name:'当前学习题',questions:[q],count:1,created:new Date().toLocaleDateString('zh-CN')};
+}
+function p52SheetHeader(sheet,kind){
+ var topic=sheet.unit>=0&&sheet.source!=='current'&&sheet.type==='unit'?(' · '+(unitsFor(sheet.subject,sheet.g,sheet.t)[sheet.unit]||'')):'';
+ var mode=kind==='answers'?'家长答案与解析':kind==='scripts'?'听力听写朗读稿':kind==='results'?'考试成绩与逐题分析':sheet.source==='study'?'学习练习卷':'空白试卷';
+ return '<header class="p52-head"><h1>星星闯关乐园 · '+px(sheet.name)+' · '+mode+'</h1>'+
+ '<div class="p52-metadata">'+px(NAME[sheet.subject])+' · '+gradeLabel(sheet.g,sheet.t)+
+ (sheet.subject==='english'?' · 美国英语能力 L'+px(saveData.englishAbility):'')+
+ topic+' · '+px(sheet.created||new Date().toLocaleDateString('zh-CN'))+' · '+sheet.questions.length+'题</div>'+
+ '<div class="p52-name">姓名：________________　班级：________________　日期：________________</div></header>';
+}
+function p52PrintableKind(q){
+ return q.kind==='choice'?'single':q.kind==='numeric'?'numeric':q.kind==='audioQuiz'?'dictation':q.kind||'single';
+}
+function p52OptionLetters(opts,kind){
+ if(!opts||!opts.length)return '';
+ return '<div class="p52-choices">'+opts.map(function(x,i){
+  return '<span class="p52-choice">'+(kind==='multi'?'□ ':'○ ')+String.fromCharCode(65+i)+'. '+px(x)+'</span>';
+ }).join('')+'</div>';
+}
+function p52PrintedQ(q,index,sheet){
+ var kind=p52PrintableKind(q),sub=sheet.subject;
+ var typeMap={single:'选择题',multi:'多选题',numeric:'填空与计算',judge:'判断题',match:'连线题',order:'排序题',dictation:'听写题',oral:'口头表达'};
+ var title=sub==='english'?(q.ask||'Answer the question.'):(q.ask||'认真作答。');
+ var c='<article class="p52-item"><p class="p52-question">'+(index+1)+'. '+px(title)+
+ '<span class="p52-topic">（'+px(q.topic||typeMap[kind]||'练习')+'）</span></p>';
+ if(q.passage)c+='<div class="p52-passage">'+px(q.passage)+'</div>';
+ if(kind!=='dictation'&&kind!=='oral'&&q.face)c+='<div class="p52-face">'+px(q.audioQuiz?'🎧 听音题':q.face)+'</div>';
+ if(kind==='single'||kind==='multi'){
+  c+=p52OptionLetters(q.options||[],kind);
+  c+='<div class="p52-lines">选择：__________________________</div>';
+ }else if(kind==='judge'){
+  c+='<div class="p52-choices"><span>□ 正确 / True</span><span>□ 错误 / False</span></div>';
+ }else if(kind==='match'){
+  var pairs=Array.isArray(q.pairs)?q.pairs:[];
+  var right=q.matchRight&&q.matchRight.length?q.matchRight:pairs.map(function(p){return p[1]}).reverse();
+  c+='<div class="p52-matching"><div>'+pairs.map(function(p,i){return '<span>'+String.fromCharCode(65+i)+'. '+px(p[0])+'　●</span>'}).join('')+
+   '</div><div>'+right.map(function(x,i){return '<span>●　'+(i+1)+'. '+px(x)+'</span>'}).join('')+'</div></div>';
+  c+='<div class="p52-lines">连线或填写对应序号：________________</div>';
+ }else if(kind==='order'){
+  var tokens=q.tokens||[];
+  c+='<p>请排序：'+tokens.map(function(v){return '［'+px(v)+'］'}).join('　')+'</p>'+
+   '<div class="p52-lines">顺序：________________________________</div>';
+ }else if(kind==='dictation'){
+  c+='<p>🎧 听写题：请家长按照单独的朗读稿读出第'+(index+1)+'题，不在学生试卷中显示听写词。</p>'+
+   '<div class="p52-lines">听写：________________________________</div>';
+ }else if(kind==='oral'){
+  if(q.art)c+='<div class="p52-face">'+px(q.art)+'</div>';
+  if(q.prompt)c+='<p>'+px(q.prompt)+'</p>';
+  c+='<div class="p52-lines">家长观察记录：________________________________</div>'+
+    '<p>□ 表达清楚　□ 需要提醒　□ 暂未完成</p>';
+ }else{
+  c+='<div class="p52-lines">答：________________________________________________</div>';
+ }
+ if(kind!=='oral'&&sheet.source!=='exam'){
+  c+='<p class="p52-footnote">🧠 想一想：你为什么这样回答？可以口头解释，或在下面画图。</p>'+
+     '<div class="p52-lines">思考：________________________________________________</div>';
+ }
+ return c+'</article>';
+}
+function p52AnswerOf(q){
+ if(q.kind==='oral')return '由家长根据表达完整性、清楚程度和独立性评价';
+ if(q.kind==='match')return (q.pairs||[]).map(function(p){return p[0]+' → '+p[1]}).join('；');
+ if(q.kind==='judge')return q.answer==='true'?'正确（True）':'错误（False）';
+ if(q.kind==='order')return Array.isArray(q.answer)?q.answer.join(' → '):String(q.answer||'').replaceAll('||',' → ').replaceAll(',',' → ');
+ if(Array.isArray(q.answer))return q.answer.join('、');
+ if(q.kind==='audioQuiz'&&q.voiceEn)return String(q.voiceEn);
+ return String(q.answer==null?'':q.answer);
+}
+function p52ListeningScript(sheet){
+ var scripts=sheet.questions.map(function(q,i){var a=q.audio||q.voiceEn||(q.audioQuiz?q.learn&&q.learn.text:'');return a?{n:i+1,text:a,kind:q.kind}:null}).filter(Boolean);
+ if(!scripts.length)return '<section class="p52-item">本卷没有需要朗读的听力或听写题。</section>';
+ return scripts.map(function(x){return '<article class="p52-item"><p class="p52-question">第'+x.n+'题 · 朗读稿</p><p>'+px(x.text)+'</p><p class="p52-footnote">由家长自然朗读1—2遍；不要向孩子展示本页。</p></article>'}).join('');
+}
+function p52AnswerPage(sheet){
+ return sheet.questions.map(function(q,i){
+  return '<article class="p52-item"><p class="p52-question">第'+(i+1)+'题 · '+px(q.topic||'')+'</p>'+
+   '<p class="p52-answer">参考答案：'+px(p52AnswerOf(q))+'</p>'+
+   (q.audio||q.voiceEn?'<p class="p52-answer-details">朗读内容：'+px(q.audio||q.voiceEn)+'</p>':'')+
+   '<p class="p52-answer-details">讲解：'+px(q.explain||q.tip||'和孩子一起说明解题方法。')+'</p></article>';
+ }).join('');
+}
+function p52ResultsPage(sheet){
+ var ex=sheet.ex;
+ if(!ex||ex.status!=='done'||!ex.summary)return '<p>本次考试尚未交卷，没有可打印的成绩。</p>';
+ var h=ex.summary;
+ var c='<div class="p52-results"><div class="p52-score">'+px(h.score==null?'—':h.score)+' / 100 分</div>'+
+  '<p>客观题：'+px(h.objectiveCount==null?ex.count:h.objectiveCount)+'题 · 失分题：'+px(h.wrong)+'题</p>'+
+  '<p>口头表达（家长评分）：完成 '+px(h.oralRatings&&h.oralRatings.full||0)+' / 部分 '+px(h.oralRatings&&h.oralRatings.part||0)+
+  ' / 未完成 '+px(h.oralRatings&&h.oralRatings.none||0)+'。口头题不计入客观成绩。</p></div>';
+ c+='<h2 class="p52-section-title">知识主题掌握情况</h2>';
+ c+=(h.topics||[]).map(function(x){return '<p>'+px(x.name)+'：'+Math.round(x.points*100/Math.max(x.max,1))+'%（'+x.max+'题）</p>'}).join('');
+ c+='<h2 class="p52-section-title">逐题订正</h2>';
+ c+=sheet.questions.map(function(q,i){return '<article class="p52-item"><p class="p52-question">第'+(i+1)+'题 · '+px(q.ask||'')+'</p>'+
+ '<p>学生答案：'+px(examPrintableResponse(q,ex.answers[i]))+'</p>'+
+ '<p class="p52-answer">参考答案：'+px(p52AnswerOf(q))+'</p>'+
+ '<p class="p52-answer-details">'+px(q.explain||'请结合题目说明理由。')+'</p></article>'}).join('');
+ return c;
+}
+function p52BuildPages(sheet,what){
+ var body='<div class="p52-doc">'+p52SheetHeader(sheet,what);
+ if(what==='student'){
+  body+=sheet.questions.map(function(q,i){return p52PrintedQ(q,i,sheet)}).join('')+
+   '<p class="p52-end">— 本卷结束 · 完成后请与家长一起订正 —</p>';
+ }else if(what==='answers')body+='<h2 class="p52-section-title">家长答案与讲解（请勿交给孩子提前查看）</h2>'+p52AnswerPage(sheet);
+ else if(what==='scripts')body+='<h2 class="p52-section-title">家长朗读稿 · 与学生卷分开保管</h2>'+p52ListeningScript(sheet);
+ else if(what==='results')body+=p52ResultsPage(sheet);
+ return body+'</div>';
+}
+function p52Print(sheet,what){
+ if(!sheet||!Array.isArray(sheet.questions)||!sheet.questions.length){toast('没有可打印的题目。');return;}
+ if(what==='results'&&(!sheet.ex||sheet.ex.status!=='done')){toast('请交卷后再查看成绩。');return;}
+ if(what==='answers'&&sheet.ex&&sheet.ex.status==='active'){toast('考试尚未交卷，不能打印答案。');return;}
+ var area=get('#printArea');if(!area){toast('打印容器不可用。');return;}
+ area.classList.add('paper-v52');area.innerHTML=p52BuildPages(sheet,what);
+ document.body.classList.add('printing');
+ if(typeof window.print!=='function'){document.body.classList.remove('printing');toast('请使用支持打印的浏览器。');return;}
+ requestAnimationFrame(function(){requestAnimationFrame(function(){try{window.print()}catch(e){document.body.classList.remove('printing');toast('无法打开打印窗口，请改用电脑浏览器。')}})});
+}
+function p52Hub(){
+ var sub=saveData.subject,scope=unitSelection(sub),p=P52.sheet;
+ var match=p&&p.subject===sub&&p.g===saveData.grade&&p.t===saveData.term;
+ var html='<section class="hero '+sub+'"><div class="overline">PRINT CENTER · A4</div><h1>🖨️ 三科打印中心</h1>'+
+ '<p>支持1—6年级上下册，学习练习卷、模拟试卷、家长答案单独打印。可在浏览器选择“保存为 PDF”。</p></section>';
+ html+='<section class="p52-panel"><h2>📚 打印学习练习卷</h2>'+
+ '<p>当前：<b>'+gradeLabel(saveData.grade,saveData.term)+' · '+px(NAME[sub])+' · '+px(scope<0?'综合随机':unitsFor(sub)[scope])+'</b>。请用页面顶部的学科、年级、学期、知识主题切换打印范围。</p>'+
+ '<label class="p52-field">打印题量<select id="p52StudyCount" data-p52-change="count">'+
+ [8,12,20].map(function(n){return '<option value="'+n+'"'+(P52.studyCount===n?' selected':'')+'>'+n+'题</option>'}).join('')+'</select></label>'+
+ '<button type="button" class="p52-button primary" data-p52="study">🎲 生成学习练习卷</button>'+
+ '<p class="p52-note">题目为知识主题原创练习，包含计算、判断、选择、连线、排序、听写和思考表达。答案另页打印。</p></section>';
+ html+='<section class="p52-panel"><h2>📝 打印单元、期中、期末模拟卷</h2>'+
+ '<label class="p52-field">试卷类型<select id="p52ExamType" data-p52-change="type">'+
+ Object.keys(EXAM_PLANS).map(function(k){var x=EXAM_PLANS[k];return '<option value="'+k+'"'+(P52.examType===k?' selected':'')+'>'+px(x.name)+' · '+x.count+'题</option>'}).join('')+'</select></label>';
+ if(P52.examType==='unit')html+='<label class="p52-field">单元知识主题<select id="p52ExamUnit" data-p52-change="unit">'+
+ unitsFor(sub).map(function(x,i){return '<option value="'+i+'"'+(i===P52.examUnit?' selected':'')+'>'+px(x)+'</option>'}).join('')+'</select></label>';
+ html+='<button type="button" class="p52-button primary" data-p52="draft">📄 生成纸质模拟卷（不计时）</button>'+
+ '<p class="p52-note">打印纸质试卷不会启动在线考试倒计时。听力与听写的朗读稿独立成页，家长可以单独打印。</p></section>';
+ if(match){
+  html+='<section class="p52-panel"><h2>✅ 已生成：'+px(p.name)+'</h2><p>'+px(NAME[p.subject])+' · '+gradeLabel(p.g,p.t)+' · '+p.questions.length+'题</p>'+
+  '<div class="p52-tools"><button class="p52-button primary" data-p52="sheet">🖨️ 打印学生卷</button>'+
+  '<button class="p52-button soft" data-p52="sheet-script">🎧 打印朗读稿</button>'+
+  '<button class="p52-button" data-p52="sheet-key">🔑 打印家长答案</button></div>'+
+  '<p class="p52-note">这三个按钮对应同一份刚生成的试卷。换年级、重新生成或刷新页面后，请重新生成并成套打印。</p></section>';
+ }
+ return html;
+}
+function p52Inject(){
+ var existing=app.querySelector('.p52-launch');if(existing)existing.remove();
+ var bar='<div class="p52-launch"><button type="button" class="p52-button soft" data-p52="open">🖨️ 打印中心</button>';
+ if(view==='practice'){
+  if(currentQuestion())bar+='<button type="button" class="p52-button" data-p52="current">📄 打印当前学习题</button>';
+  app.insertAdjacentHTML('afterbegin',bar+'</div>');
+ }else if(view==='home'||view==='report'||view==='wrongbook'||view==='speaking'||view==='thinking'){
+  app.insertAdjacentHTML('afterbegin',bar+'</div>');
+ }
+ if(view==='exam'){
+  var ex=saveData.examActive;
+  var div=app.querySelector('.exam-top')||app.querySelector('.exam-paused');
+  if(div&&ex&&['active','paused'].includes(ex.status)){
+   div.insertAdjacentHTML('afterbegin','<div class="p52-tools"><button class="p52-button soft" type="button" data-p52="live">🖨️ 打印本次试卷（无答案）</button></div>'+
+   (ex.status==='active'?'<p class="p52-note">打印时在线倒计时仍继续；需要更多时间请先保存并退出考试。</p>':''));
+  }
+  var config=app.querySelector('.exam-config');
+  if(config)config.insertAdjacentHTML('beforeend','<div class="p52-tools"><button class="p52-button soft" type="button" data-p52="exam-draft">🖨️ 打印同类型空白模拟卷</button></div>');
+  var done=app.querySelector('.exam-results');
+  if(done&&ex&&ex.status==='done')done.insertAdjacentHTML('afterbegin','<div class="p52-tools">'+
+   '<button class="p52-button" data-p52="live">🖨️ 打印本次试卷</button>'+
+   '<button class="p52-button" data-p52="live-key">🔑 打印答案</button>'+
+   '<button class="p52-button primary" data-p52="live-result">📊 打印成绩分析</button>'+
+   '<button class="p52-button" data-p52="live-script">🎧 朗读稿</button></div>');
+ }
+}
+var origRender=render;
+render=function(){
+ if(view==='printcenter'){
+  document.body.classList.remove('exam-running','v5-special');
+  renderHeader();
+  app.innerHTML=p52Hub();
+ }else{
+  origRender();
+  p52Inject();
+ }
+};
+document.addEventListener('click',function(ev){
+ var nav=ev.target.closest('[data-view="printcenter"]');
+ if(nav){
+  ev.preventDefault();ev.stopImmediatePropagation();
+  if(examIsActive()){toast('请先保存并退出在线考试，再进入打印中心。也可用试卷上的直接打印按钮。');return;}
+  view='printcenter';render();window.scrollTo(0,0);return;
+ }
+ var b=ev.target.closest('[data-p52]');
+ if(!b)return;
+ ev.preventDefault();ev.stopImmediatePropagation();
+ var op=b.dataset.p52,ex=saveData.examActive;
+ if(op==='open'){if(examIsActive()){toast('请先保存退出考试。');return;}view='printcenter';render();window.scrollTo(0,0);return;}
+ if(op==='current'){var q=p52CurrentQuestion();if(q)p52Print(q,'student');return;}
+ if(op==='study'){P52.sheet=p52MakeStudy(P52.studyCount);render();p52Print(P52.sheet,'student');return;}
+ if(op==='draft'){
+  var paper=examSetupPaper(P52.examType,P52.examUnit);
+  P52.sheet=p52FromExam(paper);render();p52Print(P52.sheet,'student');return;
+ }
+ if(op==='exam-draft'){
+  var paper2=examSetupPaper(examKind,examUnit);P52.sheet=p52FromExam(paper2);
+  p52Print(P52.sheet,'student');return;
+ }
+ if(op==='sheet'){p52Print(P52.sheet,'student');return;}
+ if(op==='sheet-script'){p52Print(P52.sheet,'scripts');return;}
+ if(op==='sheet-key'){
+  if(!window.confirm('即将打印家长答案与解析。请确认孩子不会提前看到。'))return;
+  p52Print(P52.sheet,'answers');return;
+ }
+ if(op==='live'){
+  if(!ex)return;
+  p52Print(p52FromExam(ex),'student');return;
+ }
+ if(op==='live-key'||op==='live-result'||op==='live-script'){
+  if(!ex||ex.status!=='done'){toast('考试尚未交卷，暂不能打印答案或成绩。');return;}
+  if(op==='live-key'&&!window.confirm('即将打印本次考试的正确答案，确认继续？'))return;
+  p52Print(p52FromExam(ex),op==='live-key'?'answers':op==='live-result'?'results':'scripts');
+ }
+},true);
+document.addEventListener('change',function(e){
+ var key=e.target.dataset.p52Change;
+ if(!key)return;
+ if(key==='count')P52.studyCount=Math.max(8,Math.min(20,Number(e.target.value)||12));
+ if(key==='type')P52.examType=EXAM_PLANS[e.target.value]?e.target.value:'unit';
+ if(key==='unit')P52.examUnit=Math.max(0,Math.min(3,Number(e.target.value)||0));
+ P52.sheet=null;render();
+},true);
+render();
+})();
 </script></body></html>
