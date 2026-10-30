@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
-<meta name="description" content="星星闯关乐园V4.3：小学一至六年级知识主题练习、语音讲解、随机出题、英文冒险、错题复习与打印。">
-<title>星星闯关乐园 V4.3 · US English & DeepSeek AI 老师版</title>
+<meta name="description" content="星星闯关乐园V4.4：小学一至六年级知识主题练习、语音讲解、随机出题、英文冒险、错题复习与打印。">
+<title>星星闯关乐园 V4.4 · 零基础美式英语与 DeepSeek AI 老师版</title>
 <style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
 
 /* V4.2 AI learning assistant: child-friendly dialog with responsive controls */
@@ -73,6 +73,44 @@ body.voice-dialog-open{overflow:hidden}
 .us-lesson .sound{font-size:16px;min-height:52px;padding:9px 18px}.us-lesson .soundrow{margin-top:12px}
 .ai-panel .ai-quick{line-height:1.4}
 @media(max-width:380px){.ai-fab{font-size:12px}.us-story{padding:10px}}
+
+/* V4.4 • US beginner English: teach before testing, illustrated listening, graduated Chinese help */
+.en-levelbar{display:none;background:#fff;border:2px solid #e6defc;border-radius:20px;padding:15px;margin:3px 0 14px;box-shadow:0 7px 22px #806ec30d}
+.en-levelbar.active{display:block}
+.en-levelbar .leveltop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.en-levelbar .leveltop strong{font-size:15px;color:#5a43a0}
+.en-levelbar .leveltop span{color:#6e7c98;font-size:11px}
+.en-level-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.en-level-option{border:2px solid #e8e3f6;border-radius:13px;min-height:62px;background:#f8f7ff;padding:7px 3px;font-weight:900;color:#665a9d;display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;font-size:16px}
+.en-level-option small{font-size:10px;line-height:1.35;color:#81859c;font-weight:800}
+.en-level-option.active{border-color:#8960e8;background:#6e59de;color:#fff}.en-level-option.active small{color:#f7efff}
+.en-guide{color:#68718a;font-size:12px;line-height:1.85;margin:9px 0 0}
+.en-card{background:linear-gradient(160deg,#fff8ff,#f3faff);border:2px solid #e4defd;border-radius:23px;padding:19px 14px;margin-top:14px}
+.en-steps{display:flex;justify-content:center;gap:5px;margin-bottom:13px;flex-wrap:wrap}
+.en-step{border-radius:999px;padding:5px 11px;background:#eaeafd;color:#8278a5;font-size:12px;font-weight:900}.en-step.active{background:#725cdc;color:#fff}
+.en-illustration{margin:10px auto 6px;display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;min-height:110px;border-radius:20px;background:#fff;border:1px solid #e5e8f8;padding:12px;max-width:370px}
+.en-big-emoji{font-size:clamp(55px,15vw,92px);line-height:1.3;filter:drop-shadow(0 7px 5px #362b6e17)}
+.en-story-emoji{font-size:clamp(36px,11vw,64px);line-height:1.45}
+.en-word{font-size:clamp(27px,8vw,43px);font-weight:950;color:#4b418b;letter-spacing:.5px;line-height:1.5}
+.en-instruction{font-size:clamp(19px,5vw,25px);font-weight:950;color:#4c428f;text-align:center;line-height:1.6;margin:8px 0}
+.en-cn-help{font-size:13px;color:#777e92;text-align:center;line-height:1.8;margin:6px 0 12px}
+.en-help-btn{border:1px solid #ded9fd;border-radius:14px;background:#fff;color:#6e53a9;font-weight:900;min-height:43px;padding:8px 12px;font-size:13px}
+.en-audio{min-height:57px;width:min(100%,340px);display:block;margin:13px auto;border:0;border-radius:17px;background:linear-gradient(130deg,#6a69ea,#8c6de6);color:#fff;font-size:16px;font-weight:950;padding:10px 16px;box-shadow:0 5px 0 #ddd6fd}
+.en-audio:active{transform:translateY(2px)}
+.en-choice{display:flex;align-items:center;justify-content:center;gap:7px;min-height:89px;flex-direction:column}
+.en-choice .pict{font-size:43px;line-height:1.2}.en-choice .wordlabel{font-size:20px;font-weight:950}
+.en-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.en-choices .choice{min-height:92px}
+.en-teach-progress{font-size:12px;color:#8d85a9;text-align:center;font-weight:800}
+.en-tip{font-size:13px;color:#625783;line-height:1.9;background:#fff;border-radius:13px;padding:11px 13px;margin:12px 0}
+.en-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.en-actions button{min-height:50px}
+.en-phonics-note{font-size:12px;color:#887b97;line-height:1.8;margin-top:9px}
+.en-bilingual{background:#faf8ff;padding:9px 11px;border-radius:13px;text-align:center;font-size:13px;color:#716998}
+.en-activity-tag{display:inline-flex;background:#fff2d8;border-radius:999px;padding:5px 11px;color:#9e7138;font-size:12px;font-weight:900}
+.en-parent-card{border:1px solid #efd9a8;background:#fffaee;padding:14px;border-radius:15px;margin-top:12px;color:#775e38;font-size:13px;line-height:1.75}
+.en-voice-warning{font-size:12px;line-height:1.7;color:#866e97;padding:10px;background:#f5f1ff;border-radius:12px;margin:8px 0}
+@media(max-width:370px){.en-level-option{min-height:62px}.en-level-option small{font-size:9px}.en-card{padding:13px 9px}.en-choice .pict{font-size:36px}.en-actions{grid-template-columns:1fr}}
+@media print{.en-levelbar,.en-actions,.en-audio,.en-help-btn{display:none!important}}
 </style>
 <style>
 :root{--ink:#253258;--muted:#7786a6;--blue:#4e84f7;--rose:#ff766e;--violet:#8866e6;--green:#28ad89;--paper:#fff;--edge:#e6eaf6;--bg:#f7f9ff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-width:280px;color:var(--ink);background:radial-gradient(circle at 0 4%,#e9e8ff,transparent 26%),radial-gradient(circle at 100% 17%,#dff7fb,transparent 28%),var(--bg);font-family:ui-rounded,"Arial Rounded MT Bold","Microsoft YaHei",system-ui,sans-serif}button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:disabled{cursor:not-allowed;opacity:.58}button:focus-visible,select:focus-visible{outline:3px solid #facb51;outline-offset:2px}ruby{ruby-position:over;white-space:nowrap}rt{font-size:.57em;line-height:1.1;font-weight:500;color:#8390a8}body.hide-pinyin rt{display:none}.shell{max-width:660px;padding:18px 15px calc(32px + env(safe-area-inset-bottom));margin:auto;min-height:100vh}.topline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}.brand{font-size:clamp(21px,5.8vw,29px);font-weight:950;letter-spacing:-1px}.school{font-size:12px;color:#8493b0;font-weight:800;line-height:1.9}.stat-pill{background:#fff4ce;border:2px solid white;border-radius:18px;padding:9px 12px;font-size:18px;font-weight:950;color:#bb861b;white-space:nowrap;box-shadow:0 8px 15px #ffd46e27}.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;background:#ffffffee;border:1px solid var(--edge);border-radius:23px;padding:7px;position:sticky;top:5px;z-index:10;box-shadow:0 6px 22px #5b6d990e}.tab{border:0;background:transparent;border-radius:18px;min-height:64px;font-size:16px;font-weight:950;color:#6980a0;line-height:1.4}.tab .e{display:block;font-size:22px;margin-bottom:3px}.tab.active{color:white}.tab.active rt{color:#fff}.tab[data-subject=math].active{background:linear-gradient(125deg,#4b8ffa,#6671ed)}.tab[data-subject=chinese].active{background:linear-gradient(125deg,#ff9872,#ff717f)}.tab[data-subject=english].active{background:linear-gradient(125deg,#9d77f7,#785ae6)}.settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:15px 0 11px}.field{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:12px;font-weight:800;color:#7f8ba2}.field select{min-height:45px;width:100%;padding:9px 8px;border:2px solid #e3e9f7;border-radius:13px;background:#fff;color:#455677;font-weight:850;text-overflow:ellipsis}.minitools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:4px 1px 13px}.micro{border:1px solid #e5eafa;background:white;min-height:36px;border-radius:11px;color:#64749e;font-size:12px;font-weight:850;padding:5px 10px}.modebar{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:5px;border-radius:19px;border:1px solid #e6eaf5;background:#f0f2fc;margin-bottom:14px}.mode{border:0;border-radius:14px;color:#7e87a3;font-size:12px;min-height:45px;font-weight:950;background:transparent;padding:4px}.mode.active{color:#555bc0;background:#fff;box-shadow:0 3px 10px #7f8fc020}.hero{border-radius:26px;color:white;padding:23px 20px 22px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 13px 26px #6874be18}.hero:after{content:'✦';font-size:145px;opacity:.14;position:absolute;right:-1px;top:-49px;transform:rotate(12deg)}.hero.math{background:linear-gradient(122deg,#478df4,#7375ea)}.hero.chinese{background:linear-gradient(122deg,#f87d6f,#ffae80)}.hero.english{background:linear-gradient(122deg,#7559e6,#b37bf5)}.hero h1{font-size:25px;margin:6px 0;line-height:1.55;position:relative;z-index:1}.hero p{font-size:13px;line-height:1.95;opacity:.93;margin:0;position:relative;z-index:1}.hero .overline{font-size:11px;font-weight:900;letter-spacing:1px;position:relative;z-index:1}.hero rt{color:#fff}.card{border:1px solid var(--edge);background:#fff;padding:19px 17px;border-radius:25px;box-shadow:0 9px 23px #5466960c;margin-bottom:14px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.row.wrap{flex-wrap:wrap}.title{font-size:18px;font-weight:950;margin:0 0 10px;line-height:1.75}.small{font-size:12px;color:var(--muted);line-height:1.85}.note{font-size:12px;color:#9aa6ba;line-height:1.85}.chips{display:flex;flex-wrap:wrap;gap:7px}.chip{font-size:12px;border-radius:999px;background:#f0f3ff;color:#686abd;padding:6px 10px;font-weight:900;line-height:1.55}.track{height:11px;border-radius:50px;background:#edf0f9;overflow:hidden;margin:10px 0 17px}.track>div{height:100%;width:0%;background:linear-gradient(95deg,#ffcc60,#fa9d7a);border-radius:50px;transition:width .3s}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.metric{padding:12px 5px;border-radius:17px;background:#f4f6ff;text-align:center}.metric b{display:block;font-size:22px;color:#545dbc}.metric span{font-size:11px;color:#8794aa;line-height:1.8}.lesson{width:100%;border:2px solid #e7eafa;background:#fdfdff;border-radius:16px;padding:14px 13px;margin:8px 0 0;min-height:58px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:6px;color:#405278;font-size:14px;font-weight:900}.lesson.active{border-color:#8d88e9;background:#f2f1ff}.lesson .score{font-size:12px;color:#8794af}.quest{display:flex;align-items:center;gap:12px;margin:10px 0;padding:13px;border:1px solid #e9edfa;background:#fcfdff;border-radius:16px}.quest .bubble{display:grid;place-items:center;width:46px;height:46px;background:#eef0ff;border-radius:15px;font-size:26px;flex-shrink:0}.quest .body{flex:1;min-width:0}.quest .body b{font-size:15px}.quest .count{font-size:12px;color:#98a3b9;font-weight:900}.btn{border:none;min-height:50px;border-radius:16px;padding:9px 15px;background:#f1f3ff;color:#5968b7;font-size:15px;font-weight:950;line-height:1.5}.btn:active,.choice:active,.key:active{transform:translateY(2px)}.btn.primary{background:linear-gradient(125deg,#7863e9,#617ef0);color:#fff;box-shadow:0 5px 0 #e3dcfe}.btn.green{background:#e7fff2;color:#15966b}.btn.ghost{background:#eff9ff;color:#287eaa}.btn.block{display:block;width:100%;margin-top:13px}.btn.tiny{font-size:12px;min-height:39px;padding:7px 12px}.btn.muted{background:#fff3e0;color:#ad7d3b}.btn:disabled{box-shadow:none}.question{min-height:165px;border:2px dashed #e4e8fc;background:linear-gradient(140deg,#f7faff,#fcfaff);border-radius:21px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px 12px;gap:8px;margin:13px 0 16px}.question.chinese{background:linear-gradient(145deg,#fff7f3,#fffcf8);border-color:#ffdfd2}.question.english{background:linear-gradient(145deg,#f7f1ff,#fcfbff);border-color:#e6dcff}.question .picture{font-size:44px;line-height:1.2}.question .prompt{font-size:14px;line-height:1.85;font-weight:850;color:#73809c}.question .big{font-size:clamp(32px,9vw,56px);font-weight:950;overflow-wrap:anywhere;line-height:1.32;max-width:100%}.question .big.smaller{font-size:clamp(21px,5.5vw,37px)}.soundrow{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}.sound{background:#e7f7ff;color:#267ba9;border:2px solid #cfeaff;border-radius:14px;padding:8px 11px;min-height:44px;font-size:13px;font-weight:900}.sound.en{background:#fff3e1;color:#a16c28;border-color:#ffe5c2}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.choice{background:#f5f7ff;border:2px solid #e6ebf9;border-radius:17px;min-height:64px;padding:9px 7px;font-size:clamp(16px,4.5vw,22px);color:#405371;font-weight:950;line-height:1.65;word-break:break-word}.choice.wrong{background:#fff0eb;border-color:#ffb9a8;color:#c8614d}.choice.right{background:#ecfff2;border-color:#97e5b2;color:#168c60}.choices.three{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.choices.three .choice{font-size:clamp(15px,3.9vw,20px)}.answerbox{font-size:32px;font-weight:950;letter-spacing:2px;color:#626ee1;min-height:62px;background:#f8f9ff;border:2px solid #dfe5f7;border-radius:17px;display:flex;align-items:center;justify-content:center;white-space:nowrap;margin-bottom:12px}.answerbox.empty{font-size:16px;letter-spacing:0;color:#aab7cc}.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.key{border:2px solid #e6eafa;background:#f5f7ff;color:#334f7c;font-weight:950;font-size:24px;border-radius:15px;min-height:56px;box-shadow:0 3px 0 #e7eaf8}.key.accent{background:#fff1d7}.key.submit{grid-column:span 2;background:#6381ed;color:#fff;border-color:#6381ed;font-size:17px}.feedback{margin-top:13px;border-radius:17px;padding:15px;background:#e9fcf1;border:1px solid #c4f1db;color:#22875c;font-size:15px;font-weight:900;line-height:1.9}.feedback.bad{background:#fff2ed;border-color:#ffd9cb;color:#bc6848}.explanation{background:#f0f8ff;border:1px solid #d6e8ff;border-radius:17px;padding:15px;margin-top:11px;color:#396493}.explanation p{font-size:14px;line-height:2;margin:8px 0}.explanation .step{margin-top:9px;background:#fff;border-radius:10px;padding:9px 11px;line-height:1.85;font-weight:800}.brain{background:#fff9eb;border:1px solid #ffebc1;border-radius:17px;padding:15px;margin-top:12px;color:#926c2d}.brain p{line-height:2;font-size:14px;margin:7px 0;font-weight:850}.level{display:flex;align-items:center;gap:13px;width:100%;background:#fff;border:2px solid #eaedfa;border-radius:19px;margin-top:11px;padding:14px;text-align:left;min-height:83px}.level .medal{background:#f0eaff;border-radius:15px;width:48px;height:48px;display:grid;place-items:center;font-size:28px;flex-shrink:0}.level .info{flex:1;min-width:0}.level .info strong{display:block;font-size:16px;color:#37476c}.level .info span{display:block;font-size:11px;line-height:1.6;color:#99a3b4;margin-top:4px}.level.ready{border-color:#d9c9ff;background:#fdfaff}.level.done{border-color:#c9f1db}.level.locked{filter:saturate(.2);background:#fafbfe}.level .end{font-size:20px}.reward{text-align:center;padding:15px 0}.reward .emoji{font-size:75px;animation:pop .4s ease-out}.reward h2{font-size:23px;margin:12px 0}.reward p{font-size:14px;line-height:2;color:#7284a0}.wrongentry{border:1px solid #e5eafa;border-radius:17px;padding:13px;margin-top:11px;background:#fcfdff}.wrongentry p{font-size:13px;line-height:1.9;margin:9px 0;overflow-wrap:anywhere}.wrongentry .qname{font-size:18px;font-weight:950;background:#f3f5ff;padding:12px;border-radius:12px}.barrow{margin:11px 0}.barrow .row{font-size:13px;font-weight:850}.barrow .track{margin:6px 0 0}.barrow .track>div{background:linear-gradient(90deg,#54b8a5,#68c5a8)}.empty{text-align:center;padding:26px 8px;color:#91a0b9;line-height:2}.empty .emoji{font-size:48px}.footer{text-align:center;color:#9aa7b9;font-size:11px;line-height:2;padding:10px 0}.toast{position:fixed;z-index:22;left:50%;transform:translateX(-50%);bottom:calc(17px + env(safe-area-inset-bottom));width:max-content;max-width:90%;padding:12px 16px;border-radius:15px;color:#fff;background:#2c385d;box-shadow:0 8px 25px #18254a40;font-size:13px;font-weight:850}.hidden{display:none!important}.divider{height:1px;background:#eef0f6;margin:14px 0}.flex2{display:flex;flex-wrap:wrap;gap:8px}.flex2>*{flex:1;min-width:120px}.sr-only{position:absolute;width:1px;height:1px;clip:rect(0,0,0,0);overflow:hidden}.tipbox{border-radius:14px;background:#f6f8ff;padding:12px;color:#7b8aaa;font-size:12px;line-height:1.85}.safetag{background:#fff4e1;padding:4px 8px;border-radius:10px;font-size:11px;color:#ad7b34;font-weight:800}
@@ -84,10 +122,16 @@ body.voice-dialog-open{overflow:hidden}
 <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" sizes="192x192">
 </head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V4.3</span></div></div><div class="stat-pill" id="starTotal">⭐ 0</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V4.4</span></div></div><div class="stat-pill" id="starTotal">⭐ 0</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
+
+<section class="en-levelbar" id="v44LevelBar" aria-label="英语能力分级">
+ <div class="leveltop"><strong>🌱 英语能力 · 从零基础开始</strong><span>独立于学校年级</span></div>
+ <div class="en-level-grid" id="v44LevelButtons"></div>
+ <p class="en-guide" id="v44LevelDescription">先听说、看图，再慢慢学习拼读。</p>
+</section>
 <nav class="modebar" aria-label="功能导航"><button class="mode" data-view="home">🏠 今日任务</button><button class="mode active" data-view="practice">🧩 学习闯关</button><button class="mode" data-view="wrongbook">📔 错题复习</button><button class="mode" data-view="report">👨‍👩‍👧 家长中心</button></nav>
 <main id="app" aria-live="polite"></main><footer class="footer">🌿 每次约10分钟，适时休息 · 本地练习不上传数据；经家长开启的在线AI对话会向DeepSeek发送题目与提问 · 练习内容是原创知识主题练习，非官方逐页同步题库</footer>
 </div><div class="toast hidden" id="toast" role="status"></div><div class="voice-overlay hidden" id="voiceSettingsPanel" role="dialog" aria-modal="true" aria-labelledby="voiceSettingsTitle">
@@ -882,6 +926,144 @@ const oldAiAsk=aiAsk;
 // Rendering refreshes English buttons and local hints without storing any speech or English lesson transcript.
 const prevUsRender=render;render=function(){prevUsRender();usAiUi();};
 const beforeUsApprove=applyCreative;applyCreative=function(){const q=currentQuestion(),isUs=q?.subject==='english',wasVoice=saveData.voiceOn;if(isUs)saveData.voiceOn=false;beforeUsApprove();if(isUs){saveData.voiceOn=wasVoice;if(wasVoice)speakSequence([{text:'Wonderful! You shared your thinking!',lang:'en-US'}]);store();}};
+// ===== V4.4: American-English learning for COMPLETE beginners =====
+// A child's school grade never silently determines English proficiency.
+const V44_LEVEL_NAMES=['L0 零基础','L1 自然拼读','L2 简单阅读','L3 阅读思维'];
+const V44_LEVEL_HINTS=[
+ '先看图片、听英语、跟着说，再玩听音选图；不要求先认识英语字母。',
+ '逐步练首音、字母组合、CVC拼读和押韵；图片、语音和操作说明都可使用。',
+ '阅读简单英文句子和故事，用图片及线索理解；中文提示会逐渐减少。',
+ '结合年龄与英语能力训练语境词汇、阅读证据和表达推理。'
+];
+if(![0,1,2,3].includes(Number(saveData.englishAbility)))saveData.englishAbility=0;
+else saveData.englishAbility=Number(saveData.englishAbility);
+if(saveData.enHelpPreference!=='on'&&saveData.enHelpPreference!=='off')saveData.enHelpPreference='auto';
+let v44Phase='learn',v44LastKey='',v44Played=false,v44ShowHelp=null;
+const V44_PICTURES=[
+ ['dog','🐶','d'],['cat','🐱','c'],['sun','☀️','s'],['fish','🐟','f'],
+ ['bird','🐦','b'],['moon','🌙','m'],['pig','🐷','p'],['hat','🎩','h'],
+ ['bus','🚌','b'],['tree','🌳','t'],['ball','⚽','b'],['apple','🍎','a'],
+ ['duck','🦆','d'],['cup','🥤','c'],['frog','🐸','f'],['star','⭐','s'],
+ ['book','📚','b'],['bear','🐻','b'],['pen','🖊️','p'],['milk','🥛','m']
+];
+const V44_ACTIONS=[['jump','🦘'],['run','🏃'],['sit','🪑'],['clap','👏'],['sleep','😴'],['wave','👋'],['walk','🚶'],['dance','💃']];
+const V44_RHYMES=[['cat','hat','sun','dog','pen'],['sun','fun','pig','bus','moon'],['dog','log','hat','pen','fish'],['pen','hen','cup','ball','tree'],['cake','make','moon','dog','cat'],['boat','goat','fish','hen','sun']];
+const V44_STORIES=[
+ {story:'The cat is sleeping. The dog is running.',art:'🐱💤　🐶🏃',ask:'Who is sleeping?',answer:'🐱',options:['🐱','🐶','🐟','🦆'],hint:'Listen for “sleeping.”'},
+ {story:'A bird is in the tree. A fish is in the pond.',art:'🐦🌳　🐟💧',ask:'Who is in the tree?',answer:'🐦',options:['🐦','🐟','🐶','🐱'],hint:'Listen for “tree.”'},
+ {story:'Ben has a red ball. Mia has a blue book.',art:'👦🔴⚽　👧📘',ask:'What does Ben have?',answer:'⚽',options:['⚽','📚','🍎','🚌'],hint:'Listen for “Ben has…”'},
+ {story:'A duck can swim. A rabbit can jump.',art:'🦆💦　🐰🦘',ask:'Who can swim?',answer:'🦆',options:['🦆','🐰','🐶','🐻'],hint:'Listen for “swim.”'}
+];
+const v44Pick=(arr,used,make=x=>String(x[0]||x.story))=>{const available=arr.filter(x=>!used.has(make(x))),list=available.length?available:arr;const picked=list[randint(0,list.length-1)];used.add(make(picked));return picked;};
+const v44Choices=(correct,others)=>shuffle([correct,...others.filter(x=>x!==correct).slice(0,3)]);
+function v44Make(g,t,level,used=new Set(),theme=-1){
+ const stage=saveData.englishAbility;
+ const mk=(type,question,answer,opts,spoken,learn,extra={})=>{
+  const id=`v44-${stage}-${g}-${t}-${level}-${type}-${String(spoken).replace(/[^a-z]/gi,'_')}-${String(answer)}`;
+  return {subject:'english',g,t,unit:theme<0?Math.max(0,Math.min(3,level)):theme,topic:V44_LEVEL_NAMES[stage]+' · '+['Listen','Phonics','Rhyme','Story','Speak'][level],level,kind:'choice',us:true,v44:true,usType:type,ask:question,face:'🎧 Listen',answer,options:opts,voiceEn:spoken,voiceZh:'',explain:'Listen and notice the sounds. You can try again.',tip:'Listen again. Look at the pictures or sounds.',why:'Tell your grown-up what you heard or noticed.',icon:'🎧',ability:stage,learn,help:'先听英语，再根据图片或发音选择；不需要翻译成中文。',id,...extra};
+ };
+ if(stage===0){
+  if(level===0){const w=v44Pick(V44_PICTURES,used,x=>x[0]),opts=v44Choices(w[1],shuffle(V44_PICTURES.filter(x=>x[1]!==w[1]).map(x=>x[1])));return mk('listen-picture','Listen. Tap the picture.',w[1],opts,w[0],{art:w[1],text:w[0],audio:`${w[0]}. ${w[0]}.`,intro:'Look, listen, and say the word.'},{pictureOptions:true,explain:`Great! You heard “${w[0]}”.`,why:'Can you point to a real one or draw it?',help:'听老师读英文，点击与声音对应的图片。'});}
+  if(level===1){const a=v44Pick(V44_ACTIONS,used,x=>x[0]);return mk('action','Listen. Tap the action.',a[1],v44Choices(a[1],shuffle(V44_ACTIONS.filter(x=>x[0]!==a[0]).map(x=>x[1]))),a[0],{art:a[1],text:a[0],audio:`${a[0]}. Let's ${a[0]}.`,intro:'Watch the action. Listen and try it.'},{pictureOptions:true,explain:`Great job! The action is “${a[0]}”.`,why:'Can you do the action and say the word?',help:'先看动作，听英语，再选择对应的动作图片。'});}
+  if(level===2){const w=v44Pick(V44_PICTURES.filter(x=>'bcd fhm pst'.replace(/\s/g,'').includes(x[2])&&x[2]!=='a'),used,x=>x[0]);const initial=w[2].toUpperCase();const examples=V44_PICTURES.filter(x=>x[2]===w[2]&&x[0]!==w[0]);const ex=examples.length?examples[0]:w;const wrongs=shuffle('BCDFHMPST'.split('').filter(x=>x!==initial)).slice(0,3);return mk('first-sound','Listen. Find the first letter.',initial,shuffle([initial,...wrongs]),w[0],{art:ex[1],text:`${initial} · ${ex[0]}`,audio:`${ex[0]}. ${ex[0]}.`,intro:'Hear the first sound. Listen to the whole word.'},{face:'🎧',explain:`Well done! “${w[0]}” begins with the same sound as “${ex[0]}”.`,why:'Can you say another word with the same first sound?',help:'听这个英文单词的开头声音，再选择对应的大写字母。'});}
+  if(level===3){const st=v44Pick(V44_STORIES,used,x=>x.story);return mk('mini-story',st.ask,st.answer,shuffle(st.options),`${st.story} ${st.ask}`,{art:st.art,text:'Story Time',audio:st.story,intro:'Look at the pictures. Listen to the short story.'},{pictureOptions:true,story:st.story,explain:`Let's listen again. ${st.story}`,tip:st.hint,why:'Can you act out part of the story?',help:'先听简短英语故事，再从图片中找答案。'});}
+  const a=v44Pick([['hello','👋'],['thank you','💛'],['goodbye','👋🌈'],['happy','😊']],used,x=>x[0]);return mk('speak-play','Listen. Choose the picture.',a[1],v44Choices(a[1],['😊','👏','💛','👋','👋🌈','🎁'].filter(x=>x!==a[1])),a[0],{art:a[1],text:a[0],audio:a[0],intro:'Listen, say it, and make a gesture.'},{pictureOptions:true,explain:`Wonderful! You can say “${a[0]}”.`,why:`Can you say “${a[0]}” and show the action to your grown-up?`,help:'先听问候语并尝试模仿，再选择图片。'});
+ }
+ if(stage===1){
+  if(level===0){const w=v44Pick(V44_PICTURES.filter(x=>/^[bcd fhm pst]/.test(x[2])&&x[2]!=='a'),used,x=>x[0]),initial=w[2].toUpperCase(),match=V44_PICTURES.find(x=>x[2]===w[2]&&x[0]!==w[0])||w;return mk('phonics-onset','Which letter starts the word?',initial,shuffle([initial,...sample('BCDFHMPST'.split('').filter(x=>x!==initial),3)]),w[0],{art:match[1],text:`${initial} · ${match[0]}`,audio:`${match[0]}. ${match[0]}.`,intro:'Learn a beginning sound by listening.'},{explain:`“${w[0]}” and “${match[0]}” start with the same sound.`,help:'听首音，选择开头字母，不用先翻译。'});}
+  if(level===1){const cvc=['cat','dog','sun','pig','hat','cup','bus','hen','fox','bed','pen','map','bug','bat','top','red'];const w=v44Pick(cvc,used,x=>x),ex='map';const options=v44Choices(w,sample(cvc.filter(x=>x!==w),3));return mk('blend','Blend the sounds. Choose the word.',w,options,w,{art:'🔤',text:w.toUpperCase().split('').join(' · '),audio:w,intro:'Look at each letter. Listen to the whole word.'},{face:w.toUpperCase().split('').join(' · '),explain:`Blend the sounds in “${w}”. Read the whole word.`,why:'Can you say the sounds slowly, then the word?',help:'看三个字母，听完整单词，试着把音连起来。'});}
+  if(level===2){const r=v44Pick(V44_RHYMES,used,x=>x[0]);return mk('rhyme','Listen. Which word rhymes?',r[1],shuffle(r.slice(1)),`${r[0]}. ${r[0]}.`,{art:'🎵',text:`${r[0]} · ${r[1]}`,audio:`${r[0]}. ${r[1]}.`,intro:'Listen to the ends of these two words.'},{face:r[0],explain:`“${r[0]}” and “${r[1]}” share an ending sound.`,tip:'Listen for the same ending sound.',why:'Can you make a funny rhyme?',help:'听两个词相似的结尾发音，找到押韵的词。'});}
+  if(level===3){const st=v44Pick(V44_STORIES,used,x=>x.story);return mk('story','Listen to the story. Choose.',st.answer,shuffle(st.options),`${st.story} ${st.ask}`,{art:st.art,text:'Listen to a story',audio:st.story,intro:'Look, listen and think about what happened.'},{pictureOptions:true,story:st.story,storyAsk:st.ask,explain:st.story,why:'Tell the story using the pictures.',help:'听英语故事，观察画面，再按问题选答案。'});}
+  const st=v44Pick([['I see a cat.','🐱'],['I see a dog.','🐶'],['I see the sun.','☀️'],['I see a fish.','🐟']],used,x=>x[0]);return mk('sentence','Listen. Choose a picture.',st[1],v44Choices(st[1],['🐱','🐶','☀️','🐟','🦆'].filter(x=>x!==st[1])),st[0],{art:st[1],text:st[0],audio:st[0],intro:'Listen to a whole sentence. Repeat it.'},{pictureOptions:true,explain:`Great! Say: “${st[0]}”`,why:'Can you make a new sentence with “I see…”?',help:'听完整句子，找对应图片，并尝试跟着说。'});
+ }
+ // L2 (early reading) and L3 (advanced reading): reuse graded US ELA material,
+ // with the same preview and audio-first learning experience.
+ const levelGrade=stage===2?Math.min(2,Math.max(1,g)):Math.max(3,g);
+ const q=v44FormerEnglishQuestion(levelGrade,t,level,used,theme);
+ q.g=g;q.v44=true;q.ability=stage;
+ q.id=`v44-${stage}-${g}-${t}-${q.id}`;
+ const isReading=q.usType==='reading';
+ q.learn={art:q.icon&&q.icon!=='🎧'?q.icon:(isReading?'📚':'🔤'),text:isReading?'Story time': 'Listen, notice, then read.',audio:q.voiceEn||q.ask,intro:isReading?'Listen to the story first.':'Listen once. Look for clues before choosing.'};
+ q.help=isReading?'先听故事或短文，再根据内容寻找线索，不必逐字翻译。':'先听英语，再根据词语结构、图片或语境寻找线索。';
+ return q;
+}
+const v44FormerEnglishQuestion=englishQuestion;
+englishQuestion=function(g,t,level,used=new Set(),theme=-1){return v44Make(g,t,level,used,theme);};
+newEnglishRun=function(g,t,level,theme=-1){const used=new Set();return Array.from({length:4},()=>v44Make(g,t,level,used,theme));};
+currentGame=function(){const u=unitSelection('english'),base=`us-ela-v44-a${saveData.englishAbility}-g${saveData.grade}-t${saveData.term}`,key=u<0?base:`${base}-u${u}`;
+ if(!saveData.englishGames[key])saveData.englishGames[key]={unlocked:0,completed:[],progress:{},runs:{}};
+ const x=saveData.englishGames[key];x.completed=Array.isArray(x.completed)?x.completed:[];x.progress=x.progress||{};x.runs=x.runs||{};x.unlocked=Math.max(0,Math.min(4,Number(x.unlocked)||0));return x;};
+const v44PriorDueEntries=dueEntries;
+dueEntries=function(sub){const data=v44PriorDueEntries(sub);return sub==='english'?data.filter(e=>e.question?.v44&&e.question?.ability===saveData.englishAbility):data;};
+// Each question is taught before it becomes a quiz. Wrongbook reviews stay quizzes.
+function v44SyncPhase(q){const key=[saveData.englishAbility,view,q?.id||'none',q?.__scheduledReview||''].join('|');
+ if(key!==v44LastKey){v44LastKey=key;v44Phase=view==='review'||q?.__scheduledReview?'practice':'learn';v44Played=false;v44ShowHelp=null;}
+}
+function v44HelpOn(){const setting=saveData.enHelpPreference;if(setting==='on')return true;if(setting==='off')return false;
+ const attempts=saveData.attempts.filter(a=>a.sub==='english'&&a.grade===saveData.grade&&a.englishAbility===saveData.englishAbility).slice(-12);
+ if(saveData.englishAbility>=2)return attempts.length<6;
+ return attempts.length<8||attempts.filter(x=>x.firstCorrect).length/attempts.length<.82;
+}
+const v44Voice=(value)=>speakSequence([{text:String(value||'').replace(/[\u{1F300}-\u{1FAFF}]/gu,'').slice(0,260),lang:'en-US'}]);
+function v44LearningCard(q){const l=q.learn||{},art=esc(l.art||'🎧'),word=esc(l.text||''),parentHelp=v44HelpOn();
+ return `<div class="en-card"><div class="en-steps"><span class="en-step active">1 · Listen 听</span><span class="en-step">2 · Say 说</span><span class="en-step">3 · Play 玩</span></div><span class="en-activity-tag">🌱 Learn first · 先学再练</span><div class="en-illustration"><span class="en-big-emoji">${art}</span></div><div class="en-word" style="text-align:center" lang="en-US">${word}</div><p class="en-instruction" lang="en-US">${esc(l.intro||'Listen and try.')}</p>${parentHelp?`<p class="en-cn-help">先看图片、听发音，试着跟读，不用急着认字。</p>`:''}<button type="button" data-v44="hear-learn" class="en-audio">🔊 Listen · 播放英语</button><div class="en-actions"><button type="button" data-v44="parent-read" class="en-help-btn">👨‍👩‍👧 家长已示范</button><button type="button" data-v44="begin" class="btn primary" ${v44Played?'':'disabled'}>✨ 开始小挑战</button></div><p class="en-teach-progress">${v44Played?'听过啦！可以开始挑战。':'先点击播放，让孩子听一听、跟着说。'}</p><p class="en-phonics-note">字母单独的音不一定能被系统语音准确合成；这里使用美式英语完整单词示范，鼓励听辨首音。自然拼读示范效果取决于设备音色。</p></div>`;
+}
+function v44PracticeCard(q,correct,wrong){const shown=q.usType==='mini-story'||q.usType==='story'?esc(q.learn?.art||'📚'):q.usType==='blend'?esc(q.face):q.usType==='phonics-onset'||q.usType==='first-sound'||q.usType==='listen-picture'||q.usType==='action'||q.usType==='speak-play'||q.usType==='sentence'?'🎧':esc(q.face||'🎧');
+ const picture=q.usType==='reading'?`<div class="us-story" lang="en-US">${esc(q.face)}</div>`:`<div class="en-illustration"><span class="${q.usType==='mini-story'||q.usType==='story'?'en-story-emoji':'en-big-emoji'}">${shown}</span></div>`;
+ const hidden=!!q.pictureOptions;const options=(q.options||[]).map(v=>`<button type="button" class="choice en-choice ${correct&&String(v)===String(q.answer)?'right':!correct&&wrong!==''&&String(v)===String(wrong)?'wrong':''}" data-action="choose" data-value="${esc(v)}" ${correct?'disabled':''} aria-label="${esc(v)}" lang="en-US">${hidden?`<span class="pict">${esc(v)}</span>`:`<span class="wordlabel">${esc(v)}</span>`}</button>`).join('');
+ const help=v44ShowHelp===null?v44HelpOn():v44ShowHelp;
+ const extraAsk=q.storyAsk?`<p class="en-instruction" lang="en-US">${esc(q.storyAsk)}</p>`:'';
+ return `<div class="en-card"><div class="en-steps"><span class="en-step">1 · Listen</span><span class="en-step">2 · Say</span><span class="en-step active">3 · Play</span></div><p class="en-instruction" lang="en-US">${esc(q.ask)}</p>${picture}${extraAsk}${help?`<div class="en-bilingual">${esc(q.help||'先听英语，再根据声音和图片尝试选择。')}</div>`:''}<button type="button" class="en-audio" data-v44="hear-question">🔊 Listen again · 再听一遍</button><div class="row wrap" style="justify-content:center;margin:5px 0 13px"><button type="button" class="en-help-btn" data-v44="help">${help?'🧩 收起中文帮助':'🧩 中文帮帮我'}</button><button type="button" class="en-help-btn" data-v44="repeat">🎤 Say it · 跟读</button></div><div class="en-choices">${options}</div>${correct?renderSuccess(q):activeTrial.tries?`<div class="feedback bad">💛 Good try! Let's listen again. ${activeTrial.tries>1?esc(q.tip):''}</div>`:''}</div>`;
+}
+const v44OldRenderQuestion=renderQuestion;
+renderQuestion=function(q,correct,wrong){if(q?.subject!=='english'||!q.v44)return v44OldRenderQuestion(q,correct,wrong);
+ v44SyncPhase(q);if(v44Phase==='learn'&&!correct)return v44LearningCard(q);
+ return v44PracticeCard(q,correct,wrong);};
+const v44PreviousSuccess=renderSuccess;
+renderSuccess=function(q){if(q?.subject!=='english'||!q.v44)return v44PreviousSuccess(q);
+ return `<div class="feedback" lang="en-US">🎉 Great job! You listened and tried!</div><div class="explanation"><strong>💡 Let's learn why</strong><p lang="en-US">${esc(q.explain)}</p><button class="btn tiny ghost" type="button" data-action="explain">🔊 Hear why</button></div><div class="en-parent-card"><strong>🎤 Tell your grown-up · 讲给爸爸妈妈听</strong><p lang="en-US">${esc(q.why)}</p>${renderCreative(q)}</div>`;};
+const v44PriorEnglishRender=renderEnglish;
+renderEnglish=function(){const game=currentGame(),ability=saveData.englishAbility,labels=ability===0?['Listen & Point','Move & Say','First Sounds','Mini Stories','Hello & Speak']:ability===1?['Letter Sounds','Blend Words','Rhyme Time','Listen & Read','Speak in Sentences']:englishLevels(Math.max(2,saveData.grade));
+ const levelTag=`ENGLISH L${ability} · ${ability<=1?'BEGINNER':'READER'} · ${saveData.grade}年级`;
+ if(english.screen==='map')return `<section class="hero english"><div class="overline">${levelTag}</div><h1>🇺🇸 English Adventure</h1><p>用美式英语的方式启蒙：看图、听音、跟读、游戏。先学再练，不背中文翻译。</p></section><section class="card"><h2 class="title">🗺️ My Adventure Map · 冒险地图</h2><p class="small">${esc(V44_LEVEL_HINTS[ability])}</p>${labels.map((label,i)=>{const locked=i>game.unlocked,done=game.completed.includes(i);return `<button type="button" class="level ${locked?'locked':done?'done':'ready'}" data-action="start-level" data-value="${i}" ${locked?'disabled':''}><span class="medal">${locked?'🔒':['👂','🐣','🎵','📚','🎤'][i]}</span><span class="info"><strong>Level ${i+1} · ${esc(label)}</strong><span>每关4题 · 先看、先听、再尝试</span></span><span class="end">${done?'🌟':locked?'🔐':'▶️'}</span></button>`}).join('')}<p class="en-voice-warning">🎧 美式英语使用设备的 en-US 音色。拼读采用完整单词/词组的听辨示范，不把系统合成的字母名当作独立音素。</p></section>`;
+ if(english.screen==='win')return `<section class="hero english"><h1>🏆 You did it!</h1><p>听得真认真！今天学到的声音，可以和爸爸妈妈再说一次。</p></section><section class="card">${btn('map','🗺️ Back to map · 返回地图','primary block')}${btn('view-home','🏡 休息一下','ghost block')}</section>`;
+ const q=currentQuestion();if(!q)return v44PriorEnglishRender();v44SyncPhase(q);
+ return `<section class="hero english"><div class="overline">${levelTag} · LEVEL ${english.level+1}</div><h1>${esc(labels[english.level])}</h1><p>Listen · Say · Play · Think　|　听一听，说一说，玩一玩</p></section><section class="card"><div class="row"><button type="button" class="btn tiny ghost" data-action="map">⬅ Map · 地图</button><span class="chip">${english.index+1} / 4</span></div>${progress(english.index,4)}${renderQuestion(q,english.solved,english.lastWrong)}${english.solved?`<button type="button" data-action="next" class="btn primary block">${english.index===3?'🏆 完成这一关':'✨ 下一题 · Next'}</button>`:''}</section>`;
+};
+const v44OldHeader=renderHeader;
+renderHeader=function(){v44OldHeader();const bar=get('#v44LevelBar');bar.classList.toggle('active',saveData.subject==='english');const choices=get('#v44LevelButtons');choices.innerHTML=V44_LEVEL_NAMES.map((name,i)=>`<button type="button" data-v44-level="${i}" class="en-level-option ${saveData.englishAbility===i?'active':''}" aria-pressed="${saveData.englishAbility===i}"><strong>L${i}</strong><small>${esc(name.slice(3))}</small></button>`).join('');get('#v44LevelDescription').textContent=V44_LEVEL_HINTS[saveData.englishAbility];if(saveData.subject==='english'){get('#curriculumLabel').textContent=`🇺🇸 US ELA · L${saveData.englishAbility}（独立于年级）`;}};
+// AI context can distinguish language level without including child's identity.
+const v44AiContext=aiContextData;
+aiContextData=function(){return {...v44AiContext(),englishAbility:saveData.subject==='english'?saveData.englishAbility:null,englishMode:saveData.subject==='english'?V44_LEVEL_NAMES[saveData.englishAbility]:null};};
+const v44OldAiUi=usAiUi;
+usAiUi=function(){v44OldAiUi();const en=saveData.subject==='english';const level=saveData.englishAbility;if(en){get('#aiTutorTitle').textContent=level<=1?'🌷 My First English Teacher':'🌼 English Coach';aiInput.placeholder=level<=1?'I hear... / Can you help me?':'What do you think?';const q=document.querySelectorAll('.ai-quick');if(level<=1){const names=['👂 Listen with me','🗣️ Help me say it','🔤 Sound it out','🎨 Show me an action'];const prompts=['Please teach me to hear this word. One easy step.','Help me say this in short American English.','Help me notice the beginning or ending sound. Do not give the answer.','Help me understand with one easy action or picture idea.'];q.forEach((e,i)=>{e.textContent=names[i];e.dataset.aiPrompt=prompts[i];});}}
+ let helper=get('#v44AiHelp');if(!helper){helper=document.createElement('button');helper.id='v44AiHelp';helper.type='button';helper.className='en-help-btn';helper.style.margin='0 12px 8px';helper.textContent='🧩 中文帮帮我 · 只解释操作';helper.addEventListener('click',()=>{if(saveData.subject==='english'){const q=currentQuestion();aiAddMessage('assistant',q?.help||'先按播放键听英语，再指一指图片或字母，不用翻译单词。','offline');}});document.querySelector('.ai-choices').after(helper);}helper.style.display=en&&level<=1?'block':'none';
+};
+// Delegated actions are intercepted before the legacy answer click listener.
+document.addEventListener('click',e=>{
+ const lev=e.target.closest('[data-v44-level]');if(lev){e.preventDefault();e.stopPropagation();const a=Number(lev.dataset.v44Level);if(![0,1,2,3].includes(a)||a===saveData.englishAbility)return;saveData.englishAbility=a;english.screen='map';v44LastKey='';resetTrial();store();render();return;}
+ const b=e.target.closest('[data-v44]');if(!b)return;e.preventDefault();e.stopPropagation();const q=currentQuestion();if(!q?.v44)return;
+ switch(b.dataset.v44){
+  case 'hear-learn':v44Played=true;v44Voice(q.learn?.audio||q.voiceEn);render();break;
+  case 'parent-read':v44Played=true;render();break;
+  case 'begin':if(!v44Played)return;v44Phase='practice';render();break;
+  case 'hear-question':v44Voice(q.voiceEn||q.ask);break;
+  case 'repeat':v44Voice(q.voiceEn||q.learn?.audio);break;
+  case 'help':v44ShowHelp=!(v44ShowHelp===null?v44HelpOn():v44ShowHelp);render();break;
+ }
+},true);
+const v44ReadQuestion=readQuestion;
+readQuestion=function(){const q=currentQuestion();if(q?.v44){v44Voice((q.ask||'')+'. '+(q.voiceEn||''));return;}v44ReadQuestion();};
+const v44ReadEnglish=readEnglish;
+readEnglish=function(){const q=currentQuestion();if(q?.v44){v44Voice(q.voiceEn||q.ask);return;}v44ReadEnglish();};
+const v44ReadExplain=readExplain;
+readExplain=function(){const q=currentQuestion();if(q?.v44){v44Voice(q.explain);return;}v44ReadExplain();};
+// Records carry English ability to keep the progress-aware Chinese scaffold accurate.
+const v44OldFirst=recordFirst;
+recordFirst=function(q,correct){const before=saveData.attempts.length;v44OldFirst(q,correct);if(q?.v44&&saveData.attempts.length>=before){const last=saveData.attempts.at(-1);if(last?.sub==='english')last.englishAbility=saveData.englishAbility;}};
+// A fresh ability-specific game keeps existing grade, math/chinese, badges and data intact.
+store();
+
 render();
 
 </script><script>if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});</script></body></html>
