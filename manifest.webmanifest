@@ -1,0 +1,15 @@
+{
+  "name": "星星闯关乐园 V4.3 · US English & AI 老师",
+  "short_name": "星星乐园",
+  "description": "数学、语文知识练习和美国英语语言艺术冒险，联网启用 DeepSeek 引导老师",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f9ff",
+  "theme_color": "#7863e9",
+  "lang": "zh-CN",
+  "icons": [
+    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"}
+  ]
+}

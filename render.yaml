@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: star-learning-park-family
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: DEEPSEEK_MODEL
+        value: deepseek-flash
+      - key: AI_DAILY_LIMIT
+        value: '60'
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FAMILY_ACCESS_CODE
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false

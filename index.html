@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
+<meta name="description" content="星星闯关乐园V4.3：小学一至六年级知识主题练习、语音讲解、随机出题、英文冒险、错题复习与打印。">
+<title>星星闯关乐园 V4.3 · US English & DeepSeek AI 老师版</title>
+<style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
+
+/* V4.2 AI learning assistant: child-friendly dialog with responsive controls */
+.ai-fab{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));z-index:8100;border:0;border-radius:999px;padding:15px 18px;font-size:15px;font-weight:900;color:#fff;background:linear-gradient(130deg,#6f63df,#df75a6);box-shadow:0 9px 27px #7867a95c;cursor:pointer;min-height:54px;max-width:calc(100vw - 26px)}
+.ai-fab:focus-visible,.ai-panel button:focus-visible,.ai-panel input:focus-visible{outline:3px solid #f4b648;outline-offset:2px}
+.ai-overlay{position:fixed;inset:0;background:#292845a6;z-index:10020;display:flex;align-items:flex-end;justify-content:center;padding:10px}
+.ai-overlay.hidden{display:none}
+.ai-panel{width:min(100%,560px);height:min(85dvh,740px);min-height:420px;display:flex;flex-direction:column;overflow:hidden;border-radius:24px 24px 19px 19px;background:#fdfcff;box-shadow:0 14px 54px #24234668;color:#2f3355}
+.ai-top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(120deg,#eee8ff,#ffecf2);gap:10px}
+.ai-title{font-weight:950;font-size:19px}.ai-sub{font-size:12px;color:#746e8c;margin-top:3px}
+.ai-x{background:#fff;border:1px solid #ddd5eb;border-radius:13px;min-height:43px;min-width:43px;font-size:22px;cursor:pointer}
+.ai-context{font-size:12px;color:#685a82;padding:9px 13px;background:#f4f0ff;line-height:1.6;border-bottom:1px solid #e9e4f4}
+.ai-status{padding:6px 13px;font-size:11px;color:#806d9b;background:#fff;display:flex;align-items:center;gap:5px}
+.ai-chat{flex:1;min-height:100px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain}
+.ai-msg{max-width:91%;border-radius:17px;padding:10px 13px;line-height:1.7;font-size:15px;white-space:pre-wrap;word-break:break-word;box-shadow:0 2px 5px #20103c0d}
+.ai-msg.teacher{background:#f0eaff;align-self:flex-start;border-bottom-left-radius:4px}
+.ai-msg.child{background:#dbf4ed;align-self:flex-end;border-bottom-right-radius:4px}
+.ai-message-author{display:block;font-size:11px;color:#747089;font-weight:900;margin-bottom:4px}
+.ai-read{border:0;border-radius:9px;background:#fff;padding:5px 10px;margin-top:7px;font-size:12px;color:#695f94;min-height:30px;cursor:pointer}
+.ai-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:6px 12px}
+.ai-quick{font-size:13px;font-weight:800;min-height:43px;background:#fff;border:1.5px solid #e2d8f9;border-radius:12px;color:#7057a2;cursor:pointer;padding:7px}
+.ai-quick:disabled,.ai-send:disabled{opacity:.55;cursor:not-allowed}
+.ai-footer{border-top:1px solid #eee6f3;padding:10px 12px 12px;background:#fff}
+.ai-consent{font-size:11px;line-height:1.6;color:#706783;display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+.ai-consent input{width:18px;height:18px;flex:0 0 18px;accent-color:#8668dc}
+.ai-compose{display:flex;gap:7px}
+.ai-input{flex:1;min-width:0;height:48px;border:2px solid #ded8ef;border-radius:14px;font-size:16px;padding:0 11px;color:#353651}
+.ai-mic{border:1px solid #e2d7fa;border-radius:13px;min-width:44px;background:#f3ebff;color:#6e57a9;font-size:20px;cursor:pointer}.ai-mic:disabled{opacity:.5}
+.ai-send{border:0;border-radius:13px;min-width:74px;background:#7561d9;color:#fff;font-weight:900;padding:0 9px;cursor:pointer}
+.ai-note{font-size:11px;color:#988c9e;line-height:1.5;margin-top:7px}
+body.ai-open{overflow:hidden}
+@media(max-width:480px){.ai-overlay{padding:0}.ai-panel{height:92dvh;min-height:0;border-radius:20px 20px 0 0}.ai-fab{bottom:calc(11px + env(safe-area-inset-bottom));padding:12px 16px}.ai-choices{gap:6px}.ai-quick{font-size:12px}}
+@media print{.ai-overlay,.ai-fab{display:none!important}}
+
+/* V4.1 gentle speech settings: offline compatible and large tap targets */
+.voice-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.voice-open{background:#fff2f6!important;color:#a23a67!important;border:1px solid #f9ccdb!important}
+.voice-overlay{position:fixed;inset:0;z-index:9999;background:rgba(30,32,60,.52);padding:12px;display:flex;align-items:center;justify-content:center;overflow-y:auto}
+.voice-overlay.hidden{display:none}
+.voice-dialog{width:min(100%,520px);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;border-radius:25px;background:#fffdfc;padding:20px 18px;box-shadow:0 16px 54px rgba(45,32,76,.25);color:#333954}
+.voice-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.voice-dialog-kicker{font-size:12px;color:#a66b8d;font-weight:800;margin-bottom:5px}.voice-dialog h2{font-size:20px;font-weight:900;line-height:1.45;margin:0;color:#6f4376}
+.voice-close{width:45px;height:45px;flex:0 0 45px;border-radius:15px;border:1px solid #e5dbe6;background:#fff;cursor:pointer;font-size:20px;color:#6c657b}
+.voice-sub{font-size:13px;color:#77738b;margin:10px 0 16px;line-height:1.8}
+.voice-styles{border:none;padding:0;margin:0 0 12px;display:grid;gap:8px}.voice-styles legend{font-size:14px;font-weight:900;margin-bottom:8px;color:#514e71}
+.voice-style{min-height:60px;display:flex;gap:10px;align-items:center;border:2px solid #eee9f4;background:#fff;border-radius:15px;padding:9px 12px;cursor:pointer}
+.voice-style:has(input:checked){border-color:#cc93d7;background:#fdf5ff}
+.voice-style input{height:20px;width:20px;accent-color:#9f65b9;flex:0 0 20px}
+.voice-style span{display:flex;gap:2px;flex-direction:column}.voice-style b{font-size:15px}.voice-style small{font-size:12px;color:#878294}
+.voice-select-label{display:flex;justify-content:space-between;gap:7px;align-items:center;font-weight:900;font-size:14px;margin:14px 0 7px}
+.voice-select-label span{font-size:12px;color:#9290a1;font-weight:500;text-align:right}
+.voice-select{width:100%;max-width:100%;height:50px;border:2px solid #ddd7ea;background:#fff;border-radius:13px;padding:0 10px;font-size:14px;color:#4a4564}
+.voice-device-tip{background:#f8f4ff;border-radius:13px;color:#766e92;padding:10px 12px;font-size:12px;line-height:1.6;margin:12px 0}
+.voice-preview-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.voice-preview{min-height:49px;background:#fce8f1;border:1px solid #f4d0e0;border-radius:14px;color:#a34c7b;font-weight:850;font-size:13px;padding:8px;cursor:pointer}
+.voice-dialog-actions{margin-top:12px}.voice-save{width:100%;min-height:54px;border:0;border-radius:15px;background:linear-gradient(120deg,#a86ce0,#ed81a9);color:white;font-size:16px;font-weight:900;cursor:pointer}
+.voice-footnote{margin:13px 1px 2px;color:#918c99;font-size:11px;line-height:1.7}
+body.voice-dialog-open{overflow:hidden}
+@media(max-width:380px){.voice-tools{justify-content:flex-start}.voice-dialog{padding:17px 12px}.voice-dialog h2{font-size:18px}.voice-preview-buttons{grid-template-columns:1fr}}
+@media print{.voice-overlay{display:none!important}}
+
+/* US English learning cards: English prompts, picture-based tasks, audio first */
+.us-lesson{border:2px dashed #d6d0ff;border-radius:20px;padding:18px 11px;margin:14px 0 16px;text-align:center;background:linear-gradient(145deg,#f9f6ff,#f3faff)}
+.us-instruction{font-weight:950;font-size:clamp(17px,4.6vw,23px);line-height:1.5;color:#443d85;margin:6px 0 13px}
+.us-visual{font-size:clamp(28px,8vw,48px);font-weight:900;line-height:1.5;overflow-wrap:anywhere;margin:10px 0}
+.us-story{font-size:clamp(18px,4.5vw,24px);font-weight:780;line-height:1.8;text-align:left;padding:16px;border-radius:14px;background:#fff;color:#334266;margin:12px 0}
+.us-lesson .sound{font-size:16px;min-height:52px;padding:9px 18px}.us-lesson .soundrow{margin-top:12px}
+.ai-panel .ai-quick{line-height:1.4}
+@media(max-width:380px){.ai-fab{font-size:12px}.us-story{padding:10px}}
+</style>
+<style>
+:root{--ink:#253258;--muted:#7786a6;--blue:#4e84f7;--rose:#ff766e;--violet:#8866e6;--green:#28ad89;--paper:#fff;--edge:#e6eaf6;--bg:#f7f9ff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-width:280px;color:var(--ink);background:radial-gradient(circle at 0 4%,#e9e8ff,transparent 26%),radial-gradient(circle at 100% 17%,#dff7fb,transparent 28%),var(--bg);font-family:ui-rounded,"Arial Rounded MT Bold","Microsoft YaHei",system-ui,sans-serif}button,select,input{font:inherit}button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:disabled{cursor:not-allowed;opacity:.58}button:focus-visible,select:focus-visible{outline:3px solid #facb51;outline-offset:2px}ruby{ruby-position:over;white-space:nowrap}rt{font-size:.57em;line-height:1.1;font-weight:500;color:#8390a8}body.hide-pinyin rt{display:none}.shell{max-width:660px;padding:18px 15px calc(32px + env(safe-area-inset-bottom));margin:auto;min-height:100vh}.topline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}.brand{font-size:clamp(21px,5.8vw,29px);font-weight:950;letter-spacing:-1px}.school{font-size:12px;color:#8493b0;font-weight:800;line-height:1.9}.stat-pill{background:#fff4ce;border:2px solid white;border-radius:18px;padding:9px 12px;font-size:18px;font-weight:950;color:#bb861b;white-space:nowrap;box-shadow:0 8px 15px #ffd46e27}.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;background:#ffffffee;border:1px solid var(--edge);border-radius:23px;padding:7px;position:sticky;top:5px;z-index:10;box-shadow:0 6px 22px #5b6d990e}.tab{border:0;background:transparent;border-radius:18px;min-height:64px;font-size:16px;font-weight:950;color:#6980a0;line-height:1.4}.tab .e{display:block;font-size:22px;margin-bottom:3px}.tab.active{color:white}.tab.active rt{color:#fff}.tab[data-subject=math].active{background:linear-gradient(125deg,#4b8ffa,#6671ed)}.tab[data-subject=chinese].active{background:linear-gradient(125deg,#ff9872,#ff717f)}.tab[data-subject=english].active{background:linear-gradient(125deg,#9d77f7,#785ae6)}.settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:15px 0 11px}.field{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:12px;font-weight:800;color:#7f8ba2}.field select{min-height:45px;width:100%;padding:9px 8px;border:2px solid #e3e9f7;border-radius:13px;background:#fff;color:#455677;font-weight:850;text-overflow:ellipsis}.minitools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:4px 1px 13px}.micro{border:1px solid #e5eafa;background:white;min-height:36px;border-radius:11px;color:#64749e;font-size:12px;font-weight:850;padding:5px 10px}.modebar{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:5px;border-radius:19px;border:1px solid #e6eaf5;background:#f0f2fc;margin-bottom:14px}.mode{border:0;border-radius:14px;color:#7e87a3;font-size:12px;min-height:45px;font-weight:950;background:transparent;padding:4px}.mode.active{color:#555bc0;background:#fff;box-shadow:0 3px 10px #7f8fc020}.hero{border-radius:26px;color:white;padding:23px 20px 22px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 13px 26px #6874be18}.hero:after{content:'✦';font-size:145px;opacity:.14;position:absolute;right:-1px;top:-49px;transform:rotate(12deg)}.hero.math{background:linear-gradient(122deg,#478df4,#7375ea)}.hero.chinese{background:linear-gradient(122deg,#f87d6f,#ffae80)}.hero.english{background:linear-gradient(122deg,#7559e6,#b37bf5)}.hero h1{font-size:25px;margin:6px 0;line-height:1.55;position:relative;z-index:1}.hero p{font-size:13px;line-height:1.95;opacity:.93;margin:0;position:relative;z-index:1}.hero .overline{font-size:11px;font-weight:900;letter-spacing:1px;position:relative;z-index:1}.hero rt{color:#fff}.card{border:1px solid var(--edge);background:#fff;padding:19px 17px;border-radius:25px;box-shadow:0 9px 23px #5466960c;margin-bottom:14px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.row.wrap{flex-wrap:wrap}.title{font-size:18px;font-weight:950;margin:0 0 10px;line-height:1.75}.small{font-size:12px;color:var(--muted);line-height:1.85}.note{font-size:12px;color:#9aa6ba;line-height:1.85}.chips{display:flex;flex-wrap:wrap;gap:7px}.chip{font-size:12px;border-radius:999px;background:#f0f3ff;color:#686abd;padding:6px 10px;font-weight:900;line-height:1.55}.track{height:11px;border-radius:50px;background:#edf0f9;overflow:hidden;margin:10px 0 17px}.track>div{height:100%;width:0%;background:linear-gradient(95deg,#ffcc60,#fa9d7a);border-radius:50px;transition:width .3s}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.metric{padding:12px 5px;border-radius:17px;background:#f4f6ff;text-align:center}.metric b{display:block;font-size:22px;color:#545dbc}.metric span{font-size:11px;color:#8794aa;line-height:1.8}.lesson{width:100%;border:2px solid #e7eafa;background:#fdfdff;border-radius:16px;padding:14px 13px;margin:8px 0 0;min-height:58px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:6px;color:#405278;font-size:14px;font-weight:900}.lesson.active{border-color:#8d88e9;background:#f2f1ff}.lesson .score{font-size:12px;color:#8794af}.quest{display:flex;align-items:center;gap:12px;margin:10px 0;padding:13px;border:1px solid #e9edfa;background:#fcfdff;border-radius:16px}.quest .bubble{display:grid;place-items:center;width:46px;height:46px;background:#eef0ff;border-radius:15px;font-size:26px;flex-shrink:0}.quest .body{flex:1;min-width:0}.quest .body b{font-size:15px}.quest .count{font-size:12px;color:#98a3b9;font-weight:900}.btn{border:none;min-height:50px;border-radius:16px;padding:9px 15px;background:#f1f3ff;color:#5968b7;font-size:15px;font-weight:950;line-height:1.5}.btn:active,.choice:active,.key:active{transform:translateY(2px)}.btn.primary{background:linear-gradient(125deg,#7863e9,#617ef0);color:#fff;box-shadow:0 5px 0 #e3dcfe}.btn.green{background:#e7fff2;color:#15966b}.btn.ghost{background:#eff9ff;color:#287eaa}.btn.block{display:block;width:100%;margin-top:13px}.btn.tiny{font-size:12px;min-height:39px;padding:7px 12px}.btn.muted{background:#fff3e0;color:#ad7d3b}.btn:disabled{box-shadow:none}.question{min-height:165px;border:2px dashed #e4e8fc;background:linear-gradient(140deg,#f7faff,#fcfaff);border-radius:21px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px 12px;gap:8px;margin:13px 0 16px}.question.chinese{background:linear-gradient(145deg,#fff7f3,#fffcf8);border-color:#ffdfd2}.question.english{background:linear-gradient(145deg,#f7f1ff,#fcfbff);border-color:#e6dcff}.question .picture{font-size:44px;line-height:1.2}.question .prompt{font-size:14px;line-height:1.85;font-weight:850;color:#73809c}.question .big{font-size:clamp(32px,9vw,56px);font-weight:950;overflow-wrap:anywhere;line-height:1.32;max-width:100%}.question .big.smaller{font-size:clamp(21px,5.5vw,37px)}.soundrow{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}.sound{background:#e7f7ff;color:#267ba9;border:2px solid #cfeaff;border-radius:14px;padding:8px 11px;min-height:44px;font-size:13px;font-weight:900}.sound.en{background:#fff3e1;color:#a16c28;border-color:#ffe5c2}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.choice{background:#f5f7ff;border:2px solid #e6ebf9;border-radius:17px;min-height:64px;padding:9px 7px;font-size:clamp(16px,4.5vw,22px);color:#405371;font-weight:950;line-height:1.65;word-break:break-word}.choice.wrong{background:#fff0eb;border-color:#ffb9a8;color:#c8614d}.choice.right{background:#ecfff2;border-color:#97e5b2;color:#168c60}.choices.three{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.choices.three .choice{font-size:clamp(15px,3.9vw,20px)}.answerbox{font-size:32px;font-weight:950;letter-spacing:2px;color:#626ee1;min-height:62px;background:#f8f9ff;border:2px solid #dfe5f7;border-radius:17px;display:flex;align-items:center;justify-content:center;white-space:nowrap;margin-bottom:12px}.answerbox.empty{font-size:16px;letter-spacing:0;color:#aab7cc}.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.key{border:2px solid #e6eafa;background:#f5f7ff;color:#334f7c;font-weight:950;font-size:24px;border-radius:15px;min-height:56px;box-shadow:0 3px 0 #e7eaf8}.key.accent{background:#fff1d7}.key.submit{grid-column:span 2;background:#6381ed;color:#fff;border-color:#6381ed;font-size:17px}.feedback{margin-top:13px;border-radius:17px;padding:15px;background:#e9fcf1;border:1px solid #c4f1db;color:#22875c;font-size:15px;font-weight:900;line-height:1.9}.feedback.bad{background:#fff2ed;border-color:#ffd9cb;color:#bc6848}.explanation{background:#f0f8ff;border:1px solid #d6e8ff;border-radius:17px;padding:15px;margin-top:11px;color:#396493}.explanation p{font-size:14px;line-height:2;margin:8px 0}.explanation .step{margin-top:9px;background:#fff;border-radius:10px;padding:9px 11px;line-height:1.85;font-weight:800}.brain{background:#fff9eb;border:1px solid #ffebc1;border-radius:17px;padding:15px;margin-top:12px;color:#926c2d}.brain p{line-height:2;font-size:14px;margin:7px 0;font-weight:850}.level{display:flex;align-items:center;gap:13px;width:100%;background:#fff;border:2px solid #eaedfa;border-radius:19px;margin-top:11px;padding:14px;text-align:left;min-height:83px}.level .medal{background:#f0eaff;border-radius:15px;width:48px;height:48px;display:grid;place-items:center;font-size:28px;flex-shrink:0}.level .info{flex:1;min-width:0}.level .info strong{display:block;font-size:16px;color:#37476c}.level .info span{display:block;font-size:11px;line-height:1.6;color:#99a3b4;margin-top:4px}.level.ready{border-color:#d9c9ff;background:#fdfaff}.level.done{border-color:#c9f1db}.level.locked{filter:saturate(.2);background:#fafbfe}.level .end{font-size:20px}.reward{text-align:center;padding:15px 0}.reward .emoji{font-size:75px;animation:pop .4s ease-out}.reward h2{font-size:23px;margin:12px 0}.reward p{font-size:14px;line-height:2;color:#7284a0}.wrongentry{border:1px solid #e5eafa;border-radius:17px;padding:13px;margin-top:11px;background:#fcfdff}.wrongentry p{font-size:13px;line-height:1.9;margin:9px 0;overflow-wrap:anywhere}.wrongentry .qname{font-size:18px;font-weight:950;background:#f3f5ff;padding:12px;border-radius:12px}.barrow{margin:11px 0}.barrow .row{font-size:13px;font-weight:850}.barrow .track{margin:6px 0 0}.barrow .track>div{background:linear-gradient(90deg,#54b8a5,#68c5a8)}.empty{text-align:center;padding:26px 8px;color:#91a0b9;line-height:2}.empty .emoji{font-size:48px}.footer{text-align:center;color:#9aa7b9;font-size:11px;line-height:2;padding:10px 0}.toast{position:fixed;z-index:22;left:50%;transform:translateX(-50%);bottom:calc(17px + env(safe-area-inset-bottom));width:max-content;max-width:90%;padding:12px 16px;border-radius:15px;color:#fff;background:#2c385d;box-shadow:0 8px 25px #18254a40;font-size:13px;font-weight:850}.hidden{display:none!important}.divider{height:1px;background:#eef0f6;margin:14px 0}.flex2{display:flex;flex-wrap:wrap;gap:8px}.flex2>*{flex:1;min-width:120px}.sr-only{position:absolute;width:1px;height:1px;clip:rect(0,0,0,0);overflow:hidden}.tipbox{border-radius:14px;background:#f6f8ff;padding:12px;color:#7b8aaa;font-size:12px;line-height:1.85}.safetag{background:#fff4e1;padding:4px 8px;border-radius:10px;font-size:11px;color:#ad7b34;font-weight:800}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.12)}100%{transform:scale(1)}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}@media(max-width:370px){.shell{padding-left:10px;padding-right:10px}.card{padding:16px 12px}.hero{padding:18px 14px}.brand{font-size:21px}.tab{font-size:14px}.settings{gap:5px}.field select{font-size:12px;padding:9px 5px}.mode{font-size:11px}.choices.three{gap:5px}.key{min-height:53px}}#printArea{display:none}@media print{@page{size:A4;margin:13mm}body,html{background:white!important;color:black}body.printing .shell,body.printing .toast{display:none!important}body.printing #printArea{display:block!important}#printArea{font-family:"Microsoft YaHei",Arial,sans-serif;color:#101828}#printArea h1{font-size:21px;margin:0 0 8px}#printArea .printmeta{font-size:12px;color:#666;margin:0 0 19px}#printArea .print-entry{border-bottom:1px dashed #bbb;padding:13px 0;break-inside:avoid;font-size:14px}#printArea .print-entry .print-why{font-size:12px;color:#555;margin-top:8px}#printArea .answerkey{break-before:page}#printArea .answerkey h2{font-size:20px}#printArea ruby{ruby-position:over}#printArea rt{font-size:8px}}
+
+/* V4 supplementary offline styles */
+.think-card{margin-top:15px;border:2px solid #ffdf91;background:linear-gradient(155deg,#fffaf0,#fff2e7);border-radius:19px;padding:15px;color:#7e5422}.think-head{font-size:17px;font-weight:950;line-height:1.7;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px}.think-desc{font-size:15px;line-height:2;font-weight:850;margin:11px 0}.split-equation{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:21px}.split-equation input{background:#fff;border:2px solid #ecbf73;border-radius:14px;text-align:center;width:74px;height:58px;font-size:25px;font-weight:900;color:#614e38}.split-collection{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.split-collection span{border-radius:999px;background:white;border:1px solid #f9dba4;padding:8px 10px;font-weight:850;font-size:13px}.parent-area{border:1px dashed #ebb958;border-radius:14px;padding:11px;margin-top:13px;background:#fff9e9}.parent-area p{font-size:14px;line-height:1.85}.spoken-note,.dictation-input{display:block;width:100%;padding:12px;font-size:16px;border-radius:15px;border:2px solid #e1e6f4;background:#fff;min-height:55px;line-height:1.7}.spoken-note{resize:vertical;min-height:80px}.interact-zone{background:#f7f9ff;padding:13px;border-radius:18px;margin-bottom:10px}.order-tiles{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:15px 0}.order-tile,.order-picked{min-width:60px;min-height:59px;background:#fff;border:2px solid #b7caff;border-radius:15px;color:#4a64b0;font-size:24px;font-weight:950;display:inline-grid;place-items:center;padding:6px;touch-action:manipulation}.order-tile{cursor:grab}.order-picked{background:#dbf9e9;border-color:#81d8a1;color:#168255;min-height:46px;min-width:49px;margin:3px}.match-columns{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:10px 0}.match-columns>div{display:grid;gap:10px}.match-tile{border:2px solid #dce3f4;background:white;border-radius:15px;min-height:64px;padding:9px;font-size:19px;font-weight:850;color:#425a86;overflow-wrap:anywhere}.match-tile.active{border-color:#8a72df;background:#f0ebff}.match-tile.done{background:#e5faec;border-color:#9ee4b8}.dictation-input{font-size:23px;text-align:center;margin-bottom:13px}.petbox{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:11px;border:2px solid #e1d4ff;background:linear-gradient(140deg,#fff,#f6f0ff)}.pet-art{font-size:85px;text-align:center;line-height:1.5}.petbox .track{margin:8px 0}@media(max-width:355px){.petbox{grid-template-columns:75px 1fr}.pet-art{font-size:61px}.split-equation input{width:55px}}@media print{.think-card{border-color:#ddd;background:#fff}}
+</style>
+<link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" sizes="192x192">
+</head><body>
+<div class="shell mx-auto w-full">
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V4.3</span></div></div><div class="stat-pill" id="starTotal">⭐ 0</div></header>
+<nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
+<section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
+<div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
+<nav class="modebar" aria-label="功能导航"><button class="mode" data-view="home">🏠 今日任务</button><button class="mode active" data-view="practice">🧩 学习闯关</button><button class="mode" data-view="wrongbook">📔 错题复习</button><button class="mode" data-view="report">👨‍👩‍👧 家长中心</button></nav>
+<main id="app" aria-live="polite"></main><footer class="footer">🌿 每次约10分钟，适时休息 · 本地练习不上传数据；经家长开启的在线AI对话会向DeepSeek发送题目与提问 · 练习内容是原创知识主题练习，非官方逐页同步题库</footer>
+</div><div class="toast hidden" id="toast" role="status"></div><div class="voice-overlay hidden" id="voiceSettingsPanel" role="dialog" aria-modal="true" aria-labelledby="voiceSettingsTitle">
+<div class="voice-dialog">
+  <div class="voice-dialog-head"><div><div class="voice-dialog-kicker">🌷 陪伴孩子的声音</div><h2 id="voiceSettingsTitle">选择亲切的语音老师</h2></div><button type="button" class="voice-close" id="voiceCloseBtn" aria-label="关闭声音设置">✕</button></div>
+  <p class="voice-sub">孩子喜欢哪个声音，就让哪个声音陪他学习。可以先试听，再保存。</p>
+  <fieldset class="voice-styles"><legend>说话风格</legend>
+    <label class="voice-style"><input type="radio" name="voiceStyle" value="gentle"><span>🌸 <b>温柔老师</b><small>轻声鼓励 · 默认推荐</small></span></label>
+    <label class="voice-style"><input type="radio" name="voiceStyle" value="happy"><span>🌈 <b>活泼伙伴</b><small>开心明快 · 更有活力</small></span></label>
+    <label class="voice-style"><input type="radio" name="voiceStyle" value="slow"><span>🐢 <b>耐心慢读</b><small>更慢更清楚 · 适合初学</small></span></label>
+  </fieldset>
+  <label class="voice-select-label" for="voiceZhSelect">中文音色 <span>数学和语文用普通话</span></label>
+  <select id="voiceZhSelect" class="voice-select"></select>
+  <label class="voice-select-label" for="voiceEnSelect">英文音色 <span>英语题目独立发音</span></label>
+  <select id="voiceEnSelect" class="voice-select"></select>
+  <p id="voiceDeviceTip" class="voice-device-tip" role="status"></p>
+  <div class="voice-preview-buttons"><button id="previewZhBtn" type="button" class="voice-preview">🔊 试听中文鼓励</button><button id="previewEnBtn" type="button" class="voice-preview">🎧 试听英文发音</button></div>
+  <div class="voice-dialog-actions"><button id="voiceSaveBtn" type="button" class="voice-save">💛 保存喜欢的声音</button></div>
+  <p class="voice-footnote">提示：音色来自手机或电脑的语音包。设置会保存在当前浏览器；本地无对应语音包时，需要在设备设置中安装。联网的高自然度真人声音需要额外语音服务。</p>
+</div></div>
+<button type="button" id="aiTeacherFab" class="ai-fab" aria-haspopup="dialog" aria-controls="aiTutorOverlay">🤖 问问 AI 老师</button>
+<div class="ai-overlay hidden" id="aiTutorOverlay">
+<section class="ai-panel" role="dialog" aria-modal="true" aria-labelledby="aiTutorTitle">
+ <header class="ai-top"><div><div class="ai-title" id="aiTutorTitle">🌷 星星 AI 老师</div><div class="ai-sub">先引导，再讲解 · 不替孩子直接答题</div></div><button class="ai-x" id="aiTutorClose" aria-label="关闭AI老师" type="button">×</button></header>
+ <div id="aiTutorContext" class="ai-context">📘 正在查看当前学习题目</div>
+ <div id="aiTutorStatus" class="ai-status" role="status">正在确认连接状态…</div>
+ <div id="aiTutorMessages" class="ai-chat" aria-live="polite" aria-label="AI老师聊天记录"></div>
+ <div class="ai-choices"><button type="button" class="ai-quick" data-ai-prompt="老师，给我一个小提示，不要直接告诉我答案。">💡 给我一个提示</button><button type="button" class="ai-quick" data-ai-prompt="我想讲讲我的思路，请问我一个问题。">🎤 我来讲思路</button><button type="button" class="ai-quick" data-ai-prompt="你能用更简单的办法讲一讲吗？">🌱 讲得简单些</button><button type="button" class="ai-quick" data-ai-prompt="你能用生活里的例子引导我吗？">🍎 举个生活例子</button></div>
+ <div class="ai-footer">
+  <label class="ai-consent"><input type="checkbox" id="aiParentConsent"/><span>由家长决定是否启用联网对话。勾选后，当前题目和孩子输入的文字将发送给 DeepSeek 处理；不要输入姓名、住址、电话或其他隐私信息。</span></label>
+  <form id="aiTutorForm" class="ai-compose"><input id="aiTutorInput" class="ai-input" maxlength="160" autocomplete="off" aria-label="向星星AI老师提问" placeholder="告诉老师，你卡在哪一步？"/><button type="button" class="ai-mic" id="aiTutorMic" aria-label="按住或点击语音输入" title="点击说话，转成文字后再发送">🎤</button><button class="ai-send" id="aiTutorSend" type="submit">发送</button></form>
+  <div class="ai-note">手机连接云端服务器后可使用 DeepSeek；离线时只提供本地提示。AI 回答可能出错，请家长核对；对话不保存到学习档案；语音输入可能使用浏览器提供的在线识别服务。</div>
+ </div>
+</section></div>
+<div id="printArea"></div>
+<script>
+'use strict';
+const PY={};
+`高:gāo 阳:yáng 县:xiàn 西:xī 街:jiē 小:xiǎo 学:xué 一:yī 年:nián 级:jí 趣:qù 味:wèi 同:tóng 步:bù 练:liàn 习:xí 与:yǔ 闯:chuǎng 关:guān 乐:lè 园:yuán 星:xīng 数:shù 语:yǔ 文:wén 英:yīng 选:xuǎn 择:zé 对:duì 应:yìng 科:kē 目:mù 今:jīn 天:tiān 开:kāi 始:shǐ 吧:ba 欢:huān 迎:yíng 来:lái 到:dào 探:tàn 险:xiǎn 家:jiā 收:shōu 集:jí 金:jīn 完:wán 成:chéng 挑:tiǎo 战:zhàn 得:dé 更:gèng 多:duō 加:jiā 减:jiǎn 法:fǎ 口:kǒu 算:suàn 比:bǐ 大:dà 谁:shuí 是:shì 高:gāo 手:shǒu 看:kàn 图:tú 答:dá 题:tí 第:dì 轮:lún 道:dào 每:měi 次:cì 都:dōu 有:yǒu 进:jìn 步:bù 共:gòng 计:jì 分:fēn 提:tí 示:shì 请:qǐng 点:diǎn 击:jī 输:shū 入:rù 确:què 定:dìng 删:shān 除:chú 下:xià 个:gè 继:jì 续:xù 再:zài 试:shì 太:tài 棒:bàng 啦:la 正:zhèng 确:què 哦:ó 没:méi 关:guān 系:xì 想:xiǎng 你:nǐ 能:néng 用:yòng 两:liǎng 种:zhǒng 方:fāng 说:shuō 出:chū 为:wèi 什:shén 么:me 还:hái 可:kě 以:yǐ 找:zhǎo 身:shēn 边:biān 其:qí 他:tā 东:dōng 西:xī 吗:ma 几:jǐ 等:děng 于:yú 哪:nǎ 少:shǎo 只:zhī 盒:hé 子:zi 里:lǐ 原:yuán 本:běn 放:fàng 进:jìn 拿:ná 走:zǒu 剩:shèng 苹:píng 果:guǒ 鸟:niǎo 朵:duǒ 花:huā 颗:kē 糖:táng 铅:qiān 笔:bǐ 买:mǎi 书:shū 猫:māo 狗:gǒu 拼:pīn 音:yīn 认:rèn 读:dú 声:shēng 母:mǔ 韵:yùn 调:diào 汉:hàn 字:zì 词:cí 组:zǔ 连:lián 线:xiàn 找:zhǎo 相:xiāng 的:de 听:tīng 发:fā 眼:yǎn 睛:jīng 仔:zǐ 细:xì 观:guān 察:chá 跟:gēn 着:zhe 森:sēn 林:lín 城:chéng 堡:bǎo 山:shān 谷:gǔ 写:xiě 桥:qiáo 梁:liáng 终:zhōng 极:jí 地:dì 图:tú 奖:jiǎng 杯:bēi 解:jiě 锁:suǒ 已:yǐ 通:tōng 过:guò 未:wèi 开:kāi 进:jìn 入:rù 重:chóng 新:xīn 回:huí 选:xuǎn 听:tīng 看:kàn 单:dān 词:cí 补:bǔ 全:quán 缺:quē 失:shī 不:bù 见:jiàn 显:xiǎn 示:shì 这:zhè 首:shǒu 先:xiān 然:rán 后:hòu 动:dòng 脑:nǎo 时:shí 刻:kè 美:měi 式:shì 思:sī 维:wéi 标:biāo 准:zhǔn 案:àn 画:huà 自:zì 己:jǐ 解:jiě 释:shì 理:lǐ 由:yóu 推:tuī 改:gǎi 变:biàn 会:huì 怎:zěn 样:yàng 恭:gōng 喜:xǐ 获:huò 枚:méi 三:sān 星:xīng 休:xiū 息:xī 注:zhù 意:yì 保:bǎo 护:hù 十:shí 五:wǔ 钟:zhōng 歇:xiē 儿:ér 错:cuò 了:le 来:lái 手:shǒu 指:zhǐ 凑:còu 十:shí 把:bǎ 问:wèn 讲:jiǎng 给:gěi 爸:bà 妈:mā 游:yóu 戏:xì 任:rèn 务:wù 存:cún 在:zài 台:tái 设:shè 备:bèi 浏:liú 览:lǎn 器:qì 全:quán 部:bù 才:cái 前:qián 往:wǎng 早:zǎo 上:shàng 晚:wǎn 好:hǎo 日:rì 月:yuè 水:shuǐ 火:huǒ 土:tǔ 石:shí 人:rén 女:nǚ 口:kǒu 耳:ěr 足:zú 云:yún 雨:yǔ 马:mǎ 木:mù 田:tián 米:mǐ 去:qù 和:hé 起:qǐ 还:hái 办:bàn 做:zuò 较:jiào 现:xiàn 规:guī 律:lǜ 尝:cháng 试:shì 校:xiào 教:jiào 材:cái 基:jī 础:chǔ 知:zhī 心:xīn 验:yàn 证:zhèng 如:rú 暂:zàn 无:wú 扬:yáng 系:xì 统:tǒng 四:sì 摆:bǎi 明:míng 七:qī 从:cóng 九:jiǔ 倒:dào 面:miàn 掉:diào 六:liù 另:lìng 也:yě 圈:quān 结:jié 划:huà 八:bā 二:èr 特:tè 别:bié 符:fú 号:hào 排:pái 位:wèi 置:zhì 候:hòu 该:gāi 换:huàn 又:yòu 编:biān 故:gù 事:shì 要:yào 树:shù 飞:fēi 接:jiē 所:suǒ 支:zhī 容:róng 易:yì 检:jiǎn 查:chá 左:zuǒ 真:zhēn 像:xiàng 形:xíng 状:zhuàng 晴:qíng 些:xiē 属:shǔ 玻:bō 啊:a 亮:liàng 情:qíng 生:shēng 活:huó 中:zhōng 头:tóu 感:gǎn 世:shì 界:jiè 途:tú 我:wǒ 们:men 物:wù 长:cháng 臂:bì 名:míng 食:shí 话:huà 落:luò 化:huà 片:piàn 牛:niú 奶:nǎi 鱼:yú 运:yùn 件:jiàn 红:hóng 色:sè 品:pǐn 填:tián 句:jù 制:zhì 作:zuò 力:lì 香:xiāng 蕉:jiāo 叫:jiào 条:tiáo 象:xiàng 旋:xuán 转:zhuǎn 之:zhī 颜:yán 聪:cōng 勇:yǒng 敢:gǎn 让:ràng 好:hǎo 知:zhī 博:bó 士:shì 越:yuè 感:gǎn 于:yú 互:hù 享:xiǎng 含:hán 义:yì 录:lù 示:shì 建:jiàn 议:yì 取:qǔ 释:shì
+年:nián 册:cè 上:shàng 下:xià 自:zì 由:yóu 切:qiē 错:cuò 题:tí 本:běn 打:dǎ 印:yìn 订:dìng 改:gǎi 次:cì 错:cuò 答:dá 题:tí 时:shí 间:jiān 前:qián 看:kàn 讲:jiǎng 解:jiě 发:fā 音:yīn 朗:lǎng 正:zhèng 误:wù 清:qīng 空:kōng 本:běn 学:xué 册:cè 库:kù 随:suí 机:jī 知:zhī 识:shi 点:diǎn 测:cè 验:yàn 复:fù 页:yè 面:miàn 家:jiā 规:guī 则:zé 解:jiě 析:xī 存:cún 档:dàng 奖:jiǎng 励:lì 自:zì 动:dòng 播:bō 报:bào 关:guān 闭:bì 开:kāi 启:qǐ 内:nèi 容:róng 分:fēn 别:bié 单:dān 独:dú 返:fǎn 程:chéng 度:dù 课:kè 堂:táng 适:shì 合:hé 方:fā 法:fǎ 观:guān 察:chá 想:xiǎng 法:fǎ 还:hái 原:yuán 字:zì 暂:zàn 停:tíng 标:biāo 记:jì 练:liàn 习:xí
+字:zì 母:mǔ 主:zhǔ 题:tí 身:shēn 体:tǐ 家:jiā 庭:tíng 校:xiào 园:yuán 动:dòng 物:wù 植:zhí 物:wù 节:jié 日:rì 天:tiān 气:qì 工:gōng 具:jù 地:dì 点:diǎn 职:zhí 业:yè 心:xīn 情:qíng 兴:xìng 趣:qù 句:jù 型:xíng 短:duǎn 语:yǔ 听:tīng 力:lì 意:yì 义:yì 理:lǐ 挑:tiǎo 战:zhàn 成:chéng 绩:jì 仍:réng 然:rán 需:xū 努:nǔ 力:lì 亲:qīn 口:kǒu 说:shuō 思:sī 考:kǎo 追:zhuī 问:wèn 证:zhèng 据:jù 你:nǐ 值:zhí 得:de 表:biǎo 扬:yáng 更:gèng 有:yǒu 创:chuàng 意:yì 保:bǎo 持:chí
+`.trim().split(/\s+/).forEach(x=>{const p=x.indexOf(':');if(p>0)PY[x.slice(0,p)]=x.slice(p+1);});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ruby=s=>Array.from(String(s)).map((ch,i,a)=>{let p=ch==='数'?(a[i+1]==='学'||a[i+1]==='字'?'shù':'shǔ'):PY[ch];return p?`<ruby>${esc(ch)}<rt>${p}</rt></ruby>`:esc(ch);}).join('');
+const $=s=>document.querySelector(s);
+const randint=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const shuffle=a=>{const x=a.slice();for(let i=x.length-1;i>0;i--){const j=randint(0,i);[x[i],x[j]]=[x[j],x[i]];}return x;};
+const sample=(a,n)=>shuffle(a).slice(0,n);
+const num=n=>Number(Number(n).toFixed(3)).toString();
+const TERM_LABEL=['上册','下册'];
+const CN_NUM=['零','一','二','三','四','五','六','七','八','九'];
+function chineseNum(n){if(!Number.isFinite(n))return String(n);if(n<0)return '负'+chineseNum(-n);if(!Number.isInteger(n))return chineseNum(Math.trunc(n))+'点'+String(n).split('.')[1].split('').map(x=>CN_NUM[Number(x)]).join('');if(n<10)return CN_NUM[n];if(n>=100000000)return n.toString();const units=['','十','百','千','万','十万','百万','千万'];let x=String(n),out='',zero=false;for(let i=0;i<x.length;i++){let digit=Number(x[i]),place=x.length-i-1;if(digit===0){zero=out!=='';continue;}if(zero){out+='零';zero=false;}if(!(digit===1&&place===1&&out===''))out+=CN_NUM[digit];out+=units[place];}return out;}
+function spokenMath(face){return String(face).replace(/(\d+)\/(\d+)/g,(_,a,b)=>chineseNum(Number(b))+'分之'+chineseNum(Number(a))).replace(/(\d+(?:\.\d+)?)%/g,(_,a)=>'百分之'+chineseNum(Number(a))).replace(/\d+(?:\.\d+)?/g,x=>chineseNum(Number(x))).replace(/\+/g,'加').replace(/-/g,'减').replace(/×|\*/g,'乘以').replace(/÷/g,'除以').replace(/=/g,'等于').replace(/□/g,'方框').replace(/\?/g,'几').replace(/>/g,'大于').replace(/</g,'小于').replace(/%/g,'百分之').replace(/π/g,'圆周率');}
+
+// -------- 数学：十二个学期按知识点随机组题。题目和结果均由内置算法生成 --------
+function mathTopics(g,t){return [
+ [['10以内加减','20以内计算','比较大小','生活应用'],['100以内计算','进位退位','比较大小','生活应用']],
+ [['100以内加减','表内乘法','比较大小','生活应用'],['表内除法','乘除应用','长度和时间','综合运算']],
+ [['三位数计算','一位数乘法','周长','比较大小'],['两位数乘法','简单除法','分数初步','周长应用']],
+ [['大数运算','两位数乘法','数的比较','应用问题'],['小数加减','四则混合','单位换算','应用问题']],
+ [['小数计算','倍数与因数','面积','应用问题'],['分数计算','体积','分数意义','应用问题']],
+ [['分数乘法','百分数','比的认识','圆的周长'],['比例','折扣与百分数','一元方程','圆柱体积']]
+ ][g-1][t-1];}
+function mathQuestion(g,t,preferred=-1,difficulty="mid"){const topics=mathTopics(g,t),pick=preferred>=0?preferred:randint(0,3),topic=topics[pick];let a,b,c,face,answer,explain,why,tip,kind='numeric',options=null,ask=`${topic}：算一算。`;
+ const set=(f,v,e,w,ti)=>{face=f;answer=String(v);explain=e;why=w;tip=ti||'可以画图、列竖式或换一种方法思考。';};
+ const comp=(x,y)=>{kind='choice';options=['<','=','>'];set(`${x} □ ${y}`,x<y?'<':x>y?'>':'=','先算出或比较左右两边的大小。','你能说出为什么选这个符号吗？');ask='比较大小：选出合适的符号。';};
+ if(g===1){const cap=t===1?(pick===0?10:difficulty==="low"?10:20):(difficulty==="low"?20:100); if(pick===2){a=randint(0,cap);b=randint(0,cap);comp(a,b);}else{a=randint(t===1?0:10,cap);b=randint(1,t===1?10:40);const plus=pick!==1||Math.random()<.42;if(plus){if(a+b>cap){a=randint(0,cap-b);}set(`${a} + ${b} = ?`,a+b,`${chineseNum(a)}加${chineseNum(b)}等于${chineseNum(a+b)}。先算一部分，再算另一部分。`,'你能画小圆点，演示把两部分合起来吗？','加法就是把数量合在一起。');}else{if(b>a)[a,b]=[b,a];set(`${a} - ${b} = ?`,a-b,`${chineseNum(a)}减${chineseNum(b)}等于${chineseNum(a-b)}。可以倒过来用加法检查。`,'你能用实物摆一摆，解释拿走后还剩多少吗？','减法可以理解为从原有数量中拿走一些。');}if(pick===3){ask=`有${chineseNum(a)}颗糖，${plus?'又得到'+chineseNum(b):'送给朋友'+chineseNum(b)}颗，现在有多少颗？`;if(!plus&&a<b){ask=`有${chineseNum(Math.max(a,b))}颗糖，送给朋友${chineseNum(Math.min(a,b))}颗，还剩多少颗？`;}}}}
+ else if(g===2){if(pick===0){a=randint(12,90);b=randint(5,99-a);set(`${a} + ${b} = ?`,a+b,`个位先加，满十向十位进一，答案是${a+b}。`,'你能用十根一捆的小棒解释进位吗？');}
+ else if(pick===1||pick===3){a=randint(t===1?2:3,9);b=randint(t===1?2:2,9);if(t===1){set(`${a} × ${b} = ?`,a*b,`${a}个${b}相加等于${a*b}。`,'怎样用加法解释这道乘法算式？');}else{set(`${a*b} ÷ ${a} = ?`,b,`${a*b}平均分成${a}份，每份${b}。`,'能用分糖果的方法解释平均分吗？');}}
+ else{if(t===1){a=randint(30,99);b=randint(10,a);set(`${a} - ${b} = ?`,a-b,`竖式要相同数位对齐，结果是${a-b}。`,'为什么计算减法需要先对齐数位？');}else{a=randint(1,10);b=randint(2,9);set(`${a*b} ÷ ${b} = ?`,a,`${a*b}除以${b}得到${a}。`,'你还会用乘法验证吗？');}}}
+ else if(g===3){if(pick===0){a=randint(125,850);b=randint(25,950-a);set(`${a} + ${b} = ?`,a+b,`数位对齐，按个位、十位、百位计算，结果${a+b}。`,'除了竖式，你能用分拆数字的方法计算吗？');}
+ else if(pick===1){a=randint(t===1?21:12, t===1?180:65);b=randint(t===1?2:11,t===1?8:29);set(`${a} × ${b} = ?`,a*b,`可以用竖式或分配律计算，答案是${a*b}。`,'怎样拆分其中一个数，让乘法更容易算？');}
+ else if(pick===2){kind='choice';a=randint(1,6);b=randint(a+1,10);if(t===2){set(`1/${a+1} □ 1/${b+1}`,'>','分子同为一，分母越小，分数反而越大。','你能把同样大的饼分开，证明结论吗？');options=['<','=','>'];}else{kind='numeric';a=randint(2,13);b=randint(2,13);set(`长 ${a} 厘米，宽 ${b} 厘米`,2*(a+b),`长方形周长＝（长＋宽）×2，答案${2*(a+b)}厘米。`,'请画一画，说明为什么要乘二。');ask='求长方形的周长（厘米）。';}}
+ else {a=randint(150,900);b=randint(25,a);set(`${a} - ${b} = ?`,a-b,`按数位减法计算，答案${a-b}。`,'你能估算一下结果是否合理吗？');}}
+ else if(g===4){if(t===1){if(pick===1){a=randint(115,998);b=randint(12,29);set(`${a} × ${b} = ?`,a*b,`用分配律把${b}拆开，答案是${a*b}。`,'为什么分拆乘数也不会改变结果？');}else if(pick===2){comp(randint(10000,99999),randint(10000,99999));}else{a=randint(10000,80000);b=randint(1000,9999);set(`${a} ${pick===0?'+':'-'} ${b} = ?`,pick===0?a+b:a-b,`相同数位对齐，答案${pick===0?a+b:a-b}。`,'可以怎样用估算判断答案对不对？');}}else{if(pick===0){a=randint(50,199);b=randint(10,95);set(`${num(a/10)} + ${num(b/10)} = ?`,num((a+b)/10),`小数点对齐计算，结果是${num((a+b)/10)}。`,'能用元和角来解释小数加法吗？');}else if(pick===1){a=randint(3,20);b=randint(2,12);c=randint(1,5);set(`(${a} + ${b}) × ${c} = ?`,(a+b)*c,`先算括号里的${a+b}，再乘${c}，结果${(a+b)*c}。`,'为什么要先算括号里的内容？');}else if(pick===2){a=randint(2,95);set(`${a} 米 = ? 厘米`,a*100,`一米等于一百厘米，所以${a}米等于${a*100}厘米。`,'还知道哪些长度单位之间的关系？');}else{a=randint(20,80);b=randint(10,60);set(`${num(a/10)} - ${num(b/10)} = ?`,num(Math.abs(a-b)/10),`注意把较大的数减去较小的数，答案是${num(Math.abs(a-b)/10)}。`,'为什么小数减法也要对齐小数点？');if(a<b)face=`${num(b/10)} - ${num(a/10)} = ?`;}}}
+ else if(g===5){if(t===1){if(pick===0){a=randint(12,95);b=randint(2,18);set(`${num(a/10)} × ${b} = ?`,num(a*b/10),`先按整数相乘，再调整小数点，结果${num(a*b/10)}。`,'乘十后再除以十的方法，为什么行得通？');}else if(pick===1){a=randint(2,12);b=randint(2,12);kind='choice';let yes=a*b;options=shuffle([String(yes),String(yes+1),String(yes+2)]);set(`${yes} 是 ${a} 的几倍？`,b,`${yes}除以${a}等于${b}。`,'你能解释倍数与乘法的关系吗？');kind='numeric';}else if(pick===2){a=randint(3,15);b=randint(2,9);set(`长 ${a} cm，宽 ${b} cm，面积 = ?`,a*b,`长方形面积＝长×宽，所以是${a*b}平方厘米。`,'你能用方格纸解释面积公式吗？');}else{b=randint(2,7);a=b*randint(5,28);set(`${num(a/10)} ÷ ${b} = ?`,num(a/10/b),`小数除法先按位计算，结果${num(a/10/b)}。`,'用乘法检查除法的结果吧。');}}
+ else{if(pick===0){a=randint(1,5);b=randint(1,5);c=randint(Math.max(a,b)+1,10);set(`${a}/${c} + ${b}/${c} = ?`,`${a+b}/${c}`,`同分母分数相加，分母不变，分子相加，答案${a+b}/${c}。`,'为什么分母不变？能画图说明吗？');kind='choice';options=shuffle([`${a+b}/${c}`,`${a+b}/${c+1}`,`${Math.abs(a-b)||1}/${c}`]);}
+ else if(pick===1){a=randint(2,10);b=randint(2,7);c=randint(2,5);set(`长 ${a} × 宽 ${b} × 高 ${c}`,a*b*c,`长方体体积＝长×宽×高，结果${a*b*c}立方单位。`,'可以用小方块搭一搭体积吗？');ask='求长方体体积（立方单位）。';}
+ else if(pick===2){a=randint(1,5);b=randint(a+1,9);kind='choice';set(`${a}/${b} □ ${a}/${b}`, '=','相同的两个分数一定相等。','你能构造两个不同写法但相等的分数吗？');options=['<','=','>'];}
+ else{a=randint(2,8);b=randint(a+1,10);set(`${b}/${b} - ${a}/${b} = ?`,`${b-a}/${b}`,`同分母相减，分母不变，分子相减。`,'可以用蛋糕切片解释吗？');kind='choice';options=shuffle([`${b-a}/${b}`,`${b-a}/${b+1}`,`${a}/${b}`]);}}}
+ else{if(t===1){if(pick===0){a=randint(1,7);b=randint(a+1,12);c=randint(2,8);set(`${a}/${b} × ${c} = ?`,`${a*c}/${b}`,`分子乘${c}，分母不变，得到${a*c}/${b}（可进一步约分）。`,'能用画图解释分数乘整数的含义吗？');kind='choice';options=shuffle([`${a*c}/${b}`,`${a+c}/${b}`,`${a*c}/${b+c}`]);}
+ else if(pick===1){a=randint(1,8)*5;b=randint(2,10)*10;set(`${b} 的 ${a}% = ?`,num(b*a/100),`百分之${chineseNum(a)}就是${a}/100，所以答案${num(b*a/100)}。`,'可以用百格图解释百分数吗？');}
+ else if(pick===2){a=randint(2,9);b=randint(2,9);set(`${a} : ${b} = ? : ${b*2}`,a*2,`前项后项同时乘二，比值不变，所以填${a*2}。`,'比和分数有什么联系？');}
+ else{a=randint(2,12);set(`半径 ${a} cm，圆周长 = ?`,num(2*3.14*a),`圆的周长＝2×3.14×半径，结果是${num(2*3.14*a)}厘米。`,'周长和半径之间有什么关系？');ask='圆周率按 3.14 计算（厘米）。';}}
+ else{if(pick===0){a=randint(2,9);b=randint(2,8);c=randint(2,6);set(`${a} : ${b} = ${a*c} : ?`,b*c,`比的前项乘${c}，后项也要乘${c}。`,'为什么比的两项都要按相同比例变化？');}
+ else if(pick===1){a=randint(2,9)*10;b=randint(5,30);set(`原价 ${a} 元，优惠 ${b}%，省 ? 元`,num(a*b/100),`减免${b}%就是原价乘${b}/100，省${num(a*b/100)}元。`,'打折一定更划算吗？请解释理由。');ask='计算减少的钱数（元）。';}
+ else if(pick===2){a=randint(2,9);b=randint(3,30);c=randint(2,10);set(`${a} × x + ${b} = ${a*c+b}，x = ?`,c,`先减去${b}，再除以${a}，得到 x=${c}。`,'用代入的方法验证方程吧。');}
+ else{a=randint(2,8);b=randint(2,10);set(`圆柱半径 ${a}，高 ${b}，体积 = ?`,num(3.14*a*a*b),`体积＝3.14×半径²×高，结果${num(3.14*a*a*b)}。`,'圆柱与长方体的体积公式有什么共同点？');ask='按 π=3.14 计算（立方单位）。';}}}
+ if(kind==='choice'&&options){options=Array.from(new Set(options));if(!options.includes(answer))options.unshift(answer);if(options.length<3)options.push('无法确定');options=shuffle(options);}
+ const q={subject:'math',g,t,unit:pick,topic,kind,face,ask,answer,options,explain,why,tip,voiceZh:`${ask} ${spokenMath(face)}。请认真思考。`};q.id=`math-${g}-${t}-${face}-${ask}`;return q;
+}
+
+// -------- 语文：每学期不同的识字、拼音、词语/理解素材，动态组合不同题型 --------
+// 每一项依次为 汉字或词语、拼音、图标、释义/示例。
+const CHINESE_DATA={
+ '1-1':`山|shān|⛰️|高高的山;水|shuǐ|💧|清清的水;火|huǒ|🔥|燃烧的火;日|rì|☀️|太阳;月|yuè|🌙|月亮;田|tián|🌾|田地;木|mù|🌳|树木;口|kǒu|👄|嘴巴;耳|ěr|👂|耳朵;手|shǒu|✋|手掌;足|zú|🦶|脚;雨|yǔ|🌧️|下雨;云|yún|☁️|云朵;马|mǎ|🐴|小马;鸟|niǎo|🐦|小鸟;石|shí|🪨|石头;花|huā|🌷|花朵;人|rén|🧍|人类;大|dà|🐘|大;小|xiǎo|🐜|小`,
+ '1-2':`春|chūn|🌸|春天;夏|xià|☀️|夏天;秋|qiū|🍁|秋天;冬|dōng|❄️|冬天;风|fēng|🌬️|风;雪|xuě|⛄|雪花;草|cǎo|🌿|小草;河|hé|🏞️|河水;海|hǎi|🌊|大海;桥|qiáo|🌉|桥梁;星|xīng|⭐|星星;光|guāng|✨|光芒;船|chuán|⛵|小船;鱼|yú|🐟|小鱼;羊|yáng|🐑|小羊;牛|niú|🐮|小牛;跑|pǎo|🏃|跑步;跳|tiào|🤸|跳跃;看|kàn|👀|看见;听|tīng|👂|听见`,
+ '2-1':`校园|xiào yuán|🏫|学校里;知识|zhī shi|📚|学习所得;朋友|péng you|🤝|伙伴;仔细|zǐ xì|🔍|认真;欢笑|huān xiào|😄|高兴地笑;美丽|měi lì|🌺|漂亮;温暖|wēn nuǎn|🌞|暖和;勇敢|yǒng gǎn|🦸|不害怕;森林|sēn lín|🌲|树木茂密的地方;公园|gōng yuán|🌳|游玩的地方;农田|nóng tián|🌾|种庄稼的地方;城市|chéng shì|🏙️|人口集中的地方;海洋|hǎi yáng|🌊|大片海水;故事|gù shi|📖|事情的经过;认真|rèn zhēn|✏️|专心;快乐|kuài lè|😊|开心`,
+ '2-2':`旅行|lǚ xíng|🧳|外出游览;幸福|xìng fú|❤️|美好生活;发现|fā xiàn|🔎|找到新事物;秘密|mì mì|🤫|不公开的事;帮助|bāng zhù|🤝|提供支持;礼貌|lǐ mào|🙇|尊重他人;合作|hé zuò|🧩|一起做事;保护|bǎo hù|🛡️|防止伤害;观察|guān chá|👀|仔细地看;创造|chuàng zào|💡|做出新事物;晴朗|qíng lǎng|🌞|没有云雨;安静|ān jìng|🤫|声音很小;热闹|rè nao|🎉|很有生气;整理|zhěng lǐ|🧹|收拾有序;实验|shí yàn|🔬|动手验证;变化|biàn huà|🦋|发生改变`,
+ '3-1':`缤纷|bīn fēn|🌈|色彩丰富;朗读|lǎng dú|📖|出声读;理解|lǐ jiě|💭|弄明白意思;描写|miáo xiě|✍️|用文字表现;细节|xì jié|🔍|很小的部分;勤奋|qín fèn|💪|努力学习;倾听|qīng tīng|👂|认真听;诚实|chéng shí|🤝|不说谎;观察|guān chá|🧪|细看事物;赞美|zàn měi|👏|表扬;欣赏|xīn shǎng|🌸|喜欢并品味;愉快|yú kuài|😊|心情快乐;热烈|rè liè|🎊|气氛强烈;勇气|yǒng qì|🦁|敢于行动;耐心|nài xīn|⏳|不急躁;神奇|shén qí|✨|奇妙`,
+ '3-2':`寓言|yù yán|📜|有道理的故事;推测|tuī cè|🤔|根据线索猜想;证据|zhèng jù|🔍|支持结论的事实;比较|bǐ jiào|⚖️|找相同不同;改进|gǎi jìn|🛠️|变得更好;精彩|jīng cǎi|✨|表现出色;贡献|gòng xiàn|🤲|付出的作用;责任|zé rèn|🫶|该承担的事;独立|dú lì|🧍|自己完成;欣慰|xīn wèi|💛|满意放心;探索|tàn suǒ|🧭|努力发现;珍惜|zhēn xī|💎|爱护重视;节约|jié yuē|💧|减少浪费;请求|qǐng qiú|🙋|提出希望;秩序|zhì xù|📏|有规律的安排;丰富|fēng fù|🎨|种类多`,
+ '4-1':`宽阔|kuān kuò|🏞️|面积很大;细腻|xì nì|🎨|精细柔和;观察|guān chá|🔍|有目的地看;想象|xiǎng xiàng|☁️|脑中创造画面;坚持|jiān chí|🏃|不中途放弃;质疑|zhì yí|❓|提出疑问;论证|lùn zhèng|🧠|用理由证明;描绘|miáo huì|🖌️|描写画出;传说|chuán shuō|📚|流传的故事;庄严|zhuāng yán|🏛️|郑重严肃;宁静|níng jìng|🌙|安静平和;稀疏|xī shū|🍃|数量少且分散;密集|mì jí|🌳|聚在一起;准确|zhǔn què|🎯|没有差错;敏锐|mǐn ruì|👀|反应灵敏;敬佩|jìng pèi|🌟|尊敬佩服`,
+ '4-2':`琥珀|hǔ pò|🟠|古代树脂化石;繁衍|fán yǎn|🌱|生长繁殖;推理|tuī lǐ|🧩|根据线索思考;语境|yǔ jìng|🗣️|语言所处的环境;修辞|xiū cí|✍️|让表达更生动;关联|guān lián|🔗|相互有联系;自豪|zì háo|🏅|因优点而骄傲;激励|jī lì|🚀|鼓励前进;灵感|líng gǎn|💡|突然出现的好想法;追溯|zhuī sù|🔙|向过去寻找;沉默|chén mò|🤐|不说话;惊叹|jīng tàn|😲|十分赞叹;沉着|chén zhuó|🧘|冷静;明晰|míng xī|🔎|清楚;辨别|biàn bié|⚖️|区分;勇于|yǒng yú|💪|敢于`,
+ '5-1':`协调|xié tiáo|🤝|配合一致;隐蔽|yǐn bì|🌿|不容易发现;启迪|qǐ dí|💡|得到启发;思辨|sī biàn|🧠|思考与辨析;意境|yì jìng|🎨|作品的氛围;精炼|jīng liàn|✍️|简明有力;繁琐|fán suǒ|📚|复杂麻烦;启示|qǐ shì|🔦|得到的道理;斟酌|zhēn zhuó|🤔|仔细考虑;敏捷|mǐn jié|⚡|反应快;坚持|jiān chí|🧗|不放弃;对比|duì bǐ|⚖️|找差异;抒情|shū qíng|💗|表达情感;说明|shuō míng|📋|解释清楚;质朴|zhì pǔ|🌾|朴实;真挚|zhēn zhì|❤️|真诚`,
+ '5-2':`慈祥|cí xiáng|👵|温和慈爱;胸怀|xiōng huái|❤️|心里的志向;沉思|chén sī|🤔|深入思考;酝酿|yùn niàng|🧪|逐步准备;探究|tàn jiū|🔬|深入研究;论点|lùn diǎn|📌|表达的主张;论据|lùn jù|📊|支持论点的材料;概括|gài kuò|📝|归纳重点;层次|céng cì|🪜|不同的等级;严谨|yán jǐn|📐|严密认真;崇高|chóng gāo|⛰️|高尚;坚韧|jiān rèn|🌳|坚强不屈;谦逊|qiān xùn|🌿|不骄傲;贡献|gòng xiàn|🤲|给予帮助;证实|zhèng shí|✅|用证据确定;创新|chuàng xīn|💡|新的创造`,
+ '6-1':`凝视|níng shì|👀|专注地看;澎湃|péng pài|🌊|声势浩大;娴熟|xián shú|🛠️|熟练;苍穹|cāng qióng|🌌|天空;惆怅|chóu chàng|🌧️|失落;辩论|biàn lùn|🗣️|互相论述;观点|guān diǎn|💭|看法;推断|tuī duàn|🔍|推理判断;表达|biǎo dá|✍️|说出意思;象征|xiàng zhēng|🕊️|代表意义;反驳|fǎn bó|🙅|提出不同证据;严肃|yán sù|🏛️|认真庄重;缜密|zhěn mì|🧠|周到严密;深邃|shēn suì|🌌|深奥;启发|qǐ fā|💡|引起新想法;提炼|tí liàn|📝|提取精华`,
+ '6-2':`眷恋|juàn liàn|🏡|深切留恋;憧憬|chōng jǐng|🌈|向往未来;锲而不舍|qiè ér bù shě|💪|坚持不懈;批判|pī pàn|⚖️|分析与评判;论述|lùn shù|✍️|说明道理;证据|zhèng jù|🔎|证明的事实;归纳|guī nà|🗂️|总结规律;演绎|yǎn yì|🧠|由一般推特殊;借鉴|jiè jiàn|📖|参考经验;谦逊|qiān xùn|🙏|不骄傲;质疑|zhì yí|❓|提出疑问;创新|chuàng xīn|💡|新的做法;论证|lùn zhèng|✅|用论据证明;衔接|xián jiē|🔗|连接;反思|fǎn sī|🪞|回顾思考;实践|shí jiàn|🛠️|实际行动`
+};
+const CHINESE_PHONEMES=['b|声母|玻','p|声母|坡','m|声母|摸','f|声母|佛','d|声母|得','t|声母|特','n|声母|讷','l|声母|勒','g|声母|哥','k|声母|科','h|声母|喝','j|声母|基','q|声母|欺','x|声母|希','zh|声母|知','ch|声母|吃','sh|声母|诗','r|声母|日','a|韵母|啊','o|韵母|喔','e|韵母|鹅','i|韵母|衣','u|韵母|乌','ü|韵母|迂','ai|韵母|哀','ei|韵母|诶','ao|韵母|凹','ou|韵母|欧'].map(x=>x.split('|'));
+function getChineseWords(g,t){return CHINESE_DATA[`${g}-${t}`].split(';').map((x,i)=>{const [han,pinyin,icon,meaning]=x.split('|');return {han,pinyin,icon,meaning,i};});}
+const CHINESE_EXTRA={
+ '2-1':[{face:'他把书放得很整齐。',ask:'这句话中，哪一个词可以说明做事有条理？',answer:'整齐',options:['很','整齐','书'],explain:'整齐表示有次序、不杂乱。',why:'你能说说整理书包的好方法吗？'}],
+ '3-2':[{face:'乌云越来越厚，路上的人开始撑伞。',ask:'根据这句话推测天气将怎样？',answer:'可能要下雨',options:['可能要下雨','一定下雪','太阳更亮'],explain:'乌云变厚和撑伞都是可能下雨的线索，但还不能说百分百确定。',why:'这句话有哪些证据支持你的推测？'}],
+ '4-1':[{face:'小溪唱着歌奔向远方。',ask:'这句话用了什么修辞方法？',answer:'拟人',options:['拟人','列数字','设问'],explain:'小溪不会真的唱歌，作者把它写得像人一样。',why:'你还能让风或雨也像人一样行动吗？'}],
+ '4-2':[{face:'如果没有充足证据，就不能随意下结论。',ask:'这句话强调了什么？',answer:'重视证据',options:['只相信猜测','重视证据','拒绝提问'],explain:'合理的结论需要事实与证据支持。',why:'为什么提出不同意见时也需要证据？'}],
+ '5-1':[{face:'鲸是生活在海洋中的哺乳动物。',ask:'这句话主要用了哪种说明方法？',answer:'分类别',options:['分类别','打比方','列数字'],explain:'指出鲸属于哺乳动物，是按照类别说明事物。',why:'怎样用另一种方式向朋友介绍鲸？'}],
+ '5-2':[{face:'因为长期坚持练习，所以他的书写有了进步。',ask:'句子中的关联词是什么关系？',answer:'因果关系',options:['转折关系','因果关系','假设关系'],explain:'因为和所以说明原因与结果之间的联系。',why:'你能讲一个生活中的因果关系吗？'}],
+ '6-1':[{face:'我认为每天阅读很有益，因为阅读能帮助我们获得知识。',ask:'哪一部分表达观点？',answer:'每天阅读很有益',options:['每天阅读很有益','获得知识','因为'],explain:'表达看法的中心句是观点，其后提供理由。',why:'如果有人不赞同，你会用什么证据回答？'}],
+ '6-2':[{face:'有人说凡是热门的东西就一定最好。',ask:'评价这句话最合适的做法是什么？',answer:'寻找证据并比较',options:['马上相信','寻找证据并比较','只看点赞数'],explain:'观点需要检验；热度不能单独证明质量。',why:'你会使用哪些标准判断一个东西是否真的适合自己？'}]
+};
+function chineseQuestion(g,t,preferred=-1){const words=getChineseWords(g,t),w=words[randint(0,words.length-1)];const mode=preferred>=0?(preferred===3&&g>1?4:preferred):randint(0,g===1?3:4);let face,ask,options,answer,explain,why,usedExtra=false,tip='观察声调、词义或上下文，再判断。';const others=sample(words.filter(x=>x.han!==w.han&&x.pinyin!==w.pinyin),Math.min(7,words.length-1));
+ if(mode===0){face=w.han;ask=`选择“${w.han}”的正确拼音。`;answer=w.pinyin;options=shuffle([w.pinyin,...others.map(x=>x.pinyin).filter(p=>p!==w.pinyin).slice(0,3)]);explain=`“${w.han}”读作${w.pinyin}，意思是：${w.meaning}。`;why=`请用“${w.han}”说一句自己的话。`;}
+ else if(mode===1){face=w.pinyin;ask='观察拼音，找出对应的汉字或词语。';answer=w.han;options=shuffle([w.han,...others.map(x=>x.han).slice(0,3)]);explain=`拼音${w.pinyin}对应“${w.han}”，意思是：${w.meaning}。`;why=`你能用“${w.han}”编一个简短的故事吗？`;}
+ else if(mode===2){face=w.han;ask='选择最符合这个词语的解释。';answer=w.meaning;options=shuffle([w.meaning,...others.map(x=>x.meaning).filter(x=>x!==w.meaning).slice(0,3)]);explain=`“${w.han}”（${w.pinyin}）可以理解为${w.meaning}。`;why=`你还能想到生活中的什么例子？`;}
+ else if(mode===3&&g===1){const ph=CHINESE_PHONEMES[randint(0,CHINESE_PHONEMES.length-1)];face=ph[0];ask='这个拼音字母属于哪一类？';answer=ph[1];options=shuffle(['声母','韵母','声调']);explain=`${ph[0]}是${ph[1]}，学习时可以跟着老师的示范练习发音。`;why='还可以找到两个同类字母吗？';}
+ else if(mode===3&&g>1){face=`${w.han}`;ask='下列哪一项与屏幕上的词语意思最接近？';answer=w.meaning;options=shuffle([w.meaning,...others.map(x=>x.meaning).filter(x=>x!==w.meaning).slice(0,3)]);explain=`“${w.han}”的意思是${w.meaning}。`;why='有没有意思相近但不完全相同的词语？为什么？';}
+ else{const extras=(CHINESE_EXTRA[`${g}-${t}`]||[]);if(extras.length&&Math.random()<.5){const ex=extras[randint(0,extras.length-1)];usedExtra=true;({face,ask,answer,explain,why}=ex);options=shuffle(ex.options);}else{face=w.pinyin;ask='看拼音，选择正确的词语。';answer=w.han;options=shuffle([w.han,...others.map(x=>x.han).slice(0,3)]);explain=`${w.pinyin}写作“${w.han}”。`;why=`“${w.han}”还能和哪些词组成短语？`;}}
+ options=Array.from(new Set(options));if(options.length<3){options=shuffle([answer,...words.filter(x=>x.han!==answer).slice(0,3).map(x=>x.han)]);}
+ return {subject:'chinese',g,t,unit:preferred>=0?preferred:(mode===4?3:mode),topic:chineseUnits(g)[preferred>=0?preferred:(mode===4?3:mode)],kind:'choice',icon:w.icon,face,ask,answer,options,explain,why,tip,voiceZh:mode===0?'请观察屏幕上的汉字，选择正确的拼音，注意声调。':mode===1?'请看屏幕上面的拼音，选出对应的汉字。':mode===3&&g===1?'请判断屏幕上的拼音字母属于声母还是韵母。':`语文练习。${mode===2?'请选择词语的正确解释。':'请观察题目，选择正确答案。'}`,voiceExplainZh:mode===3&&g===1?'这是'+answer+'。跟着老师示范，练习发音。':usedExtra?explain:`正确答案。${w.han}。${w.meaning}。`,id:`chinese-${g}-${t}-${face}-${ask}`};
+}
+
+// -------- 英文：PEP 主题化练习；1-2 年级作为启蒙衔接，不冒充正式教材课文 --------
+// 单词|中文|图片，所有英语题有“中文读题”和“英语发音”两套独立语音。
+const EN_DATA={
+ '1-1':`apple|苹果|🍎;banana|香蕉|🍌;cat|猫|🐱;dog|狗|🐶;fish|鱼|🐟;bird|鸟|🐦;book|书|📚;pen|钢笔|🖊️;sun|太阳|☀️;moon|月亮|🌙;star|星星|⭐;red|红色|🔴;blue|蓝色|🔵;green|绿色|🟢;milk|牛奶|🥛;water|水|💧;tree|树|🌳;flower|花|🌸;car|汽车|🚗;ball|球|⚽`,
+ '1-2':`rabbit|兔子|🐰;tiger|老虎|🐯;bear|熊|🐻;duck|鸭子|🦆;egg|鸡蛋|🥚;cake|蛋糕|🎂;rice|米饭|🍚;bread|面包|🍞;orange|橙子|🍊;yellow|黄色|🟡;black|黑色|⚫;white|白色|⚪;hand|手|✋;eye|眼睛|👁️;nose|鼻子|👃;ear|耳朵|👂;mouth|嘴|👄;house|房子|🏠;school|学校|🏫;rain|雨|🌧️`,
+ '2-1':`teacher|老师|👩‍🏫;student|学生|🧑‍🎓;desk|书桌|🪑;chair|椅子|💺;pencil|铅笔|✏️;eraser|橡皮|🧽;ruler|尺子|📏;bag|书包|🎒;mother|妈妈|👩;father|爸爸|👨;sister|姐妹|👧;brother|兄弟|👦;happy|开心|😃;sad|难过|😢;big|大|🐘;small|小|🐜;hot|热|🔥;cold|冷|🧊;morning|早晨|🌅;night|夜晚|🌙`,
+ '2-2':`spring|春天|🌷;summer|夏天|☀️;autumn|秋天|🍁;winter|冬天|❄️;cloud|云|☁️;snow|雪|🌨️;wind|风|🌬️;river|河|🏞️;mountain|山|⛰️;bike|自行车|🚲;train|火车|🚆;bus|公交车|🚌;plane|飞机|✈️;ship|轮船|🚢;run|跑|🏃;jump|跳|🤾;swim|游泳|🏊;sing|唱歌|🎤;dance|跳舞|💃;read|阅读|📖`,
+ '3-1':`hello|你好|👋;goodbye|再见|👋;name|名字|🪪;friend|朋友|🤝;family|家庭|👨‍👩‍👧;pencil|铅笔|✏️;ruler|尺子|📏;crayon|蜡笔|🖍️;school|学校|🏫;book|书|📚;face|脸|😊;nose|鼻子|👃;mouth|嘴|👄;arm|手臂|💪;leg|腿|🦵;elephant|大象|🐘;monkey|猴子|🐵;panda|熊猫|🐼;juice|果汁|🧃;bread|面包|🍞;water|水|💧;cake|蛋糕|🎂`,
+ '3-2':`father|爸爸|👨;mother|妈妈|👩;grandpa|爷爷|👴;grandma|奶奶|👵;sister|姐妹|👧;brother|兄弟|👦;apple|苹果|🍎;pear|梨|🍐;orange|橙子|🍊;strawberry|草莓|🍓;grape|葡萄|🍇;car|汽车|🚗;boat|小船|🚤;ball|球|🏀;kite|风筝|🪁;chair|椅子|🪑;desk|书桌|🪑;box|盒子|📦;on|在上面|⬆️;under|在下面|⬇️;tall|高|🦒;short|矮|🐁`,
+ '4-1':`classroom|教室|🏫;window|窗户|🪟;door|门|🚪;floor|地板|🧹;computer|电脑|💻;teacher|老师|👩‍🏫;student|学生|🧑‍🎓;quiet|安静|🤫;strong|强壮|💪;friendly|友好|🤝;shoes|鞋|👟;glasses|眼镜|👓;kitchen|厨房|🍳;bedroom|卧室|🛏️;bathroom|浴室|🛁;living room|客厅|🛋️;farmer|农民|👨‍🌾;doctor|医生|👩‍⚕️;driver|司机|🧑‍✈️;nurse|护士|👩‍⚕️`,
+ '4-2':`library|图书馆|📚;playground|操场|🏟️;music room|音乐教室|🎵;breakfast|早餐|🥣;lunch|午餐|🍱;dinner|晚餐|🍽️;weather|天气|🌦️;sunny|晴朗|🌞;cloudy|多云|☁️;rainy|下雨的|🌧️;windy|有风的|🌬️;sweater|毛衣|🧥;jacket|夹克|🧥;dress|连衣裙|👗;pants|裤子|👖;tomato|西红柿|🍅;potato|土豆|🥔;sheep|绵羊|🐑;horse|马|🐎;hen|母鸡|🐔`,
+ '5-1':`weekend|周末|🗓️;often|经常|🔁;sometimes|有时|⏱️;always|总是|🔄;bridge|桥|🌉;river|河流|🏞️;mountain|高山|⛰️;village|村庄|🏘️;forest|森林|🌲;lake|湖泊|🏞️;fresh|新鲜|🍃;healthy|健康的|🥗;delicious|美味的|😋;helpful|乐于助人|🤝;clever|聪明的|🧠;polite|有礼貌的|🙇;sandwich|三明治|🥪;salad|沙拉|🥗;hamburger|汉堡|🍔;noodles|面条|🍜`,
+ '5-2':`January|一月|🗓️;February|二月|📅;March|三月|🌼;April|四月|🌷;May|五月|🌺;June|六月|☀️;summer|夏天|🌞;winter|冬天|❄️;birthday|生日|🎂;holiday|假期|🏖️;picnic|野餐|🧺;climbing|攀爬|🧗;running|跑步|🏃;reading|阅读|📖;listening|倾听|👂;sleeping|睡觉|😴;mine|我的|🙋;yours|你的|👉;first|第一|🥇;second|第二|🥈`,
+ '6-1':`museum|博物馆|🏛️;cinema|电影院|🎬;hospital|医院|🏥;post office|邮局|📮;bookstore|书店|📚;traffic|交通|🚦;subway|地铁|🚇;straight|直行|⬆️;left|左边|⬅️;right|右边|➡️;scientist|科学家|🔬;pilot|飞行员|✈️;fisherman|渔民|🎣;coach|教练|🏅;afraid|害怕的|😨;worried|担心的|😟;angry|生气的|😠;happy|高兴的|😊;hobby|爱好|🎨;travel|旅行|🧳`,
+ '6-2':`older|年龄更大|👵;younger|年龄更小|👶;taller|更高|🦒;shorter|更矮|🐭;stronger|更强壮|💪;heavier|更重|🏋️;smaller|更小|🐜;went|去了|🚶;saw|看见了|👀;ate|吃了|🍽️;had|拥有过|🎁;rode|骑了|🚲;slept|睡了|😴;washed|清洗了|🧼;cleaned|打扫了|🧹;visited|参观了|🏛️;camping|野营|🏕️;fishing|钓鱼|🎣;yesterday|昨天|🗓️;tomorrow|明天|🌅`
+};
+const EN_GRAMMAR={
+ 3:[['I ___ a student.','am',['am','is','are'],'主语 I 搭配 am。','说一说为什么主语变化会影响动词。'],['She ___ my friend.','is',['is','am','are'],'主语 She 用 is。','换成 They 时该怎么改？']],
+ 4:[['These ___ my books.','are',['are','is','am'],'These 表示复数，搭配 are。','你能比较 this 和 these 吗？'],['___ is the library?','Where',['Where','What','Who'],'问地点用 Where。','怎么问图书馆在哪儿？']],
+ 5:[['I ___ read books on weekends.','often',['often','yesterday','tomorrow'],'often 表示经常，常用于一般现在时。','你经常做什么？怎样设计自己的时间表？'],['He ___ playing football.','is',['is','are','am'],'现在进行时中 he 搭配 is。','怎样表达现在正在发生的事情？']],
+ 6:[['I ___ to the park yesterday.','went',['went','go','going'],'yesterday 指过去，go 的过去式是 went。','怎么判断一句话是过去还是现在？'],['She is ___ than me.','taller',['taller','tall','tallest'],'than 常与比较级连用。','你能比较两种物品的高低吗？']]
+};
+function enWords(g,t){return EN_DATA[`${g}-${t}`].split(';').map(x=>{const [en,zh,icon]=x.split('|');return {en,zh,icon};});}
+function englishQuestion(g,t,level,used,theme=-1){const allWords=enWords(g,t),words=theme<0?allWords:allWords.filter((x,i)=>i%4===theme),eligible=words.filter(w=>!used.has(w.en));let w=eligible.length?eligible[randint(0,eligible.length-1)]:words[randint(0,words.length-1)];used.add(w.en);const decoys=sample(allWords.filter(x=>x.en!==w.en),3);let face='',ask='',options=[],answer='',audioQuiz=false,voiceEn=w.en,explain='',why='',icon=w.icon,tip='看看中文提示、图片或字母，再试一次。';
+ const type=level===0?(g<=2?'letter':'meaning'):level===1?'picture':level===2?'listening':level===3?'spelling':randint(0,3)===0?'grammar':'mixed';
+ if(type==='grammar'&&g>=3){const row=EN_GRAMMAR[g][randint(0,EN_GRAMMAR[g].length-1)];face=row[0];ask='选择最合适的单词完成句子。';answer=row[1];options=shuffle(row[2]);voiceEn=row[0].replace('___',row[1]);explain=row[3];why=row[4];icon='🧠';}
+ else if(type==='letter'){const letter=String.fromCharCode(randint(65,90));const letters=shuffle([letter,...sample('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter(x=>x!==letter),3)]);face=letter;ask='找出与屏幕相同的大写字母。';options=letters;answer=letter;voiceEn=letter;icon='🔤';explain=`英文字母 ${letter} 是字母王国的一位成员。`;why=`想想字母 ${letter} 像生活中什么形状？`;}
+ else if(type==='spelling'){const letters=w.en.replace(/\s/g,'').toUpperCase();const positions=[];for(let i=0;i<letters.length;i++)if(/[A-Z]/.test(letters[i]))positions.push(i);const index=positions[randint(0,positions.length-1)];const missing=letters[index];let opt=sample('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter(c=>c!==missing),3);options=shuffle([missing,...opt]);answer=missing;face=letters.slice(0,index)+' _ '+letters.slice(index+1);ask=`补齐单词：${w.zh}。`;explain=`${w.en} 的意思是${w.zh}，缺少的字母是 ${missing}。`;why=`你能完整拼读 ${w.en} 吗？再用它编一个小故事。`;}
+ else if(type==='picture'){face=words.length>0?w.zh:'';ask='看看提示，选择正确的英文单词。';options=shuffle([w.en,...decoys.map(x=>x.en)]);answer=w.en;explain=`${w.en} 的中文意思是“${w.zh}”。`;why=`用英文 ${w.en} 说一句简短的话，或画图解释。`;}
+ else if(type==='meaning'){face=w.en;ask='找出这个英文单词的中文意思。';options=shuffle([w.zh,...decoys.map(x=>x.zh)]);answer=w.zh;explain=`${w.en} 是“${w.zh}”。`;why=`生活中哪里能看到或用到${w.zh}？`;}
+ else if(type==='listening'){face='🔊 ？';ask='先听英文发音，选出它的中文意思。';audioQuiz=true;options=shuffle([w.zh,...decoys.map(x=>x.zh)]);answer=w.zh;icon='🎧';explain=`你听到的是 ${w.en}，意思是“${w.zh}”。`;why=`能举一个与${w.zh}有关的生活例子吗？`;}
+ else{face=w.zh;ask='挑战：把中文与英文单词连起来。';options=shuffle([w.en,...decoys.map(x=>x.en)]);answer=w.en;explain=`${w.zh} 对应的英文是 ${w.en}。`;why=`你能用英语描述${w.zh}的一个特点吗？`;}
+ options=Array.from(new Set(options));while(options.length<3)options.push('其他'+options.length);
+ const q={subject:'english',g,t,unit:theme<0?0:theme,topic:englishUnits(g)[Math.max(0,theme)],level,kind:'choice',face,ask,options,answer,icon,voiceEn,voiceZh:`英语练习，${ask} 请先思考再点击选项。`,explain,why,tip,audioQuiz};q.id=`english-${g}-${t}-${level}-${face}-${answer}-${type}`;return q;
+}
+function newEnglishRun(g,t,level,theme=-1){const used=new Set();return Array.from({length:4},()=>englishQuestion(g,t,level,used,theme));}
+
+
+// ===== 课程主题、学习模型与本地数据 =====
+const NAME={math:'数学',chinese:'语文',english:'英文'};
+function chineseUnits(g){return g===1?['识字读音','看拼音认字','词义与理解','声母韵母']:['汉字读音','拼音与词语','词义理解','语言综合运用'];}
+function englishUnits(g){return g<=2?['启蒙词汇①','启蒙词汇②','启蒙词汇③','启蒙词汇④']:['主题词汇①','主题词汇②','主题词汇③','主题词汇④'];}
+function unitsFor(sub,g=saveData.grade,t=saveData.term){return sub==='math'?mathTopics(g,t):sub==='chinese'?chineseUnits(g):englishUnits(g);}
+const STORE='star-adventure-v4',V3_STORE='star-adventure-v3',V2_STORE='star-adventure-1to6-v2',MAX_ATTEMPTS=1200;
+const defaultSave={grade:1,term:1,subject:'math',voiceOn:true,pinyinOn:true,units:{},stats:{math:0,chinese:0,english:0},wrongbooks:{math:[],chinese:[],english:[]},englishGames:{},attempts:[],daily:{}};
+function readSafe(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch{return null;}}
+function initialData(){let prev=readSafe(STORE);if(!prev){prev=readSafe(V3_STORE)||readSafe(V2_STORE)||{};}const data={...defaultSave,...prev};data.grade=Math.max(1,Math.min(6,Number(data.grade)||1));data.term=Number(data.term)===2?2:1;data.subject=NAME[data.subject]?data.subject:'math';data.stats={...defaultSave.stats,...(data.stats||{})};data.wrongbooks={};for(const sub of Object.keys(NAME)){data.wrongbooks[sub]=(Array.isArray(prev?.wrongbooks?.[sub])?prev.wrongbooks[sub]:[]).filter(x=>x&&x.question&&x.id).slice(0,350).map(e=>({count:1,reviewCount:0,mastered:false,due:localDate(),...e}));}data.units=typeof data.units==='object'&&data.units?data.units:{};data.englishGames=typeof data.englishGames==='object'&&data.englishGames?data.englishGames:{};data.attempts=Array.isArray(data.attempts)?data.attempts.slice(-MAX_ATTEMPTS):[];data.daily=typeof data.daily==='object'&&data.daily?data.daily:{};return data;}
+function localDate(offset=0){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+offset);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+let saveData=initialData(),view='practice',wrongFilter='due',printType='wrong',toastTimer,sessionStart=Date.now();
+saveData.voiceStyle=['gentle','happy','slow'].includes(saveData.voiceStyle)?saveData.voiceStyle:'gentle';
+saveData.voiceZh=typeof saveData.voiceZh==='string'?saveData.voiceZh:'';
+saveData.voiceEn=typeof saveData.voiceEn==='string'?saveData.voiceEn:'';
+let reviewVariant=null,reviewStage='original';
+let mathInput='',rounds={math:[],chinese:[]},position={math:0,chinese:0},solved={math:false,chinese:false},lastWrong={math:'',chinese:''},activeTrial={seen:false,wrongLogged:false,tries:0,hints:0},reviewEntry=null,reviewSolved=false,english={screen:'map',level:0,index:0,solved:false,reveal:false,lastWrong:''},explainStep=0;
+const app=document.getElementById('app'),get=sel=>document.querySelector(sel),labelTerm=t=>t===1?'上册':'下册';
+const unitKey=(sub,g=saveData.grade,t=saveData.term)=>`${sub}-${g}-${t}`;
+function unitSelection(sub=saveData.subject){const n=Number(saveData.units[unitKey(sub)]);return Number.isInteger(n)&&n>=0&&n<4?n:-1;}
+function store(){try{localStorage.setItem(STORE,JSON.stringify(saveData));}catch{toast('保存失败：可能是浏览器存储空间不足。');}}
+function toast(msg){const el=get('#toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.add('hidden'),3200);}
+const liveTotal=()=>Object.values(saveData.stats).reduce((a,b)=>a+(Number(b)||0),0);
+function currentDay(){const k=localDate();if(!saveData.daily[k])saveData.daily[k]={math:0,chinese:0,english:0};return saveData.daily[k];}
+function dayTotal(){const d=currentDay();return Object.keys(NAME).reduce((a,s)=>a+Math.min(2,Number(d[s])||0),0);}
+function currentGame(){const base=`${saveData.grade}-${saveData.term}`,choice=unitSelection('english'),k=choice<0?base:`${base}-u${choice}`;if(!saveData.englishGames[k])saveData.englishGames[k]={unlocked:0,completed:[],progress:{},runs:{}};const g=saveData.englishGames[k];g.completed=Array.isArray(g.completed)?g.completed:[];g.progress=g.progress||{};g.runs=g.runs||{};g.unlocked=Math.max(0,Math.min(4,Number(g.unlocked)||0));return g;}
+function lessonTitle(){const u=unitSelection();return u<0?'综合随机':unitsFor(saveData.subject)[u];}
+function recentStats(sub,unit=-1){const records=saveData.attempts.filter(a=>a&&a.sub===sub&&a.grade===saveData.grade&&a.term===saveData.term&&(unit<0||a.unit===unit));const recent=records.slice(-20),right=recent.filter(x=>x.firstCorrect).length;return {n:records.length,rate:recent.length?Math.round(100*right/recent.length):null,help:recent.filter(x=>x.help).length};}
+function adapt(sub,unit=unitSelection(sub)){const st=recentStats(sub,unit);if(st.n<6)return'mid';if(st.rate<60)return'low';if(st.rate>85)return'high';return'mid';}
+function adaptLabel(sub=saveData.subject){const diff=adapt(sub);return diff==='low'?'🌱 基础巩固':diff==='high'?'🚀 思维进阶':'🌿 稳步提升';}
+function makeQuestion(sub){const u=unitSelection(sub),difficulty=adapt(sub,u);let q;if(sub==='math'){q=mathQuestion(saveData.grade,saveData.term,u,difficulty);}else{const selected=u>=0?u:difficulty==='low'?randint(0,1):difficulty==='high'?randint(2,3):-1;q=chineseQuestion(saveData.grade,saveData.term,selected);if(difficulty==='low'&&q.options?.length>3){const invalid=q.options.find(x=>String(x)!==String(q.answer));q.options=q.options.filter(x=>x!==invalid);}}if(q.unit==null||q.unit<0)q.unit=sub==='math'?Math.max(0,mathTopics(q.g,q.t).indexOf(q.topic)):Math.max(0,chineseUnits(q.g).indexOf(q.topic));return q;}
+function createRound(sub){const arr=[],seen=new Set();let n=0;while(arr.length<6&&n++<200){const q=makeQuestion(sub);if(seen.has(q.id))continue;seen.add(q.id);arr.push(q);}rounds[sub]=arr;position[sub]=0;solved[sub]=false;lastWrong[sub]='';if(sub===saveData.subject)resetTrial();}
+function resetTrial(){activeTrial={seen:false,wrongLogged:false,tries:0,hints:0};mathInput='';explainStep=0;}
+function resetSession(){createRound('math');createRound('chinese');english={screen:'map',level:0,index:0,solved:false,reveal:false,lastWrong:''};resetTrial();reviewEntry=null;reviewSolved=false;reviewVariant=null;reviewStage='original';}
+function currentQuestion(){if(view==='review')return reviewVariant||reviewEntry?.question||null;if(saveData.subject==='english')return english.screen==='play'?currentGame().runs[english.level]?.[english.index]:null;return rounds[saveData.subject][position[saveData.subject]]||null;}
+function recordFirst(q,correct){if(activeTrial.seen)return;activeTrial.seen=true;saveData.attempts.push({at:new Date().toISOString(),day:localDate(),sub:q.subject,grade:q.g,term:q.t,unit:q.unit,topic:q.topic||'',firstCorrect:!!correct,help:activeTrial.hints>0});if(saveData.attempts.length>MAX_ATTEMPTS)saveData.attempts=saveData.attempts.slice(-MAX_ATTEMPTS);}
+function findMistake(q){return saveData.wrongbooks[q.subject].find(e=>e.id===q.id);}
+function logWrong(q,value){if(activeTrial.wrongLogged)return;activeTrial.wrongLogged=true;const a=saveData.wrongbooks[q.subject],hit=findMistake(q);if(hit){hit.count=(hit.count||0)+1;hit.lastWrong=String(value);hit.lastAt=new Date().toISOString();hit.reviewCount=0;hit.mastered=false;hit.corrected=false;hit.due=localDate();}else{a.unshift({id:q.id,g:q.g,t:q.t,unit:q.unit,question:q,count:1,lastWrong:String(value),lastAt:new Date().toISOString(),reviewCount:0,corrected:false,mastered:false,due:localDate()});}if(a.length>350)a.length=350;}
+function reviewSuccess(entry){entry.reviewCount=Math.min(3,(Number(entry.reviewCount)||0)+1);entry.corrected=true;entry.correctedAt=new Date().toISOString();entry.mastered=entry.reviewCount>=3;entry.due=entry.mastered?'':localDate([0,1,3,7][entry.reviewCount]);}
+function wrongDue(e){return !e.mastered&&(!e.due||e.due<=localDate());}
+function dueCount(sub){return saveData.wrongbooks[sub].filter(wrongDue).length;}
+function award(q){saveData.stats[q.subject]++;const d=currentDay();d[q.subject]=(d[q.subject]||0)+1;}
+function renderHeader(){document.body.classList.toggle('hide-pinyin',!saveData.pinyinOn);get('#schoolTitle').innerHTML='🏫 '+ruby('高阳县西街小学')+' · '+ruby(`${saveData.grade}年级${labelTerm(saveData.term)}`);get('#starTotal').textContent='⭐ '+liveTotal();get('#gradeSel').value=String(saveData.grade);get('#termSel').value=String(saveData.term);const sel=get('#unitSel');const chosen=unitSelection();sel.innerHTML=`<option value="-1">综合随机</option>`+unitsFor(saveData.subject).map((x,i)=>`<option value="${i}">${esc(x)}</option>`).join('');sel.value=String(chosen);get('#voiceToggle').textContent=saveData.voiceOn?'🔊 自动鼓励：开':'🔇 自动鼓励：关';get('#curriculumLabel').textContent=saveData.subject==='chinese'?'统编版相关知识主题':saveData.subject==='math'?'人教版相关知识主题':saveData.grade<=2?'US ELA · Early Literacy':'US ELA · Reading & Writing';for(const sub of Object.keys(NAME)){get('#nav'+({math:'Math',chinese:'Chinese',english:'English'}[sub])).innerHTML=ruby(NAME[sub]);}document.querySelectorAll('[data-subject]').forEach(x=>{const a=x.dataset.subject===saveData.subject;x.classList.toggle('active',a);x.setAttribute('aria-pressed',String(a));});document.querySelectorAll('[data-view]').forEach(x=>{const a=(view==='review'?'wrongbook':view)===x.dataset.view;x.classList.toggle('active',a);x.setAttribute('aria-current',a?'page':'false');});}
+const hero=(title,tag,desc)=>`<section class="hero ${saveData.subject}"><div class="overline">${esc(tag)}</div><h1>${ruby(title)}</h1><p>${ruby(desc)}</p></section>`;
+const progress=(n,total)=>`<div class="track" role="progressbar" aria-valuenow="${n}" aria-valuemin="0" aria-valuemax="${total}"><div style="width:${Math.min(100,100*n/Math.max(1,total))}%"></div></div>`;
+const btn=(action,text,klass='primary',value=null)=>`<button type="button" class="btn ${klass}" data-action="${action}"${value!==null?` data-value="${esc(value)}"`:''}>${text}</button>`;
+function render(){renderHeader();app.innerHTML=({home:renderHome,practice:renderPractice,wrongbook:renderWrongBook,review:renderReview,report:renderReport}[view]||renderPractice)();}
+// ===== 亲子每日任务、学科练习 =====
+function renderHome(){const d=currentDay(),done=dayTotal();return hero('今天也要闪闪发光！','DAILY ADVENTURE · 约10分钟','数学、语文、英文各来两题，听讲解、说理由，完成就去休息吧！')+`<section class="card"><div class="row"><h2 class="title">🎯 ${ruby('今日学习任务')}</h2><span class="chip">${done}/6 ${ruby('颗任务星')}</span></div>${progress(done,6)}${Object.keys(NAME).map(s=>`<div class="quest"><div class="bubble">${{math:'🔢',chinese:'📖',english:'🚀'}[s]}</div><div class="body"><b>${ruby(NAME[s])} · ${ruby(['加油冲刺','开心识字','勇闯王国'][Object.keys(NAME).indexOf(s)])}</b><div class="small">${ruby('完成两题')} · ${Math.min(2,Number(d[s])||0)}/2</div></div>${btn('daily-sub',d[s]>=2?'✅':'开始','tiny '+(d[s]>=2?'green':'ghost'),s)}</div>`).join('')}${done===6?`<div class="feedback">🏆 ${ruby('今日任务已完成！离开屏幕，去发现生活中的新知识吧！')}</div>`:`<div class="tipbox">💡 ${ruby('每天少量练习，答完试着说清为什么。答题数只是参考，别为了星星一直刷题。')}</div>`}</section>`+`<section class="card"><h2 class="title">🌱 ${ruby('学习小提醒')}</h2><p class="small">${ruby('建议每次约八到十分钟，先做已学知识，再画图、摆积木或和家长讨论一道开放题。')}</p><div class="flex2">${btn('open-due',`📔 ${ruby('待复习错题')} ${dueCount(saveData.subject)}`,'ghost')}${btn('go-practice',`🧩 ${ruby('随心闯关')}`,'primary')}</div></section>`;}
+function renderPractice(){if(saveData.subject==='english')return renderEnglish();const s=saveData.subject,q=currentQuestion(),stats=recentStats(s),unit=lessonTitle();if(!q)return hero('本轮挑战完成！','MISSION COMPLETE','学会了就去喝口水、看看远处吧。')+`<section class="card reward"><div class="emoji">🏆</div><h2>${ruby('完成六题挑战！')}</h2><p>${ruby('今天能把一道题讲给家人听吗？')}</p>${btn('restart',`🔄 ${ruby('重新生成随机题目')}`,'primary block')}${btn('view-home',`🏠 ${ruby('返回今日任务')}`,'ghost block')}</section>`;
+return hero(s==='math'?'数字森林大冒险':'汉字王国奇遇记',`${saveData.grade}年级${labelTerm(saveData.term)} · ${unit}`,s==='math'?'算得准，也要能说出怎么算的。':'读得准，也要能解释词语和表达想法。')+`<section class="card"><div class="row wrap"><span class="chip">🎯 ${ruby('第')} ${position[s]+1}/6 ${ruby('题')}</span><span class="chip">${adaptLabel(s)}</span><span class="chip">${stats.rate===null?'新开始':`首次正确率 ${stats.rate}%`}</span></div>${progress(position[s],6)}${renderQuestion(q,solved[s],lastWrong[s])}${solved[s]?btn('next',`✨ ${ruby('下一题')}`,'primary block'):''}<p class="note">${ruby(s==='chinese'?'汉字认读题不提前注音，避免泄露正确答案。':'这是原创知识主题题库，非课本原题。')}</p></section>`;}
+function renderQuestion(q,correct,wrong){if(!q)return'';const hiddenListen=q.audioQuiz&&!correct&&!english.reveal;const big=hiddenListen?'🎧 ？':q.face;const display=String(big).length>12?'smaller':'';let image=(q.icon&&!q.audioQuiz)?`<div class="picture">${esc(q.icon)}</div>`:'';let sounds=`<div class="soundrow">${btn('speak-zh',`🔊 ${ruby('中文听题')}`,'ghost tiny')}${q.subject==='english'?btn('speak-en',`🇺🇸 ${ruby('英文发音')}`,'muted tiny'):''}</div>`;
+const wrongValue=wrong!==''?wrong:'';const options=q.kind==='numeric'?`<div class="answerbox ${mathInput?'':'empty'}">${mathInput?esc(mathInput):ruby('点击下面的数字键盘')}</div><div class="keypad">${['1','2','3','4','5','6','7','8','9','⌫','0','.','清空','✓'].map(k=>`<button type="button" class="key ${['⌫','清空'].includes(k)?'accent':''} ${k==='✓'?'submit':''}" data-action="key" data-value="${esc(k)}" ${correct?'disabled':''}>${k==='✓'?ruby('确定'):k==='清空'?ruby('清空'):k}</button>`).join('')}</div>`:`<div class="choices ${(q.options||[]).length===3?'three':''}">${(q.options||[]).map(v=>`<button type="button" class="choice ${correct&&String(v)===String(q.answer)?'right':!correct&&wrongValue!==''&&String(v)===String(wrongValue)?'wrong':''}" data-action="choose" data-value="${esc(v)}" ${correct?'disabled':''}>${q.subject==='chinese'&&q.answer==='声母'||q.answer==='韵母'?ruby(v):esc(v)}</button>`).join('')}</div>`;
+return `<div class="question ${q.subject}">${image}<div class="prompt">${ruby(q.ask)}</div><div class="big ${display}" ${q.subject==='english'?'lang="en"':''}>${esc(big)}</div>${sounds}${q.audioQuiz&&!hiddenListen?`<div class="small" lang="en">${esc(q.voiceEn)}</div>`:''}</div>${options}${q.audioQuiz&&!correct?btn('english-reveal',english.reveal?`🙈 ${ruby('隐藏单词')}`:`👀 ${ruby('听不清？显示单词')}`,'tiny muted block'):''}${correct?renderSuccess(q):renderFailed(q,wrongValue)}`;}
+function renderFailed(q,wrong){if(!activeTrial.tries)return'';return `<div class="feedback bad">💛 ${ruby('没关系！勇敢尝试很棒，再想一想。')}${activeTrial.tries>1?`<div style="font-size:13px">💡 ${ruby(q.tip||'先观察，再换个方法试试。')}</div>`:''}</div><div class="flex2">${btn('hint',`💡 ${ruby(activeTrial.hints?'再听一个提示':'听老师提示')}`,'tiny ghost')}${btn('speak-zh',`🔊 ${ruby('重新听题')}`,'tiny muted')}</div>`;}
+function stepsFor(q){if(q.subject==='math'&&q.g===1){const m=String(q.face).match(/(\d+)\s*([+\-])\s*(\d+)/);if(m){const [_,a,op,b]=m;return [`看清数字：${chineseNum(+a)}和${chineseNum(+b)}。`,`想一想${op==='+'?'把两部分合起来':'从原来的数量中拿走一部分'}。`,`计算结果是${chineseNum(Number(q.answer))}。${q.explain}`];}}return ['先认真读题，找出关键的数字、字音或词义。',q.explain,'再换一个方法解释，或者举出生活中的例子。'];}
+function renderSuccess(q){const steps=stepsFor(q);return `<div class="feedback">🎉 ${ruby('答对啦！真棒！你学会了一个新方法！')}</div><div class="explanation"><strong>💡 ${ruby('老师的答案讲解')}</strong><p>${ruby(q.explain)}</p><div class="row wrap">${btn('explain',`🔊 ${ruby('听完整讲解')}`,'tiny ghost')}${btn('step',`🪜 ${ruby('分步讲解')} (${Math.min(steps.length,explainStep+1)}/${steps.length})`,'tiny muted')}</div>${steps.slice(0,Math.max(0,explainStep)).map((s,i)=>`<div class="step">${i+1}. ${ruby(s)}</div>`).join('')}</div><div class="brain"><strong>🧠 Explain Why · ${ruby('动脑时刻')}</strong><p>${ruby(q.why||'你能说出为什么这样选吗？')}</p><div class="small">${ruby('可以口头表达、画图或举例，不必只有一种答案。')}</div></div>`;}
+function englishLevels(g){return g<=2?['字母森林','单词城堡','听力山谷','拼写桥梁','终极挑战']:['词汇森林','单词城堡','听力山谷','拼写桥梁','终极挑战'];}
+function renderEnglish(){const g=currentGame(),labels=englishLevels(saveData.grade);if(english.screen==='map'){return hero('英文王国大冒险','ENGLISH KINGDOM · 5 LEVELS',saveData.grade<=2?'先听、再说、再认字母和单词，不抢跑三年级考试。':'主题词汇、听力、拼写和句型，完成一关再解锁下一关。')+`<section class="card"><div class="row"><h2 class="title">🗺️ ${ruby('奇妙闯关地图')}</h2><span class="chip">🏆 ${g.completed.length}/5</span></div>${progress(g.completed.length,5)}${labels.map((x,i)=>{const locked=i>g.unlocked,done=g.completed.includes(i);return `<button type="button" class="level ${locked?'locked':done?'done':'ready'}" data-action="start-level" data-value="${i}" ${locked?'disabled':''}><span class="medal">${locked?'🔒':['🌳','🏰','🎧','🌉','👑'][i]}</span><span class="info"><strong>${ruby('第'+['一','二','三','四','五'][i]+'关')} · ${ruby(x)}</strong><span>${ruby('每关随机四题，全部答对才能解锁下一关')}</span></span><span class="end">${done?'🌟':locked?'🔐':'▶️'}</span></button>`;}).join('')}<div class="tipbox" style="margin-top:13px">⭐ ${ruby('每完成一个关卡可获得奖杯；可以重玩已解锁关卡。')}</div></section>`;}
+if(english.screen==='win')return hero('王国勇士诞生啦！','MISSION COMPLETE','今天不仅认出了单词，还学会了听、想、说。')+`<section class="card reward"><div class="emoji">🏆</div><h2>${ruby('恭喜闯关成功！')}</h2><p>⭐⭐⭐</p>${btn('map',`🗺️ ${ruby('继续探索地图')}`,'primary block')}${btn('view-home',`🌿 ${ruby('今天先休息')}`,'ghost block')}</section>`;
+const qs=g.runs[english.level]||[],q=qs[english.index];if(!q){english.screen='map';return renderEnglish();}return hero(labels[english.level],`LEVEL ${english.level+1} · ${lessonTitle()}`,'先听英文，勇敢思考，再听中文老师的解释。')+`<section class="card"><div class="row"><button class="btn ghost tiny" data-action="map">⬅ ${ruby('返回地图')}</button><span class="chip">⭐ ${english.index+1} / 4</span></div>${progress(english.index,4)}${renderQuestion(q,english.solved,english.lastWrong)}${english.solved?btn('next',`✨ ${ruby(english.index===3?'领取闯关奖杯':'下一题')}`,'primary block'):''}</section>`;}
+// ===== 间隔复习、错题本、家长中心 =====
+function renderWrongBook(){const s=saveData.subject,all=saveData.wrongbooks[s],filtered=all.filter(e=>wrongFilter==='all'||(wrongFilter==='mastered'?e.mastered:wrongDue(e)));return hero(`${NAME[s]}错题复习本`,'REVIEW · LEARN · GROW','先听讲解，再独立做类似题；复习通过后按1天、3天、7天安排。')+`<section class="card"><div class="row wrap"><h2 class="title">📔 ${ruby('错题管理')}</h2><span class="chip">${dueCount(s)} ${ruby('道待复习')}</span></div><div class="flex2">${btn('wrong-filter',`🗓️ ${ruby('待复习')}`,'tiny '+(wrongFilter==='due'?'primary':'ghost'),'due')}${btn('wrong-filter',`📚 ${ruby('全部')} (${all.length})`,'tiny '+(wrongFilter==='all'?'primary':'ghost'),'all')}${btn('wrong-filter',`🏅 ${ruby('已掌握')}`,'tiny '+(wrongFilter==='mastered'?'primary':'ghost'),'mastered')}</div><div class="flex2" style="margin-top:12px">${btn('print-wrong',`🖨️ ${ruby('打印练习卷')}`,'tiny ghost')}${btn('print-all',`🖨️ ${ruby('打印三科错题')}`,'tiny muted')}</div>${filtered.length===0?`<div class="empty"><div class="emoji">🎉</div>${ruby('这里暂时没有错题。继续开心学习吧！')}</div>`:filtered.map((e,i)=>{const q=e.question;return `<article class="wrongentry"><div class="row wrap"><span class="chip">${e.g}${ruby('年级')}${labelTerm(e.t)} · ${esc(q.topic||NAME[s])}</span><span class="small">${e.mastered?'🏅已掌握':wrongDue(e)?'⏰待复习':'📅'+esc(e.due)}</span></div><p class="qname">${esc(q.face)} · ${ruby(q.ask)}</p><p><b>${ruby('错误次数')}：</b>${e.count}　 <b>${ruby('复习进度')}：</b>${e.reviewCount||0}/3</p><p><b>${ruby('正确答案')}：</b>${esc(q.answer)}</p><p><b>${ruby('解析')}：</b>${ruby(q.explain)}</p>${btn('review',`🔁 ${ruby('重新独立练习')}`,'ghost block',e.id)}</article>`;}).join('')}</section><div class="tipbox">💡 ${ruby('错题可以跨年级保留。复习三次通过不代表永久掌握，家长仍可随时重新出题。')}</div>`;}
+function renderReview(){const e=reviewEntry;if(!e)return renderWrongBook();const q=currentQuestion();const complete=reviewStage==='complete';return hero('错题勇敢重来','REVIEW CHALLENGE','先独立做原题，再尝试一题新变式；完成两题才算这次复习通过。')+`<section class="card"><div class="row wrap"><span class="chip">${e.g}${ruby('年级')}${labelTerm(e.t)} · ${reviewVariant?'② 同类新题':'① 回顾原题'}</span>${btn('close-review',`⬅ ${ruby('返回错题本')}`,'tiny ghost')}</div>${renderQuestion(q,reviewSolved,activeTrial.tries&&!reviewSolved?e.tempWrong||'':'')}${reviewSolved?(complete?`<div class="tipbox">${ruby(e.mastered?'已通过三次复习，做得好！':'原题和变式题都完成了，下次复习：'+e.due)}</div>${btn('close-review',`✅ ${ruby('完成本次复习')}`,'primary block')}`:`<div class="tipbox">${ruby('原题回答正确！再做一道同知识点的新题，证明自己真的理解。')}</div>${btn('review-variant',`🧩 ${ruby('挑战一道同类变式题')}`,'primary block')}`):''}</section>`;}
+function reportSubjects(){const recent=saveData.attempts.filter(e=>e&&e.grade===saveData.grade&&e.term===saveData.term&&e.day>=localDate(-6)&&e.day<=localDate());return Object.keys(NAME).map(s=>{const a=recent.filter(e=>e.sub===s),ok=a.filter(e=>e.firstCorrect).length;return{n:s,qty:a.length,correct:ok,rate:a.length?Math.round(ok/a.length*100):null,wrong:saveData.wrongbooks[s].length,due:dueCount(s)};});}
+function renderReport(){const rows=reportSubjects(),total=rows.reduce((n,r)=>n+r.qty,0),rate=total?Math.round(100*rows.reduce((a,r)=>a+r.correct,0)/total):null;const unitList=unitsFor(saveData.subject).map((name,i)=>{const st=recentStats(saveData.subject,i);return{title:name,rate:st.rate,n:st.n}});const weak=unitList.filter(x=>x.n>=3).sort((a,b)=>(a.rate??100)-(b.rate??100))[0];return hero('家长学习中心','PARENT DASHBOARD','看知识掌握情况，不只看孩子拿到了多少颗星。')+`<section class="card"><div class="row"><h2 class="title">📊 ${ruby('最近七天学习概览')}</h2><span class="chip">${saveData.grade}${ruby('年级')}${labelTerm(saveData.term)}</span></div><div class="metric-grid"><div class="metric"><b>${total}</b><span>${ruby('首次作答题数')}</span></div><div class="metric"><b>${rate===null?'—':rate+'%'}</b><span>${ruby('首次正确率')}</span></div><div class="metric"><b>${rows.reduce((a,r)=>a+r.due,0)}</b><span>${ruby('待复习错题')}</span></div></div>${rows.map(r=>`<div class="barrow"><div class="row"><span>${esc(NAME[r.n])} · ${r.qty}${ruby('题')}</span><span>${r.rate===null?'暂无数据':r.rate+'%'}</span></div>${progress(r.rate||0,100)}</div>`).join('')}</section><section class="card"><h2 class="title">🧩 ${ruby(NAME[saveData.subject])} ${ruby('知识主题掌握')}</h2><p class="small">${ruby('最近20次该主题的首次作答表现，提示次数和复习情况也需要结合观察。')}</p>${unitList.map(x=>`<div class="barrow"><div class="row"><span>${esc(x.title)}</span><span>${x.n?`${x.rate}% · ${x.n}题`:'待开始'}</span></div>${progress(x.rate||0,100)}</div>`).join('')}<div class="tipbox">${weak?`💡 建议：优先陪孩子复习“${esc(weak.title)}”，多让孩子说理由、画示意图。`:'💡 先让孩子每个主题练习几题，完成后这里会出现针对性的建议。'}</div></section><section class="card"><h2 class="title">🧰 ${ruby('家长工具箱')}</h2><div class="flex2">${btn('print-wrong',`🖨️ ${ruby('错题练习卷')}`,'ghost tiny')}${btn('print-sheet',`📄 ${ruby('随机练习卷')}`,'muted tiny')}${btn('print-all',`🖨️ ${ruby('三科错题汇总')}`,'ghost tiny')}${btn('export',`💾 ${ruby('导出本地存档')}`,'muted tiny')}</div><label class="btn ghost block" style="display:flex;align-items:center;justify-content:center;cursor:pointer">📂 ${ruby('导入本地存档')} <input type="file" id="restoreFile" accept=".json,application/json" style="display:none"></label><div class="divider"></div><div class="flex2">${btn('toggle-pinyin',saveData.pinyinOn?`拼音显示：开`:`拼音显示：关`,'tiny ghost')}${btn('sound-check',`🔊 ${ruby('测试中文发音')}`,'tiny ghost')}${btn('reset-voice',`🇺🇸 ${ruby('测试英文发音')}`,'tiny muted')}</div><p class="note">${ruby('备份文件仅在你下载或导入时使用。清除浏览器数据或更换设备可能使本地学习记录丢失。')}</p></section><section class="card"><h2 class="title">🌿 ${ruby('使用与教材说明')}</h2><p class="small">${ruby('数学按人教版相关知识范围、语文按统编版相关知识范围，英文按美国英语语言艺术读写标准参考框架设计。选择的是知识主题，不是官方教材的逐课、逐页目录。')}</p><p class="small">${ruby('建议一次学习八到十分钟，适时离屏休息；一年级英文重点是听说兴趣，不以提前应试为目标。')}</p></section>`;}
+// ===== 打印：供孩子作答的试卷 + 新的一页家长答案，跨科亦可 =====
+function printHtml(groups,title){const date=new Date().toLocaleDateString('zh-CN');let tasks='',keys='';let global=0;for(const [sub,qs]of groups){if(!qs.length)continue;tasks+=`<h2>${esc(NAME[sub])} · ${esc(title)}</h2>`;keys+=`<h3>${esc(NAME[sub])}</h3>`;for(const q of qs){global++;tasks+=`<div class="print-entry"><strong>${global}. 【${q.g}年级${labelTerm(q.t)}】${ruby(q.ask)}　${q.subject==='chinese'?esc(q.face):ruby(q.face)}</strong>${q.subject==='english'&&q.audioQuiz?'<p>听力题：请家长读出英文单词后作答</p>':''}<p>答：________________________________________________</p><div class="print-why">${ruby('开放思维')}：${ruby(q.why||'请说出原因')}</div><p>思考区：________________________________________________</p></div>`;keys+=`<p>${global}. <strong>${esc(q.answer)}</strong>　${esc(q.explain)}</p>`;}}if(!global){toast('当前没有可打印的错题。');return;}const area=get('#printArea');area.innerHTML=`<h1>🌈 星星闯关乐园 · ${esc(title)}</h1><p class="printmeta">${date}　姓名：________　年级：${saveData.grade}　学期：${labelTerm(saveData.term)}　共 ${global} 题</p>${tasks}<section class="answerkey"><h2>家长答案与讲解（请另页保存）</h2>${keys}</section>`;document.body.classList.add('printing');try{window.print();}catch{toast('当前浏览器不支持打印，请使用电脑浏览器打开。');document.body.classList.remove('printing');}}
+window.addEventListener('afterprint',()=>{document.body.classList.remove('printing');get('#printArea').innerHTML='';});
+function printWrong(all=false){const ss=all?Object.keys(NAME):[saveData.subject],groups=ss.map(s=>[s,saveData.wrongbooks[s].map(e=>e.question)]);printHtml(groups,all?'三科错题汇总':'错题复习练习卷');}
+function printSheet(){const sub=saveData.subject;if(sub==='english'){const used=new Set();printHtml([[sub,Array.from({length:8},()=>englishQuestion(saveData.grade,saveData.term,1,used,unitSelection('english')))]],'随机练习卷');}else{printHtml([[sub,Array.from({length:8},()=>makeQuestion(sub))]],'随机练习卷');}}
+function downloadData(){const blob=new Blob([JSON.stringify({app:'星星闯关乐园',version:4,exportedAt:new Date().toISOString(),data:saveData},null,2)],{type:'application/json;charset=utf-8'});const link=document.createElement('a');const url=URL.createObjectURL(blob);link.href=url;link.download=`星星闯关乐园_学习备份_${localDate()}.json`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),8000);toast('学习记录备份已准备下载。');}
+async function restoreData(file){if(!file)return;if(file.size>2000000){toast('备份文件太大，无法导入。');return;}try{const raw=JSON.parse(await file.text()),d=raw.data;if(raw.app!=='星星闯关乐园'||raw.version!==3||!d||!Array.isArray(d.attempts)||!d.wrongbooks||!d.stats){throw Error('格式不符');}if(!confirm('导入会覆盖当前浏览器的学习进度，确定继续吗？'))return;localStorage.setItem(STORE,JSON.stringify(d));saveData=initialData();resetSession();view='report';render();toast('学习记录已成功恢复！');}catch{toast('导入失败：请使用本应用导出的 V4.1 备份文件。');}}
+// ===== 优先普通话音色 / 分语言发音，不能把中文误当作英语读 =====
+// V4.1 - gentle, selectable device speech; safe per-language voices.
+let ttsVoices=[],speechSession=0,speechPauseTimer=null;
+const VOICE_STYLES={gentle:{zh:{rate:.85,pitch:1.06},en:{rate:.83,pitch:1.03},pause:220},happy:{zh:{rate:.96,pitch:1.13},en:{rate:.90,pitch:1.09},pause:130},slow:{zh:{rate:.72,pitch:1.00},en:{rate:.72,pitch:1.00},pause:300}};
+const voiceId=v=>String(v.voiceURI||v.name+'|'+v.lang);
+function refreshVoices(){if(!('speechSynthesis'in window))return[];try{ttsVoices=window.speechSynthesis.getVoices()||[];}catch{ttsVoices=[];}return ttsVoices;}
+function voiceCandidates(lang){const chinese=lang==='zh-CN';return refreshVoices().filter(v=>chinese?(/^zh(?:-|_|$)/i.test(v.lang)||/中文|普通话|Mandarin/i.test(v.name)):(/^en(?:-|_|$)/i.test(v.lang)||/English/i.test(v.name)));}
+function voiceScore(v,lang){const name=v.name||'',locale=v.lang||'';let sc=0;
+ if(lang==='zh-CN'){if(/zh[-_]CN/i.test(locale))sc+=18;else if(/zh[-_]Hans/i.test(locale))sc+=12;else if(/^zh[-_](HK|TW)/i.test(locale))sc-=20;}
+ else if(/en[-_]US/i.test(locale))sc+=14;
+ if(/natural|neural|晓晓|晓伊|小艺|Xiaoxiao|Xiaoyi|Ting.Ting|婷婷|温柔|warm/i.test(name))sc+=30;
+ if(/女声|female|woman/i.test(name))sc+=8;
+ if(v.localService)sc+=2;
+ return sc;
+}
+function pickVoice(lang){const list=voiceCandidates(lang);if(!list.length)return null;
+ const chosen=lang==='zh-CN'?saveData.voiceZh:saveData.voiceEn;
+ return list.find(v=>voiceId(v)===chosen)||list.slice().sort((a,b)=>voiceScore(b,lang)-voiceScore(a,lang))[0];
+}
+function gentleText(raw){return String(raw||'').replace(/请认真思考[。！]?/g,'慢慢想一想呀。').replace(/答题讲解[:：。]?/g,'咱们一起看看。').replace(/请先思考再点击选项/g,'想好了，再点选答案吧').replace(/语文练习[，。]/g,'来做一道语文小练习。').replace(/请观察屏幕上的/g,'看一看屏幕上的').replace(/请观察题目/g,'仔细看看题目').replace(/请你也说一说自己的理由/g,'要不要也说说，你是怎么想到的呢');}
+function splitSpeech(raw){const input=gentleText(raw).trim();if(!input)return[];const result=[];let chunk='';for(const ch of input){chunk+=ch;if(/[。！？!?；;]/.test(ch)&&chunk.trim()){result.push(chunk.trim());chunk='';}else if(chunk.length>=85&&/[，,、]/.test(ch)){result.push(chunk.trim());chunk='';}}if(chunk.trim())result.push(chunk.trim());return result;}
+function stopSpeech(){speechSession++;if(speechPauseTimer!==null){clearTimeout(speechPauseTimer);speechPauseTimer=null;}if('speechSynthesis'in window){try{speechSynthesis.cancel();}catch{}}}
+function speakSequence(items){if(!('speechSynthesis'in window)||typeof SpeechSynthesisUtterance==='undefined'){toast('当前设备不支持语音播放。');return;}
+ stopSpeech();const session=speechSession,mode=VOICE_STYLES[saveData.voiceStyle]||VOICE_STYLES.gentle,zhChoice=saveData.voiceZh,enChoice=saveData.voiceEn;
+ const queue=[];for(const entry of items){const lang=entry.lang==='en-US'?'en-US':'zh-CN';let phrases=lang==='zh-CN'?splitSpeech(entry.text):[String(entry.text||'').trim()].filter(Boolean);for(const phrase of phrases)queue.push({text:phrase,lang,tone:entry.tone||'plain',pause:entry.pause});}
+ let n=0;const next=()=>{if(session!==speechSession||n>=queue.length)return;const item=queue[n++];const list=voiceCandidates(item.lang),selected=item.lang==='zh-CN'?zhChoice:enChoice;const voice=list.find(v=>voiceId(v)===selected)||list.slice().sort((a,b)=>voiceScore(b,item.lang)-voiceScore(a,item.lang))[0];
+  if(!voice){toast(item.lang==='zh-CN'?'没有检测到普通话音色，请在手机或电脑中安装中文语音。':'没有检测到英语音色，请安装英语语音。');return;}
+  const config=item.lang==='zh-CN'?mode.zh:mode.en,utter=new SpeechSynthesisUtterance(item.text);
+  utter.voice=voice;utter.lang=item.lang;utter.rate=Math.max(.55,Math.min(1.25,config.rate+(item.tone==='celebrate'?.04:item.tone==='explain'?-.03:0)));
+  utter.pitch=Math.max(.7,Math.min(1.4,config.pitch+(item.tone==='celebrate'?.035:0)));
+  utter.volume=1;utter.onend=()=>{if(session!==speechSession)return;speechPauseTimer=setTimeout(next,Math.max(0,item.pause??mode.pause));};
+  utter.onerror=e=>{if(session===speechSession&&e.error!=='interrupted'&&e.error!=='canceled')toast('这次没有播出声音，请换一个音色试听。');};
+  try{speechSynthesis.speak(utter);}catch{toast('语音播放失败，请更换语音音色。');}
+ };
+ next();
+}
+const sayZh=s=>speakSequence([{text:String(s),lang:'zh-CN'}]);
+function readQuestion(){const q=currentQuestion();if(!q)return;
+ speakSequence([{text:q.voiceZh||q.ask,lang:'zh-CN',tone:'gentle'}]);
+}
+function readEnglish(){const q=currentQuestion();if(q?.subject==='english')speakSequence([{text:q.voiceEn||q.answer,lang:'en-US'}]);}
+function readExplain(){const q=currentQuestion();if(!q)return;
+ let opening='好呀，我们把这道题慢慢讲清楚。';
+ let explanation=q.voiceExplainZh||q.explain;
+ const tasks=[{text:opening,lang:'zh-CN',tone:'gentle',pause:250},{text:explanation,lang:'zh-CN',tone:'explain',pause:250}];
+ if(q.subject==='english')tasks.push({text:q.voiceEn||'',lang:'en-US',pause:280});
+ else tasks.push({text:'听懂了吗？试着讲给爸爸妈妈听吧。',lang:'zh-CN'});
+ speakSequence(tasks);
+}
+const POSITIVE_WORDS=['哇，答对啦！你真棒呀！','耶！又发现了一个正确答案。','嗯，做得好！你又进步一点点啦。','太好啦！这个方法找对了。','给你一个大大的赞！你想得很认真。','真不错！你越来越会思考啦。'];
+const TRY_AGAIN_WORDS=['没关系，咱们再看一看，好吗？','差一点点啦，我们换个方法试试。','谢谢你认真尝试，再想一想，我们一定能找到方法。','不要着急，慢慢来，我陪你一起想。'];
+let lastEncourageText='';
+function differentPhrase(choices){let out=choices[randint(0,choices.length-1)];if(choices.length>1&&out===lastEncourageText)out=choices[(choices.indexOf(out)+1)%choices.length];lastEncourageText=out;return out;}
+function encourage(q,correct){if(!saveData.voiceOn)return;
+ if(correct){const tasks=[{text:differentPhrase(POSITIVE_WORDS),lang:'zh-CN',tone:'celebrate',pause:270}];
+  // Answer explanation remains audible, but delivered as a separate, calmer sentence.
+  tasks.push({text:'我们再记住这个小方法。',lang:'zh-CN',pause:160},{text:q.voiceExplainZh||q.explain,lang:'zh-CN',tone:'explain'});
+  if(q.subject==='english')tasks.push({text:q.voiceEn||'',lang:'en-US'});
+  speakSequence(tasks);
+ }else{let intro=differentPhrase(TRY_AGAIN_WORDS);if(activeTrial.tries>=2)intro+=' 小提示来了。'+(q.tip||'慢慢想，先看看题目。');speakSequence([{text:intro,lang:'zh-CN',tone:'gentle'}]);}
+}
+function voiceOptionHTML(lang,chosen){const list=voiceCandidates(lang);if(!list.length)return '<option value="">设备暂无可用语音包</option>';
+ return '<option value="">✨ 自动选择合适音色</option>'+list.sort((a,b)=>voiceScore(b,lang)-voiceScore(a,lang)).map(v=>`<option value="${esc(voiceId(v))}" ${voiceId(v)===chosen?'selected':''}>${esc(v.name)} (${esc(v.lang)})${v.localService?' · 本地':''}</option>`).join('');
+}
+function renderVoiceOptions(){const zh=get('#voiceZhSelect'),en=get('#voiceEnSelect');if(!zh||!en)return;
+ const formerZh=zh.dataset.draft??saveData.voiceZh,formerEn=en.dataset.draft??saveData.voiceEn;
+ zh.innerHTML=voiceOptionHTML('zh-CN',formerZh);en.innerHTML=voiceOptionHTML('en-US',formerEn);
+ const countZh=voiceCandidates('zh-CN').length,countEn=voiceCandidates('en-US').length;
+ get('#voiceDeviceTip').textContent=countZh&&countEn?`这台设备检测到 ${countZh} 种中文音色、${countEn} 种英文音色。实际声音以试听为准。`:'这台设备尚未显示完整语音列表。可以等一会儿再打开；若一直没有中文音色，请到设备系统中安装普通话语音包。';
+}
+function openVoicePanel(){get('#voiceSettingsPanel').classList.remove('hidden');document.body.classList.add('voice-dialog-open');get('#voiceZhSelect').dataset.draft=saveData.voiceZh;get('#voiceEnSelect').dataset.draft=saveData.voiceEn;
+ const checked=get(`input[name="voiceStyle"][value="${saveData.voiceStyle}"]`);if(checked)checked.checked=true;renderVoiceOptions();get('#voiceCloseBtn').focus();
+}
+function closeVoicePanel(){stopSpeech();get('#voiceSettingsPanel').classList.add('hidden');document.body.classList.remove('voice-dialog-open');get('#voiceZhSelect').removeAttribute('data-draft');get('#voiceEnSelect').removeAttribute('data-draft');get('#voiceSettingsBtn').focus();}
+function voiceSettingsDraft(){return {style:get('input[name="voiceStyle"]:checked')?.value||'gentle',zh:get('#voiceZhSelect').value,en:get('#voiceEnSelect').value};}
+function previewVoice(lang){const draft=voiceSettingsDraft();const old={style:saveData.voiceStyle,zh:saveData.voiceZh,en:saveData.voiceEn};saveData.voiceStyle=draft.style;saveData.voiceZh=draft.zh;saveData.voiceEn=draft.en;
+ speakSequence(lang==='zh-CN'?[{text:'嗨，小朋友！我是星星老师。',lang:'zh-CN'},{text:'哇，答对啦！你真棒！咱们一起开心地学新本领吧。',lang:'zh-CN',tone:'celebrate'}]:[{text:'Hello, my little explorer! Great job! You did it!',lang:'en-US'}]);
+ saveData.voiceStyle=old.style;saveData.voiceZh=old.zh;saveData.voiceEn=old.en;
+ // The selected voice and prosody are resolved when playback starts; preview chunks need draft settings until completion.
+}
+function saveVoiceSettings(){const d=voiceSettingsDraft();stopSpeech();saveData.voiceStyle=d.style;saveData.voiceZh=d.zh;saveData.voiceEn=d.en;store();closeVoicePanel();toast('声音已保存！现在可以听听新的星星老师啦。');}
+if('speechSynthesis'in window){refreshVoices();try{speechSynthesis.addEventListener('voiceschanged',()=>{refreshVoices();if(!get('#voiceSettingsPanel').classList.contains('hidden'))renderVoiceOptions();});}catch{}}
+get('#voiceSettingsBtn').addEventListener('click',openVoicePanel);
+get('#voiceCloseBtn').addEventListener('click',closeVoicePanel);
+get('#voiceSaveBtn').addEventListener('click',saveVoiceSettings);
+get('#previewZhBtn').addEventListener('click',()=>previewVoice('zh-CN'));
+get('#previewEnBtn').addEventListener('click',()=>previewVoice('en-US'));
+get('#voiceZhSelect').addEventListener('change',e=>e.target.dataset.draft=e.target.value);
+get('#voiceEnSelect').addEventListener('change',e=>e.target.dataset.draft=e.target.value);
+get('#voiceSettingsPanel').addEventListener('click',e=>{if(e.target.id==='voiceSettingsPanel')closeVoicePanel();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!get('#voiceSettingsPanel').classList.contains('hidden'))closeVoicePanel();});
+function answer(value){const q=currentQuestion();if(!q)return;if(view!=='review'&&view!=='practice')return;if(view==='review'&&reviewSolved)return;if(view==='practice'&&(q.subject==='english'?english.solved:solved[q.subject]))return;if(String(value).trim()===''){toast('请先选择或输入答案。');return;}
+const correct=String(value).trim()===String(q.answer).trim();activeTrial.tries++;if(view!=='review')recordFirst(q,correct);if(!correct){logWrong(q,value);if(view==='review'){reviewEntry.tempWrong=String(value);reviewEntry.due=localDate();reviewEntry.reviewCount=0;reviewEntry.mastered=false;}else if(q.subject==='english')english.lastWrong=String(value);else lastWrong[q.subject]=String(value);mathInput='';encourage(q,false);store();render();return;}
+if(view==='review'){reviewSolved=true;if(reviewVariant){reviewStage='complete';reviewSuccess(reviewEntry);}reviewEntry.tempWrong='';}else{award(q);if(q.subject==='english'){english.solved=true;english.lastWrong='';}else{solved[q.subject]=true;lastWrong[q.subject]='';}const hit=findMistake(q);if(hit)hit.corrected=true;}store();encourage(q,true);render();}
+function nextQuestion(){if(view!=='practice')return;const s=saveData.subject;if(s==='english'){if(!english.solved)return;const g=currentGame();if(english.index>=3){if(!g.completed.includes(english.level)){g.completed.push(english.level);g.unlocked=Math.min(4,Math.max(g.unlocked,english.level+1));}delete g.progress[english.level];english.screen='win';if(saveData.voiceOn){if(s==='english')speakSequence([{text:'You did it! Great work on your English adventure!',lang:'en-US'}]);else sayZh('恭喜闯关成功！获得一座小奖杯！');}}else{english.index++;g.progress[english.level]=english.index;english.solved=false;english.reveal=false;english.lastWrong='';resetTrial();}store();}else{if(!solved[s])return;position[s]++;solved[s]=false;lastWrong[s]='';resetTrial();}render();}
+function startLevel(v){const level=Number(v),g=currentGame();if(!Number.isInteger(level)||level<0||level>4||level>g.unlocked)return;const theme=unitSelection('english');if(!g.runs[level]||g.completed.includes(level)){g.runs[level]=newEnglishRun(saveData.grade,saveData.term,level,theme);if(adapt('english',theme)==='low')g.runs[level].forEach(q=>{if(q.options?.length>3){const invalid=q.options.find(x=>String(x)!==String(q.answer));q.options=q.options.filter(x=>x!==invalid);}});g.progress[level]=0;}english={screen:'play',level,index:Math.min(3,Number(g.progress[level])||0),solved:false,reveal:false,lastWrong:''};resetTrial();store();render();}
+function selectSubject(s){if(!NAME[s])return;saveData.subject=s;view='practice';reviewEntry=null;resetTrial();store();render();}
+function changeView(v){if(!['home','practice','wrongbook','report'].includes(v))return;view=v;reviewEntry=null;reviewVariant=null;reviewStage='original';render();window.scrollTo({top:0,behavior:'smooth'});}
+function action(el){const a=el.dataset.action,v=el.dataset.value;switch(a){
+case 'daily-sub':selectSubject(v);if(v==='english'){english.screen='map';render();}break;
+case 'go-practice':changeView('practice');break;case 'view-home':changeView('home');break;case 'open-due':changeView('wrongbook');wrongFilter='due';render();break;
+case 'key':{const q=currentQuestion();if(!q||q.kind!=='numeric'||(view==='review'?reviewSolved:solved.math))return;if(v==='✓'){answer(mathInput);return;}if(v==='⌫')mathInput=mathInput.slice(0,-1);else if(v==='清空')mathInput='';else if(v==='.'&&!mathInput.includes('.'))mathInput+=(mathInput?'':'0')+'.';else if(/^\d$/.test(v)&&mathInput.length<10)mathInput=(mathInput+v).replace(/^0(?=\d)/,'');render();break;}
+case 'choose':answer(v);break;case 'next':nextQuestion();break;case 'restart':createRound(saveData.subject);resetTrial();render();break;
+case 'start-level':startLevel(v);break;case 'map':english.screen='map';render();break;case 'english-reveal':english.reveal=!english.reveal;activeTrial.hints++;render();break;
+case 'speak-zh':readQuestion();break;case 'speak-en':readEnglish();break;case 'explain':readExplain();break;
+case 'hint':{const q=currentQuestion();if(!q)return;activeTrial.hints++;if(q.subject==='english')speakSequence([{text:'Here is a clue. '+(q.tip||'Listen carefully.'),lang:'en-US'}]);else sayZh('小提示：'+(q.tip||'慢慢读题，试试看。'));render();break;}
+case 'step':{const q=currentQuestion();if(!q)return;explainStep=Math.min(stepsFor(q).length,explainStep+1);sayZh(stepsFor(q)[explainStep-1]);render();break;}
+case 'wrong-filter':wrongFilter=v;render();break;
+case 'review':{const e=saveData.wrongbooks[saveData.subject].find(x=>x.id===v);if(!e)return;reviewEntry=e;reviewEntry.tempWrong='';reviewSolved=false;reviewVariant=null;reviewStage='original';view='review';resetTrial();render();break;}
+case 'review-variant':{if(!reviewEntry||!reviewSolved||reviewVariant)return;const original=reviewEntry.question;let candidate;for(let i=0;i<35;i++){candidate=original.subject==='math'?mathQuestion(original.g,original.t,original.unit??-1,'mid'):original.subject==='chinese'?chineseQuestion(original.g,original.t,original.unit??-1):englishQuestion(original.g,original.t,original.level??1,new Set(),original.unit??-1);if(candidate.id!==original.id)break;}reviewVariant=candidate;reviewStage='variant';reviewSolved=false;reviewEntry.tempWrong='';resetTrial();render();break;}
+case 'close-review':view='wrongbook';reviewEntry=null;reviewVariant=null;reviewStage='original';reviewSolved=false;render();break;
+case 'print-wrong':printWrong();break;case 'print-all':printWrong(true);break;case 'print-sheet':printSheet();break;
+case 'export':downloadData();break;case 'toggle-pinyin':saveData.pinyinOn=!saveData.pinyinOn;store();render();break;
+case 'sound-check':sayZh('你好！我是星星老师。答对啦！真棒！');break;
+case 'reset-voice':speakSequence([{text:'Hello! Great job! You can do it!',lang:'en-US'}]);break;
+}}
+document.addEventListener('click',e=>{const s=e.target.closest('[data-subject]');if(s){selectSubject(s.dataset.subject);return;}const v=e.target.closest('[data-view]');if(v){changeView(v.dataset.view);return;}const b=e.target.closest('[data-action]');if(b&&!b.disabled)action(b);});
+get('#gradeSel').addEventListener('change',e=>{saveData.grade=Math.max(1,Math.min(6,Number(e.target.value)||1));resetSession();store();render();});
+get('#termSel').addEventListener('change',e=>{saveData.term=Number(e.target.value)===2?2:1;resetSession();store();render();});
+get('#unitSel').addEventListener('change',e=>{saveData.units[unitKey(saveData.subject)]=Number(e.target.value);if(saveData.subject==='english')english.screen='map';else createRound(saveData.subject);resetTrial();store();render();});
+get('#voiceToggle').addEventListener('click',()=>{saveData.voiceOn=!saveData.voiceOn;if(!saveData.voiceOn)stopSpeech();store();render();});
+document.addEventListener('change',e=>{if(e.target.id==='restoreFile')restoreData(e.target.files[0]);});
+document.addEventListener('keydown',e=>{if(view!=='practice'&&view!=='review'||e.target.matches('input,select,textarea'))return;const q=currentQuestion();if(!q||q.kind!=='numeric'||(view==='review'?reviewSolved:solved.math))return;if(/^\d$/.test(e.key)||['Backspace','Enter','.'].includes(e.key)){e.preventDefault();if(e.key==='Enter')answer(mathInput);else if(e.key==='Backspace')mathInput=mathInput.slice(0,-1);else if(e.key==='.'&&!mathInput.includes('.'))mathInput+=(mathInput?'':'0')+'.';else if(/^\d$/.test(e.key)&&mathInput.length<10)mathInput=(mathInput+e.key).replace(/^0(?=\d)/,'');render();}});
+// 如果打开网页时间过长，仅给出一次休息提示，不设置强迫性连续闯关奖励。
+setTimeout(()=>{if(Date.now()-sessionStart>=9*60*1000)toast('🌿 学习一会儿啦，建议放下屏幕，活动眼睛和身体！');},10*60*1000);
+// ===== V4 开放思维 / 互动题型 / 强化复习 / 宠物激励：全部运行在本地 =====
+// 保持 V3 本地存档键不变，可自动保留旧学习记录。
+saveData.creativity = Array.isArray(saveData.creativity) ? saveData.creativity.slice(-250) : [];
+saveData.adaptive = (saveData.adaptive && typeof saveData.adaptive==='object') ? saveData.adaptive : {};
+saveData.pet = (saveData.pet && typeof saveData.pet==='object') ? saveData.pet : {xp:0, lastVisit:'', days:[], badges:[]};
+saveData.pet.xp = Number(saveData.pet.xp)||0;
+saveData.pet.days = Array.isArray(saveData.pet.days) ? saveData.pet.days : [];
+saveData.pet.badges = Array.isArray(saveData.pet.badges) ? saveData.pet.badges : [];
+let creativePairs=[],creativeDone=false,sortSequence=[],matchChoice=null,matchPairs={},spokenNote='';
+const coreCreateRound=createRound,coreMakeQuestion=makeQuestion,coreRecordFirst=recordFirst,coreAnswer=answer,coreNext=nextQuestion,coreNextLevel=startLevel;
+const coreRenderQuestion=renderQuestion,coreRenderSuccess=renderSuccess,coreRenderHome=renderHome,coreRenderReport=renderReport,coreRenderWrongBook=renderWrongBook,coreRenderHeader=renderHeader;
+const CORE_REVIEW_SUCCESS=reviewSuccess;
+const coreLogWrong=logWrong;
+logWrong=function(q,value){coreLogWrong(q,value);const e=findMistake(q);if(e&&!e.mastered)e.due=localDate(1);};
+const adaptKey=(s,grade=saveData.grade,term=saveData.term,unit=unitSelection(s))=>`${s}-${grade}-${term}-${unit}`;
+function skillTier(s,grade=saveData.grade,term=saveData.term,unit=unitSelection(s)){const d=saveData.adaptive[adaptKey(s,grade,term,unit)];return d&&Number.isInteger(d.tier)?d.tier:1;}
+function skillDescription(s){return ['🌱 巩固基础','🌿 稳步提升','🚀 尝试挑战'][skillTier(s)]||'🌿 稳步提升';}
+adapt=function(s,unit=unitSelection(s)){return ['low','mid','high'][skillTier(s,saveData.grade,saveData.term,unit)]||'mid';};
+adaptLabel=function(s=saveData.subject){return skillDescription(s);};
+function updateAdaptive(q,correct){for(const unit of new Set([q.unit??-1,-1])){const key=adaptKey(q.subject,q.g,q.t,unit);let d=saveData.adaptive[key];if(!d)d=saveData.adaptive[key]={tier:1,win:0,loss:0};if(correct){d.win++;d.loss=0;if(d.win>=3){d.tier=Math.min(2,d.tier+1);d.win=0;}}else{d.loss++;d.win=0;if(d.loss>=2){d.tier=Math.max(0,d.tier-1);d.loss=0;}}}}
+recordFirst=function(q,correct){if(activeTrial.seen)return;coreRecordFirst(q,correct);updateAdaptive(q,correct);};
+function petInfo(){const xp=saveData.pet.xp,level=Math.floor(xp/45)+1;return {level,xp,stage:xp<45?'🥚':xp<135?'🐣':xp<270?'🐥':'🦄',need:45-xp%45};}
+function visitToday(){const d=localDate(),p=saveData.pet;if(!p.days.includes(d)){p.days.push(d);p.days=p.days.slice(-180);}p.lastVisit=d;}
+function petReward(q){visitToday();saveData.pet.xpAwardKeys=Array.isArray(saveData.pet.xpAwardKeys)?saveData.pet.xpAwardKeys:[];const key=localDate()+'::'+q.subject+'::'+q.id;if(saveData.pet.xpAwardKeys.includes(key))return;saveData.pet.xpAwardKeys.push(key);saveData.pet.xpAwardKeys=saveData.pet.xpAwardKeys.slice(-1000);saveData.pet.xp+=q.__scheduledReview?8:5;const entries=saveData.creativity.length;const add=(name)=>{if(!saveData.pet.badges.includes(name))saveData.pet.badges.push(name);};if(saveData.pet.days.length>=1)add('🌱 学习小种子');if(saveData.pet.days.length>=3)add('🌼 三日探索者');if(saveData.pet.days.length>=7)add('🌈 七日探索者');if(saveData.pet.xp>=75)add('🏅 勇敢练习家');if(entries>=3)add('🧠 小小思想家');}
+function creativityId(q){return `${q.subject}/${q.g}/${q.t}/${q.id}`;}
+function isCreativityRequired(q){if(!q||view!=='practice')return false;
+ if(q.subject==='english')return english.screen==='play'&&english.index===1;
+ return position[q.subject]===1 || position[q.subject]===4;}
+function creativeRecorded(q){return saveData.creativity.some(e=>e.id===creativityId(q));}
+function resetCreative(){creativePairs=[];creativeDone=false;sortSequence=[];matchChoice=null;matchPairs={};spokenNote='';}
+function splitTarget(q){return q.g<=1?8:q.g<=2?12:20;}
+function renderCreative(q){if(!isCreativityRequired(q))return '';
+ const done=creativeRecorded(q);if(done)return `<div class="think-card"><div class="feedback">🧠 ${ruby('你的开放思维挑战已完成！可以进入下一题。')}</div></div>`;
+ if(q.subject==='math'){
+ const target=splitTarget(q),max=Math.floor(target/2)+1;
+ return `<section class="think-card" id="creativeTask"><div class="think-head">🧠 ${ruby('真正的开放思维挑战')} <span class="chip">${creativePairs.length}/3 ${ruby('种方法')}</span></div><p class="think-desc">${ruby(`把${target}拆成两个数，至少找出三种不同方法。顺序交换算同一种。`)}</p><div class="split-equation"><input id="splitA" type="number" inputmode="numeric" min="0" max="${target}" placeholder="?" aria-label="第一个数"/> <b>+</b> <input id="splitB" type="number" inputmode="numeric" min="0" max="${target}" placeholder="?" aria-label="第二个数"/> <b>= ${target}</b></div>${btn('add-split',`➕ ${ruby('收集一种新方法')}`,'ghost block')}${creativePairs.length?`<div class="split-collection">${creativePairs.map(p=>`<span>✅ ${p[0]} + ${p[1]} = ${target}</span>`).join('')}</div>`:''}${creativePairs.length>=3?`<div class="parent-area"><p>🎤 ${ruby('现在请把你发现的方法讲给爸爸妈妈听。')}</p>${btn('parent-approve',`👨‍👩‍👧 ${ruby('家长确认：讲得清楚')}`,'green block')}</div>`:`<p class="note">${ruby(`目前有${creativePairs.length}种，还需要${Math.max(0,3-creativePairs.length)}种。可以用小积木摆一摆。`)}</p>`}</section>`;
+ }
+ return `<section class="think-card" id="creativeTask"><div class="think-head">🎤 ${ruby('讲给爸爸妈妈听')}</div><p class="think-desc">${ruby(q.why||'请解释自己的答案，并举一个生活中的例子。')}</p><textarea id="spokenNote" class="spoken-note" maxlength="120" placeholder="家长可选填孩子的想法，不必打字，也可以直接口述" aria-label="记录孩子的想法">${esc(spokenNote)}</textarea><p class="small">${ruby('由孩子自己讲一讲，家长听完后确认。系统不录音、不上传。')}</p>${btn('parent-approve',`👨‍👩‍👧 ${ruby('家长确认：讲得清楚')}`,'green block')}</section>`;
+}
+function createInteractiveQuestion(s){const g=saveData.grade,t=saveData.term,u=unitSelection(s),serial=Math.floor(Math.random()*1e8);
+ if(s==='math'){
+ let ceiling=g===1?(t===1?10:20):g===2?100:g===3?200:500;
+ const nums=new Set();while(nums.size<4)nums.add(randint(0,ceiling));const vals=shuffle([...nums]);return {id:`v4-order-${g}-${t}-${serial}`,subject:s,g,t,unit:u<0?0:u,topic:'数字排序与比较',kind:'order',ask:'请按从小到大的顺序排列这些数字。可以点按，也可以拖动。',face:'🔢 ↗',tokens:vals,answer:[...vals].sort((a,b)=>a-b).join('|'),explain:'从最小的数字开始排列，再逐个比较。',tip:'先找到最小的数字，放到最前面。',why:'你是怎样最快找到最小数的？',voiceZh:'数学排序题：请把屏幕上的数字，从小到大排列。'};
+ }
+ if(s==='chinese'){
+ const words=shuffle(getChineseWords(g,t).filter(x=>x.han&&x.pinyin)).slice(0,3),pairs=words.map(x=>[x.han,x.pinyin]);
+ return {id:`v4-match-${g}-${t}-${serial}`,subject:s,g,t,unit:u<0?0:u,topic:'汉字和拼音配对',kind:'match',ask:'连一连：先点左边的汉字，再点右边正确的拼音。',face:'📖 ↔',pairs,answer:pairs.map(p=>p.join('→')).sort().join('|'),explain:pairs.map(p=>p.join('，读作')).join('；')+'。',tip:'注意拼音中的声调。',why:'你可以任选一个字组词或说一句话吗？',voiceZh:'语文连线题：请观察左边的字，和右边的拼音，把它们正确配对。'};
+ }
+ const words=enWords(g,t).filter(w=>/^[a-zA-Z]{2,9}$/.test(w.en)),w=words[randint(0,words.length-1)];
+ return {id:`v4-dict-${g}-${t}-${serial}`,subject:s,g,t,unit:u<0?0:u,topic:'英文听写',kind:'dictation',ask:'听英文发音，写出你听到的单词。',face:'🎧 ✏️',answer:w.en.toLowerCase(),explain:`${w.en} 的中文意思是${w.zh}。`,why:'这个单词能用来表达生活中的什么东西？',voiceZh:'英文听写，请先点击英文发音，然后在输入框写出听到的单词。',voiceEn:w.en,tip:'听清开头和结尾的字母。'};
+}
+function dueEntries(s){return saveData.wrongbooks[s].filter(e=>e&&e.question&&e.g===saveData.grade&&e.t===saveData.term&&wrongDue(e)&&(!Number.isInteger(unitSelection(s))||unitSelection(s)<0||e.unit===unitSelection(s))).sort((a,b)=>(a.due||'').localeCompare(b.due||''));}
+function spawnReviewVariant(s,e){let q=null;for(let i=0;i<24;i++){
+ if(['order','match','dictation'].includes(e.question.kind)){q=createInteractiveQuestion(s);q.unit=e.unit;}
+ else if(s==='english')q=englishQuestion(e.g,e.t,Math.max(1,e.question.level||1),new Set(),Number.isInteger(e.unit)?e.unit:-1);
+ else if(s==='math')q=mathQuestion(e.g,e.t,Number.isInteger(e.unit)?e.unit:-1,adapt(s,e.unit));
+ else q=chineseQuestion(e.g,e.t,Number.isInteger(e.unit)?e.unit:-1);
+ if(q.id!==e.id)break;
+ }q.__scheduledReview=e.id;q.__sourceTopic=e.question.topic||'';return q;}
+createRound=function(s){coreCreateRound(s);const arr=rounds[s],due=dueEntries(s);
+ // 自动回到正常练习：第1、第4题优先安排到期同知识点变式题
+ const injected=new Set();for(const [slot,e] of [[0,due[0]],[3,due[1]]]){if(e&&!injected.has(e.id)){arr[slot]=spawnReviewVariant(s,e);injected.add(e.id);}}
+ // 各种交互题型融入六题一轮；避免覆盖到期复习题
+ for(const slot of [2,5])if(arr[slot]&&!arr[slot].__scheduledReview)arr[slot]=createInteractiveQuestion(s);
+};
+startLevel=function(v){coreNextLevel(v);if(english.screen!=='play')return;const due=dueEntries('english'),run=currentGame().runs[english.level];if(due.length&&Array.isArray(run)&&english.index===0&&!run[0]?.__scheduledReview){run[0]=spawnReviewVariant('english',due[0]);store();render();}
+ if(english.level===3&&run&&english.index===0){run[2]=createInteractiveQuestion('english');store();render();}
+};
+function reviewEntryFor(q){if(!q?.__scheduledReview)return null;return saveData.wrongbooks[q.subject].find(e=>e.id===q.__scheduledReview)||null;}
+answer=function(value){const q=currentQuestion();if(!q)return;
+ let val=String(value).trim();if(q.kind==='dictation')val=val.toLowerCase().replace(/\s+/g,' ');
+ const wasSeen=activeTrial.seen,valid=view==='review'||view==='practice',already=(view==='review'?reviewSolved:(q.subject==='english'?english.solved:solved[q.subject]));
+ if(!valid||already)return;
+ const correct=val===String(q.answer).trim();
+ coreAnswer(val);
+ if(val==='')return;
+ if(view==='review'&&!correct&&reviewEntry)reviewEntry.due=localDate(1);
+ if(!wasSeen){const entry=reviewEntryFor(q);if(entry){if(correct){CORE_REVIEW_SUCCESS(entry);toast(entry.mastered?'🏅 同类题三次独立答对，已标记掌握！':`✅ 变式题答对！下次复习：${entry.due}`);}else{entry.reviewCount=0;entry.mastered=false;entry.due=localDate(1);}}
+ }
+ if(correct){petReward(q);store();}
+};
+nextQuestion=function(){const q=currentQuestion();if(q&&isCreativityRequired(q)&&!creativeRecorded(q)){toast('🧠 先完成思维挑战，再请家长听一听你的想法。');return;}resetCreative();coreNext();};
+function renderInteractive(q,correct,wrong){const sound=`<div class="soundrow">${btn('speak-zh',`🔊 ${ruby('听题目')}`,'ghost tiny')}${q.subject==='english'?btn('speak-en',`🇺🇸 ${ruby('听英文')}`,'muted tiny'):''}</div>`;
+ let tool='';
+ if(q.kind==='order'){
+ const remaining=q.tokens.filter(v=>!sortSequence.map(String).includes(String(v)));
+ tool=`<div class="think-desc order-drop">${ruby('已排列')}：${sortSequence.length?sortSequence.map(v=>`<span class="order-picked">${esc(v)}</span>`).join(' '):'请先选数字'}</div><div class="order-tiles">${remaining.map(v=>`<button class="order-tile" type="button" draggable="true" data-action="sort-pick" data-value="${esc(v)}">${esc(v)}</button>`).join('')}</div><p class="small">${ruby('手机点按或拖动数字，电脑也可以拖动数字排序。')}</p>${btn('sort-undo',`↩️ ${ruby('撤销一步')}`,'tiny ghost')}${btn('sort-clear',`🔄 ${ruby('重新排序')}`,'tiny muted')}`;
+ } else if(q.kind==='match'){
+ const right=shuffleStablePairs(q);const used=Object.values(matchPairs);tool=`<p class="small">${ruby('先选左边的字，再选右边的拼音。已完成')} ${Object.keys(matchPairs).length}/${q.pairs.length}</p><div class="match-columns"><div>${q.pairs.map(p=>`<button class="match-tile ${matchChoice===p[0]?'active':''} ${matchPairs[p[0]]?'done':''}" type="button" data-action="match-left" data-value="${esc(p[0])}" ${correct?'disabled':''}>${esc(p[0])}</button>`).join('')}</div><div>${right.map(p=>`<button class="match-tile ${used.includes(p[1])?'done':''}" type="button" data-action="match-right" data-value="${esc(p[1])}" ${correct?'disabled':''}>${esc(p[1])}</button>`).join('')}</div></div>${btn('match-clear',`🔄 ${ruby('重新连线')}`,'tiny ghost')}`;
+ }else if(q.kind==='dictation'){
+ tool=`<input id="dictationInput" class="dictation-input" type="text" lang="en" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="听一听，输入英语单词" ${correct?'disabled':''}/>${btn('dict-submit',`✅ ${ruby('提交听写')}`,'primary block')}`;
+ }
+ return `<div class="question ${q.subject}"><div class="picture">${esc(q.face)}</div><div class="prompt">${ruby(q.ask)}</div>${sound}</div><div class="interact-zone">${tool}</div>${correct?renderSuccess(q):renderFailed(q,wrong||'')}`;
+}
+const matchRightCache={};function shuffleStablePairs(q){if(!matchRightCache[q.id])matchRightCache[q.id]=shuffle(q.pairs.slice());return matchRightCache[q.id];}
+renderQuestion=function(q,correct,wrong){return ['order','match','dictation'].includes(q?.kind)?renderInteractive(q,correct,wrong):coreRenderQuestion(q,correct,wrong);};
+renderSuccess=function(q){return coreRenderSuccess(q)+renderCreative(q);};
+renderHeader=function(){coreRenderHeader();get('#starTotal').textContent='🐣 '+petInfo().xp+' XP';};
+renderHome=function(){const p=petInfo(),days=saveData.pet.days.length,points=saveData.creativity.length;return `<section class="card petbox"><div class="pet-art">${p.stage}</div><div><div class="small">我的成长伙伴 · 第 ${p.level} 级</div><h2 style="margin:3px 0">${ruby('小星星的冒险伙伴')}</h2><div class="small">${ruby(`已获得${p.xp}点成长值，距下一级还有${p.need}点`)}</div>${progress(45-p.need,45)}<div class="chips"><span class="chip">📅 ${days} ${ruby('个学习日')}</span><span class="chip">🧠 ${points} ${ruby('次思维表达')}</span></div></div></section>`+coreRenderHome()+`<section class="card"><h2 class="title">🏅 ${ruby('我的成长徽章')}</h2>${saveData.pet.badges.length?`<div class="chips">${saveData.pet.badges.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div>`:`<p class="small">${ruby('完成一次练习，就能获得第一枚徽章！')}</p>`}<p class="note">${ruby('徽章只是鼓励，不要求连续打卡；休息一天不会扣除任何奖励。')}</p></section>`;};
+renderReport=function(){const p=petInfo(),topics=Object.entries(saveData.adaptive).filter(([k])=>k.startsWith(`${saveData.subject}-${saveData.grade}-${saveData.term}-`));return coreRenderReport()+`<section class="card"><h2 class="title">🧠 ${ruby('开放思维与成长记录')}</h2><div class="metric-grid"><div class="metric"><b>${saveData.creativity.length}</b><span>思维表达次数</span></div><div class="metric"><b>${p.level}</b><span>宠物成长级别</span></div><div class="metric"><b>${saveData.pet.days.length}</b><span>累计学习日</span></div></div><p class="small">${ruby('根据连续三道首次答对升一级，连续两道首次答错降一级。仅在当前年级学期与知识主题内调节。')}</p>${topics.map(([key,d])=>`<div class="row" style="margin-top:9px"><span>${esc(key.split('-').at(-1)==='-1'?'综合随机':'主题 '+(Number(key.split('-').at(-1))+1))}</span><span class="chip">${['基础','标准','进阶'][d.tier]||'标准'}</span></div>`).join('')}<div class="tipbox">${ruby('每次思维挑战需要家长确认，系统记录完成情况及数学拆数方法数，不保存孩子的录音。')}</div></section>`;};
+renderWrongBook=function(){const count=dueEntries(saveData.subject).length;return `<div class="tipbox" style="margin-bottom:12px">⏰ ${ruby(`当前年级学期有${count}道到期错题，将自动安排进下一轮普通练习。每次独立答对、隔天再练，累积三次后标记为掌握。`)}</div>`+coreRenderWrongBook();};
+function applyCreative(){const q=currentQuestion();if(!q)return;
+ if(q.subject==='math'&&creativePairs.length<3){toast('至少找到三种不同的拆数方法，再来讲给家人听。');return;}
+ const note=get('#spokenNote')?.value?.trim().slice(0,120)||'';
+ const e={id:creativityId(q),day:localDate(),sub:q.subject,grade:q.g,term:q.t,topic:q.topic||'',methods:creativePairs.length,examples:creativePairs.map(x=>x.join('+')),note,parentChecked:true};
+ if(!creativeRecorded(q)){saveData.creativity.push(e);saveData.creativity=saveData.creativity.slice(-250);saveData.pet.xp+=10;if(saveData.creativity.length>=3&&!saveData.pet.badges.includes('🧠 小小思想家'))saveData.pet.badges.push('🧠 小小思想家');}creativeDone=true;store();toast('🧠 讲得真清楚！你获得了思考勋章！');if(saveData.voiceOn)sayZh('讲得真清楚！你不仅会做，还会解释。真了不起！');render();}
+// 附加交互：走原有事件代理；按钮事件只来自真实点击。
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action;
+ if(a==='add-split'){const q=currentQuestion();if(!q||q.subject!=='math')return;const A=get('#splitA')?.value,B=get('#splitB')?.value,target=splitTarget(q);if(A===''||B===''){toast('请把两个数字都填好。');return;}const x=Number(A),y=Number(B);if(!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x+y!==target){toast(`再想一想：两个非负整数相加应当等于 ${target}。`);return;}const pair=[Math.min(x,y),Math.max(x,y)];if(creativePairs.some(p=>p[0]===pair[0]&&p[1]===pair[1])){toast('这个办法已经找到啦，换一组试试！');return;}creativePairs.push(pair);if(saveData.voiceOn)sayZh(`新方法找到啦！已经有${creativePairs.length}种方法了。`);render();}
+ if(a==='parent-approve')applyCreative();
+ if(a==='sort-pick'){if(lastTouchDragValue===b.dataset.value&&Date.now()-lastTouchDragAt<800)return;const q=currentQuestion();if(!q||q.kind!=='order'||sortSequence.some(x=>String(x)===String(b.dataset.value)))return;sortSequence.push(Number(b.dataset.value));if(sortSequence.length===q.tokens.length){const val=sortSequence.join('|');answer(val);if(val!==q.answer)sortSequence=[];}render();}
+ if(a==='sort-undo'){sortSequence.pop();render();}if(a==='sort-clear'){sortSequence=[];render();}
+ if(a==='match-left'){matchChoice=b.dataset.value;render();}
+ if(a==='match-right'){const q=currentQuestion();if(!matchChoice||!q||q.kind!=='match')return;const right=b.dataset.value;const prior=Object.keys(matchPairs).find(k=>matchPairs[k]===right);if(prior)delete matchPairs[prior];matchPairs[matchChoice]=right;matchChoice=null;if(Object.keys(matchPairs).length===q.pairs.length){const val=Object.entries(matchPairs).map(([k,v])=>`${k}→${v}`).sort().join('|');answer(val);if(val!==q.answer)matchPairs={};}render();}
+ if(a==='match-clear'){matchPairs={};matchChoice=null;render();}
+ if(a==='dict-submit'){const q=currentQuestion();if(q?.kind!=='dictation')return;const val=get('#dictationInput')?.value||'';answer(val);}
+});
+// 若同时在旧版错题订正页，仍保留原先的“原题+变式题”复习流程。
+// 先保存旧的选择与切换逻辑，进入下一个题目/科目时重置交互状态。
+const oldSelectSubject=selectSubject;selectSubject=function(s){resetCreative();oldSelectSubject(s);};
+const oldChangeView=changeView;changeView=function(v){resetCreative();oldChangeView(v);};
+const oldResetSession=resetSession;resetSession=function(){resetCreative();
+ // 以新逻辑重建数学、语文练习轮次
+ createRound('math');createRound('chinese');english={screen:'map',level:0,index:0,solved:false,reveal:false,lastWrong:''};resetTrial();reviewEntry=null;reviewSolved=false;reviewVariant=null;reviewStage='original';};
+// 错题自动注入需在日期打开后刷新，避免跨天还停留在旧的一轮题里。
+function refreshDuePool(){for(const s of ['math','chinese']){if(position[s]===0&&!solved[s])createRound(s);}}
+// 词语听写请只播放单词本身，不能把答案写在题面中。
+const baseReadQuestion=readQuestion;
+readQuestion=function(){const q=currentQuestion();if(q?.kind==='dictation'&&q.subject==='english'){sayZh('听一听英文，再把听到的单词写出来。');return;}baseReadQuestion();};
+get('#unitSel').addEventListener('change',()=>{resetCreative();});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='dictationInput'){e.preventDefault();answer(e.target.value);}});
+// HTML5拖动辅助排序；触屏下采用无误触的“点按顺序”作为后备交互。
+let draggingValue=null,lastTouchDragValue=null,lastTouchDragAt=0,activePointer=null;
+// 触屏拖放：手指按住数字卡片并移动，松开时把它放入答案队列。点按仍可用。
+document.addEventListener('pointerdown',e=>{const tile=e.target.closest('.order-tile');if(!tile||e.pointerType==='mouse')return;activePointer={tile,value:tile.dataset.value,x:e.clientX,y:e.clientY,moved:false};});
+document.addEventListener('pointermove',e=>{if(!activePointer)return;const p=activePointer,dx=e.clientX-p.x,dy=e.clientY-p.y;if(Math.hypot(dx,dy)>13){p.moved=true;p.tile.classList.add('dragging');p.tile.style.transform=`translate(${dx}px,${dy}px)`;}});
+document.addEventListener('pointerup',e=>{if(!activePointer)return;const p=activePointer;activePointer=null;p.tile.style.transform='';p.tile.classList.remove('dragging');if(!p.moved)return;const q=currentQuestion();if(q?.kind!=='order'||sortSequence.includes(Number(p.value)))return;lastTouchDragValue=p.value;lastTouchDragAt=Date.now();sortSequence.push(Number(p.value));if(sortSequence.length===q.tokens.length){const val=sortSequence.join('|');answer(val);if(val!==q.answer)sortSequence=[];}render();});
+document.addEventListener('pointercancel',()=>{if(activePointer){activePointer.tile.style.transform='';activePointer.tile.classList.remove('dragging');activePointer=null;}});
+document.addEventListener('dragstart',e=>{const b=e.target.closest('.order-tile');if(!b)return;draggingValue=b.dataset.value;e.dataTransfer?.setData('text/plain',draggingValue);});
+document.addEventListener('dragover',e=>{if(e.target.closest('.interact-zone'))e.preventDefault();});
+document.addEventListener('drop',e=>{if(!e.target.closest('.interact-zone')||draggingValue==null)return;e.preventDefault();const q=currentQuestion();if(q?.kind!=='order')return;if(sortSequence.includes(Number(draggingValue)))return;sortSequence.push(Number(draggingValue));if(sortSequence.length===q.tokens.length){const val=sortSequence.join('|');answer(val);if(val!==q.answer)sortSequence=[];}draggingValue=null;render();});
+store();
+
+
+// ===== V4.2 Guided DeepSeek tutor: online requires same-origin Node server; offline answers are labelled as local hints =====
+let aiIsOpen=false, aiHistory=[], aiQuestionKey='', aiPending=false, aiOnline=false, aiStatusChecked=false, aiRequestSeq=0;
+const aiPanel=document.getElementById('aiTutorOverlay');
+const aiConversation=document.getElementById('aiTutorMessages');
+const aiStatus=document.getElementById('aiTutorStatus');
+const aiCtx=document.getElementById('aiTutorContext');
+const aiSubmit=document.getElementById('aiTutorSend');
+let aiRecognition=null;
+const aiInput=document.getElementById('aiTutorInput');
+const aiConsent=document.getElementById('aiParentConsent');
+const aiSafeText=s=>String(s??'').replace(/<[^>]*>/g,'').slice(0,260);
+function aiContextData(){
+ const q=currentQuestion();
+ const solvedNow=q ? (view==='review'?reviewSolved:q.subject==='english'?english.solved:Boolean(solved[q.subject])) : false;
+ return {subject:saveData.subject,grade:saveData.grade,term:saveData.term,topic:aiSafeText(q?.topic||lessonTitle()).slice(0,60),
+ question:aiSafeText(q?((q.ask||'')+' '+(q.face||'')):'当前没有进行中的题目').slice(0,260),
+ correctAnswer:aiSafeText(q?.answer||'').slice(0,90),explanation:aiSafeText(q?.explain||'').slice(0,250),
+ hint:aiSafeText(q?.tip||'').slice(0,140),solved:Boolean(solvedNow)};
+}
+function aiKey(){const q=currentQuestion();return [saveData.grade,saveData.term,saveData.subject,view,q?.id||'none'].join('|');}
+function aiAddMessage(role,text,source=''){aiHistory.push({role,text:String(text).slice(0,760),source});if(aiHistory.length>18)aiHistory.splice(0,aiHistory.length-18);aiPaintMessages();}
+function aiPaintMessages(){aiConversation.replaceChildren();for(const m of aiHistory){const el=document.createElement('div');el.className='ai-msg '+(m.role==='assistant'?'teacher':'child');
+ const who=document.createElement('span');who.className='ai-message-author';who.textContent=m.role==='assistant'?(m.source==='offline'?'🧩 本地提示（非 DeepSeek）':'🌷 星星AI老师'):'🧒 我';el.append(who);
+ const content=document.createElement('span');content.textContent=m.text;el.append(content);
+ if(m.role==='assistant'){const play=document.createElement('button');play.type='button';play.className='ai-read';play.textContent='🔊 朗读';play.addEventListener('click',()=>sayZh(m.text));el.append(document.createElement('div'),play);}
+ aiConversation.append(el);}aiConversation.scrollTop=aiConversation.scrollHeight;}
+function aiSyncQuestion(){const k=aiKey();if(k!==aiQuestionKey){aiQuestionKey=k;aiHistory=[];aiRequestSeq++;aiAddMessage('assistant','你好呀！我是星星老师。你可以先说说自己的想法，我会陪你一步一步找到方法。','offline');}
+ const q=currentQuestion();aiCtx.textContent=q?`📘 ${NAME[saveData.subject]} · ${saveData.grade}年级${labelTerm(saveData.term)} · ${aiSafeText(q.topic||'综合练习')} · ${aiSafeText(q.ask||'')}`:`📘 ${NAME[saveData.subject]} · ${saveData.grade}年级${labelTerm(saveData.term)} · 先打开一道题，也可以问学习方法。`;
+}
+function aiShowStatus(){aiStatus.textContent=aiOnline?'🟢 DeepSeek 已连接 · 引导式学习模式':'🟡 本地模式 · 未连接 DeepSeek，只有预设提示';}
+async function aiCheckStatus(){if(location.protocol==='file:'){aiOnline=false;aiShowStatus();return;}try{const response=await fetch('/api/tutor/status',{cache:'no-store',signal:AbortSignal.timeout(3500)});if(!response.ok)throw Error('status');const data=await response.json();aiOnline=!!data.available;}catch{aiOnline=false;}aiStatusChecked=true;aiShowStatus();}
+function aiOpen(){aiIsOpen=true;aiPanel.classList.remove('hidden');document.body.classList.add('ai-open');aiConsent.checked=!!saveData.aiParentConsent;aiSyncQuestion();aiCheckStatus();aiInput.focus();}
+function aiClose(){try{aiRecognition?.stop();}catch{}aiPending=false;aiSubmit.disabled=false;document.querySelectorAll('.ai-quick').forEach(b=>b.disabled=false);aiIsOpen=false;aiPanel.classList.add('hidden');document.body.classList.remove('ai-open');aiRequestSeq++;document.getElementById('aiTeacherFab').focus();}
+function aiOfflineGuidance(input,context){const q=currentQuestion();if(!q)return '先选择一个学科，打开一道题，我们一起看一看题目要求。';
+ if(context.solved&&/讲|解释|答案|为什么/.test(input))return '这题已经完成啦。'+(q.explain||'说说你是怎么想出来的，好吗？');
+ if(/答案|直接|等于多少|告诉我结果/.test(input))return '我们先不急着说答案哦。'+(q.tip||'先找出题目中已知的条件，你觉得第一步可以做什么？');
+ if(/简单|不会|不懂|提示|帮/.test(input))return '没关系，我们一点一点来。'+(q.tip||'先观察题目里最重要的数字或文字，告诉我你看到了什么。');
+ if(/讲|思路|我想/.test(input))return '我很想听听你的想法！你先告诉我第一步怎么做的，为什么这样做？';
+ return '你愿意先尝试一次吗？'+(q.tip||'找到题目里的重要信息后，说说你准备怎样开始。');
+}
+function aiHasPrivateData(text){return /1[3-9]\d{9}|[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|(?:\d[ -]?){9,}|(?:家庭住址|身份证|电话号码|微信号|住在|我家地址|我的名字是)/.test(text);}
+async function aiAsk(raw){const msg=String(raw||'').trim().slice(0,160);if(!msg||aiPending)return;if(aiHasPrivateData(msg)){toast('请不要发送个人信息。可以换一种不包含姓名、住址或电话的提问方式。');return;}
+ aiSyncQuestion();const context=aiContextData();const previous=aiHistory.filter(x=>(x.role==='user'&&x.source==='online-user')||(x.role==='assistant'&&x.source==='online')).slice(-8).map(x=>({role:x.role,content:x.text.slice(0,500)}));
+ aiAddMessage('user',msg,aiOnline&&aiConsent.checked?'online-user':'offline');aiInput.value='';
+ if(!aiOnline){aiAddMessage('assistant',aiOfflineGuidance(msg,context),'offline');return;}
+ if(!aiConsent.checked){aiAddMessage('assistant','请先请爸爸妈妈阅读并勾选“启用联网对话”。在此之前，我只能提供本地预设提示。','offline');return;}
+ aiPending=true;aiSubmit.disabled=true;document.querySelectorAll('.ai-quick').forEach(b=>b.disabled=true);const requestId=++aiRequestSeq;aiStatus.textContent='🌷 星星老师正在想怎样提示你…';
+ try{const response=await fetch('/api/tutor/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:previous,context}),signal:AbortSignal.timeout(28000)});
+ const data=await response.json();if(!response.ok||!data.reply)throw Error(data.error||'暂时无法连接到老师');
+ if(requestId!==aiRequestSeq||!aiIsOpen)return;const answer=String(data.reply).slice(0,780);aiAddMessage('assistant',answer,'online');
+ }catch(err){if(requestId!==aiRequestSeq||!aiIsOpen)return;aiAddMessage('assistant',`连接 DeepSeek 暂时不成功（${String(err.message||'网络错误').slice(0,60)}）。先看看这个小提示：${aiOfflineGuidance(msg,context)}`,'offline');
+ }finally{if(requestId===aiRequestSeq){aiPending=false;aiSubmit.disabled=false;document.querySelectorAll('.ai-quick').forEach(b=>b.disabled=false);aiShowStatus();}}
+}
+document.getElementById('aiTeacherFab').addEventListener('click',aiOpen);
+document.getElementById('aiTutorClose').addEventListener('click',aiClose);
+document.getElementById('aiTutorMic').addEventListener('click',()=>{
+ if(!aiConsent.checked){toast('语音输入可能需要浏览器语音服务，请先由家长勾选联网授权。');return;}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){toast('当前浏览器暂不支持语音转文字，请改用文字输入。');return;}
+ if(aiRecognition){try{aiRecognition.stop();}catch{}return;}
+ try{const r=new SR();aiRecognition=r;r.lang=saveData.subject==='english'?'en-US':'zh-CN';r.continuous=false;r.interimResults=false;
+  document.getElementById('aiTutorMic').textContent='⏺';
+  r.onresult=e=>{const t=String(e.results?.[0]?.[0]?.transcript||'').slice(0,160);aiInput.value=(aiInput.value+' '+t).trim().slice(0,160);aiInput.focus();};
+  r.onerror=()=>toast('没有听清，或者麦克风没有授权，可以改用打字提问。');
+  r.onend=()=>{aiRecognition=null;document.getElementById('aiTutorMic').textContent='🎤';};r.start();
+ }catch{aiRecognition=null;document.getElementById('aiTutorMic').textContent='🎤';toast('麦克风暂时不可用，请用文字提问。');}
+});
+aiPanel.addEventListener('click',e=>{if(e.target===aiPanel)aiClose();});
+document.getElementById('aiTutorForm').addEventListener('submit',e=>{e.preventDefault();aiAsk(aiInput.value);});
+document.querySelectorAll('[data-ai-prompt]').forEach(b=>b.addEventListener('click',()=>aiAsk(b.dataset.aiPrompt)));
+aiConsent.addEventListener('change',()=>{saveData.aiParentConsent=!!aiConsent.checked;store();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&aiIsOpen){e.stopPropagation();aiClose();}});
+const renderBeforeAITutor=render;render=function(){renderBeforeAITutor();if(aiIsOpen)aiSyncQuestion();};
+
+resetSession();render();
+// V4.3 — US English Language Arts pathway. English lessons are English-first,
+// no Chinese-English word translations; parent UI remains Chinese.
+if(!saveData.usEnglishMigrated){saveData.legacyEnglishWrongbook=Array.isArray(saveData.wrongbooks?.english)?saveData.wrongbooks.english.filter(e=>!e?.question?.us):[];saveData.wrongbooks.english=(saveData.wrongbooks.english||[]).filter(e=>e?.question?.us);saveData.usEnglishMigrated=true;store();}
+const US_WORDS = {
+  1:[['cat','🐱'],['dog','🐶'],['sun','☀️'],['pig','🐷'],['hat','🎩'],['fish','🐟'],['cup','🥤'],['bus','🚌'],['hen','🐔'],['fox','🦊'],['bed','🛏️'],['pen','🖊️'],['map','🗺️'],['bug','🐞'],['bat','🦇'],['ball','⚽'],['book','📘'],['milk','🥛'],['apple','🍎'],['star','⭐']],
+  2:[['ship','🚢'],['shop','🏬'],['rain','🌧️'],['moon','🌙'],['boat','🚤'],['cake','🎂'],['bike','🚲'],['tree','🌳'],['chair','🪑'],['frog','🐸'],['clock','🕒'],['plane','✈️'],['smile','🙂'],['whale','🐋'],['train','🚆'],['flower','🌼'],['snake','🐍'],['brush','🪥'],['bread','🍞'],['sheep','🐑']],
+  3:[['garden','🌱'],['rabbit','🐇'],['river','🏞️'],['window','🪟'],['sunshine','🌤️'],['birthday','🎂'],['butterfly','🦋'],['basket','🧺'],['pencil','✏️'],['puzzle','🧩'],['library','📚'],['mountain','⛰️'],['planet','🪐'],['jungle','🌴'],['ocean','🌊'],['people','👨‍👩‍👧'],['turtle','🐢'],['whisper','🤫'],['storm','⛈️'],['bridge','🌉']],
+  4:[['adventure','🧭'],['curious','🔍'],['journey','🎒'],['weather','🌤️'],['island','🏝️'],['explore','🗺️'],['discover','💡'],['protect','🛡️'],['nature','🌳'],['shelter','🏠'],['quietly','🤫'],['patient','🧘'],['carefully','🔍'],['creative','🎨'],['volcano','🌋'],['compass','🧭'],['habitat','🌲'],['delight','😁'],['problem','🧩'],['solution','💡']],
+  5:[['evidence','🔎'],['observe','🔭'],['compare','⚖️'],['contrast','🌗'],['infer','🧠'],['predict','🔮'],['analyze','📊'],['explain','🗣️'],['organize','🗂️'],['research','📚'],['argument','💬'],['respect','🤝'],['perspective','👀'],['community','🏘️'],['consequence','⚡'],['character','🎭'],['setting','🏞️'],['theme','💭'],['summary','📝'],['example','🧩']],
+  6:[['interpret','🔎'],['structure','🏗️'],['narrator','📖'],['claim','💬'],['reason','🧠'],['citation','📚'],['sequence','🔢'],['context','🗺️'],['figurative','🎨'],['metaphor','🌊'],['persuade','🗣️'],['evaluate','📊'],['source','📰'],['reliable','✅'],['opinion','💭'],['fact','📌'],['transition','➡️'],['paragraph','📝'],['revision','✏️'],['audience','👥']]
+};
+const US_STORIES={
+1:[{story:'Sam has a red hat. Sam puts the hat on.',ask:'What color is the hat?',answer:'Red',opts:['Red','Blue','Green','Yellow'],why:'What is your favorite color?',tip:'Listen for the color word.'},
+{story:'A cat sits on a mat. The cat is happy.',ask:'Where is the cat?',answer:'On a mat',opts:['On a mat','In a box','Under a bed','In a tree'],why:'Where does your pet like to sit?',tip:'Where does the cat sit?'},
+{story:'Ben has a ball. He plays in the park.',ask:'Where does Ben play?',answer:'In the park',opts:['In the park','In a car','At a store','At school'],why:'Where do you like to play?',tip:'Listen for a place.'},
+{story:'It is hot. Mia drinks water.',ask:'What does Mia drink?',answer:'Water',opts:['Water','Milk','Juice','Tea'],why:'What do you drink on a hot day?',tip:'What does Mia drink?'}],
+2:[{story:'Lily and Max see a frog beside a pond. The frog jumps into the water.',ask:'Where does the frog jump?',answer:'Into the water',opts:['Into the water','Into a tree','Onto a bed','Into a bag'],why:'Why might a frog jump into water?',tip:'Listen to the last part.'},
+{story:'The rain stops. A rainbow shines above the park.',ask:'What shines above the park?',answer:'A rainbow',opts:['A rainbow','A kite','A plane','The moon'],why:'What can you see after rain?',tip:'What shines?'}],
+3:[{story:'Ava plants a seed in her garden. She waters it each day. After one week, a tiny green sprout appears.',ask:'Why does Ava water the seed?',answer:'To help it grow',opts:['To help it grow','To make it cold','To hide it','To paint it'],why:'What else does a seed need to grow?',tip:'Think about what a seed needs.'},
+{story:'The turtle moves slowly. The rabbit runs quickly. They reach the tree at different times.',ask:'Which animal moves more slowly?',answer:'The turtle',opts:['The turtle','The rabbit','The tree','Both'],why:'Does moving slowly always mean losing?',tip:'Find the word slowly.'}],
+4:[{story:'During the storm, the children stayed in the school library. They read books while they waited for the rain to stop.',ask:'Why did the children stay inside?',answer:'Because of the storm',opts:['Because of the storm','Because they were hungry','Because it was dark','Because school was closed'],why:'How can people stay safe in a storm?',tip:'Look at the first sentence.'}],
+5:[{story:'Maya brought a reusable bottle to the park. Her friends noticed it. Soon, several friends brought reusable bottles too.',ask:'Which detail shows Maya influenced others?',answer:'Her friends brought reusable bottles',opts:['Her friends brought reusable bottles','The park was empty','Maya forgot her bottle','It started to rain'],why:'What makes an example persuasive?',tip:'What changed after Maya acted?'}],
+6:[{story:'Some students argued that the school garden should grow vegetables. Others favored flowers. The group collected evidence about costs and benefits before deciding.',ask:'Which action shows evidence-based decision-making?',answer:'Comparing costs and benefits',opts:['Comparing costs and benefits','Choosing without discussion','Ignoring different ideas','Picking at random'],why:'What other evidence would help?',tip:'What did the group collect before deciding?'}]
+};
+const US_RHYMES=[['cat','hat','sun','dog','pig'],['sun','fun','cat','pen','fish'],['dog','log','cup','hen','moon'],['pen','hen','hat','bed','bus'],['cake','lake','ship','frog','train'],['boat','goat','tree','chair','rain'],['fish','dish','cake','sun','book'],['rain','train','ship','dog','moon'],['tree','bee','hat','bus','frog'],['light','night','cake','cat','map']];
+const US_CONTEXT={
+3:[
+ ['The tiny kitten slept in a shoe. What does tiny mean?','Very small',['Very small','Very loud','Very fast','Very old'],'Tiny describes something very small.','Name one tiny thing.'],
+ ['The rabbit dashed into the garden. What does dashed mean?','Ran quickly',['Ran quickly','Slept','Whispered','Stopped'],'Dashed means moved quickly.','When might you dash somewhere?'],
+ ['Maya whispered in the library. What does whispered mean?','Spoke softly',['Spoke softly','Shouted','Sang loudly','Jumped'],'A whisper is a soft voice.','Where do people whisper?'],
+ ['It was chilly, so Max put on a jacket. What does chilly mean?','A little cold',['A little cold','Very hot','Very bright','Very loud'],'A jacket is a clue that chilly means a little cold.','What do you wear when it is chilly?']],
+4:[
+ ['After the long hike, Jo was exhausted. What does exhausted mean?','Very tired',['Very tired','Very excited','Very hungry','Very angry'],'Long activity can make someone exhausted, or very tired.','What helps you rest?'],
+ ['The path was narrow. Only one person could walk on it. What does narrow mean?','Not wide',['Not wide','Very noisy','Hard','Clean'],'The second sentence provides a clue about narrow.','Where have you seen a narrow path?'],
+ ['Ava observed the birds carefully. What does observed mean?','Watched closely',['Watched closely','Ignored','Painted','Fed'],'To observe means to look carefully.','What would you observe outdoors?'],
+ ['The storm was fierce, so everyone stayed indoors. What does fierce mean?','Very strong',['Very strong','Very small','Very quiet','Very short'],'The storm required people to stay safe indoors.','What detail helped you infer the meaning?']],
+5:[
+ ['The evidence was convincing, so the class changed its mind. What does convincing mean?','Persuasive',['Persuasive','Confusing','Ordinary','Secret'],'Convincing evidence can change what people believe.','What makes evidence strong?'],
+ ['The class proposed an alternative plan. What does alternative mean?','Another choice',['Another choice','The same idea','A mistake','A reward'],'An alternative is another possible choice.','Give two ways to solve one problem.'],
+ ['The scientists were cautious before drawing a conclusion. What does cautious mean?','Careful',['Careful','Careless','Angry','Certain'],'Cautious means careful and thoughtful.','Why should scientists be cautious?'],
+ ['The author emphasizes the need to conserve water. What does conserve mean?','Use carefully',['Use carefully','Waste','Hide','Heat'],'Conserve means use wisely and avoid waste.','How might you conserve water?']],
+6:[
+ ['The writer addresses a counterargument before presenting more evidence. What is a counterargument?','An opposing viewpoint',['An opposing viewpoint','A story setting','A metaphor','A summary'],'A counterargument gives a different or opposing position.','Why might a writer include it?'],
+ ['The narrator is unreliable because key details conflict. What does unreliable mean?','Not always trustworthy',['Not always trustworthy','Very friendly','Always factual','Very quiet'],'An unreliable narrator may not provide consistently accurate details.','What would help you check the account?'],
+ ['The claim was supported by relevant evidence. What does relevant mean?','Closely connected',['Closely connected','Unrelated','Unknown','Funny'],'Relevant evidence directly supports the claim.','What evidence could support a school garden?'],
+ ['The paragraph implies that the character regrets the choice. What does implies mean?','Suggests without stating directly',['Suggests without stating directly','Shouts loudly','Repeats exactly','Changes the topic'],'An implication is a meaning suggested by details.','Which detail led to that inference?']]
+};
+const US_PATTERNS={
+3:[
+ ['Which word has a suffix meaning full of?','careful',['careful','garden','rabbit','window'],'-ful can mean full of.','Tell me a careful action.'],
+ ['Which word has TWO syllables?','rabbit',['rabbit','cat','sun','book'],'Rabbit has two spoken syllables.','Clap out the syllables.'],
+ ['Which word is a compound word?','sunshine',['sunshine','rabbit','river','garden'],'Sunshine combines sun and shine.','Can you combine two words?'],
+ ['Which word begins with un-?','unsafe',['unsafe','bridge','pencil','flower'],'The prefix un- often means not.','What might unsafe mean?']],
+4:[
+ ['Which word is a synonym for joyful?','happy',['happy','sad','tired','angry'],'A synonym is a word with a similar meaning.','Use joyful in a sentence.'],
+ ['Which word has a prefix meaning not?','unfair',['unfair','sunshine','explore','brave'],'Un- can mean not.','What is a fair choice?'],
+ ['Which word is a compound word?','raincoat',['raincoat','island','patient','journey'],'Raincoat is rain plus coat.','Find another compound word.'],
+ ['Which word is the antonym of expand?','shrink',['shrink','grow','stretch','increase'],'An antonym is a word with an opposite meaning.','Give two opposites.']],
+5:[
+ ['Which word means a possible result?','consequence',['consequence','evidence','setting','audience'],'A consequence is an outcome of an action.','What might follow a kind action?'],
+ ['Which word is closest to analyze?','examine carefully',['examine carefully','forget quickly','copy exactly','guess randomly'],'To analyze is to study closely.','What clues would you examine?'],
+ ['Which phrase signals contrast?','On the other hand',['On the other hand','For example','First of all','As a result'],'On the other hand signals a different view.','Compare two ideas.'],
+ ['Which phrase signals a cause?','Because of the rain',['Because of the rain','Next to the tree','On Tuesday','Near the school'],'Because of tells a cause.','Describe one cause and effect.']],
+6:[
+ ['Which statement is a claim?','School gardens help students learn.',['School gardens help students learn.','It was Tuesday.','The gate was green.','A leaf fell.'],'A claim is a position that can be supported with evidence.','What evidence supports the claim?'],
+ ['Which statement is evidence, not an opinion?','12 students joined the garden club.',['12 students joined the garden club.','The garden is the best place.','Gardening is boring.','Flowers are always prettier.'],'A count of students is a checkable detail.','How could you verify the number?'],
+ ['Which phrase introduces a counterpoint?','However, some disagree.',['However, some disagree.','For example,','As a result,','In the beginning,'],'However signals contrast or opposition.','What is another viewpoint?'],
+ ['Which phrase asks for textual evidence?','Which sentence supports that?',['Which sentence supports that?','Did you have fun?','What is your favorite snack?','When is your birthday?'],'Good readers support an idea with text details.','Find a sentence that supports your view.']]
+};
+US_STORIES[2].push(
+{story:'Kai packs a lunch and a water bottle. He walks to the playground with his sister.',ask:'What does Kai bring to drink?',answer:'A water bottle',opts:['A water bottle','A cup of soup','A box of milk','A bowl of fruit'],why:'Why is it helpful to bring water?',tip:'Listen for what Kai packs.'},
+{story:'Nora looks outside. Dark clouds cover the sky. She takes an umbrella before leaving.',ask:'Why does Nora take an umbrella?',answer:'It may rain',opts:['It may rain','It is too sunny','She wants to swim','The umbrella is broken'],why:'What other clue can show that rain is coming?',tip:'Think about dark clouds.'});
+US_STORIES[3].push(
+{story:'Jay lost his mittens on a cold day. His friend Emma lent him an extra pair. Jay thanked her and returned them after school.',ask:'What does Emma do that shows kindness?',answer:'She lends Jay mittens',opts:['She lends Jay mittens','She takes his coat','She loses his hat','She leaves early'],why:'How can you help a friend?',tip:'What did Emma share?'},
+{story:'A bird built a nest in the tree. Two days later, wind knocked it down. The bird gathered twigs and built a new one.',ask:'What happens after the wind knocks down the nest?',answer:'The bird rebuilds it',opts:['The bird rebuilds it','The bird leaves the forest','The tree falls','The nest becomes a house'],why:'What can this story teach about perseverance?',tip:'Read the last sentence.'});
+US_STORIES[4].push(
+{story:'Many insects visit the school garden. Bees move pollen from flower to flower. Students planted additional flowers to help insects find food.',ask:'What is the MAIN idea?',answer:'Flowers help garden insects',opts:['Flowers help garden insects','Students dislike insects','Bees only visit trees','The garden has no flowers'],why:'Which details support the main idea?',tip:'Think about bees and flowers.'},
+{story:'Nora wanted to learn to play the violin. At first the notes sounded rough. She practiced every afternoon, and after months her playing improved.',ask:'What caused Nora to improve?',answer:'Regular practice',opts:['Regular practice','A new instrument','Good weather','A bigger room'],why:'Which detail tells you about her effort?',tip:'Look for what Nora did each afternoon.'},
+{story:'The park was crowded on Saturday, but quiet on Monday morning. On Saturday families gathered for a festival.',ask:'What explains the difference?',answer:'A Saturday festival',opts:['A Saturday festival','Snow on Monday','A broken bridge','A school bus'],why:'How does time affect how people use places?',tip:'The last sentence gives a reason.'});
+US_STORIES[5].push(
+{story:'The fifth-grade class collected rainwater for the garden. Over four weeks, they used fewer buckets of tap water than before.',ask:'Which detail BEST supports the claim that rainwater collection helped?',answer:'They used less tap water',opts:['They used less tap water','The garden had flowers','It was spring','Students liked the garden'],why:'What other measurement would strengthen the evidence?',tip:'Which detail describes a change in water use?'},
+{story:'An article says that biking to school may reduce car traffic. It also notes that some roads need safer bike lanes before more children can ride.',ask:'What is the author doing?',answer:'Considering benefits and limitations',opts:['Considering benefits and limitations','Ignoring safety','Writing a fairy tale','Describing a recipe'],why:'Why is it useful to consider more than one side?',tip:'The text gives a benefit and a concern.'},
+{story:'The scientist tested two plants in different amounts of sunlight. Both plants received the same amount of water each day.',ask:'Why did both plants get the same amount of water?',answer:'To compare the effect of sunlight',opts:['To compare the effect of sunlight','To make both flowers blue','To stop the plants from growing','To change the kind of soil'],why:'What makes a comparison fair?',tip:'Only one condition should change at a time.'});
+US_STORIES[6].push(
+{story:'A school council proposed starting classes thirty minutes later. Supporters cited student sleep data. Critics worried that bus schedules would become more difficult.',ask:'Which evidence would BEST test the supporters’ claim?',answer:'Student sleep and attendance records',opts:['Student sleep and attendance records','Favorite lunch surveys','A picture of a school bus','The color of the classrooms'],why:'How would you compare benefits and costs?',tip:'Find evidence about sleep and school outcomes.'},
+{story:'In a story, Mara says, "I did not care about winning," but later hides her disappointment and avoids her teammates. The narrator only reports what Mara says and does.',ask:'Which inference is supported?',answer:'Mara may care more than she admits',opts:['Mara may care more than she admits','Mara never played the game','Her teammates are angry','Winning is always bad'],why:'Which actions support your inference?',tip:'Compare Mara’s words with her actions.'},
+{story:'An article argues that a local river is healthier this year. It reports more fish sightings but does not provide measurements of water quality.',ask:'What is a limitation of the evidence?',answer:'Water-quality data is missing',opts:['Water-quality data is missing','Fish cannot live in rivers','All sightings are false','Rivers never change'],why:'What data would you collect next?',tip:'What important measurement is not included?'});
+const US_SENTENCE=[
+ ['Which is a complete sentence?','The dog runs.',['The dog runs.','Dog the','Runs the','The dog'], 'A sentence tells a complete idea.','Can you say a new sentence?'],
+ ['Which sentence asks a question?','Where is my book?',['Where is my book?','My book is red.','I like books.','The book is here.'],'A question asks something and ends with a question mark.','Ask one question about your day.'],
+ ['Which word completes the sentence? I ___ a book.','read',['read','blue','happy','under'],'Read is an action word in this sentence.','What do you like to read?'],
+ ['Choose the word that describes the sun.','bright',['bright','jump','sing','run'],'Bright describes how the sun looks.','What else can be bright?'],
+ ['Which sentence gives a reason?','I went inside because it rained.',['I went inside because it rained.','The rain is wet.','I have a coat.','My coat is blue.'],'Because introduces a reason.','Tell me something you do because it is raining.']
+];
+function usVocabulary(g,t){const grade=Math.max(1,Math.min(6,Number(g)||1)),list=US_WORDS[grade];return t===1?list.slice(0,16):list.slice(4);}
+// Existing support functions also use enWords for spelling; make those words genuinely US-curriculum based.
+enWords=function(g,t){return usVocabulary(g,t).map(([en,icon])=>({en,icon,zh:''}));};
+englishUnits=function(g){return ['Sounds & Letters','Phonics & Words','Reading & Stories','Speaking & Writing'];};
+englishLevels=function(g){return g<=2?['Sound Safari','Picture & Word Play','Rhyme River','Story Time','Speak & Think']:['Word Detectives','Vocabulary in Context','Word Patterns','Reading Detectives','Write & Explain'];};
+currentGame=function(){const base=`us-ela-v1-${saveData.grade}-${saveData.term}`,u=unitSelection('english'),k=u<0?base:`${base}-u${u}`;
+ if(!saveData.englishGames[k])saveData.englishGames[k]={unlocked:0,completed:[],progress:{},runs:{}};
+ const game=saveData.englishGames[k];game.completed=Array.isArray(game.completed)?game.completed:[];game.progress=game.progress||{};game.runs=game.runs||{};game.unlocked=Math.max(0,Math.min(4,Number(game.unlocked)||0));return game;
+};
+function usPick(list,used,makeKey){let eligible=list.filter(x=>!used.has(makeKey(x)));if(!eligible.length)eligible=list;const value=eligible[randint(0,eligible.length-1)];used.add(makeKey(value));return value;}
+function usOptions(correct,decoys){return shuffle([correct,...decoys.filter(x=>x!==correct).slice(0,3)]);}
+englishQuestion=function(g,t,level,used=new Set(),theme=-1){
+ const grade=Math.max(1,Math.min(6,Number(g)||1)),words=usVocabulary(grade,t),pickWord=()=>usPick(words,used,x=>x[0]);
+ const mk=(type,ask,face,answer,options,spoken,explain,why,tip,icon='')=>({subject:'english',g:grade,t,unit:theme<0?Math.max(0,Math.min(3,level-1)):theme,topic:englishLevels(grade)[level],level,kind:'choice',us:true,usType:type,ask,face,answer,options,voiceEn:spoken,voiceZh:'',explain,why,tip,icon, audioQuiz:type==='sound',id:`us-${grade}-${t}-${level}-${type}-${String(answer).replace(/\s/g,'_')}-${String(face).slice(0,34).replace(/\s/g,'_')}`});
+ // Include different strands in every adventure; advance by US literacy skills, not translations.
+ let q;
+ if(level===0){
+  if(grade>=3){
+   const patterns=[
+    ['Which word begins with the prefix re-?','rewrite',['rewrite','sunshine','flower','teacher'],'The prefix re- can mean again.','Can you say what you might rewrite?'],
+    ['Which word ends with -ful?','helpful',['helpful','garden','teacher','rabbit'],'The suffix -ful means full of.','What is one helpful action?'],
+    ['Which word has THREE syllables?','butterfly',['butterfly','cat','garden','river'],'Butterfly has three spoken syllables: but-ter-fly.','Clap the syllables in another long word.'],
+    ['Which word has the prefix un-?','unhappy',['unhappy','flower','turtle','garden'],'The prefix un- often means not.','What does unhappy mean?'],
+    ['Which word ends in -less?','careless',['careless','careful','window','sunshine'],'The suffix -less means without.','How are careful and careless different?'],
+    ['Which word is a compound word?','sunflower',['sunflower','garden','river','rabbit'],'Sunflower combines sun and flower.','Can you find another compound word?']
+   ];
+   const p=usPick(patterns,used,x=>x[0]);q=mk('wordstudy',p[0],'🔤',p[1],shuffle(p[2]),p[0],p[3],p[4],'Look for meaningful word parts.','🔤');
+  }else{
+   const letters=['b','c','d','f','h','m','p','s','t'];const eligible=words.filter(x=>letters.includes(x[0][0].toLowerCase())&&!/^(sh|ch|th|ph)/i.test(x[0]));const w=usPick(eligible.length?eligible:US_WORDS[1].filter(x=>letters.includes(x[0][0])),used,x=>x[0]);
+   const first=w[0][0].toUpperCase();const choices=shuffle([first,...sample(letters.map(x=>x.toUpperCase()).filter(x=>x!==first),3)]);
+   q=mk('sound','Listen. Which letter makes the FIRST sound?','🎧',first,choices,w[0],`Listen to the first sound of ${w[0]}. The letter ${first} can represent it.`,`Can you think of another word beginning with ${first}?`,'Listen to the beginning sound.','🎧');
+  }
+ }else if(level===1){if(grade>=3){const c=usPick(US_CONTEXT[grade],used,x=>x[0]);q=mk('context',c[0],'📗',c[1],shuffle(c[2]),c[0],c[3],c[4],'Use the clues in the sentence.','📗');}else if(used.size%2===0){
+    const cvc=grade===1?['cat','dog','sun','pig','hat','cup','bus','hen','fox','bed','pen','map','bug','bat'] :['ship','shop','rain','moon','boat','cake','bike','tree','frog','train','sheep'];
+    const w=usPick(cvc,used,x=>x);const letterDisplay=(grade===1?w.toUpperCase().split(''):w.toUpperCase().match(/SH|CH|TH|PH|EE|OO|AI|OA|EA|[A-Z]/g)).join(' · ');
+    q=mk('phonics','Read the letters and word parts. Which word do they make?',letterDisplay,w,shuffle([w,...sample(words.map(x=>x[0]).filter(x=>x!==w),3)]),'Look at each letter or letter team. Put the sounds together.',`Blend the sounds to read ${w}.`,`Can you say a word that begins with the same sound?`,'Point to each letter or letter team. Then try reading.','🔤');
+   }else{const w=pickWord(),decoys=sample(words.filter(x=>x[0]!==w[0]),3).map(x=>x[0]);q=mk('picture','Look at the picture. Choose the word.',w[1],w[0],shuffle([w[0],...decoys]),'Look at the picture. Choose the word.',`This is a ${w[0]}.`,`Tell someone a short sentence with ${w[0]}.`,'Look at the picture. Say the word out loud.',w[1]);}}
+ else if(level===2){if(grade>=3){const a=usPick(US_PATTERNS[grade],used,x=>x[0]);q=mk('pattern',a[0],'🔤',a[1],shuffle(a[2]),a[0],a[3],a[4],'Look at the word parts and the whole sentence.','🔤');}else{const suitable=US_RHYMES.filter(r=>grade<=2?['cat','sun','dog','pen','cake','boat','fish'].includes(r[0]):true);const r=usPick(suitable,used,x=>'rhyme:'+x[0]);q=mk('rhyme','Which word rhymes with '+r[0]+'?',r[0],r[1],shuffle(r.slice(1)),`Which word rhymes with ${r[0]}?`,`Listen: ${r[0]} and ${r[1]} have the same ending sound.`,`Can you make a funny rhyming sentence?`,'Say the ending sound aloud.','🎵');}}
+ else if(level===3){const stories=US_STORIES[grade]||US_STORIES[1];const st=usPick(stories,used,x=>x.story);q=mk('reading',st.ask,st.story,st.answer,shuffle(st.opts),st.story+' '+st.ask,`Read the story again. ${st.answer} is supported by the words in the story.`,st.why,st.tip,'📚');q.usStory=true;}
+ else{if(grade<=2){const s=usPick(US_SENTENCE.slice(0,3),used,x=>x[0]);q=mk('writing',s[0],'✏️',s[1],shuffle(s[2]),s[0],s[3],s[4],'Say the sentence slowly.','✏️');}
+  else{const s=usPick(US_SENTENCE.slice(grade>=5?2:0),used,x=>x[0]);q=mk('writing',s[0],'🧠',s[1],shuffle(s[2]),s[0],s[3],s[4],'Which choice makes sense in the whole sentence?','🧠');}}
+ return q;
+};
+newEnglishRun=function(g,t,level,theme=-1){const used=new Set();return Array.from({length:4},()=>englishQuestion(g,t,level,used,theme));};
+const previousEnglishInteract=createInteractiveQuestion;
+createInteractiveQuestion=function(s){if(s!=='english')return previousEnglishInteract(s);
+ const q=englishQuestion(saveData.grade,saveData.term,Math.max(0,english.level||0),new Set(),unitSelection('english'));
+ return {...q,kind:'choice',us:true};
+};
+const previousEnglishQuestionRender=renderQuestion;
+renderQuestion=function(q,correct,wrong){if(q?.subject!=='english'||!q.us)return previousEnglishQuestionRender(q,correct,wrong);
+ const shown=q.usType==='sound'&&!correct?'🎧 Listen':q.face;
+ let first=q.usType==='reading'?`<div class="us-story">${esc(shown)}</div>`:`<div class="us-visual" lang="en-US">${esc(shown)}</div>`;
+ const choices=(q.options||[]).map(v=>`<button type="button" class="choice ${correct&&String(v)===String(q.answer)?'right':!correct&&wrong!==''&&String(v)===String(wrong)?'wrong':''}" data-action="choose" data-value="${esc(v)}" ${correct?'disabled':''} lang="en-US">${esc(v)}</button>`).join('');
+ return `<div class="us-lesson"><div class="us-instruction" lang="en-US">${esc(q.ask)}</div>${first}<div class="soundrow"><button class="sound en" type="button" data-action="speak-en">🔊 ${q.usType==='sound'?'Listen to the word':'Listen in English'}</button></div></div><div class="choices">${choices}</div>${correct?renderSuccess(q):activeTrial.tries?`<div class="feedback bad" lang="en-US">💛 Great try! You are learning. ${activeTrial.tries>1?esc(q.tip):'Try once more.'}</div><button type="button" class="btn ghost block" data-action="hint">💡 Give me a hint</button>`:''}`;
+};
+const previousEnglishSuccess=renderSuccess;
+renderSuccess=function(q){if(q?.subject!=='english'||!q.us)return previousEnglishSuccess(q);
+ const thought=renderCreative(q);
+ return `<div class="feedback" lang="en-US">🎉 Great thinking! You did it!</div><div class="explanation" lang="en-US"><strong>💡 Let's learn why</strong><p>${esc(q.explain)}</p><button class="btn tiny ghost" type="button" data-action="explain">🔊 Hear why</button></div><div class="brain" lang="en-US"><strong>🧠 Think & Tell</strong><p>${esc(q.why)}</p><p class="small">You can draw, point, or speak. There can be more than one good idea.</p></div>${thought}`;
+};
+const previousEnglishCreative=renderCreative;
+renderCreative=function(q){if(q?.subject!=='english')return previousEnglishCreative(q);if(!isCreativityRequired(q))return '';
+ if(creativeRecorded(q))return `<div class="think-card" lang="en-US">🎤 You shared your thinking. Great job!</div>`;
+ return `<section class="think-card" lang="en-US"><div class="think-head">🎤 Tell your grown-up</div><p class="think-desc">${esc(q.why||'Tell me how you know.')}</p><textarea id="spokenNote" class="spoken-note" maxlength="120" placeholder="A parent may write a short note (optional)"></textarea><p class="small">Say it out loud or draw it. A grown-up can listen and confirm.</p><button type="button" data-action="parent-approve" class="btn green block">✅ Grown-up: I heard the explanation</button></section>`;
+};
+const previousEnglishRender=renderEnglish;
+renderEnglish=function(){const game=currentGame(),labels=englishLevels(saveData.grade);if(english.screen==='map'){
+ return `<section class="hero english" lang="en-US"><div class="overline">US ENGLISH · GRADE ${saveData.grade} · ${saveData.term===1?'FALL':'SPRING'}</div><h1>🇺🇸 Reading & Speaking Adventure</h1><p>Listen. Notice sounds. Read. Share your ideas.</p></section><section class="card" lang="en-US"><h2 class="title">🗺️ Your learning map</h2><div class="tipbox">American English · Foundational reading, phonics, stories, speaking & writing. No translation quizzes.</div>${labels.map((title,i)=>{const locked=i>game.unlocked,done=game.completed.includes(i);return `<button type="button" class="level ${locked?'locked':done?'done':'ready'}" data-action="start-level" data-value="${i}" ${locked?'disabled':''}><span class="medal">${locked?'🔒':['🦁','🖼️','🎵','📖','🎤'][i]}</span><span class="info"><strong>Level ${i+1} · ${title}</strong><span>4 challenges · Listen, think, and try</span></span><span class="end">${done?'🌟':locked?'🔐':'▶️'}</span></button>`;}).join('')}<p class="small">Every child learns at a different pace. Start with sounds and build up!</p></section>`;
+ }
+ if(english.screen==='win')return `<section class="hero english" lang="en-US"><h1>🏆 You did it!</h1><p>You listened, read, and shared your ideas. Great job!</p></section><section class="card"><button type="button" class="btn primary block" data-action="map">🗺️ See my map</button><button type="button" class="btn ghost block" data-action="view-home">🌿 Take a break</button></section>`;
+ const q=currentQuestion();if(!q)return previousEnglishRender();return `<section class="hero english" lang="en-US"><div class="overline">GRADE ${saveData.grade} · LEVEL ${english.level+1}</div><h1>${labels[english.level]}</h1><p>Listen first. Then think and choose. Mistakes help us learn.</p></section><section class="card"><div class="row"><button type="button" class="btn tiny ghost" data-action="map">⬅ Map</button><span class="chip">${english.index+1} / 4</span></div>${progress(english.index,4)}${renderQuestion(q,english.solved,english.lastWrong)}${english.solved?`<button type="button" data-action="next" class="btn primary block">${english.index===3?'🏆 Finish level':'✨ Next challenge'}</button>`:''}</section>`;
+};
+const origReadQuestion=readQuestion,origReadEnglish=readEnglish,origReadExplain=readExplain,origEncourage=encourage;
+readQuestion=function(){const q=currentQuestion();if(q?.subject==='english'&&q.us){speakSequence([{text:q.ask,lang:'en-US'}]);return;}origReadQuestion();};
+readEnglish=function(){const q=currentQuestion();if(q?.subject==='english'&&q.us){speakSequence([{text:q.voiceEn||q.ask,lang:'en-US'}]);return;}origReadEnglish();};
+readExplain=function(){const q=currentQuestion();if(q?.subject==='english'&&q.us){speakSequence([{text:'Great thinking! '+q.explain,lang:'en-US'}]);return;}origReadExplain();};
+encourage=function(q,correct){if(q?.subject==='english'&&q.us){if(saveData.voiceOn){const text=correct?'Wonderful! You worked it out. '+q.explain:(activeTrial.tries>1?'Nice try! '+q.tip:'Good try. Listen and think again.');speakSequence([{text,lang:'en-US'}]);}return;}origEncourage(q,correct);};
+// Version-specific lesson labels; keep the Chinese parent controls, English learning space English-only.
+const beforeUsHeader=renderHeader;
+renderHeader=function(){beforeUsHeader();if(saveData.subject==='english'){
+ get('#curriculumLabel').textContent='US ELA · Common Core reference';
+ const label=get('#unitSel').closest('label');if(label)label.childNodes[0].textContent='英文领域';
+}else{const label=get('#unitSel').closest('label');if(label)label.childNodes[0].textContent='知识主题';}
+ get('#schoolTitle').textContent='🏫 星星家庭学习乐园';
+};
+const oldAiSync=aiSyncQuestion,oldAiStatus=aiShowStatus,oldAiLocal=aiOfflineGuidance;
+function usAiUi(){const en=saveData.subject==='english';const quicks=document.querySelectorAll('.ai-quick');const defaults=[
+ ['💡 Give me a clue','Please give me a tiny hint. Ask me one question.'],
+ ['🎤 I will explain','Ask me to explain my thinking in a simple sentence.'],
+ ['🌱 Make it easy','Can you say it using easy English and short sentences?'],
+ ['🍎 Real-life example','Show me a simple real-life example, but do not tell me the answer.']];
+ if(en){quicks.forEach((el,i)=>{el.textContent=defaults[i][0];el.dataset.aiPrompt=defaults[i][1];});get('#aiTeacherFab').textContent='🤖 Ask my English teacher';get('#aiTutorTitle').textContent='🌼 Your English Coach';aiInput.placeholder='What do you hear or think?';aiSubmit.textContent='Send';get('#aiTutorMic').setAttribute('title','Speak in American English');}
+ else{const labels=['💡 给我一个提示','🎤 我来讲思路','🌱 讲得简单些','🍎 举个生活例子'],prompts=['老师，给我一个小提示，不要直接告诉我答案。','我想讲讲我的思路，请问我一个问题。','你能用更简单的办法讲一讲吗？','你能用生活里的例子引导我吗？'];quicks.forEach((el,i)=>{el.textContent=labels[i];el.dataset.aiPrompt=prompts[i];});get('#aiTeacherFab').textContent='🤖 问问 AI 老师';get('#aiTutorTitle').textContent='🌷 星星 AI 老师';aiInput.placeholder='告诉老师，你卡在哪一步？';aiSubmit.textContent='发送';get('#aiTutorMic').setAttribute('title','点击说话，转成文字后再发送');}
+}
+aiShowStatus=function(){if(saveData.subject==='english'){aiStatus.textContent=aiOnline?'🟢 English coach is ready':'🟡 Offline clues (DeepSeek is not connected)';}else oldAiStatus();};
+aiOfflineGuidance=function(msg,ctx){if(saveData.subject==='english'){const q=currentQuestion();return q?.us?'Let’s try one step. '+q.tip+' What do you notice first?':'Open a challenge first. Then we can think together.';}return oldAiLocal(msg,ctx);};
+aiSyncQuestion=function(){const key=aiKey();if(key!==aiQuestionKey){aiQuestionKey=key;aiHistory=[];aiRequestSeq++;const en=saveData.subject==='english';aiAddMessage('assistant',en?'Hi! Let’s listen, think, and try together. What do you notice?':'你好呀！我是星星老师。你可以先说说自己的想法，我会陪你一步一步找到方法。','offline');}
+ const q=currentQuestion();if(saveData.subject==='english'){aiCtx.textContent=q?`📖 Grade ${saveData.grade} · ${aiSafeText(q.topic)} · ${aiSafeText(q.ask)}`:`📖 Grade ${saveData.grade} · Start a lesson first.`;}else oldAiSync();
+ usAiUi();aiShowStatus();
+};
+const oldAiPaint=aiPaintMessages;
+aiPaintMessages=function(){aiConversation.replaceChildren();for(const m of aiHistory){const item=document.createElement('div');item.className='ai-msg '+(m.role==='assistant'?'teacher':'child');const en=saveData.subject==='english';
+ const who=document.createElement('span');who.className='ai-message-author';who.textContent=m.role==='assistant'?(en?'🌼 English Coach':(m.source==='offline'?'🧩 本地提示':'🌷 星星AI老师')):(en?'🧒 Me':'🧒 我');item.append(who);
+ const body=document.createElement('span');body.textContent=m.text;item.append(body);
+ if(m.role==='assistant'){const play=document.createElement('button');play.type='button';play.className='ai-read';play.textContent=en?'🔊 Listen':'🔊 朗读';play.addEventListener('click',()=>speakSequence([{text:m.text,lang:en?'en-US':'zh-CN'}]));item.append(document.createElement('div'),play);}aiConversation.append(item);}aiConversation.scrollTop=aiConversation.scrollHeight;};
+const oldAiOpen=aiOpen;aiOpen=function(){oldAiOpen();usAiUi();};
+const aiMicButton=get('#aiTutorMic'); // English speech input, not Mandarin dictation
+// Existing click listener is preserved; use capture listener to switch speech locale is not possible there,
+// so patch source initializer from zh-CN to language chosen at invocation during packaging.
+const oldAiAsk=aiAsk;
+// Rendering refreshes English buttons and local hints without storing any speech or English lesson transcript.
+const prevUsRender=render;render=function(){prevUsRender();usAiUi();};
+const beforeUsApprove=applyCreative;applyCreative=function(){const q=currentQuestion(),isUs=q?.subject==='english',wasVoice=saveData.voiceOn;if(isUs)saveData.voiceOn=false;beforeUsApprove();if(isUs){saveData.voiceOn=wasVoice;if(wasVoice)speakSequence([{text:'Wonderful! You shared your thinking!',lang:'en-US'}]);store();}};
+render();
+
+</script><script>if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});</script></body></html>
