@@ -59,7 +59,20 @@ const server=http.createServer(async(req,res)=>{
  csp(res);
  let u;try{u=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);}catch{return json(res,400,{error:'bad URL'});}
  const pathname=u.pathname, origin=req.headers.origin;
- if(origin){try{if(new URL(origin).host!==req.headers.host)return json(res,403,{error:'cross-origin blocked'});}catch{return json(res,403,{error:'invalid origin'});}}
+ // Browsers may send Origin: null (or a non-URL Origin) during navigation.
+ // Safe GET/HEAD navigation does not require an Origin check. For state-changing
+ // requests keep the cross-site guard; allow Origin: null only for the parent
+ // access-code form, which is independently protected by its secret and rate limit.
+ if(req.method!=='GET' && req.method!=='HEAD' && origin){
+  if(origin==='null'){
+   if(pathname!=='/login')return json(res,403,{error:'cross-origin blocked'});
+  }else{
+   try{
+    const parsed=new URL(origin);
+    if(!['http:','https:'].includes(parsed.protocol)||parsed.host!==req.headers.host)return json(res,403,{error:'cross-origin blocked'});
+   }catch{return json(res,403,{error:'invalid origin'});}
+  }
+ }
  if(pathname==='/health'&&req.method==='GET')return json(res,200,{ok:true});
  if(pathname==='/login'&&req.method==='GET')return html(res,loginHtml());
  if(pathname==='/login'&&req.method==='POST'){
