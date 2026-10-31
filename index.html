@@ -3478,6 +3478,7 @@ const V67_UNITS={
 const V67={key:'',unit:'hello',stage:'choose',audioReady:false,parentHelp:false,attempts:0,errors:0,
  listenFirst:false,readFirst:false,listenFirstCount:0,readFirstCount:0,listenIndex:0,readIndex:0,
  listenWrong:0,readWrong:0,listenWrongCurrent:0,readWrongCurrent:0,listenAdult:false,readAdult:false,
+ listenHelpCount:0,readHelpCount:0,
  spokenTried:false,spokenModel:false,guardianConfirmed:false,heardPrompt:false,message:'',done:false};
 function v67Data(){
  var d=saveData.v67SchoolBridge;
@@ -3501,6 +3502,7 @@ function v67Reset(){
  V67.listenFirst=false;V67.readFirst=false;V67.listenFirstCount=0;V67.readFirstCount=0;
  V67.listenIndex=0;V67.readIndex=0;V67.listenWrong=0;V67.readWrong=0;
  V67.listenWrongCurrent=0;V67.readWrongCurrent=0;
+ V67.listenHelpCount=0;V67.readHelpCount=0;
  V67.listenAdult=false;V67.readAdult=false;V67.spokenTried=false;V67.spokenModel=false;
  V67.guardianConfirmed=false;V67.heardPrompt=false;V67.done=false;V67.message='';
 }
@@ -3610,8 +3612,8 @@ function v67Save(){
  var data=v67Data(),row={day:localDate(),grade:saveData.grade,term:saveData.term,ability:v5Level(),
   track:v67Track(),unit:V67.unit,listenFirst:V67.listenFirst,readFirst:V67.readFirst,
   listenFirstCount:V67.listenFirstCount,readFirstCount:V67.readFirstCount,listenQuestions:2,readQuestions:2,
-  listenWrong:V67.listenWrong,readWrong:V67.readWrong,listenAdult:V67.listenAdult,
-  readAdult:V67.readAdult,spokenTried:true,parentConfirmed:true,independent:independent,understood:understood,
+  listenWrong:V67.listenWrong,readWrong:V67.readWrong,
+  listenHelpCount:V67.listenHelpCount,readHelpCount:V67.readHelpCount,spokenTried:true,parentConfirmed:true,independent:independent,understood:understood,
   modelHelp:V67.spokenModel};
  data.records.push(row);data.records=data.records.slice(-160);
  V67.stage='done';V67.done=true;store();render();v5Voice('Great! You used English today!');
@@ -3634,8 +3636,8 @@ function v67Action(button){
  v67Sync();var op=button.dataset.v67;
  if(op==='start'){v67Start(button.dataset.unit);return;}
  if(op==='hear'&&V67.stage==='listen'){V67.audioReady=true;v5Voice(v67ListenTarget()[0]);render();return;}
- if(op==='adult'&&V67.stage==='listen'){V67.listenAdult=true;V67.audioReady=true;V67.message='Thanks for listening together!';render();return;}
- if(op==='read-hear'&&V67.stage==='read'){V67.readAdult=true;v5Voice(v67ReadTarget()[0]);render();return;}
+ if(op==='adult'&&V67.stage==='listen'){if(!V67.listenAdult)V67.listenHelpCount++;V67.listenAdult=true;V67.audioReady=true;V67.message='Thanks for listening together!';render();return;}
+ if(op==='read-hear'&&V67.stage==='read'){if(!V67.readAdult)V67.readHelpCount++;V67.readAdult=true;v5Voice(v67ReadTarget()[0]);render();return;}
  if(op==='answer'){v67Answer(Number(button.dataset.index));return;}
  if(op==='hear-question'&&V67.stage==='speak'){V67.heardPrompt=true;v5Voice(v67Unit().prompt);render();return;}
  if(op==='hear-model'&&V67.stage==='speak'){V67.spokenModel=true;v5Voice(v67Unit().model);render();return;}
