@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
-<meta name="description" content="星星闯关乐园V6.3：英语新增自然拼读与听力训练中心、独立音素示范、单词拼合、听音辨图与真实作答成长记录，保留语文、数学、绘本、动画和口语陪练。">
-<title>星星闯关乐园 V6.3 · Sound & Listening Lab</title>
+<meta name="description" content="星星闯关乐园V6.4：英语新增自然拼读与听力训练中心、独立音素示范、单词拼合、听音辨图与真实作答成长记录，保留语文、数学、绘本、动画和口语陪练。">
+<title>星星闯关乐园 V6.4 · Smart English Review</title>
 <style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
 
 /* V4.2 AI learning assistant: child-friendly dialog with responsive controls */
@@ -374,6 +374,25 @@ body.v6-immersive #app{padding-top:8px}
 .v63-option:focus-visible,.v63-slot:focus-visible{outline:3px solid #3b78f0;outline-offset:2px}
 @media(max-width:380px){.v63-option{min-height:100px;padding:5px 2px}.v63-options{gap:5px}.v63-slot{height:58px;font-size:32px}}
 
+/* V6.4: calm learning agenda and honest parent mastery signals */
+.v64-agenda{border-color:#dcd3fc;background:linear-gradient(155deg,#fff,#f4f2ff)}
+.v64-agenda h2{margin:0!important}
+.v64-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin:15px 0}
+.v64-step{display:flex;min-width:0;min-height:88px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#f1effb;border-radius:13px;padding:7px 2px;text-align:center}
+.v64-step span{font-size:25px}.v64-step strong{font-size:11px;color:#4a5781;line-height:1.2;overflow-wrap:anywhere}
+.v64-step small{font-size:10px;color:#697da1}.v64-step.done{background:#e1f8ed}
+.v64-report{display:grid;gap:8px;margin:12px 0}
+.v64-report-row{padding:10px;background:#f8f9ff;border:1px solid #dfe4f7;border-radius:14px}
+.v64-report-row>strong{font-size:14px}.v64-report-row>small{display:block;margin:4px 0;color:#66728c}
+.v64-skillchips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:7px}
+.v64-skillchips span{border-radius:7px;background:#e9ecf5;color:#506080;font-size:11px;padding:5px 6px;overflow-wrap:anywhere}
+.v64-skillchips .stable{background:#d7f5e5;color:#186344}
+.v64-skillchips .due{background:#fff0d9;color:#8e560e}
+.v64-skillchips .learning{background:#e8e5ff;color:#5645a8}
+.v64-reco{background:#f0eafa;border-radius:14px;border:1px solid #cfc5ed;padding:12px;margin:12px 0}
+@media(max-width:410px){.v64-steps{gap:3px}.v64-step{min-height:82px}.v64-step span{font-size:21px}.v64-step strong{font-size:10px}.v64-skillchips{grid-template-columns:1fr 1fr}}
+
+
 /* V6.2: animated, touch-friendly mini-scenes and guided English buddy */
 .v62-scene{position:relative;isolation:isolate;overflow:hidden;min-height:275px;border:2px solid #d8e5fc;border-radius:22px;margin:14px 0;background:linear-gradient(#bce9ff 0%,#e7f8ff 61%,#a1e7ae 62%,#6cc889 100%);box-shadow:inset 0 -10px 30px #26734a15}
 .v62-scene.v62-cafe{background:linear-gradient(#cbdffb 0%,#fff0d5 60%,#d3a47f 61%,#b98261 100%)}
@@ -409,7 +428,7 @@ body.v6-immersive #app{padding-top:8px}
 @media(prefers-reduced-motion:reduce){.v6-dancers.playing span{animation:none!important}}
 </style></head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.3</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.4</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
@@ -2385,7 +2404,7 @@ function v6Go(page){
 function v6Header(title,subtitle){
  var d=v6Data(),topic=v6Topic(),percent=Math.round(v6DoneCount()/5*100);
  return '<div class="v6-head"><div class="v6-headbar"><button class="v6-topbtn" type="button" data-v6="exit">← Exit</button>'+
- '<span class="v6-kicker">ENGLISH WORLD · L'+v5Level()+'</span><button class="v6-topbtn" type="button" data-v6="parent">👨‍👩‍👧 Parent</button></div>'+
+ '<span class="v6-kicker">ENGLISH WORLD V6.4 · L'+v5Level()+'</span><button class="v6-topbtn" type="button" data-v6="parent">👨‍👩‍👧 Parent</button></div>'+
  '<h1>'+v5Html(title)+'</h1><p class="v6-english">'+v5Html(subtitle)+'</p><div class="v6-headbar">'+
  '<span class="v6-badge">'+topic.icon+' '+v5Html(topic.name)+'</span><span class="v6-badge">⏰ <span id="v6-live-clock">'+v6Clock()+'</span> · '+percent+'% done</span></div></div>';
 }
@@ -2682,6 +2701,7 @@ function v64ParentReport(){
   }).join('')+'</div></div>';
  }).join('')+'</div>'+
  (legacy?'<p class="v6-note">之前保存的 '+legacy+' 轮 V6.3 汇总记录仍保留，但因没有四步明细，不会直接换算成“已掌握”。</p>':'')+
+ '<button type="button" class="v6-btn soft full" data-v64="review">🔤 立即练习今日推荐内容</button>'+ 
  '<p class="v6-note">学习记录保存在当前浏览器。换设备或清理网站数据可能丢失，请定期使用原有家长备份功能。</p>';
 }
 
@@ -2769,9 +2789,10 @@ function v63Finish(){
  d.records=d.records.slice(-120);v64ApplyResult(d.records[d.records.length-1]);v6Mark('phonics');store();
  V63.stage=5;V63.heard=false;V63.solved=true;V63.message='';render();v5Voice('Amazing! You finished the Sound Lab!');
 }
-function v63Intro(){var d=v63Data(),l=v63Current(),last=d.records.slice(-10);
+function v63Intro(){var d=v63Data(),l=v63Current(),last=d.records.slice(-10),recommend=v64Plan(),recommended=V63_LESSONS[recommend.index];
  var average=last.length?Math.round(last.reduce(function(sum,r){return sum+r.firstTry;},0)/(last.length*4)*100):null;
  return '<section class="v6-card"><h2>🔤 My Sound Adventures</h2><p class="v6-note">Listen first. Learn the sound. Build a small word. Show what it means!</p>'+
+ '<div class="v64-reco"><strong>🧠 Today’s Sound: '+v5Html(recommended.name)+'</strong><p class="v6-note">'+(recommend.reason==='review'?'Let’s review a sound you already met!':recommend.reason==='new'?'Let’s discover a new sound!':'Let’s practise a familiar sound!')+'</p><button class="v6-btn good full" data-v63="smart-start">▶ Start Today’s Sound</button></div>'+ 
  '<div class="v63-options">'+V63_LESSONS.map(function(unit,i){return '<button class="v63-option '+(V63.lesson===i?'correct':'')+'" type="button" data-v63="lesson" data-index="'+i+'"><span class="v63-emoji">'+unit.icon+'</span><span style="font-size:13px">'+v5Html(unit.name)+'</span></button>'}).join('')+'</div>'+
  '<p class="v63-tip">Today: '+v5Html(l.name)+'. Four short activities. You can replay sounds as often as you like.</p>'+
  '<button class="v6-btn primary full" data-v63="start">▶ Start My Sound Adventure</button>'+ 
@@ -2823,6 +2844,7 @@ function v63Action(button){
  var op=button.dataset.v63,index=Number(button.dataset.index),l=v63Current();
  if(op==='library-sound'){if(V63.stage===0&&['m','s','a','k','p','t'].includes(button.dataset.sound))v63PlayClipOnly(button.dataset.sound);return;}
  if(op==='lesson'){if(V63.stage===0){V63.lesson=index;v63Data().lastLesson=index;store();render();}return;}
+ if(op==='smart-start'){v63Start(v64Plan().index);return;}
  if(op==='start'){v63Start(V63.lesson);return;}
  if(op==='another'){v63Start((V63.lesson+1)%V63_LESSONS.length);return;}
  if(op==='listen'){
