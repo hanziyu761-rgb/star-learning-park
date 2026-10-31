@@ -343,7 +343,7 @@ body.v6-immersive #app{padding-top:8px}
 @media(prefers-reduced-motion:reduce){.v6-dancers.playing span{animation:none!important}}
 </style></head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V5.2</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.0</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
@@ -1654,10 +1654,10 @@ function v5Init(){
  const nav=document.querySelector('.modebar');if(nav&&!nav.classList.contains('v5-modebar')){
   nav.classList.add('v5-modebar');
   const exam=nav.querySelector('[data-view="exam"]');
-  exam?.insertAdjacentHTML('beforebegin','<button type="button" class="mode" data-view="speaking">🇺🇸 英语冒险</button><button type="button" class="mode" data-view="thinking">🧠 思维训练</button>');
+  exam?.insertAdjacentHTML('beforebegin','<button type="button" class="mode" data-view="speaking">🇺🇸 English World</button><button type="button" class="mode" data-view="thinking">🧠 思维训练</button>');
  }
- document.querySelector('.brand span')?.replaceChildren(document.createTextNode('V5.3'));
- document.title='星星闯关乐园 V5.3 · 英语成长版';
+ document.querySelector('.brand span')?.replaceChildren(document.createTextNode('V6.0'));
+ document.title='星星闯关乐园 V6.0 · English World';
 }
 function v5Voice(text){if(!text)return;try{speakSequence([{text:String(text).slice(0,200),lang:'en-US'}]);}catch{toast('此设备暂无法播放英文语音，可直接阅读提示。');}}
 function v5SlowVoice(text){if(!text)return;try{if(!('speechSynthesis'in window)||typeof SpeechSynthesisUtterance==='undefined')throw Error('speech');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text).slice(0,200));u.lang='en-US';u.rate=.7;const v=pickVoice('en-US');if(v)u.voice=v;speechSynthesis.speak(u);}catch{toast('当前设备无法慢速播放，可用普通播放键。');}}
@@ -2212,6 +2212,36 @@ const V6_THEMES=[
   pages:[['I see a dog.','🧒🐶','dog'],['A duck can swim.','🦆💦','duck'],['The cat can jump.','🐱⬆️','cat'],['We love animals.','🧒🐶🦆','dog']],
   ask:'Which animal do you like?',example:'I like dogs!',reply:'Animals are fun!',roleAsk:'Show me the dog, please!',bye:'Bye-bye, animals!'}
 ];
+
+const V6_DIALOGUES={
+ cafe:[
+  {q:'What would you like?',choices:['Milk, please!']},
+  {q:'Here is your milk. What do you say?',choices:['Thank you!']},
+  {q:'Do you like milk?',choices:['Yes, I do!']}
+ ],
+ hello:[
+  {q:'Hello! How are you?',choices:["I'm happy!"]},
+  {q:'Can you wave and say hello?',choices:['Hello, my friend!']},
+  {q:'Bye-bye! Can you say goodbye?',choices:['See you!']}
+ ],
+ toys:[
+  {q:'What toy do you like?',choices:['I like the ball!']},
+  {q:'Can you share the ball?',choices:['Here you go!']},
+  {q:'Was that fun?',choices:['Yes, it was!']}
+ ],
+ farm:[
+  {q:'Look! A dog. Can you say dog?',choices:['Dog!']},
+  {q:'What can a duck do?',choices:['A duck can swim!']},
+  {q:'Do you like animals?',choices:['Yes, I do!']}
+ ]
+};
+const V6_LEVEL_SOUNDS=[
+ null,
+ {letter:'at',main:'cat',mainArt:'🐱',match:'hat',options:[['hat','🎩'],['sun','☀️'],['dog','🐶']],info:'cat and hat share a short-a word pattern. Listen and notice the matching ending.'},
+ {letter:'sh',main:'ship',mainArt:'🚢',match:'shop',options:[['shop','🏪'],['chip','🍟'],['cat','🐱']],info:'ship and shop begin with the two-letter sh sound.'},
+ {letter:'a_e',main:'cake',mainArt:'🎂',match:'make',options:[['make','🧰'],['cat','🐱'],['sun','☀️']],info:'cake and make show the long-a spelling pattern with final e.'}
+];
+function v6SoundRule(){return V6_LEVEL_SOUNDS[v5Level()]||v6Topic().sound;}
 const V6_STEPS=[
  ['song','🎵','Sing & Watch','2 min'],
  ['phonics','🔤','Sound Lab','2 min'],
@@ -2346,14 +2376,14 @@ function v6SongUi(){
  return html;
 }
 function v6SoundUi(){
- var t=v6Topic(),sound=t.sound,correct=V6.phonicsPassed;
+ var t=v6Topic(),sound=v6SoundRule(),correct=V6.phonicsPassed;
  var html=v6Header('🔤 Sound Lab','Listen to the first sound. Find a matching word!');
  html+='<section class="v6-card"><div class="v6-art"><span class="emoji">'+sound.mainArt+' 🔤</span>'+
  '<strong class="v6-english">'+v5Html(sound.main)+'</strong>'+
  '<span class="caption">Listen for the first sound.</span></div>'+
  '<div class="v6-actions"><button class="v6-btn primary" data-v6="sound-main">🔊 Listen</button>'+
  '<button class="v6-btn" data-v6="sound-slow">🐢 Again, slowly</button></div>'+
- '<h2>Which word begins the same way?</h2><p class="v6-note">Tap a picture to hear it. Tap “This one!” to answer.</p>'+
+ '<h2>'+(v5Level()>0?'Which word uses the same sound pattern?':'Which word begins the same way?')+'</h2><p class="v6-note">Tap a picture to hear it. Tap “This one!” to answer.</p>'+
  '<div class="v6-items">'+sound.options.map(function(w,i){return '<div class="v6-art" style="padding:7px;min-height:0"><div class="emoji" style="font-size:44px">'+w[1]+'</div>'+
  (v5Level()>0?'<strong style="font-size:16px">'+v5Html(w[0])+'</strong>':'')+
  '<button type="button" class="v6-btn" data-v6="sound-option" data-index="'+i+'" aria-label="Listen to '+v5Html(w[0])+'">🔊 Listen</button>'+
@@ -2423,8 +2453,8 @@ function v6PlayUi(){
  html+='</section>'+v6Footer();return html;
 }
 function v6TalkPrompt(){
- var scene=v5SpeechScene();
- return scene&&v5Speak.step<3?scene.prompts[v5Speak.step]:null;
+ var scene=v5SpeechScene(),dialogues=V6_DIALOGUES[v6Topic().id];
+ return scene&&v5Speak.step<3?dialogues?.[v5Speak.step]||null:null;
 }
 function v6TalkUi(){
  var t=v6Topic(),scene=v5SpeechScene(),step=v5Speak.step,phase=V6.talkPhase;
@@ -2574,7 +2604,7 @@ async function v6TalkCommit(){
  }
  v5Speak.pending=true;render();
  try{
-  const scene=v5SpeechScene(),prompt=scene?.prompts[step]?.q||v6Topic().ask;
+  const prompt=V6_DIALOGUES[v6Topic().id]?.[step]?.q||v6Topic().ask;
   const body={
    message:('The child wrote or said: '+text+'. Give one short kind acknowledgement.').slice(0,180),
    history:v5Speak.messages.slice(0,-1).slice(-4).map(function(m){return {role:m.who==='child'?'user':'assistant',content:String(m.text).slice(0,130)}}),
@@ -2674,13 +2704,13 @@ document.addEventListener('click',function(event){
  case 'song-slow':v6SingPlay(true);break;
  case 'song-stop':v6StopAllAudio();break;
  case 'song-finish':if(V6.songPlayed){v6Mark('song');v6StopAllAudio();v6Go('home');}break;
- case 'sound-main':v5Voice(t.sound.main+'. '+t.sound.main+'.');break;
- case 'sound-slow':v5SlowVoice(t.sound.main+' '+t.sound.main);break;
+ case 'sound-main':v5Voice(v6SoundRule().main+'. '+v6SoundRule().main+'.');break;
+ case 'sound-slow':v5SlowVoice(v6SoundRule().main+' '+v6SoundRule().main);break;
  case 'sound-option':
-  var w=t.sound.options[Number(button.dataset.index)];if(w)v5Voice(w[0]);break;
+  var w=v6SoundRule().options[Number(button.dataset.index)];if(w)v5Voice(w[0]);break;
  case 'sound-pick':
-  var picked=t.sound.options[Number(button.dataset.index)];if(!picked)return;
-  V6.phonicsGuess=picked[0];V6.phonicsPassed=picked[0]===t.sound.match;
+  var picked=v6SoundRule().options[Number(button.dataset.index)];if(!picked)return;
+  V6.phonicsGuess=picked[0];V6.phonicsPassed=picked[0]===v6SoundRule().match;
   if(V6.phonicsPassed){v6Mark('phonics');v5Voice('Great listening!');}
   else v5Voice('Listen again. You can try!');
   render();break;
