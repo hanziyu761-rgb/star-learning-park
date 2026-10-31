@@ -1846,7 +1846,35 @@ function v53Today(){
  '<p class="v53-parent-note">中文只辅助操作；英语词语、故事与对话采用美式英语教学。自然拼读和口语进度分别记录。</p></section>';
  return h;
 }
-function v53PhonicsBank(){return v5Level()===0?V53_PH_L0:v5Level()===1?V53_PH_L1:V53_PH_L2;}
+
+var V53_THEME_SOUNDS={
+ animals:[
+  {ref:'dog',art:'🐶',target:'duck',choices:[['duck','🦆'],['cat','🐱'],['sun','☀️']],letter:'d',rule:'dog 和 duck 的开头声音相同。'},
+  {ref:'cat',art:'🐱',target:'cup',choices:[['cup','🥤'],['fish','🐟'],['dog','🐶']],letter:'c',rule:'cat 和 cup 的开头声音相同。'},
+  {ref:'fish',art:'🐟',target:'fan',choices:[['fan','🪭'],['cat','🐱'],['sun','☀️']],letter:'f',rule:'fish 和 fan 的开头声音相同。'}],
+ hello:[
+  {ref:'hello',art:'👋',target:'hat',choices:[['hat','🎩'],['cat','🐱'],['sun','☀️']],letter:'h',rule:'hello 和 hat 的开头声音相同。'},
+  {ref:'friend',art:'🧒',target:'fan',choices:[['fan','🪭'],['cat','🐱'],['dog','🐶']],letter:'f',rule:'friend 和 fan 的开头声音相同。'},
+  {ref:'bye',art:'🙋',target:'bag',choices:[['bag','🎒'],['sun','☀️'],['cat','🐱']],letter:'b',rule:'bye 和 bag 的开头声音相同。'}],
+ food:[
+  {ref:'milk',art:'🥛',target:'map',choices:[['map','🗺️'],['cat','🐱'],['sun','☀️']],letter:'m',rule:'milk 和 map 的开头声音相同。'},
+  {ref:'bread',art:'🍞',target:'bag',choices:[['bag','🎒'],['cat','🐱'],['dog','🐶']],letter:'b',rule:'bread 和 bag 的开头声音相同。'},
+  {ref:'apple',art:'🍎',target:'ant',choices:[['ant','🐜'],['sun','☀️'],['dog','🐶']],letter:'a',rule:'apple 和 ant 的开头声音相同。'}],
+ classroom:[
+  {ref:'book',art:'📖',target:'bag',choices:[['bag','🎒'],['sun','☀️'],['cat','🐱']],letter:'b',rule:'book 和 bag 的开头声音相同。'},
+  {ref:'pencil',art:'✏️',target:'pig',choices:[['pig','🐷'],['dog','🐶'],['sun','☀️']],letter:'p',rule:'pencil 和 pig 的开头声音相同。'},
+  {ref:'desk',art:'🪑',target:'dog',choices:[['dog','🐶'],['fish','🐟'],['cat','🐱']],letter:'d',rule:'desk 和 dog 的开头声音相同。'}],
+ shop:[
+  {ref:'apple',art:'🍎',target:'ant',choices:[['ant','🐜'],['cat','🐱'],['dog','🐶']],letter:'a',rule:'apple 和 ant 的开头声音相同。'},
+  {ref:'milk',art:'🥛',target:'map',choices:[['map','🗺️'],['sun','☀️'],['fish','🐟']],letter:'m',rule:'milk 和 map 的开头声音相同。'},
+  {ref:'bread',art:'🍞',target:'bag',choices:[['bag','🎒'],['dog','🐶'],['cat','🐱']],letter:'b',rule:'bread 和 bag 的开头声音相同。'}],
+ show:[
+  {ref:'ball',art:'⚽',target:'bag',choices:[['bag','🎒'],['cat','🐱'],['sun','☀️']],letter:'b',rule:'ball 和 bag 的开头声音相同。'},
+  {ref:'star',art:'⭐',target:'sun',choices:[['sun','☀️'],['cat','🐱'],['dog','🐶']],letter:'s',rule:'star 和 sun 的第一个声音相同。'},
+  {ref:'red',art:'🔴',target:'run',choices:[['run','🏃'],['cat','🐱'],['fish','🐟']],letter:'r',rule:'red 和 run 的开头声音相同。'}]
+};
+
+function v53PhonicsBank(){return v5Level()===0?(V53_THEME_SOUNDS[V53_TOPICS[V53.theme].id]||V53_PH_L0):v5Level()===1?V53_PH_L1:V53_PH_L2;}
 function v53Phonics(){
  var items=v53PhonicsBank(),p=items[V53.phonics];
  var h=v53Header('🔤 Sound First · 声音魔法屋','先用完整单词听声音，再认字母与拼读规律。');
