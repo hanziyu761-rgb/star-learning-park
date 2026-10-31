@@ -2679,6 +2679,24 @@ function v6Exit(){
  if(s.running){s.elapsed=v6Elapsed();s.running=false;s.started=0;store();}
  V6.parent=false;V6.page='home';v5ParentConsent=false;view='home';render();window.scrollTo(0,0);
 }
+
+var v6PriorGrowthReport=v5GrowthReport;
+v5GrowthReport=function(){
+ var data=v6Data(),g=saveData.grade,t=saveData.term,l=v5Level();
+ var completed=Object.entries(data.days).filter(function(entry){
+  var p=entry[0].split('|');
+  return p[1]===String(g)&&p[2]===String(t)&&p[3]===String(l);
+ }).map(function(entry){return entry[1]});
+ var rows=[['🎧 听唱参与','song'],['🔤 声音与拼读','phonics'],['📚 亲子故事','story'],['🏡 生活交流','play'],['🎤 家长确认开口','talk']];
+ return v6PriorGrowthReport()+'<section class="v5-card"><h2>🇺🇸 English World · 学习成长记录</h2>'+
+ '<p class="v5-notice">年级 '+g+' · '+labelTerm(t)+' · 英语 L'+l+'。以下为实际完成的活动次数，不是英语能力等级或发音分数。</p>'+
+ rows.map(function(row){
+  var num=completed.filter(function(day){return !!day[row[1]]}).length;
+  return '<div class="v5-metric"><span>'+row[0]+'</span><b>'+num+' 次</b></div>';
+ }).join('')+
+ '<p class="v5-notice">口语活动须有家长确认才计入最后一项。不同能力需要结合实际表现观察，不凭一次点击计算掌握率。</p></section>';
+};
+
 var v6PriorSpeakUi=v5SpeakUi;
 v5SpeakUi=function(){return v6Ui();};
 var v6PriorRender=render;
