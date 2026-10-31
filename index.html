@@ -1790,7 +1790,7 @@ var V53_PH_L2=[
  {example:'chat / chin',target:'chip',art:'🍟',choices:[['chip','🍟'],['ship','🚢'],['shop','🏬']],rule:'比较 ch 和 sh 的开头声音，听到再选，不靠中文译名。'},
  {example:'rain / train',target:'mail',art:'✉️',choices:[['mail','✉️'],['mill','🏭'],['moon','🌙']],rule:'观察 rain、train 的常见 ai 元音组合，再看 mail。'}
 ];
-var V53={page:'dashboard',theme:0,phonics:0,phonicsCorrect:false,phonicsPicked:'',game:0,gamePicked:'',gameWrong:false,readPicked:'',readCorrect:false,songPlays:0,songMoved:false,preview:'',showHint:false};
+var V53={page:'dashboard',theme:0,phonics:0,phonicsCorrect:false,phonicsPicked:'',game:0,gamePicked:'',gameWrong:false,gameOrder:null,gameOrderKey:'',readPicked:'',readCorrect:false,songPlays:0,songMoved:false,preview:'',showHint:false};
 function v53Data(){
  var d=saveData.v53English;
  if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v53English={daily:{},words:{},records:[]};
@@ -1813,10 +1813,11 @@ function v53Mark(kind){
 function v53Steps(){
  return [['phonics','🔤','声音魔法屋','听音辨音和自然拼读 · 约3分钟'],['song','🎵','唱跳小剧场','听原创英语节奏童谣 · 约2分钟'],['game','🎮','单词游乐场','图片和英语听音游戏 · 约2分钟'],['read','📖','小小阅读馆','图片听故事与分级阅读 · 约2分钟'],['dialogue','🎤','AI 口语俱乐部','模仿后进行简单对话 · 约3分钟']];
 }
-function v53Back(){V53.page='dashboard';V53.preview='';stopSpeech();render();window.scrollTo(0,0);}
+function v53Back(){V53.page='dashboard';V53.preview='';if(v5SpeechScene())v5ResetSpeak();stopSpeech();render();window.scrollTo(0,0);}
 function v53Enter(page){
  if(page==='dialogue'){V53.page='dialogue';v53BackToScenes();return;}
  if(!['dashboard','phonics','song','game','read'].includes(page))return;
+ if(v5SpeechScene())v5ResetSpeak();
  V53.page=page;V53.preview='';V53.showHint=false;stopSpeech();render();window.scrollTo(0,0);
 }
 function v53BackToScenes(){v5ResetSpeak();V53.page='dialogue';render();}
@@ -1855,7 +1856,7 @@ function v53Phonics(){
  '<div class="v53-focus"><div class="art">'+(l0?p.art:'🔤')+'</div><p>'+v5Html(lead)+'</p>'+
  (l0?'<p><b>'+v5Html(p.ref)+'</b> → 开头声音</p>':'<p><b>规则示例：</b> '+v5Html(p.example)+'</p>')+'</div>'+
  '<button class="v53-btn primary block" data-v53="ph-listen">🔊 听英语单词</button>'+
- '<p class="v53-parent-note">'+v5Html(p.rule)+'</p><h3>'+ (l0?'Which word starts the same?':'Listen. Which spelling is correct?')+'</h3>'+
+ '<p class="v53-parent-note">'+v5Html(l0&&!V53.phonicsCorrect?'先听第一个单词，再找一个开头声音相同的词。答对后再揭晓字母规律。':p.rule)+'</p><h3>'+ (l0?'Which word starts the same?':'Listen. Which spelling is correct?')+'</h3>'+
  '<div class="v53-choices">'+opts.map(function(c,i){return '<button type="button" class="v53-choice '+(V53.phonicsPicked===c[0]?'selected':'')+'" data-v53="ph-answer" data-index="'+i+'">'+(l0?'<span>'+c[1]+'</span><small>'+v5Html(c[0])+'</small>':'<span>'+v5Html(c[0])+'</span>')+'</button>'}).join('')+'</div>';
  if(V53.phonicsPicked)h+='<div class="v53-feedback '+(V53.phonicsCorrect?'':'try')+'">'+(V53.phonicsCorrect?'🌟 Nice listening! '+v5Html(p.rule):'💛 再听一遍，注意单词开头的声音。')+'</div>';
  if(V53.phonicsCorrect)h+='<button class="v53-btn success block" data-v53="ph-next">✨ 下一组声音</button>';
@@ -1877,10 +1878,12 @@ function v53GameTargets(){
  var t=V53_TOPICS[V53.theme],words=t.words;
  // Prefer words due for spaced review; return four different target words.
  var progress=v53Data().words,lvl=v5Level(),now=localDate();
- return words.slice().sort(function(a,b){
+ if(Array.isArray(V53.gameOrder)&&V53.gameOrderKey===v53DayKey())return V53.gameOrder;
+ var choices=words.slice().sort(function(a,b){
   function priority(w){var v=progress[lvl+'|'+w[0]];return !v||!v.due||v.due<=now?0:1}
   return priority(a)-priority(b);
  }).slice(0,3);
+ V53.gameOrder=choices;V53.gameOrderKey=v53DayKey();return choices;
 }
 function v53Game(){
  var targets=v53GameTargets(),item=targets[V53.game],t=V53_TOPICS[V53.theme];
@@ -1997,12 +2000,12 @@ document.addEventListener('click',function(event){
  if(op==='back'){v53Back();return;}
  if(op==='open'){v53Enter(b.dataset.page);return;}
  if(op==='next-module'){v53AdvanceModule();return;}
- if(op==='change-theme'){V53.theme=(V53.theme+1)%V53_TOPICS.length;V53.songPlays=0;V53.phonics=0;V53.game=0;V53.readPicked='';render();return;}
+ if(op==='change-theme'){V53.theme=(V53.theme+1)%V53_TOPICS.length;V53.songPlays=0;V53.phonics=0;V53.phonicsPicked='';V53.phonicsCorrect=false;V53.game=0;V53.gamePicked='';V53.gameWrong=false;V53.gameOrder=null;V53.readPicked='';V53.readCorrect=false;render();return;}
  if(op==='speak-theme'){speakSequence(topic.words.map(function(w){return {text:w[0],lang:'en-US',pause:250}}));return;}
  if(op==='level'){
   var lvl=Number(b.dataset.level);
   if(![0,1,2,3].includes(lvl))return;
-  saveData.englishAbility=lvl;V53.phonics=0;V53.phonicsPicked='';V53.game=0;V53.gamePicked='';V53.readPicked='';english.screen='map';store();render();return;
+  saveData.englishAbility=lvl;V53.phonics=0;V53.phonicsPicked='';V53.phonicsCorrect=false;V53.game=0;V53.gamePicked='';V53.gameWrong=false;V53.gameOrder=null;V53.readPicked='';V53.readCorrect=false;english.screen='map';store();render();return;
  }
  if(op==='ph-listen'){var p=v53PhonicsBank()[V53.phonics];if(p){var txt=v5Level()===0?p.ref+'. '+p.ref+'.':p.target+'. '+p.target+'.';v5Voice(txt);}return;}
  if(op==='ph-answer'){
