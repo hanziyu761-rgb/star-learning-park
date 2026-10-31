@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
-<meta name="description" content="星星闯关乐园V6.6：口语伙伴根据孩子的回答调整后续问题，新增离线家庭英语任务和家长真实反馈；保留分级绘本、智能复习、语数考试与打印。">
-<title>星星闯关乐园 V6.6 · Speaking & Family Missions</title>
+<meta name="description" content="星星闯关乐园V6.7：新增中国课标预备级主题衔接，适龄听词找图、英文认读与家长确认口语观察，保留互动绘本、智能复习、家庭任务以及语文数学考试打印。">
+<title>星星闯关乐园 V6.7 · School English Bridge</title>
 <style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
 
 /* V4.2 AI learning assistant: child-friendly dialog with responsive controls */
@@ -498,7 +498,7 @@ body.v6-immersive #app{padding-top:8px}
 @media(prefers-reduced-motion:reduce){.v6-dancers.playing span{animation:none!important}}
 </style></head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.6</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.7</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
@@ -2466,7 +2466,7 @@ function v6SessionSync(){
 }
 function v6Go(page){
  if(examIsActive()){toast('请先保存并退出考试。');return;}
- if(!['home','song','phonics','story','play','talk','mission'].includes(page))return;
+ if(!['home','song','phonics','story','play','talk','mission','school'].includes(page))return;
  v6StopAllAudio();
  if(V6.page==='talk'&&page!=='talk'&&v5SpeechScene())v5ResetSpeak();
  V6.page=page;V6.lessonHint=false;render();window.scrollTo(0,0);
@@ -2475,7 +2475,7 @@ function v6Go(page){
 function v6Header(title,subtitle){
  var d=v6Data(),topic=v6Topic(),percent=Math.round(v6DoneCount()/5*100);
  return '<div class="v6-head"><div class="v6-headbar"><button class="v6-topbtn" type="button" data-v6="exit">← Exit</button>'+
- '<span class="v6-kicker">ENGLISH WORLD V6.6 · L'+v5Level()+'</span><button class="v6-topbtn" type="button" data-v6="parent">👨‍👩‍👧 Parent</button></div>'+
+ '<span class="v6-kicker">ENGLISH WORLD V6.7 · L'+v5Level()+'</span><button class="v6-topbtn" type="button" data-v6="parent">👨‍👩‍👧 Parent</button></div>'+
  '<h1>'+v5Html(title)+'</h1><p class="v6-english">'+v5Html(subtitle)+'</p><div class="v6-headbar">'+
  '<span class="v6-badge">'+topic.icon+' '+v5Html(topic.name)+'</span><span class="v6-badge">⏰ <span id="v6-live-clock">'+v6Clock()+'</span> · '+percent+'% done</span></div></div>';
 }
@@ -2495,6 +2495,9 @@ function v6ParentUi(){
  '<label><input type="checkbox" id="v6-english-only" '+(d.settings.englishOnly?'checked':'')+'/> 孩子学习时隐藏中文学科菜单（英语沉浸模式）</label>'+ 
  '<label><input type="checkbox" id="v62-animations" '+(d.settings.animations?'checked':'')+'/> 显示轻量卡通动画（关闭后保留绘本点读和游戏）</label>'+
  '<p class="v6-note">开始时间仅作家长安排参考，不会在后台自动提醒。每日计时可由家长或孩子主动开始、暂停，时间结束不强制退出。</p>'+
+ '<div class="v6-divider"></div><h3>学校英语主题衔接（家长设置）</h3>'+ 
+ '<label>主题组织方式 <select id="v67-track">'+Object.keys(V67_TRACKS).map(function(k){return '<option value="'+k+'" '+(v67Track()===k?'selected':'')+'>'+v5Html(V67_TRACKS[k].name)+'</option>'}).join('')+'</select></label>'+ 
+ '<p class="v6-note">国家课程要求小学英语通常从三年级开始，一至二年级有条件的学校可开设，以听说为主。以上人教版/沪教版是原创主题衔接顺序，不代表精确教材单元、课文或页码。要做真正逐单元同步，需要核对孩子实际课本。</p>'+ 
  '<div class="v6-divider"></div><h3>麦克风和 AI</h3>'+
  '<label><input type="checkbox" id="v6-speaking-consent" '+(v5ParentConsent?'checked':'')+'/> 家长同意本次使用浏览器语音识别</label>'+ 
  '<label><input type="checkbox" id="v61-ai-replies" '+(d.settings.aiReplies?'checked':'')+'/> 允许将本次口语转写或输入文字发送给 DeepSeek 获取简短鼓励（可选，默认关闭）</label>'+
@@ -2505,6 +2508,7 @@ function v6ParentUi(){
  '<div class="v6-divider"></div><h3>🔤 自然拼读听力记录</h3>'+v63ParentReport()+
  '<div class="v6-divider"></div><h3>📚 V6.5 分级阅读与故事理解</h3>'+v65ParentReport()+
  '<div class="v6-divider"></div><h3>🏠 V6.6 家庭英语与口语观察</h3>'+v66ParentReport()+
+ '<div class="v6-divider"></div><h3>🏫 V6.7 校内英语衔接与适龄观察</h3>'+v67ParentReport()+
  '<div class="v6-divider"></div><h3>🧠 V6.4 智能复习与能力观察</h3>'+v64ParentReport()+
  '<div class="v6-divider"></div><h3>课程说明</h3>'+
  '<p>第一步听唱进入英文环境；自然拼读使用离线合成音素示范与整词朗读，非专业真人录音，请家长留意音质，勿把字母名称当作音素。绘本为原创简短故事，可亲子共读，不要求逐句中文翻译。</p>'+
@@ -2523,6 +2527,7 @@ function v6Home(){
  '<button class="v6-btn" data-v6="timer-reset">↻ Reset Timer</button></div>'+
  '<button class="v6-btn good full" data-v64="next">'+(done===5?'🌟 All done today':'▶ Next: '+next[2])+'</button></section>';
  html+=v64Agenda();
+ html+='<section class="v6-card"><h2>🏫 My School English Bridge</h2><p class="v6-note">Short listening, word-picture reading and talking checks inspired by China’s grade 1–2 preparation themes.</p><button type="button" class="v6-btn good full" data-v6="go" data-page="school">🎒 Explore School English</button></section>';
  html+='<section class="v6-card"><h2>🏠 My English Mission</h2><p class="v6-note">Use one English sentence with your grown-up today, away from the screen.</p><button type="button" class="v6-btn good full" data-v6="go" data-page="mission">🏠 Try Today’s Home Mission</button></section>';
  html+='<section class="v6-card"><h2>📚 Today’s Reading Adventure</h2><p class="v6-note">Listen, read, find pictures and answer story questions! Your Sound Bridge reviews today’s phonics word.</p><button type="button" class="v6-btn good full" data-v6="go" data-page="story">📖 Open My Graded Storybook</button></section>';
  html+='<section class="v6-card"><h2>🧭 Explore Your English World</h2><div class="v6-grid">'+V6_STEPS.map(function(x){return '<button class="v6-activity '+(day[x[0]]?'done':'')+'" data-v6="go" data-page="'+x[0]+'"><span class="emoji">'+x[1]+'</span><b>'+x[2]+'</b><small>'+(day[x[0]]?'✓ Great work!':x[3])+'</small></button>'}).join('')+'</div></section>';
@@ -3780,6 +3785,7 @@ function v6Ui(){
  else if(page==='play')h+=v6PlayUi();
  else if(page==='talk')h+=v6TalkUi();
  else if(page==='mission')h+=v66MissionUi();
+ else if(page==='school')h+=v67SchoolUi();
  else h+=v6Home();
  return h+v6ParentUi()+'</div>';
 }
@@ -3965,6 +3971,8 @@ function v6ParentSave(){
  d.settings.aiReplies=!!document.getElementById('v61-ai-replies')?.checked;
  d.settings.animations=!!document.getElementById('v62-animations')?.checked;
  if(!d.settings.animations)v62CartoonStop();
+ var nextTrack=document.getElementById('v67-track')?.value;
+ if(V67_TRACKS[nextTrack]){v67Data().selected[v67Profile()]=nextTrack;V67.key='';}
  d.settings.englishOnly=!!document.getElementById('v6-english-only')?.checked;
  v5ParentConsent=!!document.getElementById('v6-speaking-consent')?.checked;
  V6.parent=false;store();render();
@@ -4114,6 +4122,11 @@ document.addEventListener('click',function(event){
  else if(op==='mission-slow'){V66.missionHeard=true;v5SlowVoice(item.line);render();}
  else if(op==='mission-tried'&&V66.missionHeard){V66.missionTried=true;render();}
  else if(op==='mission-save')v66MissionSave();
+},true);
+document.addEventListener('click',function(event){
+ var button=event.target.closest('[data-v67]');if(!button||view!=='speaking'||V6.page!=='school')return;
+ event.preventDefault();event.stopImmediatePropagation();if(examIsActive())return;
+ v67Action(button);
 },true);
 document.addEventListener('dragstart',function(event){
  var el=event.target.closest?.('[data-v6-drag-index]');
