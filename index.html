@@ -245,6 +245,7 @@ body.exam-running #aiTeacherFab,body.exam-running #v44LevelBar{display:none!impo
 .v53-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:14px 0}
 .v53-choice{border:2px solid #d9e1f4;border-radius:18px;background:#fff;color:#304466;font-weight:850;min-height:82px;font-size:22px;padding:12px 8px;display:grid;gap:4px;place-items:center;overflow-wrap:anywhere}
 .v53-choice small{font-size:13px;font-weight:750;color:#74809b}.v53-choice.selected{background:#eee8ff;border-color:#8065de}
+.v53-option-pair{display:grid;gap:6px;min-width:0}.v53-option-pair .v53-choice{width:100%}.v53-option-pair .v53-btn{font-size:12px;min-height:41px;padding:8px 3px}
 .v53-feedback{border-radius:14px;padding:12px 14px;line-height:1.75;font-size:14px;font-weight:780;background:#eff7f5;color:#29775a;margin:11px 0}
 .v53-feedback.try{background:#fff6eb;color:#9a6e25}
 .v53-chant-art{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;background:#f4f2ff;padding:23px 10px;border-radius:18px;margin:12px 0;min-height:148px}
@@ -1857,7 +1858,7 @@ function v53Phonics(){
  (l0?'<p><b>'+v5Html(p.ref)+'</b> → 开头声音</p>':'<p><b>规则示例：</b> '+v5Html(p.example)+'</p>')+'</div>'+
  '<button class="v53-btn primary block" data-v53="ph-listen">🔊 听英语单词</button>'+
  '<p class="v53-parent-note">'+v5Html(l0&&!V53.phonicsCorrect?'先听第一个单词，再找一个开头声音相同的词。答对后再揭晓字母规律。':p.rule)+'</p><h3>'+ (l0?'Which word starts the same?':'Listen. Which spelling is correct?')+'</h3>'+
- '<div class="v53-choices">'+opts.map(function(c,i){return '<button type="button" class="v53-choice '+(V53.phonicsPicked===c[0]?'selected':'')+'" data-v53="ph-answer" data-index="'+i+'">'+(l0?'<span>'+c[1]+'</span><small>'+v5Html(c[0])+'</small>':'<span>'+v5Html(c[0])+'</span>')+'</button>'}).join('')+'</div>';
+ '<div class="v53-choices">'+opts.map(function(c,i){var pick='<button type="button" class="v53-choice '+(V53.phonicsPicked===c[0]?'selected':'')+'" data-v53="ph-answer" data-index="'+i+'">'+(l0?'<span>'+c[1]+'</span><small>'+v5Html(c[0])+'</small>':'<span>'+v5Html(c[0])+'</span>')+'</button>';return l0?'<div class="v53-option-pair"><button type="button" class="v53-btn" data-v53="ph-hear-choice" data-index="'+i+'">🔊 听单词</button>'+pick+'</div>':pick;}).join('')+'</div>';
  if(V53.phonicsPicked)h+='<div class="v53-feedback '+(V53.phonicsCorrect?'':'try')+'">'+(V53.phonicsCorrect?'🌟 Nice listening! '+v5Html(p.rule):'💛 再听一遍，注意单词开头的声音。')+'</div>';
  if(V53.phonicsCorrect)h+='<button class="v53-btn success block" data-v53="ph-next">✨ 下一组声音</button>';
  h+='<p class="v53-parent-note">当前使用完整英语单词示范。专业的独立音素真人录音还未接入，系统不会把英文字母名称冒充音素。</p></section>';
@@ -2023,6 +2024,7 @@ document.addEventListener('click',function(event){
   saveData.englishAbility=lvl;V53.phonics=0;V53.phonicsPicked='';V53.phonicsCorrect=false;V53.game=0;V53.gamePicked='';V53.gameWrong=false;V53.gameOrder=null;V53.readPicked='';V53.readCorrect=false;english.screen='map';store();render();return;
  }
  if(op==='ph-listen'){var p=v53PhonicsBank()[V53.phonics];if(p){var txt=v5Level()===0?p.ref+'. '+p.ref+'.':p.target+'. '+p.target+'.';v5Voice(txt);}return;}
+ if(op==='ph-hear-choice'){var sound=v53PhonicsBank()[V53.phonics]?.choices[Number(b.dataset.index)];if(sound)v5Voice(sound[0]);return;}
  if(op==='ph-answer'){
   var p=v53PhonicsBank()[V53.phonics],c=p?.choices[Number(b.dataset.index)];if(!c)return;
   V53.phonicsPicked=c[0];V53.phonicsCorrect=c[0]===p.target;
