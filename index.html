@@ -2431,6 +2431,7 @@ function v6StopAllAudio(){
 }
 function v6ClearActivity(){
  v62CartoonStop();V6.cartoonFrame=0;V6.songPlayed=false;V6.songMoved=false;V6.songTouches=0;V6.bookPage=0;V6.bookVisited={};V6.bookPoints={};V6.bookPointed=false;V6.bookWarmed=false;V6.bookWarmHeard=false;V6.bookMode='listen';V6.phonicsGuess='';V6.phonicsPassed=false;
+ V66.talkIntent=[];V66.talkUsedHint=[];V66.talkModelPlayed=[];
  V6.gameStage='choose';V6.gameItem='';V6.gameRole='customer';V6.gameWarmHeard=false;V6.gameSpoken=false;V6.gameModelHeard=false;V6.gameRepeatTried=false;V6.micStatus='';V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.talkAttempt=false;V6.talkDraft='';
 }
 function v6SessionSync(){
@@ -2577,7 +2578,7 @@ function v62BookWords(sentence){
  }).join('')+'</div>';
 }
 function v62Buddy(topic,phase,step){
- var prompt=V6_DIALOGUES[topic.id]?.[step],words=phase==='listen'?prompt?.q:
+ var prompt=v66TalkPrompt(step,topic),words=phase==='listen'?prompt?.q:
   phase==='repeat'?prompt?.choices?.[0]:
   phase==='free'?'Your turn! I am listening.':
   phase==='finished'?'You are a brave explorer!':'Ready, explorer?';
@@ -3361,6 +3362,71 @@ function v66ParentReport(){
  '<p class="v6-note">仅保存在当前浏览器；清理浏览器数据可能丢失。可使用原有学习记录备份功能。</p>';
 }
 
+
+/* V6.6: three short, bounded, context-responsive speaking turns.
+   Button ideas are examples, not proof that a child spoke. Never score pronunciation. */
+function v66TalkIntent(topic,words){
+ var spoken=String(words||'').toLowerCase(),id=topic.id;
+ var wordsByTheme={
+  cafe:['apple','milk','bread','water'],
+  hello:['happy','good','fine','sleepy','sad'],
+  toys:['ball','car','bear'],
+  farm:['duck','dog','cat']
+ };
+ var matched=(wordsByTheme[id]||[]).find(function(x){
+  return new RegExp('\\b'+x+'\\b','i').test(spoken);
+ });
+ return matched||'';
+}
+function v66TalkPrompt(step,topic){
+ var t=topic||v6Topic(),item=V66.talkIntent[0]||'',friendly=item||'it';
+ if(step===0){
+  var first={
+   cafe:{q:'What would you like?',choices:['Milk, please!','An apple, please!','Bread, please!']},
+   hello:{q:'How do you feel?',choices:["I'm happy!","I'm good!","I'm sleepy!"]},
+   toys:{q:'What toy do you like?',choices:['I like the ball!','I like the car!','I like my bear!']},
+   farm:{q:'Which animal do you like?',choices:['I like dogs!','I like ducks!','I like cats!']}
+  };
+  return first[t.id]||V6_DIALOGUES[t.id]?.[0];
+ }
+ if(t.id==='cafe'){
+  if(step===1)return {q:item?'Here is your '+(item==='apple'?'apple':item)+'. What do you say?':'Here you go! What do you say?',choices:['Thank you!','Thank you very much!','Thanks!']};
+  return {q:item?'Do you like the '+item+'?':'Do you like it?',choices:['Yes, I do!','Yes, please!','No, thank you!']};
+ }
+ if(t.id==='hello'){
+  if(step===1)return {q:item?'You feel '+item+'! Can you say hello to me?':'Can you wave and say hello?',choices:['Hello, friend!','Hello!','Hi there!']};
+  return {q:'It is time to go. What can you say?',choices:['Bye-bye!','See you!','Goodbye!']};
+ }
+ if(t.id==='toys'){
+  if(step===1)return {q:item?'Can I play with your '+item+'?':'Can I play with your toy?',choices:['Here you go!','Yes, you can!','Let us play!']};
+  return {q:item?'What can we do with the '+item+'?':'What can we do together?',choices:['We can play!','Let us share!','We can have fun!']};
+ }
+ if(t.id==='farm'){
+  if(step===1)return {q:item==='duck'?'What can a duck do?':item==='cat'?'What can a cat do?':item==='dog'?'What can a dog do?':'What can an animal do?',
+    choices:item==='duck'?['It can swim!','A duck can walk!','It can move!']:item==='cat'?['It can jump!','A cat can run!','It can play!']:['It can run!','It can jump!','It can play!']};
+  return {q:item?'Do you like '+(item==='duck'?'ducks':item==='cat'?'cats':item==='dog'?'dogs':'animals')+'?':'Do you like animals?',choices:['Yes, I do!','I like animals!','They are fun!']};
+ }
+ return V6_DIALOGUES[t.id]?.[step]||{q:t.ask,choices:[t.example]};
+}
+function v66LocalEncouragement(topic,step,text){
+ var intent=v66TalkIntent(topic,text);
+ if(!text)return 'You gave it a try! I would love to hear you next time!';
+ if(step===0&&intent){
+  if(topic.id==='cafe')return 'Yummy! Let us get '+(intent==='apple'?'an apple':intent)+'!';
+  if(topic.id==='toys')return 'That '+intent+' looks fun!';
+  if(topic.id==='farm')return 'I like '+intent+'s, too!';
+  return 'Thank you for telling me how you feel!';
+ }
+ if(step===1)return 'Thank you! We can keep talking together.';
+ return 'Great talking! You had a whole little conversation!';
+}
+function v66SpeakReportUi(){
+ var d=v66Data(),rows=d.speaking.filter(function(r){return r.grade===saveData.grade&&r.term===saveData.term&&r.ability===v5Level();}).slice(-6);
+ return rows.map(function(r){return '<div class="v66-report-row">🤖 '+v5Html(r.day)+' · '+v5Html(r.theme)+
+ ' · '+r.rounds+' 轮 · '+(r.parentConfirmed?'家长确认开口':'仅记录尝试')+
+ ' · '+(r.independent?'曾独立表达':'有示范/帮助')+'</div>';}).join('');
+}
+
 /* V6.0 English World activities */
 function v6SongUi(){
  var t=v6Topic();
@@ -3447,7 +3513,7 @@ function v6PlayUi(){
 }
 function v6TalkPrompt(){
  var scene=v5SpeechScene(),dialogues=V6_DIALOGUES[v6Topic().id];
- return scene&&v5Speak.step<3?dialogues?.[v5Speak.step]||null:null;
+ return scene&&v5Speak.step<3?v66TalkPrompt(v5Speak.step,v6Topic()):null;
 }
 function v6TalkUi(){
  var t=v6Topic(),scene=v5SpeechScene(),step=v5Speak.step,phase=V6.talkPhase;
@@ -3462,7 +3528,8 @@ function v6TalkUi(){
   html+='<section class="v6-card">'+v62Buddy(t,'finished',3)+
    '<div class="v6-check">🌟 Speaking is brave! Every try counts.</div>'+
    '<label style="display:flex;gap:9px;align-items:start;padding:12px;line-height:1.6"><input type="checkbox" id="v5-parent-confirm" style="width:19px;height:19px;flex-shrink:0"/> A grown-up heard me speak English.</label>'+
-   '<label style="display:flex;gap:9px;align-items:start;padding:12px;line-height:1.6"><input type="checkbox" id="v5-parent-independent" style="width:19px;height:19px;flex-shrink:0"/> I answered once without a model.</label>'+
+   '<label style="display:flex;gap:9px;align-items:start;padding:12px;line-height:1.6"><input type="checkbox" id="v5-parent-independent" style="width:19px;height:19px;flex-shrink:0"/> A grown-up heard me answer once without a model.</label>'+ 
+ '<label style="display:flex;gap:9px;align-items:start;padding:12px;line-height:1.6"><input type="checkbox" id="v66-parent-comprehension" style="width:19px;height:19px;flex-shrink:0"/> A grown-up thinks I understood the questions.</label>'+
    '<button class="v6-btn good full" data-v6="talk-save" '+(v5Speak.pending?'disabled':'')+'>✅ Save My Talking Adventure</button>'+
    '<p class="v6-note">The app cannot reliably grade a child’s accent or pronunciation. A parent can confirm that speaking happened.</p></section>'+v6Footer();return html;
  }
@@ -3494,7 +3561,9 @@ function v6TalkUi(){
    '<div class="v6-actions"><button class="v6-btn" data-v6="talk-question-repeat">🔊 Hear Question</button>'+
    '<button class="v6-btn" data-v6="talk-hint">'+(V6.lessonHint?'🙈 Hide a Model':'💡 Show a Model')+'</button></div>'+
    (V6.lessonHint?'<div class="v6-dialog v6-english">'+v5Html(model)+'</div>':'')+
-   '<button class="v6-btn primary full" data-v6="talk-self">🙋 I tried speaking! →</button>'+
+   '<div class="v66-choicebar">'+(it?.choices||[]).map(function(phrase,i){return '<button type="button" data-v6="talk-idea" data-index="'+i+'" aria-label="Show sentence idea '+(i+1)+'">💡 '+v5Html(phrase)+'</button>';}).join('')+'</div>'+ 
+ '<p class="v66-mini">These are just ideas: tap one if you need help, then actually say it aloud. Tapping does not count as speaking.</p>'+ 
+ '<button class="v6-btn primary full" data-v6="talk-self">🙋 I tried speaking! →</button>'+
    '<div class="v6-actions"><button class="v6-btn" data-v6="talk-mic" '+(!(window.SpeechRecognition||window.webkitSpeechRecognition)||!v5ParentConsent?'disabled':'')+'>🎙️ Use My Microphone</button></div>'+ 
    '<p class="v6-note" id="v61-mic-status" role="status" aria-live="polite">'+v5Html(V6.micStatus||'No microphone? Say it aloud to a grown-up, then tap I tried speaking!')+'</p>'+
    '<details><summary class="v6-note">Optional: check recognized words / type with a grown-up</summary><input id="v5-speech-input" class="v6-mini-input" maxlength="130" autocomplete="off" placeholder="Your words (optional)" value="'+v5Html(V6.talkDraft)+'"/></details>'+
@@ -3589,6 +3658,7 @@ function v6TalkBegin(){
  v5Speak.token++;
  v5Speak.scene=v6Topic().scene;v5Speak.step=0;v5Speak.answers=[];v5Speak.messages=[];v5Speak.pending=false;v5Speak.onlineNote='';v5Speak.lastRecognized='';
  V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.lessonHint=false;V6.talkAttempt=false;V6.talkDraft='';
+ V66.talkIntent=[];V66.talkUsedHint=[];V66.talkModelPlayed=[];
  render();
 }
 async function v6TalkCommit(){
@@ -3599,17 +3669,18 @@ async function v6TalkCommit(){
  if(text&&(v5IsPrivate(text)||/\b(?:my name is|i live at|i live in|my address|my phone|my school|my email|my wechat|my instagram|my tiktok|my birthday)\b/i.test(text))){toast('Please do not share private information.');return;}
  var method=text?(v5Speak.lastRecognized===text?'voice':'typed'):'self-report';
  var step=v5Speak.step,token=++v5Speak.token;
+ V66.talkIntent[step]=v66TalkIntent(v6Topic(),text);
  v5Speak.answers.push({method:method,step:step});
  if(text)v5Speak.messages.push({who:'child',text:text});
  v5Speak.step++;v5Speak.lastRecognized='';V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.lessonHint=false;V6.talkDraft='';
  if(!text||!v5ParentConsent||!v6Data().settings.aiReplies){
-  var localReply=v62LocalReply(v6Topic(),step,text);
+  var localReply=v66LocalEncouragement(v6Topic(),step,text);
   v5Speak.messages.push({who:'teacher',text:localReply,source:'local'});
   render();v5Voice(localReply);return;
  }
  v5Speak.pending=true;render();
  try{
-  const prompt=V6_DIALOGUES[v6Topic().id]?.[step]?.q||v6Topic().ask;
+  const prompt=v66TalkPrompt(step,v6Topic()).q;
   const body={
    message:('The child wrote or said: '+text+'. Give one short kind acknowledgement.').slice(0,180),
    history:v5Speak.messages.slice(0,-1).slice(-4).map(function(m){return {role:m.who==='child'?'user':'assistant',content:String(m.text).slice(0,130)}}),
@@ -3622,7 +3693,7 @@ async function v6TalkCommit(){
   v5Speak.messages.push({who:'teacher',text:safe,source:'DeepSeek'});v5Voice(safe);
  }catch(e){
   if(token!==v5Speak.token)return;
-  var fallback=v62LocalReply(v6Topic(),step,text);
+  var fallback=v66LocalEncouragement(v6Topic(),step,text);
   v5Speak.messages.push({who:'teacher',text:fallback,source:'local'});
   v5Voice(fallback);
  }finally{if(token===v5Speak.token){v5Speak.pending=false;render();}}
@@ -3631,6 +3702,7 @@ function v6TalkSave(){
  if(v5Speak.step<3||v5Speak.pending)return;
  var yes=!!document.getElementById('v5-parent-confirm')?.checked;
  var independent=!!document.getElementById('v5-parent-independent')?.checked;
+ var understood=!!document.getElementById('v66-parent-comprehension')?.checked;
  var scene=v5SpeechScene();if(!scene)return;
  saveData.v5SpeakRecords=Array.isArray(saveData.v5SpeakRecords)?saveData.v5SpeakRecords:[];
  saveData.v5SpeakRecords.push({
@@ -3639,6 +3711,10 @@ function v6TalkSave(){
   parentConfirmed:yes,independent:yes&&independent
  });
  saveData.v5SpeakRecords=saveData.v5SpeakRecords.slice(-120);
+ var report=v66Data();report.speaking.push({day:localDate(),grade:saveData.grade,term:saveData.term,ability:v5Level(),theme:v6Topic().id,
+  rounds:3,voiceRecognitions:v5Speak.answers.filter(function(x){return x.method==='voice'}).length,
+  parentConfirmed:yes,independent:yes&&independent,understood:yes&&understood,
+  scaffoldedTurns:V66.talkUsedHint.filter(Boolean).length});report.speaking=report.speaking.slice(-120);
  if(yes)v6Mark('talk');
  store();v5ResetSpeak();V6.talkPhase='warm';V6.page='home';v6StopAllAudio();render();
  toast(yes?'🌟 Grown-up confirmed: speaking adventure complete!':'Practice saved. A grown-up can confirm speaking next time.');
@@ -3800,11 +3876,12 @@ document.addEventListener('click',function(event){
  case 'talk-into-repeat':
   V6.talkPhase='repeat';V6.talkModelHeard=true;render();
   if(v6TalkPrompt())v5Voice(v6TalkPrompt().choices[0]);break;
- case 'talk-model':if(v6TalkPrompt())v5Voice(v6TalkPrompt().choices[0]);break;
- case 'talk-model-slow':if(v6TalkPrompt())v5SlowVoice(v6TalkPrompt().choices[0]);break;
+ case 'talk-model':if(v6TalkPrompt()){V66.talkModelPlayed[v5Speak.step]=true;v5Voice(v6TalkPrompt().choices[0]);}break;
+ case 'talk-model-slow':if(v6TalkPrompt()){V66.talkModelPlayed[v5Speak.step]=true;v5SlowVoice(v6TalkPrompt().choices[0]);}break;
  case 'talk-into-free':V6.talkPhase='free';render();break;
  case 'talk-question-repeat':if(v6TalkPrompt())v5Voice(v6TalkPrompt().q);break;
- case 'talk-hint':V6.lessonHint=!V6.lessonHint;render();break;
+ case 'talk-hint':V6.lessonHint=!V6.lessonHint;if(V6.lessonHint)V66.talkUsedHint[v5Speak.step]=true;render();break;
+ case 'talk-idea':if(V6.talkPhase==='free'&&v5Speak.step<3){var choices=v6TalkPrompt()?.choices||[],phrase=choices[Number(button.dataset.index)];if(phrase){V6.talkDraft=phrase;V66.talkUsedHint[v5Speak.step]=true;v5Speak.lastRecognized='';render();v5Voice(phrase);}}break;
  case 'talk-feedback':var lastReply=v5Speak.messages.slice().reverse().find(function(m){return m.who==='teacher';});if(lastReply)v5Voice(lastReply.text);break;
  case 'talk-self':v6TalkCommit();break;
  case 'talk-mic':v6Mic();break;
