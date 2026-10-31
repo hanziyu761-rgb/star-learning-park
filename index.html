@@ -2560,25 +2560,26 @@ function v6TalkUi(){
  var t=v6Topic(),scene=v5SpeechScene(),step=v5Speak.step,phase=V6.talkPhase;
  var html=v6Header('🎤 Talk to My English Buddy','Listen. Repeat. Then use your own words!');
  if(!scene){
-  html+='<section class="v6-card"><div class="v6-art"><span class="emoji">🤖 🎤 🧒</span><strong>Ready to talk?</strong><span class="caption">'+v5Html(t.name)+' · Three short turns</span></div>'+
+  html+='<section class="v6-card">'+v62Buddy(t,'warm',0)+
    '<p class="v6-note">We will practise a sound before each spoken sentence. You can always ask to listen again.</p>'+
    '<button class="v6-btn primary full" data-v6="talk-begin">▶ Start Talking</button></section>'+v6Footer();
   return html;
  }
  if(step>=3){
-  html+='<section class="v6-card"><div class="v6-art"><span class="emoji">🏆🤖</span><strong>You did it!</strong><span class="caption">You tried three short conversations.</span></div>'+
+  html+='<section class="v6-card">'+v62Buddy(t,'finished',3)+
    '<div class="v6-check">🌟 Speaking is brave! Every try counts.</div>'+
    '<label style="display:flex;gap:9px;align-items:start;padding:12px;line-height:1.6"><input type="checkbox" id="v5-parent-confirm" style="width:19px;height:19px;flex-shrink:0"/> A grown-up heard me speak English.</label>'+
    '<label style="display:flex;gap:9px;align-items:start;padding:12px;line-height:1.6"><input type="checkbox" id="v5-parent-independent" style="width:19px;height:19px;flex-shrink:0"/> I answered once without a model.</label>'+
-   '<button class="v6-btn good full" data-v6="talk-save">✅ Save My Talking Adventure</button>'+
+   '<button class="v6-btn good full" data-v6="talk-save" '+(v5Speak.pending?'disabled':'')+'>✅ Save My Talking Adventure</button>'+
    '<p class="v6-note">The app cannot reliably grade a child’s accent or pronunciation. A parent can confirm that speaking happened.</p></section>'+v6Footer();return html;
  }
  var it=v6TalkPrompt(),model=it?.choices[0]||t.example,question=it?.q||t.ask;
  html+='<section class="v6-card"><div class="v6-headbar"><h2>Round '+(step+1)+' / 3</h2><span class="v6-badge">'+v5Html(t.name)+'</span></div>'+
  '<div class="v6-progress"><span style="width:'+(step/3*100)+'%"></span></div>'+
  '<div class="v6-talk-stages">'+['🔤 Sound','🎧 Listen','🗣️ Repeat','🎤 Speak'].map(function(x,i){return '<span class="'+(i===['warm','listen','repeat','free'].indexOf(phase)?'on':'')+'">'+x+'</span>'}).join('')+'</div>';
+ html+=v62Buddy(t,phase,step);
  var lastEncouragement=v5Speak.messages.slice().reverse().find(function(m){return m.who==='teacher';});
- if(lastEncouragement&&step>0)html+='<div class="v6-check" role="status">✨ '+v5Html(lastEncouragement.text)+'</div>';
+ if(lastEncouragement&&step>0)html+='<div class="v6-check" role="status">✨ '+v5Html(lastEncouragement.text)+'</div><button type="button" class="v6-btn soft" data-v6="talk-feedback">🔊 Hear My Buddy Again</button>';
  if(phase==='warm'){
   html+='<div class="v6-art"><span class="emoji">'+t.sound.mainArt+'</span><strong class="v6-english">'+v5Html(t.sound.main)+'</strong>'+
    '<span class="caption">First, warm up your ears and your voice.</span></div>'+
@@ -2596,7 +2597,7 @@ function v6TalkUi(){
    '<button class="v6-btn good full" data-v6="talk-into-free">🙋 I tried repeating it</button>';
  }
  if(phase==='free'){
-  html+='<div class="v6-art"><span class="emoji">🎤🌟</span><strong>Your Turn!</strong><span class="caption">Try saying something on your own.</span></div>'+
+  html+='<p class="v6-note">Say your own answer. It can be one word or a short sentence.</p>'+
    '<div class="v6-actions"><button class="v6-btn" data-v6="talk-question-repeat">🔊 Hear Question</button>'+
    '<button class="v6-btn" data-v6="talk-hint">'+(V6.lessonHint?'🙈 Hide a Model':'💡 Show a Model')+'</button></div>'+
    (V6.lessonHint?'<div class="v6-dialog v6-english">'+v5Html(model)+'</div>':'')+
@@ -2670,7 +2671,7 @@ function v6StoryNext(){
  if([0,1,2,3].some(function(i){return !V6.bookVisited[i]||!V6.bookPoints[i]})){
   v5Voice('Let us finish every page together!');return;
  }
- v6Mark('story');v5Voice('Wonderful! You finished your storybook!');v6Go('home');
+ v6Mark('story');v6Go('home');v5Voice('Wonderful! You finished your storybook!');
 }
 function v6GameChoose(index){
  var t=v6Topic(),item=t.objects[index];if(!item||V6.gameStage!=='choose')return;
@@ -2707,8 +2708,9 @@ async function v6TalkCommit(){
  if(text)v5Speak.messages.push({who:'child',text:text});
  v5Speak.step++;v5Speak.lastRecognized='';V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.lessonHint=false;V6.talkDraft='';
  if(!text||!v5ParentConsent||!v6Data().settings.aiReplies){
-  v5Speak.messages.push({who:'teacher',text:'Nice trying! Keep talking!',source:'local'});
-  render();v5Voice('Nice trying! Keep talking!');return;
+  var localReply=v62LocalReply(v6Topic(),step,text);
+  v5Speak.messages.push({who:'teacher',text:localReply,source:'local'});
+  render();v5Voice(localReply);return;
  }
  v5Speak.pending=true;render();
  try{
@@ -2725,12 +2727,13 @@ async function v6TalkCommit(){
   v5Speak.messages.push({who:'teacher',text:safe,source:'DeepSeek'});v5Voice(safe);
  }catch(e){
   if(token!==v5Speak.token)return;
-  v5Speak.messages.push({who:'teacher',text:'Good try! Let us keep going!',source:'local'});
-  v5Voice('Good try! Let us keep going!');
+  var fallback=v62LocalReply(v6Topic(),step,text);
+  v5Speak.messages.push({who:'teacher',text:fallback,source:'local'});
+  v5Voice(fallback);
  }finally{if(token===v5Speak.token){v5Speak.pending=false;render();}}
 }
 function v6TalkSave(){
- if(v5Speak.step<3)return;
+ if(v5Speak.step<3||v5Speak.pending)return;
  var yes=!!document.getElementById('v5-parent-confirm')?.checked;
  var independent=!!document.getElementById('v5-parent-independent')?.checked;
  var scene=v5SpeechScene();if(!scene)return;
@@ -2903,6 +2906,7 @@ document.addEventListener('click',function(event){
  case 'talk-into-free':V6.talkPhase='free';render();break;
  case 'talk-question-repeat':if(v6TalkPrompt())v5Voice(v6TalkPrompt().q);break;
  case 'talk-hint':V6.lessonHint=!V6.lessonHint;render();break;
+ case 'talk-feedback':var lastReply=v5Speak.messages.slice().reverse().find(function(m){return m.who==='teacher';});if(lastReply)v5Voice(lastReply.text);break;
  case 'talk-self':v6TalkCommit();break;
  case 'talk-mic':v6Mic();break;
  case 'talk-save':v6TalkSave();break;
