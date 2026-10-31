@@ -2456,7 +2456,7 @@ function v62CartoonToggle(){
  if(V6.cartoonPlaying){v62CartoonStop();stopSpeech();render();return;}
  var frames=V62_CARTOONS[v6Topic().id]||V62_CARTOONS.cafe;
  if(V6.cartoonFrame>=frames.length-1)V6.cartoonFrame=0;
- V6.cartoonPlaying=true;v62CartoonRun();
+ v6StoppedMusic();stopSpeech();V6.cartoonPlaying=true;v62CartoonRun();
 }
 function v62CartoonNext(){
  v62CartoonStop();stopSpeech();
@@ -2505,6 +2505,8 @@ function v62LocalReply(topic,step,words){
 }
 function v62TouchAnimation(index,button){
  var t=v6Topic(),item=t.objects[index];if(!item)return;
+ v62CartoonStop();
+ var playBtn=document.querySelector('[data-v6="cartoon-play"]');if(playBtn)playBtn.textContent='▶ Play Cartoon';
  V6.songTouches=(V6.songTouches||0)+1;
  if(button){button.classList.remove('burst');void button.offsetWidth;button.classList.add('burst');}
  var count=document.getElementById('v62-touch-count');
@@ -2705,6 +2707,7 @@ function v6Melody(){
  }catch(e){v6StoppedMusic();}
 }
 function v6SingPlay(slow){
+ v62CartoonStop();stopSpeech();
  var t=v6Topic();V6.songPlayed=true;
  render();
  var dancers=document.getElementById('v6-dancers');if(dancers)dancers.classList.add('playing');
