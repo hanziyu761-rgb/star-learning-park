@@ -2764,7 +2764,7 @@ function v63TapLetter(index){
  if(V63.build.length===l.word.length){
   V63.stageTries++;V63.tries++;
   V63.stageAttempts[3]=(V63.stageAttempts[3]||0)+1;
-  if(V63.build.join('')===l.word){V63.first[3]=V63.stageTries===1;V63.solved=true;V63.message='You blended '+l.word+'!';v63Stop();v5Voice(l.word);}
+  if(V63.build.join('')===l.word){V63.first[3]=V63.stageTries===1&&!V63.assisted[3];V63.solved=true;V63.message='You blended '+l.word+'!';v63Stop();v5Voice(l.word);}
   else{V63.stageErrors[3]=(V63.stageErrors[3]||0)+1;V63.errors++;V63.message='Good try! Tap Clear and try another order.';}
  }
  render();
@@ -2856,7 +2856,7 @@ function v63Action(button){
  if(op==='answer'){v63Answer(index);return;}
  if(op==='tile'){v63TapLetter(index);return;}
  if(op==='clear'){v63ClearBuild();return;}
- if(op==='word'){v5Voice(l.word);return;}
+ if(op==='word'){if(V63.stage===3&&!V63.solved)V63.assisted[3]=true;v5Voice(l.word);return;}
  if(op==='next'){v63GoNext();return;}
 }
 function v63ParentReport(){
