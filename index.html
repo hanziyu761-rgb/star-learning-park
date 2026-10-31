@@ -525,6 +525,8 @@ const TRY_AGAIN_WORDS=['没关系，咱们再看一看，好吗？','差一点�
 let lastEncourageText='';
 function differentPhrase(choices){let out=choices[randint(0,choices.length-1)];if(choices.length>1&&out===lastEncourageText)out=choices[(choices.indexOf(out)+1)%choices.length];lastEncourageText=out;return out;}
 function encourage(q,correct){if(!saveData.voiceOn)return;
+ // Only one brief voice cue after each answer in the learning adventure.
+ if(view==='practice'){speakSequence([{text:correct?'答对啦！':'答错了，继续努力！',lang:'zh-CN',tone:correct?'celebrate':'gentle'}]);return;}
  if(correct){const tasks=[{text:differentPhrase(POSITIVE_WORDS),lang:'zh-CN',tone:'celebrate',pause:270}];
   // Answer explanation remains audible, but delivered as a separate, calmer sentence.
   tasks.push({text:'我们再记住这个小方法。',lang:'zh-CN',pause:160},{text:q.voiceExplainZh||q.explain,lang:'zh-CN',tone:'explain'});
@@ -987,7 +989,7 @@ const origReadQuestion=readQuestion,origReadEnglish=readEnglish,origReadExplain=
 readQuestion=function(){const q=currentQuestion();if(q?.subject==='english'&&q.us){speakSequence([{text:q.ask,lang:'en-US'}]);return;}origReadQuestion();};
 readEnglish=function(){const q=currentQuestion();if(q?.subject==='english'&&q.us){speakSequence([{text:q.voiceEn||q.ask,lang:'en-US'}]);return;}origReadEnglish();};
 readExplain=function(){const q=currentQuestion();if(q?.subject==='english'&&q.us){speakSequence([{text:'Great thinking! '+q.explain,lang:'en-US'}]);return;}origReadExplain();};
-encourage=function(q,correct){if(q?.subject==='english'&&q.us){if(saveData.voiceOn){const text=correct?'Wonderful! You worked it out. '+q.explain:(activeTrial.tries>1?'Nice try! '+q.tip:'Good try. Listen and think again.');speakSequence([{text,lang:'en-US'}]);}return;}origEncourage(q,correct);};
+encourage=function(q,correct){if(view==='practice'){if(saveData.voiceOn)speakSequence([{text:correct?'答对啦！':'答错了，继续努力！',lang:'zh-CN',tone:correct?'celebrate':'gentle'}]);return;}if(q?.subject==='english'&&q.us){if(saveData.voiceOn){const text=correct?'Wonderful! You worked it out. '+q.explain:(activeTrial.tries>1?'Nice try! '+q.tip:'Good try. Listen and think again.');speakSequence([{text,lang:'en-US'}]);}return;}origEncourage(q,correct);};
 // Version-specific lesson labels; keep the Chinese parent controls, English learning space English-only.
 const beforeUsHeader=renderHeader;
 renderHeader=function(){beforeUsHeader();if(saveData.subject==='english'){
