@@ -343,6 +343,16 @@ body.v6-immersive #app{padding-top:8px}
 .v6-shelf button.active{background:#eae5ff;border-color:#a599e5;color:#5e4cb0}
 @media(max-width:360px){.v6-grid{gap:7px}.v6-card{padding:13px 11px}.v6-activity{padding:11px 8px}.v6-items{gap:5px}.v6-object{padding:6px 2px}.v6-head{padding:13px}}
 
+
+.v62-cartoon{background:linear-gradient(145deg,#e8f1ff,#fff4df);border-radius:20px;padding:15px;margin:15px 0;border:2px solid #dee4fb}
+.v62-cartoon h3{margin:0 0 9px!important}
+.v62-cartoon-screen{position:relative;min-height:170px;background:linear-gradient(#9cddff 0%,#eefaff 68%,#80cd88 69%,#75bb71 100%);border-radius:18px;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow:hidden}
+.v62-cartoon-screen:before{content:'☁️';position:absolute;top:4px;left:10%;font-size:35px;animation:v62-drift 4s ease-in-out infinite alternate}
+.v62-cartoon-art{position:relative;z-index:1;font-size:clamp(59px,17vw,91px);line-height:1.5;animation:v62-celebrate 2.8s ease-in-out infinite alternate}
+.v62-cartoon-bubble{position:relative;z-index:1;border:2px solid #c8d9f5;border-radius:16px;background:#ffffffed;color:#34527a;font-size:clamp(17px,4.6vw,22px);font-weight:900;padding:8px 15px;max-width:93%;text-align:center;line-height:1.4}
+.v62-cartoon-dots{display:flex;justify-content:center;gap:7px;margin-top:10px}
+.v62-cartoon-dots span{height:9px;width:18px;border-radius:99px;background:#ccd5ee}
+.v62-cartoon-dots span.on{background:#6d76df;width:35px}
 /* V6.2: animated, touch-friendly mini-scenes and guided English buddy */
 .v62-scene{position:relative;isolation:isolate;overflow:hidden;min-height:275px;border:2px solid #d8e5fc;border-radius:22px;margin:14px 0;background:linear-gradient(#bce9ff 0%,#e7f8ff 61%,#a1e7ae 62%,#6cc889 100%);box-shadow:inset 0 -10px 30px #26734a15}
 .v62-scene.v62-cafe{background:linear-gradient(#cbdffb 0%,#fff0d5 60%,#d3a47f 61%,#b98261 100%)}
@@ -2284,7 +2294,7 @@ const V6_STEPS=[
  ['play','🏡','Life Adventures','3 min'],
  ['talk','🎤','Talk to AI','3 min']
 ];
-const V6={page:'home',parent:false,songPlayed:false,songMoved:false,songTouches:0,bookPage:0,bookVisited:{},bookPoints:{},bookPointed:false,bookWarmed:false,bookWarmHeard:false,bookMode:'listen',phonicsGuess:'',phonicsPassed:false,gameStage:'choose',gameItem:'',gameRole:'customer',gameWarmHeard:false,gameSpoken:false,talkPhase:'warm',talkWarmDone:false,talkModelHeard:false,talkAttempt:false,talkDraft:'',musicCtx:null,contextKey:'',lessonHint:false,micRec:null,micStatus:'',gameModelHeard:false,gameRepeatTried:false};
+const V6={page:'home',parent:false,songPlayed:false,songMoved:false,songTouches:0,cartoonFrame:0,cartoonPlaying:false,cartoonTimer:null,bookPage:0,bookVisited:{},bookPoints:{},bookPointed:false,bookWarmed:false,bookWarmHeard:false,bookMode:'listen',phonicsGuess:'',phonicsPassed:false,gameStage:'choose',gameItem:'',gameRole:'customer',gameWarmHeard:false,gameSpoken:false,talkPhase:'warm',talkWarmDone:false,talkModelHeard:false,talkAttempt:false,talkDraft:'',musicCtx:null,contextKey:'',lessonHint:false,micRec:null,micStatus:'',gameModelHeard:false,gameRepeatTried:false};
 function v6Data(){
  var d=saveData.v6English;
  if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v6English={};
@@ -2333,10 +2343,10 @@ function v6StoppedMusic(){
 }
 function v6StopAllAudio(){
  if(V6.micRec){var active=V6.micRec;V6.micRec=null;active.onresult=null;active.onerror=null;active.onend=null;try{active.abort();}catch(e){}}
- V6.micStatus='';stopSpeech();v6StoppedMusic();
+ V6.micStatus='';v62CartoonStop();stopSpeech();v6StoppedMusic();
 }
 function v6ClearActivity(){
- V6.songPlayed=false;V6.songMoved=false;V6.songTouches=0;V6.bookPage=0;V6.bookVisited={};V6.bookPoints={};V6.bookPointed=false;V6.bookWarmed=false;V6.bookWarmHeard=false;V6.bookMode='listen';V6.phonicsGuess='';V6.phonicsPassed=false;
+ v62CartoonStop();V6.cartoonFrame=0;V6.songPlayed=false;V6.songMoved=false;V6.songTouches=0;V6.bookPage=0;V6.bookVisited={};V6.bookPoints={};V6.bookPointed=false;V6.bookWarmed=false;V6.bookWarmHeard=false;V6.bookMode='listen';V6.phonicsGuess='';V6.phonicsPassed=false;
  V6.gameStage='choose';V6.gameItem='';V6.gameRole='customer';V6.gameWarmHeard=false;V6.gameSpoken=false;V6.gameModelHeard=false;V6.gameRepeatTried=false;V6.micStatus='';V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.talkAttempt=false;V6.talkDraft='';
 }
 function v6SessionSync(){
@@ -2405,6 +2415,56 @@ function v6Home(){
 
 
 
+
+const V62_CARTOONS={
+ cafe:[['🏠🌞','Hello, little café!'],['🧒🥛','Milk, please!'],['🧑‍🍳🥛','Here you go!'],['🧒🌟','Thank you!']],
+ hello:[['🏫🌞','Hello, my friend!'],['🧒👋','I wave my hand!'],['🧒😄','I am happy!'],['🧒👋','Bye-bye, friend!']],
+ toys:[['🧸🏠','Here are my toys!'],['🧒⚽','I want the ball!'],['🧒🤲','Here you go!'],['🧒🎉','Let us play!']],
+ farm:[['🌾🌞','Hello, animal friends!'],['🐶🐾','The dog can run!'],['🦆💦','The duck can swim!'],['🐱🌟','The cat can jump!']]
+};
+function v62CartoonStop(){
+ if(V6.cartoonTimer){clearTimeout(V6.cartoonTimer);V6.cartoonTimer=null;}
+ V6.cartoonPlaying=false;
+}
+function v62CartoonUi(topic){
+ var frames=V62_CARTOONS[topic.id]||V62_CARTOONS.cafe;
+ var idx=Math.max(0,Math.min(frames.length-1,V6.cartoonFrame||0)),frame=frames[idx],enabled=v6Data().settings.animations;
+ return '<div class="v62-cartoon"><h3>🎬 My Mini Cartoon · '+v5Html(topic.name)+'</h3>'+
+ '<div class="v62-cartoon-screen" role="group" aria-label="Animated English story frame '+(idx+1)+' of '+frames.length+'">'+
+ '<div class="v62-cartoon-art" aria-hidden="true">'+frame[0]+'</div>'+
+ '<div class="v62-cartoon-bubble" lang="en">'+v5Html(frame[1])+'</div></div>'+
+ '<div class="v62-cartoon-dots" aria-label="Scene '+(idx+1)+' of '+frames.length+'">'+frames.map(function(_,i){return '<span class="'+(idx===i?'on':'')+'"></span>'}).join('')+'</div>'+
+ '<div class="v6-actions">'+(enabled?'<button class="v6-btn primary" data-v6="cartoon-play">'+(V6.cartoonPlaying?'⏸ Pause':'▶ Play Cartoon')+'</button>':'')+
+ '<button class="v6-btn" data-v6="cartoon-hear">🔊 Hear This Scene</button>'+
+ '<button class="v6-btn" data-v6="cartoon-next">⏭ Next Scene</button></div>'+
+ '<p class="v6-note">'+(enabled?'Four short original animated scenes with English narration. Tap pause any time.':'Animations are off. You can still turn pages and listen at your own pace.')+'</p></div>';
+}
+function v62CartoonRun(){
+ if(!V6.cartoonPlaying)return;
+ var frames=V62_CARTOONS[v6Topic().id]||V62_CARTOONS.cafe;
+ if(V6.cartoonFrame>=frames.length){v62CartoonStop();V6.cartoonFrame=0;render();return;}
+ render();v5Voice(frames[V6.cartoonFrame][1]);
+ V6.cartoonTimer=setTimeout(function(){
+  V6.cartoonTimer=null;
+  if(!V6.cartoonPlaying||V6.page!=='song'||view!=='speaking'){v62CartoonStop();return;}
+  V6.cartoonFrame++;
+  v62CartoonRun();
+ },4800);
+}
+function v62CartoonToggle(){
+ if(!v6Data().settings.animations)return;
+ if(V6.cartoonPlaying){v62CartoonStop();stopSpeech();render();return;}
+ var frames=V62_CARTOONS[v6Topic().id]||V62_CARTOONS.cafe;
+ if(V6.cartoonFrame>=frames.length-1)V6.cartoonFrame=0;
+ V6.cartoonPlaying=true;v62CartoonRun();
+}
+function v62CartoonNext(){
+ v62CartoonStop();stopSpeech();
+ var frames=V62_CARTOONS[v6Topic().id]||V62_CARTOONS.cafe;
+ V6.cartoonFrame=((V6.cartoonFrame||0)+1)%frames.length;
+ render();v5Voice(frames[V6.cartoonFrame][1]);
+}
+
 /* V6.2: original lightweight animated scenes; no external media or tracking */
 function v62Scene(topic,kind,pageIndex){
  var story=kind==='story',p=story?Math.min(3,Math.max(0,pageIndex)):0;
@@ -2460,7 +2520,7 @@ function v6SongUi(){
  '<div id="v6-dancers" class="v6-dancers '+(V6.songPlayed?'playing':'')+'">'+t.objects.map(function(w){return '<span>'+w[1]+'</span>'}).join('')+'</div>'+
  '<div class="v6-chant-lines v6-english">'+t.chant.map(function(line){return '<div>'+v5Html(line)+'</div>'}).join('')+'</div></div>'+
  '<div class="v6-actions"><button class="v6-btn primary" data-v6="song-play">▶ Listen & Move</button><button class="v6-btn" data-v6="song-slow">🐢 Slowly</button><button class="v6-btn" data-v6="song-stop">◼ Stop</button></div>'+
- v62Scene(t,'song')+'<p class="v6-note" id="v62-touch-count">'+(V6.songTouches||0)+' friendly taps!</p>'+ 
+ v62CartoonUi(t)+v62Scene(t,'song')+'<p class="v6-note" id="v62-touch-count">'+(V6.songTouches||0)+' friendly taps!</p>'+ 
  '<div class="v6-art"><span class="emoji">👋 👏 🕺</span><strong>Clap! Wave! Move!</strong><span class="caption">Listen to the chant. Tap a character and say its word!</span></div>'+
  '<button class="v6-btn good full" data-v6="song-finish" '+(!V6.songPlayed?'disabled':'')+'>'+(v6Day().song?'✓ I joined in!':'🙌 I listened and moved!')+'</button>'+
  '<p class="v6-note">Short original English rhythm chant with simple music notes and animated pictures.</p></section>'+v6Footer();
@@ -2794,6 +2854,7 @@ function v6ParentSave(){
  if([8,12,15].includes(duration))d.settings.minutes=duration;
  d.settings.aiReplies=!!document.getElementById('v61-ai-replies')?.checked;
  d.settings.animations=!!document.getElementById('v62-animations')?.checked;
+ if(!d.settings.animations)v62CartoonStop();
  d.settings.englishOnly=!!document.getElementById('v6-english-only')?.checked;
  v5ParentConsent=!!document.getElementById('v6-speaking-consent')?.checked;
  V6.parent=false;store();render();
@@ -2854,10 +2915,13 @@ document.addEventListener('click',function(event){
   if(!V6_THEMES.some(function(x){return x.id===button.dataset.theme}))return;
   v6StopAllAudio();v6Data().theme=button.dataset.theme;
   V6.contextKey='';V6.page='home';store();render();break;
+ case 'cartoon-play':v62CartoonToggle();break;
+ case 'cartoon-next':v62CartoonNext();break;
+ case 'cartoon-hear':var frames=V62_CARTOONS[t.id]||V62_CARTOONS.cafe;v5Voice(frames[V6.cartoonFrame]?.[1]||frames[0][1]);break;
  case 'anim-tap':v62TouchAnimation(Number(button.dataset.index),button);break;
  case 'song-play':v6SingPlay(false);break;
  case 'song-slow':v6SingPlay(true);break;
- case 'song-stop':v6StopAllAudio();break;
+ case 'song-stop':v6StopAllAudio();render();break;
  case 'song-finish':if(V6.songPlayed){v6Mark('song');v6StopAllAudio();v6Go('home');}break;
  case 'sound-main':v5Voice(v6SoundRule().main+'. '+v6SoundRule().main+'.');break;
  case 'sound-slow':v5SlowVoice(v6SoundRule().main+' '+v6SoundRule().main);break;
