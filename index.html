@@ -2548,7 +2548,7 @@ const V63_LESSONS=[
  {id:'cap',name:'Cool Cap',icon:'🧢',focus:'p',ipa:'/p/',example:'pig',options:[['cat','🐱'],['pig','🐷'],['sun','☀️']],letters:['m','s','p'],word:'cap',picture:'🧢',tiles:['a','p','c'],meaning:[['map','🗺️'],['cap','🧢'],['tap','🚰']]},
  {id:'tap',name:'Tap & Splash',icon:'🚰',focus:'t',ipa:'/t/',example:'tiger',options:[['pig','🐷'],['tiger','🐯'],['moon','🌙']],letters:['t','c','p'],word:'tap',picture:'🚰',tiles:['p','a','t'],meaning:[['tap','🚰'],['cap','🧢'],['cat','🐱']]}
 ];
-const V63={lesson:0,stage:0,heard:false,solved:false,errors:0,tries:0,first:[],stageTries:0,build:[],message:'',clip:null,ctx:''};
+const V63={lesson:0,stage:0,heard:false,solved:false,errors:0,tries:0,first:[],assisted:[],stageTries:0,build:[],message:'',clip:null,ctx:''};
 function v63Data(){
  var d=saveData.v63Phonics;
  if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v63Phonics={};
@@ -2560,7 +2560,7 @@ function v63Sync(){
  var key=localDate()+'|'+saveData.grade+'|'+saveData.term+'|'+v5Level();
  if(V63.ctx!==key){
   v63Stop();V63.ctx=key;V63.lesson=v63Data().lastLesson;V63.stage=0;
-  V63.heard=false;V63.solved=false;V63.errors=0;V63.tries=0;V63.first=[];V63.build=[];V63.message='';
+  V63.heard=false;V63.solved=false;V63.errors=0;V63.tries=0;V63.first=[];V63.assisted=[];V63.build=[];V63.message='';
  }
 }
 function v63Current(){return V63_LESSONS[V63.lesson]||V63_LESSONS[0];}
@@ -2580,11 +2580,11 @@ function v63Play(key){
   else{V63.heard=true;V63.message='Listen to the sound. You can play it again.';render();}
  }catch(e){V63.clip=null;V63.message='Sound unavailable. Ask a grown-up for help.';render();}
 }
-function v63ParentHeard(){V63.heard=true;V63.message='Great! Now try it yourself.';render();}
+function v63ParentHeard(){if(![1,2,4].includes(V63.stage))return;V63.assisted[V63.stage]=true;V63.heard=true;V63.message='Thanks, grown-up! Now try it yourself.';render();}
 function v63Start(index){
  if(index<0||index>=V63_LESSONS.length)return;
  v63Stop();V63.lesson=index;V63.stage=1;V63.solved=false;V63.heard=false;V63.tries=0;V63.errors=0;
- V63.first=[];V63.build=[];V63.stageTries=0;V63.message='';v63Data().lastLesson=index;store();render();
+ V63.first=[];V63.assisted=[];V63.build=[];V63.stageTries=0;V63.message='';v63Data().lastLesson=index;store();render();
 }
 function v63StageLabels(){return ['👂 Hear','🔤 Letter','🧩 Build','🎯 Meaning'];}
 function v63Answer(index){
@@ -2595,18 +2595,18 @@ function v63Answer(index){
   l.meaning[index]?.[0]===l.word;
  V63.tries++;V63.stageTries++;
  if(!ok){V63.errors++;V63.message='Nice try! Listen again and look carefully.';render();return;}
- V63.first[stage]=V63.stageTries===1;V63.solved=true;
+ V63.first[stage]=V63.stageTries===1&&!V63.assisted[stage];V63.solved=true;
  V63.message=stage===4?'Great listening! You found '+l.word+'!':'Great! Your ears are learning!';
  if(stage===4)v63Finish();else render();
 }
 function v63TapLetter(index){
  var l=v63Current(),letter=l.tiles[index];
- if(V63.stage!==3||V63.solved||!letter||V63.build.length>=l.word.length)return;
+ if(V63.stage!==3||V63.solved||!letter||V63.build.length>=l.word.length||V63.build.includes(letter))return;
  V63.build.push(letter);V63.message='';
  v63PlayPart(letter);
  if(V63.build.length===l.word.length){
   V63.stageTries++;V63.tries++;
-  if(V63.build.join('')===l.word){V63.first[3]=V63.stageTries===1;V63.solved=true;V63.message='You blended '+l.word+'!';v5Voice(l.word);}
+  if(V63.build.join('')===l.word){V63.first[3]=V63.stageTries===1;V63.solved=true;V63.message='You blended '+l.word+'!';v63Stop();v5Voice(l.word);}
   else{V63.errors++;V63.message='Good try! Tap Clear and try another order.';}
  }
  render();
@@ -2626,7 +2626,7 @@ function v63Finish(){
  if(V63.stage!==4||!V63.solved)return;
  var d=v63Data(),lesson=v63Current();
  d.records.push({day:localDate(),grade:saveData.grade,term:saveData.term,ability:v5Level(),lesson:lesson.id,
-  firstTry:[1,2,3,4].filter(function(st){return V63.first[st]}).length,totalStages:4,wrong:V63.errors,attempts:V63.tries});
+  firstTry:[1,2,3,4].filter(function(st){return V63.first[st]}).length,assistedStages:[1,2,3,4].filter(function(st){return V63.assisted[st]}).length,totalStages:4,wrong:V63.errors,attempts:V63.tries});
  d.records=d.records.slice(-120);v6Mark('phonics');store();
  V63.stage=5;V63.heard=false;V63.solved=true;V63.message='';render();v5Voice('Amazing! You finished the Sound Lab!');
 }
@@ -2665,7 +2665,7 @@ function v63Ui(){
   h+='<div class="v63-soundcard"><span class="v63-emoji" style="font-size:55px">'+l.picture+'</span><strong>Build the word for this picture!</strong></div>'+
   '<div class="v63-slotbar">'+[0,1,2].map(function(i){return '<div class="v63-slot">'+v5Html(V63.build[i]||'_')+'</div>'}).join('')+'</div>'+
   '<p class="v63-tip">Tap each letter in order. The letter tiles play their sounds, not their letter names.</p>'+
-  '<div class="v63-options">'+l.tiles.map(function(letter,i){return '<button class="v63-option letter" data-v63="tile" data-index="'+i+'" '+(V63.build.length>=3||V63.solved?'disabled':'')+'>'+v5Html(letter)+'</button>'}).join('')+'</div>'+
+  '<div class="v63-options">'+l.tiles.map(function(letter,i){return '<button class="v63-option letter" data-v63="tile" data-index="'+i+'" '+(V63.build.length>=3||V63.solved||V63.build.includes(letter)?'disabled':'')+'>'+v5Html(letter)+'</button>'}).join('')+'</div>'+
   '<div class="v6-actions"><button class="v6-btn" data-v63="clear" '+(V63.solved?'disabled':'')+'>↻ Clear</button><button class="v6-btn" data-v63="word">🔊 Whole Word</button></div>';
  }
  if(s===4){
@@ -2673,7 +2673,7 @@ function v63Ui(){
   '<button class="v6-btn primary full" data-v63="listen">🔊 Listen to the Word</button>'+
   '<div class="v63-options">'+l.meaning.map(function(o,i){return '<button class="v63-option" data-v63="answer" data-index="'+i+'" '+(!V63.heard||V63.solved?'disabled':'')+' aria-label="'+v5Html(o[0])+'"><span class="v63-emoji">'+o[1]+'</span></button>'}).join('')+'</div>';
  }
- if(!V63.heard&&(s===1||s===2||s===4))h+='<button class="v6-btn soft full" data-v63="adult">👨‍👩‍👧 Grown-up Read It Instead</button>';
+ if(!V63.heard&&(s===1||s===2||s===4))h+='<button class="v6-btn soft full" data-v63="adult">👨‍👩‍👧 Grown-up Says the Sound</button>';
  if(V63.message)h+='<div class="'+(V63.solved?'v6-check':'v63-notice')+'" role="status">'+v5Html(V63.message)+'</div>';
  if(s!==4&&V63.solved)h+='<button class="v6-btn good full" data-v63="next">✓ Next Adventure →</button>';
  h+='<p class="v63-tip">👂 Replay freely. Wrong answers are a chance to learn; no pronunciation score or countdown.</p></section>'+v6Footer();
@@ -2699,8 +2699,8 @@ function v63Action(button){
 function v63ParentReport(){
  var r=v63Data().records.filter(function(x){return x.grade===saveData.grade&&x.term===saveData.term;});
  if(!r.length)return '<p>自然拼读练习：暂无完整记录。建议从第一组声音开始，轻松练习即可。</p>';
- var last=r.slice(-10),first=last.reduce(function(sum,x){return sum+x.firstTry;},0),miss=last.reduce(function(sum,x){return sum+x.wrong;},0);
- return '<p>已完成自然拼读 '+r.length+' 轮。最近 '+last.length+' 轮首次答对 '+first+'/'+(last.length*4)+' 个步骤；选错重试 '+miss+' 次。</p>'+
+ var last=r.slice(-10),first=last.reduce(function(sum,x){return sum+x.firstTry;},0),miss=last.reduce(function(sum,x){return sum+x.wrong;},0),assisted=last.reduce(function(sum,x){return sum+(x.assistedStages||0);},0);
+ return '<p>已完成自然拼读 '+r.length+' 轮。最近 '+last.length+' 轮首次答对 '+first+'/'+(last.length*4)+' 个步骤（家长代读不算独立首次答对）；家长代读 '+assisted+' 个步骤；选错重试 '+miss+' 次。</p>'+
  '<p>这些数据反映听辨、字音对应、拼合和听词找图的作答，不代表口音、英语等级或完整的拼读能力测评。</p>';
 }
 
