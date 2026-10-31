@@ -2219,7 +2219,7 @@ const V6_STEPS=[
  ['play','🏡','Life Adventures','3 min'],
  ['talk','🎤','Talk to AI','3 min']
 ];
-const V6={page:'home',parent:false,songPlayed:false,songMoved:false,bookPage:0,bookVisited:{},bookPointed:false,phonicsGuess:'',phonicsPassed:false,gameStage:'choose',gameItem:'',gameRole:'customer',gameSpoken:false,talkPhase:'warm',talkWarmDone:false,talkModelHeard:false,talkAttempt:false,talkDraft:'',musicCtx:null,contextKey:'',lessonHint:false};
+const V6={page:'home',parent:false,songPlayed:false,songMoved:false,bookPage:0,bookVisited:{},bookPoints:{},bookPointed:false,phonicsGuess:'',phonicsPassed:false,gameStage:'choose',gameItem:'',gameRole:'customer',gameWarmHeard:false,gameSpoken:false,talkPhase:'warm',talkWarmDone:false,talkModelHeard:false,talkAttempt:false,talkDraft:'',musicCtx:null,contextKey:'',lessonHint:false};
 function v6Data(){
  var d=saveData.v6English;
  if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v6English={};
@@ -2266,8 +2266,8 @@ function v6StoppedMusic(){
 }
 function v6StopAllAudio(){stopSpeech();v6StoppedMusic();}
 function v6ClearActivity(){
- V6.songPlayed=false;V6.songMoved=false;V6.bookPage=0;V6.bookVisited={};V6.bookPointed=false;V6.phonicsGuess='';V6.phonicsPassed=false;
- V6.gameStage='choose';V6.gameItem='';V6.gameRole='customer';V6.gameSpoken=false;V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.talkAttempt=false;V6.talkDraft='';
+ V6.songPlayed=false;V6.songMoved=false;V6.bookPage=0;V6.bookVisited={};V6.bookPoints={};V6.bookPointed=false;V6.phonicsGuess='';V6.phonicsPassed=false;
+ V6.gameStage='choose';V6.gameItem='';V6.gameRole='customer';V6.gameWarmHeard=false;V6.gameSpoken=false;V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.talkAttempt=false;V6.talkDraft='';
 }
 function v6SessionSync(){
  var key=v6Key();if(V6.contextKey!==key){V6.contextKey=key;v6ClearActivity();if(v5SpeechScene())v5ResetSpeak();}
@@ -2365,7 +2365,7 @@ function v6SoundUi(){
  return html;
 }
 function v6StoryUi(){
- var t=v6Topic(),p=Math.min(3,Math.max(0,V6.bookPage)),page=t.pages[p],done=v6Day().story,asked=page[2],pointed=V6.bookVisited[p]===true;
+ var t=v6Topic(),p=Math.min(3,Math.max(0,V6.bookPage)),page=t.pages[p],done=v6Day().story,asked=page[2],pointed=V6.bookPoints[p]===true;
  var html=v6Header('📚 Story Together','Look at the picture. Listen and point.');
  html+='<section class="v6-card"><div class="v6-headbar"><h2>📖 '+v5Html(t.name)+' Story</h2><span class="v6-badge">Page '+(p+1)+' / 4</span></div>'+
  '<div class="v6-story"><div class="v6-story-scene">'+page[1]+'</div><p class="v6-english">'+v5Html(page[0])+'</p>'+
@@ -2404,7 +2404,7 @@ function v6PlayUi(){
  if(stage==='sound'){
   html+='<h3>🔤 Listen before speaking</h3><p class="v6-center v6-english">'+v5Html(item)+'</p>'+
    '<div class="v6-actions"><button class="v6-btn primary" data-v6="game-sound">🔊 Listen</button><button class="v6-btn" data-v6="game-sound-slow">🐢 Slowly</button></div>'+
-   '<button class="v6-btn good full" data-v6="game-ready">I heard it! →</button>';
+   '<button class="v6-btn good full" data-v6="game-ready" '+(!V6.gameWarmHeard?'disabled':'')+'>I heard it! →</button>';
  }
  if(stage==='speak'){
   html+='<h3>🗣️ Listen → Repeat → Try!</h3><p class="v6-note">Hear the sentence and try to say it yourself.</p>'+
