@@ -3623,10 +3623,10 @@ function v67ParentReport(){
   independent=last.filter(function(r){return r.independent}).length;
  return '<p>当前衔接模式：<strong>'+v5Html(V67_TRACKS[v67Track()].name)+'</strong>。这是原创主题衔接，不是官方教材页码同步。</p>'+
  '<p>已完成 '+rows.length+' 次适龄观察。最近 '+last.length+' 次：听词找图首次独立答对 '+heard+
- '/'+(last.length*2)+' 道；认读找图首次答对 '+read+'/'+(last.length*2)+' 道；家长确认有独立开口尝试 '+independent+' 次。</p>'+
- '<div class="v67-report">'+(last.length?last.slice(-5).reverse().map(function(r){return '📆 '+v5Html(r.day)+' · '+
+ '/'+(last.length*2)+' 道；认读找图首次独立答对 '+read+'/'+(last.length*2)+' 道；家长确认有独立开口尝试 '+independent+' 次。</p>'+
+ '<div class="v67-report">'+(last.length?last.slice(-5).reverse().map(function(r){return '<div class="v66-report-row">📆 '+v5Html(r.day)+' · '+
   v5Html(V67_UNITS[r.unit]?.name||r.unit)+' · 听 '+(r.listenFirstCount||0)+'/2 首次答对 · 认读 '+
-  (r.readFirstCount||0)+'/2 首次答对 · 说 '+(r.independent?'尝试独立':'有帮助')+'<div></div>';
+  (r.readFirstCount||0)+'/2 首次答对 · 说 '+(r.independent?'尝试独立':'有帮助')+'</div>';
  }).join(''):'还没有记录。建议先从 Hello! 开始。')+'</div>'+
  '<p class="v6-note">家长口语观察≠标准化能力测评；不采集儿童原始录音，也不对口音和流利度自动打分。学习记录保存在本浏览器。</p>';
 }
