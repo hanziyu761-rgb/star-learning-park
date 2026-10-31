@@ -1580,8 +1580,8 @@ function v5Init(){
   const exam=nav.querySelector('[data-view="exam"]');
   exam?.insertAdjacentHTML('beforebegin','<button type="button" class="mode" data-view="speaking">🗣️ 英语口语</button><button type="button" class="mode" data-view="thinking">🧠 思维训练</button>');
  }
- document.querySelector('.brand span')?.replaceChildren(document.createTextNode('V5.1'));
- document.title='星星闯关乐园 V5.1 · 考试随时退出版';
+ document.querySelector('.brand span')?.replaceChildren(document.createTextNode('V5.3'));
+ document.title='星星闯关乐园 V5.3 · 英语成长版';
 }
 function v5Voice(text){if(!text)return;try{speakSequence([{text:String(text).slice(0,200),lang:'en-US'}]);}catch{toast('此设备暂无法播放英文语音，可直接阅读提示。');}}
 function v5SlowVoice(text){if(!text)return;try{if(!('speechSynthesis'in window)||typeof SpeechSynthesisUtterance==='undefined')throw Error('speech');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text).slice(0,200));u.lang='en-US';u.rate=.7;const v=pickVoice('en-US');if(v)u.voice=v;speechSynthesis.speak(u);}catch{toast('当前设备无法慢速播放，可用普通播放键。');}}
@@ -1765,6 +1765,296 @@ document.addEventListener('click',event=>{
 },true);
 document.addEventListener('change',event=>{if(event.target.id==='v5-speaking-consent'){v5ParentConsent=!!event.target.checked;if(!v5ParentConsent)toast('联网对话已关闭。仍可本地练习。');}},true);
 document.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target.id==='v5-speech-input'){event.preventDefault();const x=event.target.value;v5SpeakAnswer(x,v5Speak.lastRecognized===x?'voice':'typed');}},true);
+
+/* V5.3 English Adventure interactive modules: offline, child-first, privacy aware */
+var V53_TOPICS=[
+ {id:'animals',icon:'🐶',name:'Animal Friends',zh:'动物朋友',words:[['dog','🐶'],['cat','🐱'],['duck','🦆'],['fish','🐟']],chant:['Dog, dog, wag your tail!','Cat, cat, stretch and play!','Duck, duck, splash today!','Hello, friends! Hip hooray!'],move:'听到 Dog 学小狗摇尾巴；听到 Duck 模仿游泳。',story:['I see a dog.','The dog can run.','I like the dog.'],question:'What can the dog do?',choices:['run','sleep','fly'],correct:'run',art:'🐶🏃'},
+ {id:'hello',icon:'👋',name:'Hello School',zh:'快乐打招呼',words:[['hello','👋'],['happy','😄'],['friend','🧒'],['bye','🙋']],chant:['Hello, hello, wave to me!','Hello, friend, one, two, three!','Clap your hands and turn around!','Bye-bye, friends! What a sound!'],move:'听到 Hello 挥手，听到 Clap 拍手。',story:['I see a friend.','We say hello.','We wave and smile.'],question:'What do we say to a friend?',choices:['hello','banana','blue'],correct:'hello',art:'👋🧒'},
+ {id:'food',icon:'🥪',name:'Food Time',zh:'美味早餐',words:[['milk','🥛'],['bread','🍞'],['apple','🍎'],['banana','🍌']],chant:['Apple, apple, red and round!','Banana, banana, yellow is found!','Milk and bread, breakfast today!','Yum, yum, yum! Hooray, hooray!'],move:'听到 Apple 指苹果，听到 Milk 做喝牛奶动作。',story:['I have an apple.','I like my apple.','My friend has bread.'],question:'What do I have?',choices:['apple','dog','book'],correct:'apple',art:'🍎🍞'},
+ {id:'classroom',icon:'📚',name:'My Classroom',zh:'我的教室',words:[['book','📖'],['pencil','✏️'],['bag','🎒'],['desk','🪑']],chant:['Book, book, open wide!','Pencil, pencil, by my side!','Bag on the desk, ready to go!','One, two, three, we learn and grow!'],move:'听到 Book 做打开书动作，听到 Pencil 做写字动作。',story:['I have a book.','My book is on the desk.','I read my book.'],question:'Where is my book?',choices:['on the desk','in the water','in a tree'],correct:'on the desk',art:'📖🪑'},
+ {id:'shop',icon:'🍎',name:'Little Shop',zh:'小小商店',words:[['apple','🍎'],['orange','🍊'],['milk','🥛'],['bread','🍞']],chant:['Apple, apple, in my bag!','Orange, orange, what a snack!','Milk and bread, what do you say?','Please and thank you every day!'],move:'听到 Please 做礼貌请求动作，听到 Thank you 微笑。',story:['I see an apple.','I say, An apple, please.','I say, Thank you!'],question:'What do I ask for?',choices:['an apple','a dog','a chair'],correct:'an apple',art:'🍎🛒'},
+ {id:'show',icon:'🎨',name:'Show & Tell',zh:'小小分享家',words:[['red','🔴'],['blue','🔵'],['ball','⚽'],['star','⭐']],chant:['Red and blue, look around!','Ball, ball, bounce on the ground!','Star, star, shine so bright!','Show and tell, what a sight!'],move:'听到 Ball 做拍球动作，听到 Star 指天空。',story:['I have a red ball.','I show it to my friend.','We play with the ball.'],question:'What color is the ball?',choices:['red','blue','green'],correct:'red',art:'🔴⚽'}
+];
+var V53_PH_L0=[
+ {ref:'sun',art:'☀️',target:'sock',targetArt:'🧦',choices:[['sock','🧦'],['cat','🐱'],['dog','🐶']],letter:'s',rule:'sun 和 sock 的开头有相同的声音。'},
+ {ref:'cat',art:'🐱',target:'cup',targetArt:'🥤',choices:[['cup','🥤'],['sun','☀️'],['fish','🐟']],letter:'c',rule:'cat 和 cup 的开头有相同的声音。'},
+ {ref:'dog',art:'🐶',target:'duck',targetArt:'🦆',choices:[['duck','🦆'],['cat','🐱'],['sun','☀️']],letter:'d',rule:'dog 和 duck 的开头有相同的声音。'}
+];
+var V53_PH_L1=[
+ {example:'map / cat',target:'sat',art:'🧒',choices:[['sat','🪑'],['sit','🧍'],['sun','☀️']],rule:'观察 map 和 cat 中字母 a 的发音位置，再听 sat。'},
+ {example:'cat / cap',target:'can',art:'🥫',choices:[['can','🥫'],['cat','🐱'],['cup','🥤']],rule:'练习 c 开头的字母与发音联系，听完整单词后再拼读。'},
+ {example:'sun / run',target:'fun',art:'🎉',choices:[['fun','🎉'],['fan','🪭'],['fish','🐟']],rule:'观察 sun、run 的结尾字母组合 un，再听 fun。'}
+];
+var V53_PH_L2=[
+ {example:'ship / shell',target:'shop',art:'🏬',choices:[['shop','🏬'],['chip','🍟'],['ship','🚢']],rule:'sh 在 ship、shell、shop 里代表常见的相同开头声音。'},
+ {example:'chat / chin',target:'chip',art:'🍟',choices:[['chip','🍟'],['ship','🚢'],['shop','🏬']],rule:'比较 ch 和 sh 的开头声音，听到再选，不靠中文译名。'},
+ {example:'rain / train',target:'mail',art:'✉️',choices:[['mail','✉️'],['mill','🏭'],['moon','🌙']],rule:'观察 rain、train 的常见 ai 元音组合，再看 mail。'}
+];
+var V53={page:'dashboard',theme:0,phonics:0,phonicsCorrect:false,phonicsPicked:'',game:0,gamePicked:'',gameWrong:false,readPicked:'',readCorrect:false,songPlays:0,songMoved:false,preview:'',showHint:false};
+function v53Data(){
+ var d=saveData.v53English;
+ if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v53English={daily:{},words:{},records:[]};
+ if(!d.daily||typeof d.daily!=='object')d.daily={};
+ if(!d.words||typeof d.words!=='object')d.words={};
+ if(!Array.isArray(d.records))d.records=[];
+ return d;
+}
+function v53DayKey(){return [localDate(),saveData.grade,saveData.term,saveData.englishAbility,V53_TOPICS[V53.theme].id].join('|');}
+function v53Daily(){var d=v53Data(),key=v53DayKey();return d.daily[key]||{};}
+function v53Mark(kind){
+ var d=v53Data(),key=v53DayKey();if(!d.daily[key])d.daily[key]={};
+ if(d.daily[key][kind])return;
+ d.daily[key][kind]=true;
+ d.records.push({at:new Date().toISOString(),grade:saveData.grade,term:saveData.term,ability:saveData.englishAbility,theme:V53_TOPICS[V53.theme].id,kind:kind});
+ d.records=d.records.slice(-240);
+ var keys=Object.keys(d.daily);if(keys.length>80)keys.slice(0,keys.length-80).forEach(function(k){delete d.daily[k]});
+ store();
+}
+function v53Steps(){
+ return [['phonics','🔤','声音魔法屋','听音辨音和自然拼读 · 约3分钟'],['song','🎵','唱跳小剧场','听原创英语节奏童谣 · 约2分钟'],['game','🎮','单词游乐场','图片和英语听音游戏 · 约2分钟'],['read','📖','小小阅读馆','图片听故事与分级阅读 · 约2分钟'],['dialogue','🎤','AI 口语俱乐部','模仿后进行简单对话 · 约3分钟']];
+}
+function v53Back(){V53.page='dashboard';V53.preview='';stopSpeech();render();window.scrollTo(0,0);}
+function v53Enter(page){
+ if(page==='dialogue'){V53.page='dialogue';v53BackToScenes();return;}
+ if(!['dashboard','phonics','song','game','read'].includes(page))return;
+ V53.page=page;V53.preview='';V53.showHint=false;stopSpeech();render();window.scrollTo(0,0);
+}
+function v53BackToScenes(){v5ResetSpeak();V53.page='dialogue';render();}
+function v53Header(title,desc){
+ var topic=V53_TOPICS[V53.theme];
+ return '<section class="v53-hero"><div class="v53-kicker">MY ENGLISH ADVENTURE · L'+v5Level()+'</div><h1>'+v5Html(title)+'</h1><p>'+v5Html(desc)+'</p>'+
+ '<div class="v53-hero-foot"><span class="v53-chip">'+topic.icon+' '+v5Html(topic.name)+'</span><span class="v53-chip">🎧 US English · '+saveData.grade+'年级</span></div></section>';
+}
+function v53BackBar(){
+ return '<div class="v53-buttons"><button class="v53-btn" data-v53="back">⬅ 返回今日英语</button>'+
+ '<button class="v53-btn" data-v53="next-module">下一项冒险 ➜</button></div>';
+}
+function v53Today(){
+ var d=v53Daily(),steps=v53Steps(),done=steps.filter(function(x){return d[x[0]]}).length,topic=V53_TOPICS[V53.theme],next=steps.find(function(x){return !d[x[0]]})||steps[0];
+ var h=v53Header('🐣 今日英语冒险','先听声音，再听唱、玩单词、听故事、开口说。每天一小步，不用一次学会全部内容。');
+ h+='<section class="v53-card"><h2>✨ 今天的小任务</h2><p>约12分钟 · 今天已经完成 '+done+' / 5 项。可以自由选择、随时休息。</p>'+
+ '<div class="v53-day-progress" role="progressbar" aria-label="今日英语任务完成情况" aria-valuemin="0" aria-valuemax="5" aria-valuenow="'+done+'"><span style="width:'+(done*20)+'%"></span></div>'+
+ '<button class="v53-btn primary block" data-v53="open" data-page="'+next[0]+'">▶ '+(done===5?'继续自由探索':'继续：'+next[2])+'</button>'+
+ (done===5?'<div class="v53-badge" style="margin-top:12px">🏅 今天的英语探险已完成，真棒！也可以明天再来。</div>':'')+'</section>';
+ h+='<section class="v53-card"><h2>🧭 我的冒险路线</h2><div class="v53-steps">'+steps.map(function(x,i){return '<button type="button" data-v53="open" data-page="'+x[0]+'" class="v53-step '+(d[x[0]]?'done':next[0]===x[0]?'current':'')+'"><span class="icon">'+x[1]+'</span><span class="info"><b>'+(i+1)+'. '+x[2]+'</b><small>'+x[3]+'</small></span><span class="status">'+(d[x[0]]?'✅':'›')+'</span></button>'}).join('')+'</div></section>';
+ h+='<section class="v53-card"><h2>🎨 今天的主题 · '+v5Html(topic.zh)+'</h2><p>学过的英语会在游戏、绘本和口语里反复出现。</p>'+
+ '<div class="v53-grid">'+topic.words.map(function(w){return '<div class="v53-tile" style="min-height:92px" lang="en-US"><span class="emoji">'+w[1]+'</span><b>'+v5Html(w[0])+'</b></div>'}).join('')+'</div>'+
+ '<div class="v53-buttons"><button class="v53-btn" data-v53="change-theme">🎲 换个主题</button><button class="v53-btn" data-v53="speak-theme">🔊 听四个单词</button></div></section>';
+ h+='<section class="v53-card"><h2>🌱 英语能力选择</h2><p>学校年级与英语能力分开，零基础请从 L0 开始。</p><div class="v53-levels">'+['L0 零基础','L1 字母与拼读','L2 短句阅读','L3 阅读思考'].map(function(x,i){return '<button data-v53="level" data-level="'+i+'" class="'+(v5Level()===i?'active':'')+'">'+x+'</button>'}).join('')+'</div>'+
+ '<p class="v53-parent-note">中文只辅助操作；英语词语、故事与对话采用美式英语教学。自然拼读和口语进度分别记录。</p></section>';
+ return h;
+}
+function v53PhonicsBank(){return v5Level()===0?V53_PH_L0:v5Level()===1?V53_PH_L1:V53_PH_L2;}
+function v53Phonics(){
+ var items=v53PhonicsBank(),p=items[V53.phonics];
+ var h=v53Header('🔤 Sound First · 声音魔法屋','先用完整单词听声音，再认字母与拼读规律。');
+ if(!p)return h+'<section class="v53-card"><div class="v53-focus"><div class="art">🦉✨</div><strong>Well done!</strong></div><p>今天认识了三组声音或拼读规律。</p><button class="v53-btn primary block" data-v53="finish" data-kind="phonics">✅ 完成声音训练</button></section>'+v53BackBar();
+ var l0=v5Level()===0,target=p.target,opts=p.choices,lead=l0?'先听 “'+p.ref+'”，再找出与它开头声音一样的单词。':'先观察示例，再听目标词，找到正确的字母拼写。';
+ h+='<section class="v53-card"><h2>第 '+(V53.phonics+1)+' / '+items.length+' 组 · Listen & Notice</h2>'+
+ '<div class="v53-progress-track"><span style="width:'+(V53.phonics/items.length*100)+'%"></span></div>'+
+ '<div class="v53-focus"><div class="art">'+(l0?p.art:'🔤')+'</div><p>'+v5Html(lead)+'</p>'+
+ (l0?'<p><b>'+v5Html(p.ref)+'</b> → 开头声音</p>':'<p><b>规则示例：</b> '+v5Html(p.example)+'</p>')+'</div>'+
+ '<button class="v53-btn primary block" data-v53="ph-listen">🔊 听英语单词</button>'+
+ '<p class="v53-parent-note">'+v5Html(p.rule)+'</p><h3>'+ (l0?'Which word starts the same?':'Listen. Which spelling is correct?')+'</h3>'+
+ '<div class="v53-choices">'+opts.map(function(c,i){return '<button type="button" class="v53-choice '+(V53.phonicsPicked===c[0]?'selected':'')+'" data-v53="ph-answer" data-index="'+i+'">'+(l0?'<span>'+c[1]+'</span><small>'+v5Html(c[0])+'</small>':'<span>'+v5Html(c[0])+'</span>')+'</button>'}).join('')+'</div>';
+ if(V53.phonicsPicked)h+='<div class="v53-feedback '+(V53.phonicsCorrect?'':'try')+'">'+(V53.phonicsCorrect?'🌟 Nice listening! '+v5Html(p.rule):'💛 再听一遍，注意单词开头的声音。')+'</div>';
+ if(V53.phonicsCorrect)h+='<button class="v53-btn success block" data-v53="ph-next">✨ 下一组声音</button>';
+ h+='<p class="v53-parent-note">当前使用完整英语单词示范。专业的独立音素真人录音还未接入，系统不会把英文字母名称冒充音素。</p></section>';
+ return h+v53BackBar();
+}
+function v53Song(){
+ var t=V53_TOPICS[V53.theme],d=v53Daily();
+ var h=v53Header('🎵 Sing & Move · 唱跳小剧场','听一小段原创英语节奏童谣，跟着词语做动作。');
+ h+='<section class="v53-card"><h2>'+t.icon+' '+v5Html(t.name)+' Chant</h2><div id="v53-chant-art" class="v53-chant-art">'+t.words.slice(0,3).map(function(w){return '<span>'+w[1]+'</span>'}).join('')+'</div>'+
+ '<div class="v53-chant-lines">'+t.chant.map(function(line){return '<div lang="en-US">'+v5Html(line)+'</div>'}).join('')+'</div>'+
+ '<div class="v53-buttons"><button class="v53-btn primary" data-v53="song-play">🔊 播放英语童谣</button><button class="v53-btn" data-v53="song-slow">🐢 慢速跟听</button><button class="v53-btn" data-v53="song-stop">⏹ 停止</button></div>'+
+ '<div class="v53-feedback">🎭 动作任务：'+v5Html(t.move)+'</div>'+
+ '<p class="v53-parent-note">这是原创英语节奏童谣的<strong>朗读版＋简单动画</strong>，不是已配好音乐的真人演唱视频。可重复听唱，建议短时进行。</p>'+
+ '<button class="v53-btn success block" data-v53="song-done" '+(!V53.songPlays?'disabled':'')+'>'+(d.song?'✅ 今天已听唱':'🙌 我听过并跟着做动作了')+'</button></section>';
+ return h+v53BackBar();
+}
+function v53GameTargets(){
+ var t=V53_TOPICS[V53.theme],words=t.words;
+ // Prefer words due for spaced review; return four different target words.
+ var progress=v53Data().words,lvl=v5Level(),now=localDate();
+ return words.slice().sort(function(a,b){
+  function priority(w){var v=progress[lvl+'|'+w[0]];return !v||!v.due||v.due<=now?0:1}
+  return priority(a)-priority(b);
+ }).slice(0,3);
+}
+function v53Game(){
+ var targets=v53GameTargets(),item=targets[V53.game],t=V53_TOPICS[V53.theme];
+ var h=v53Header('🎮 Word Playground · 单词游乐场','听单词，找到图片；旧词会隔天再回来练习。');
+ if(!item)return h+'<section class="v53-card"><div class="v53-focus"><div class="art">🏅🎮</div><strong>You did it!</strong></div><p>今天的三个听音找图小游戏完成啦！</p>'+
+ '<button class="v53-btn primary block" data-v53="finish" data-kind="game">✅ 保存单词游戏记录</button></section>'+v53BackBar();
+ var opts=[item].concat(t.words.filter(function(w){return w[0]!==item[0]}).slice(0,2));
+ var rotate=V53.game%opts.length;opts=opts.slice(rotate).concat(opts.slice(0,rotate));
+ h+='<section class="v53-card"><h2>听音找图 · '+(V53.game+1)+' / '+targets.length+'</h2><div class="v53-progress-track"><span style="width:'+(V53.game/targets.length*100)+'%"></span></div>'+
+ '<div class="v53-focus"><div class="art">🎧❔</div><p>Which picture matches the word?</p><button class="v53-btn primary" data-v53="game-hear">🔊 Listen · 听单词</button></div>'+
+ '<div class="v53-choices">'+opts.map(function(w,i){return '<button class="v53-choice '+(V53.gamePicked===w[0]?'selected':'')+'" data-v53="game-answer" data-index="'+i+'"><span>'+w[1]+'</span><small>'+v5Html(w[0])+'</small></button>'}).join('')+'</div>';
+ if(V53.gamePicked)h+='<div class="v53-feedback '+(V53.gamePicked===item[0]?'':'try')+'">'+(V53.gamePicked===item[0]?'🌟 Great! 你听出来啦。':'💛 再听一遍，再试试。')+'</div>';
+ if(V53.gamePicked===item[0])h+='<button class="v53-btn success block" data-v53="game-next">✨ 下一个单词</button>';
+ h+='<p class="v53-parent-note">点击错误可以继续尝试，系统不会因一次错误否定孩子。词汇复习按1天、3天、7天安排。</p></section>';
+ return h+v53BackBar();
+}
+function v53Book(){
+ var t=V53_TOPICS[V53.theme],isDecodable=v5Level()>=1;
+ var easyStory=['Sam sat.','A cat sat.','Sam sat on a mat.'];
+ var story=isDecodable&&v5Level()===1?easyStory:t.story;
+ var question=isDecodable&&v5Level()===1?'Who sat on a mat?':t.question;
+ var answers=isDecodable&&v5Level()===1?['Sam','Dog','Duck']:t.choices;
+ var answer=isDecodable&&v5Level()===1?'Sam':t.correct;
+ var art=isDecodable&&v5Level()===1?'🧒🐱':t.art;
+ var h=v53Header('📖 Little Readers · 小小阅读馆',v5Level()===0?'零基础先看图听故事，再用图片和词语回答。':'听故事、跟读，再尝试独立读句子。');
+ h+='<section class="v53-card"><h2>'+v5Html(isDecodable&&v5Level()===1?'Sam and the Cat':t.name+' Story')+'</h2>'+
+ '<div class="v53-story-img">'+art+'</div>'+
+ '<div class="v53-reading" lang="en-US">'+story.map(function(line){return '<p>'+v5Html(line)+'</p>'}).join('')+'</div>'+
+ '<div class="v53-buttons"><button class="v53-btn primary" data-v53="read-listen">🔊 听整个故事</button>'+
+ '<button class="v53-btn" data-v53="read-repeat">🐢 慢速跟读</button></div>'+
+ '<h3>'+v5Html(question)+'</h3><div class="v53-choices">'+answers.map(function(option,i){return '<button class="v53-choice '+(V53.readPicked===option?'selected':'')+'" data-v53="read-answer" data-index="'+i+'">'+v5Html(option)+'</button>'}).join('')+'</div>';
+ if(V53.readPicked)h+='<div class="v53-feedback '+(V53.readCorrect?'':'try')+'">'+(V53.readCorrect?'🌟 Great! You found it.':'💛 再听故事，寻找原文里的线索。')+'</div>';
+ if(V53.readCorrect)h+='<button class="v53-btn success block" data-v53="read-done">📖 完成今天的故事</button>';
+ h+='<p class="v53-parent-note">'+(v5Level()===1?'这是一篇练习 CVC 词的短故事，其中 a、on 等高频词仍需单独学习。':'这是听读故事，不能把听过一遍算作已经独立学会拼读。')+'</p></section>';
+ return h+v53BackBar();
+}
+function v53Dialogue(){
+ var scene=v5SpeechScene(),lvl=v5Level(),h=v53Header('🎤 Speak with AI · 英语口语','先听、再模仿，敢说比一次说对更重要。');
+ if(!scene){
+  return h+'<section class="v53-card"><h2>🎭 选择生活场景</h2><p>每天三个简短回合。点选项只会播放示范，<strong>不会直接算作孩子开口。</strong></p><div class="v53-grid">'+V5_SCENES.map(function(x,i){return '<button class="v53-tile" data-v53="scene" data-index="'+i+'"><span class="emoji">'+x.icon+'</span><b>'+v5Html(x.name)+'</b><small>'+v5Html(x.zh)+'</small></button>'}).join('')+'</div></section>'+v53BackBar();
+ }
+ if(v5Speak.step>=3){
+  var n=v5Speak.answers.filter(function(x){return x.method==='voice'}).length;
+  return h+'<section class="v53-card"><div class="v53-focus"><div class="art">🏆🐣</div><strong>Wonderful!</strong><p>你已经完成三个交流回合。愿意开口尝试，就是进步。</p></div>'+
+   '<p>麦克风识别 '+n+' 次；仅用于辅助转写，不能作为孩子的发音分数。</p>'+
+   '<div class="v53-talk-box"><label><input type="checkbox" id="v5-parent-confirm"/>家长确认：听到孩子亲口说了英语（不是只点选项）</label><label style="margin-top:10px"><input type="checkbox" id="v5-parent-independent"/>至少一次不看答案，独立作出合适回应</label></div>'+
+   '<div class="v53-buttons"><button class="v53-btn primary block" data-v5="speak-save">✅ 保存口语记录</button><button class="v53-btn" data-v53="talk-back">↩ 换一个场景</button></div></section>'+v53BackBar();
+ }
+ var it=scene.prompts[v5Speak.step],choice=V53.preview;
+ var transcript=v5Speak.messages.slice(-4).map(function(m){return '<div class="v5-msg '+(m.who==='child'?'child':'teacher')+'"><small>'+v5Html(m.who==='child'?'孩子的回应':'AI／老师回应')+'</small>'+v5Html(m.text)+'</div>'}).join('');
+ h+='<section class="v53-card"><div class="v53-stage-tags"><span>① LISTEN</span><span>② IMITATE</span><span>③ TALK</span></div><h2>'+scene.icon+' '+v5Html(scene.name)+' · '+(v5Speak.step+1)+' / 3</h2>'+
+ '<div class="v53-progress-track"><span style="width:'+(v5Speak.step/3*100)+'%"></span></div>'+
+ '<div class="v53-speech-callout" lang="en-US">'+v5Html(it.q)+'</div>'+
+ '<div class="v53-buttons"><button class="v53-btn primary" data-v5="speak-hear">🔊 听老师说</button><button class="v53-btn" data-v5="speak-slow">🐢 慢速再听</button><button class="v53-btn" data-v5="speak-help">🧩 中文帮帮我</button></div>'+
+ (lvl<=1||v5Speak.help?'<p class="v53-parent-note">🧩 '+v5Html(it.cn)+'</p>':'')+
+ '<h3>② 选一句听示范，自己试着说</h3><div class="v53-choices">'+it.choices.map(function(x,i){return '<button class="v53-choice '+(choice===x?'selected':'')+'" data-v53="preview" data-index="'+i+'">'+v5Html(x)+'</button>'}).join('')+'</div>'+
+ '<p class="v53-parent-note">选择短句只用于播放和模仿，不等于已经开口；可以反复试听。</p>'+
+ '<h3>③ 说给老师听</h3><div class="v5-entry"><input id="v5-speech-input" type="text" maxlength="130" autocomplete="off" placeholder="可用麦克风转写，或输入短句" aria-label="英语口语回答"/>'+
+ '<button class="v53-btn" data-v5="speak-mic" '+(!(window.SpeechRecognition||window.webkitSpeechRecognition)?'disabled':'')+'>🎤 语音识别</button></div>'+
+ '<button class="v53-btn primary block" data-v53="talk-say">🙋 我试着开口说了 · 下一轮</button>'+
+ (transcript?'<div style="margin-top:15px">'+transcript+'</div>':'')+
+ (v5Speak.pending?'<p class="v53-parent-note">🤖 AI 老师正在回应，请不要重复点击。</p>':'')+
+ '<label class="v5-consent" style="margin-top:16px"><input id="v5-speaking-consent" type="checkbox" '+(v5ParentConsent?'checked':'')+'/><span>家长同意联网 AI 和可选语音识别。浏览器可能将语音提交给其识别服务；DeepSeek 接收孩子的文字回应。不勾选也可以完成本地模仿。请勿提供姓名、学校、地址或电话。</span></label>'+
+ '<p class="v53-parent-note">AI 和浏览器语音识别不具备可靠的儿童音素级发音评分能力；不以口音进行评分。</p></section>';
+ return h+v53BackBar();
+}
+function v53Screen(){
+ if(v5SpeechScene()||V53.page==='dialogue')return v53Dialogue();
+ if(V53.page==='phonics')return v53Phonics();
+ if(V53.page==='song')return v53Song();
+ if(V53.page==='game')return v53Game();
+ if(V53.page==='read')return v53Book();
+ return v53Today();
+}
+var v53PriorSpeakUi=v5SpeakUi;
+v5SpeakUi=function(){return v53Screen();};
+var v53PriorSpeakSave=v5SpeakSave;
+v5SpeakSave=function(){
+ var yes=!!document.getElementById('v5-parent-confirm')?.checked;
+ v53PriorSpeakSave();
+ if(yes){v53Mark('dialogue');toast('家长已确认孩子开口，今天的口语任务完成！');}
+ else toast('已保存练习。请家长确认真正开口后，才能标记口语任务完成。');
+ V53.page='dashboard';render();
+};
+var v53PriorGrowth=v5GrowthReport;
+v5GrowthReport=function(){
+ var data=v53Data(),rows=data.records.filter(function(x){return x.grade===saveData.grade&&x.term===saveData.term&&x.ability===v5Level()}),types=v53Steps();
+ return v53PriorGrowth()+'<section class="v5-card"><h2>🇺🇸 英语学习五项活动记录</h2><p class="v5-notice">统计本年级本学期、英语能力 L'+v5Level()+' 的真实完成记录；口语是否开口需要家长确认，不能视为标准化语言能力评估。</p>'+
+ types.map(function(x){var qty=rows.filter(function(r){return r.kind===x[0]}).length;return '<div class="v5-metric"><span>'+x[1]+' '+x[2]+'</span><b>'+qty+' 次</b></div>'}).join('')+
+ '<p class="v5-notice">已练习词汇会按1天、3天、7天回流。对于发音和音素质量，目前尚无专业真人音频与儿童评测数据，不能输出虚构的发音分数。</p></section>';
+};
+function v53WordRecord(w,correct){
+ var data=v53Data(),k=v5Level()+'|'+w,rec=data.words[k]||{success:0,mistakes:0};
+ if(correct){rec.success=Math.min(3,(rec.success||0)+1);rec.due=localDate([0,1,3,7][rec.success]);}
+ else{rec.mistakes=(rec.mistakes||0)+1;rec.success=0;rec.due=localDate(1);}
+ rec.lastAt=new Date().toISOString();data.words[k]=rec;store();
+}
+function v53FinishModule(kind){
+ v53Mark(kind);
+ toast('🌟 今天这个英语任务完成啦！');
+ V53.page='dashboard';render();window.scrollTo(0,0);
+}
+function v53AdvanceModule(){
+ var kinds=v53Steps().map(function(x){return x[0]}),current=V53.page==='dialogue'?'dialogue':V53.page,i=kinds.indexOf(current);
+ if(i<0)return v53Back();
+ if(i===kinds.length-1){v53Back();return;}
+ v53Enter(kinds[i+1]);
+}
+document.addEventListener('click',function(event){
+ var b=event.target.closest('[data-v53]');if(!b)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ if(examIsActive()){toast('考试正在进行，请先保存并退出考试。');return;}
+ var op=b.dataset.v53,topic=V53_TOPICS[V53.theme];
+ if(op==='back'){v53Back();return;}
+ if(op==='open'){v53Enter(b.dataset.page);return;}
+ if(op==='next-module'){v53AdvanceModule();return;}
+ if(op==='change-theme'){V53.theme=(V53.theme+1)%V53_TOPICS.length;V53.songPlays=0;V53.phonics=0;V53.game=0;V53.readPicked='';render();return;}
+ if(op==='speak-theme'){speakSequence(topic.words.map(function(w){return {text:w[0],lang:'en-US',pause:250}}));return;}
+ if(op==='level'){
+  var lvl=Number(b.dataset.level);
+  if(![0,1,2,3].includes(lvl))return;
+  saveData.englishAbility=lvl;V53.phonics=0;V53.phonicsPicked='';V53.game=0;V53.gamePicked='';V53.readPicked='';english.screen='map';store();render();return;
+ }
+ if(op==='ph-listen'){var p=v53PhonicsBank()[V53.phonics];if(p){var txt=v5Level()===0?p.ref+'. '+p.ref+'.':p.target+'. '+p.target+'.';v5Voice(txt);}return;}
+ if(op==='ph-answer'){
+  var p=v53PhonicsBank()[V53.phonics],c=p?.choices[Number(b.dataset.index)];if(!c)return;
+  V53.phonicsPicked=c[0];V53.phonicsCorrect=c[0]===p.target;
+  v5Voice(c[0]);render();return;
+ }
+ if(op==='ph-next'){if(!V53.phonicsCorrect)return;V53.phonics++;V53.phonicsPicked='';V53.phonicsCorrect=false;render();return;}
+ if(op==='song-play'||op==='song-slow'){
+  V53.songPlays++;var items=topic.chant.map(function(text){return {text:text,lang:'en-US',pause:230}});
+  if(op==='song-play')speakSequence(items);else v5SlowVoice(topic.chant.join(' '));
+  render();var art=document.getElementById('v53-chant-art');if(art)art.classList.add('playing');return;
+ }
+ if(op==='song-stop'){stopSpeech();var ar=document.getElementById('v53-chant-art');if(ar)ar.classList.remove('playing');return;}
+ if(op==='song-done'){if(V53.songPlays<1)return;v53FinishModule('song');return;}
+ if(op==='game-hear'){var item=v53GameTargets()[V53.game];if(item)v5Voice(item[0]);return;}
+ if(op==='game-answer'){
+  var targets=v53GameTargets(),item=targets[V53.game],opts=[item].concat(topic.words.filter(function(w){return w[0]!==item[0]}).slice(0,2)),rotate=V53.game%3;
+  opts=opts.slice(rotate).concat(opts.slice(0,rotate));
+  var selected=opts[Number(b.dataset.index)];if(!item||!selected)return;
+  if(V53.gamePicked===item[0])return;
+  V53.gamePicked=selected[0];v5Voice(selected[0]);
+  if(selected[0]===item[0])v53WordRecord(item[0],true);
+  else if(!V53.gameWrong){V53.gameWrong=true;v53WordRecord(item[0],false);}
+  render();return;
+ }
+ if(op==='game-next'){if(V53.gamePicked!==v53GameTargets()[V53.game]?.[0])return;V53.game++;V53.gamePicked='';V53.gameWrong=false;render();return;}
+ if(op==='read-listen'){var story=v5Level()===1?['Sam sat.','A cat sat.','Sam sat on a mat.']:topic.story;speakSequence(story.map(function(x){return {text:x,lang:'en-US',pause:350}}));return;}
+ if(op==='read-repeat'){var story2=v5Level()===1?['Sam sat.','A cat sat.','Sam sat on a mat.']:topic.story;v5SlowVoice(story2.join(' '));return;}
+ if(op==='read-answer'){
+  var c=v5Level()===1?['Sam','Dog','Duck']:topic.choices,a=v5Level()===1?'Sam':topic.correct;
+  V53.readPicked=c[Number(b.dataset.index)]||'';V53.readCorrect=V53.readPicked===a;render();return;
+ }
+ if(op==='read-done'){if(V53.readCorrect)v53FinishModule('read');return;}
+ if(op==='finish'){if(b.dataset.kind==='phonics'&&V53.phonics>=v53PhonicsBank().length||b.dataset.kind==='game'&&V53.game>=3)v53FinishModule(b.dataset.kind);return;}
+ if(op==='scene'){V53.page='dialogue';V53.preview='';v5SelectScene(Number(b.dataset.index));return;}
+ if(op==='talk-back'){V53.preview='';v5ResetSpeak();V53.page='dialogue';render();return;}
+ if(op==='preview'){
+  var it=v5SpeechScene()?.prompts[v5Speak.step],chosen=it?.choices[Number(b.dataset.index)];
+  if(!chosen)return;
+  V53.preview=chosen;v5Voice(chosen);
+  render();var input=document.getElementById('v5-speech-input');if(input)input.value=chosen;return;
+ }
+ if(op==='talk-say'){
+  if(v5Speak.pending)return;
+  var input2=document.getElementById('v5-speech-input'),text=input2?.value.trim()||V53.preview;
+  if(!text){toast('先选一句话听示范，再试着开口说。');return;}
+  var method=v5Speak.lastRecognized&&v5Speak.lastRecognized===text?'voice':'self-report';
+  V53.preview='';v5SpeakAnswer(text,method);return;
+ }
+},true);
+
 v5Init();render();
 })();
 
