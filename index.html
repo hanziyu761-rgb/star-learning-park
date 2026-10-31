@@ -2550,7 +2550,139 @@ const V63_LESSONS=[
  {id:'cap',name:'Cool Cap',icon:'🧢',focus:'p',ipa:'/p/',example:'pig',options:[['cat','🐱'],['pig','🐷'],['sun','☀️']],letters:['m','s','p'],word:'cap',picture:'🧢',tiles:['a','p','c'],meaning:[['map','🗺️'],['cap','🧢'],['tap','🚰']]},
  {id:'tap',name:'Tap & Splash',icon:'🚰',focus:'t',ipa:'/t/',example:'tiger',options:[['pig','🐷'],['tiger','🐯'],['moon','🌙']],letters:['t','c','p'],word:'tap',picture:'🚰',tiles:['p','a','t'],meaning:[['tap','🚰'],['cap','🧢'],['cat','🐱']]}
 ];
-const V63={lesson:0,stage:0,heard:false,solved:false,errors:0,tries:0,first:[],assisted:[],stageTries:0,build:[],message:'',clip:null,ctx:''};
+const V63={lesson:0,stage:0,heard:false,solved:false,errors:0,tries:0,first:[],assisted:[],stageTries:0,stageErrors:[],stageAttempts:[],build:[],message:'',clip:null,ctx:''};
+
+/* V6.4: conservative, local-only review scheduling based on observed answers.
+   Three good reviews on separate dates indicate stable practice, NOT assessed fluency. */
+const V64_STAGE_NAMES=['','Listening','Letter sounds','Word building','Word meaning'];
+const V64_TASKS=[['song','🎵','Sing & Watch',2],['phonics','🔤','Sound Lab',3],['story','📚','Story Together',2],['play','🏡','Life Adventures',3],['talk','🎤','English Buddy',2]];
+function v64Scope(){return [saveData.grade,saveData.term,v5Level()].join('|');}
+function v64Data(){
+ var d=saveData.v64Adaptive;
+ if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v64Adaptive={};
+ if(!d.skills||typeof d.skills!=='object'||Array.isArray(d.skills))d.skills={};
+ if(!d.plans||typeof d.plans!=='object'||Array.isArray(d.plans))d.plans={};
+ return d;
+}
+function v64After(day,n){
+ var match=/^(\d{4})-(\d\d)-(\d\d)$/.exec(day||'');
+ if(!match)return localDate();
+ var date=new Date(Date.UTC(+match[1],+match[2]-1,+match[3]+n));
+ return date.toISOString().slice(0,10);
+}
+function v64SkillKey(lesson,stage){return v64Scope()+'|'+lesson+'|'+stage;}
+function v64Progress(lesson,stage){return v64Data().skills[v64SkillKey(lesson,stage)]||null;}
+function v64ApplyResult(record){
+ var lessons=V63_LESSONS.some(function(l){return l.id===record.lesson;});
+ if(!lessons||!Array.isArray(record.stageResults)||record.stageResults.length!==4)return;
+ var data=v64Data(),day=record.day;
+ record.stageResults.forEach(function(r){
+  if(!r||![1,2,3,4].includes(r.stage))return;
+  var key=v64SkillKey(record.lesson,r.stage);
+  var old=data.skills[key]||{reviews:0,independent:0,streak:0,day:'',due:day};
+  var quality=r.firstTry&&!r.assisted&&r.wrong===0?2:(r.assisted?0:1);
+  var sameDay=old.day===day;
+  old.reviews=Math.min(10000,(old.reviews||0)+1);
+  if(quality===2)old.independent=Math.min(10000,(old.independent||0)+1);
+  if(!sameDay){
+   old.streak=quality===2?Math.min(5,(old.streak||0)+1):0;
+   old.day=day;
+   old.lastQuality=quality;
+   old.due=v64After(day,quality===2?[0,1,3,7,14,30][old.streak]:1);
+  }else if(quality<2){
+   old.streak=0;
+   old.lastQuality=Math.min(old.lastQuality===undefined?2:old.lastQuality,quality);
+   old.due=v64After(day,1);
+  }
+  old.lastAttempts=Math.max(1,Number(r.attempts)||1);
+  old.lastAssisted=!!r.assisted;
+  data.skills[key]=old;
+ });
+ var all=Object.keys(data.skills);
+ if(all.length>160)all.slice(0,all.length-160).forEach(function(k){delete data.skills[k];});
+}
+function v64Mastery(state){
+ if(!state)return 'New';
+ if((state.streak||0)>=3)return 'Practising steadily';
+ if((state.streak||0)>=1)return 'Making progress';
+ return 'Needs practice';
+}
+function v64LessonStats(lesson){
+ var skills=[1,2,3,4].map(function(i){return v64Progress(lesson.id,i);});
+ var existing=skills.filter(Boolean);
+ var due=skills.filter(function(p){return p&&p.due<=localDate()}).length;
+ var weak=skills.map(function(p,i){return p&&((p.streak||0)===0||p.due<=localDate())?i+1:null;}).filter(Boolean);
+ return {lesson:lesson,skills:skills,existing:existing.length,due:due,weak:weak,
+  stable:skills.filter(function(p){return p&&(p.streak||0)>=3}).length};
+}
+function v64Choice(){
+ var stats=V63_LESSONS.map(v64LessonStats),today=localDate();
+ var overdue=stats.filter(function(x){return x.due>0}).sort(function(a,b){
+  var aDate=Math.min.apply(null,a.skills.filter(function(v){return v&&v.due<=today}).map(function(v){return Date.parse(v.due+'T00:00:00Z')}));
+  var bDate=Math.min.apply(null,b.skills.filter(function(v){return v&&v.due<=today}).map(function(v){return Date.parse(v.due+'T00:00:00Z')}));
+  return aDate-bDate||b.due-a.due;
+ });
+ var fresh=stats.filter(function(x){return x.existing===0});
+ var data=v64Data(),prefix=v64Scope()+'|';
+ var earlier=Object.keys(data.plans).filter(function(k){return k.startsWith(prefix)&&k.slice(prefix.length)<today}).sort().reverse();
+ var recentReviews=earlier.slice(0,2).filter(function(k){return data.plans[k].reason==='review'}).length;
+ if(overdue.length&&!(fresh.length&&recentReviews>=2))return {index:V63_LESSONS.indexOf(overdue[0].lesson),reason:'review',weak:overdue[0].weak};
+ if(fresh.length)return {index:V63_LESSONS.indexOf(fresh[0].lesson),reason:'new',weak:[]};
+ if(overdue.length)return {index:V63_LESSONS.indexOf(overdue[0].lesson),reason:'review',weak:overdue[0].weak};
+ var lowest=stats.slice().sort(function(a,b){return a.stable-b.stable||a.existing-b.existing})[0];
+ return {index:V63_LESSONS.indexOf(lowest.lesson),reason:'refresh',weak:lowest.weak};
+}
+function v64Plan(){
+ var d=v64Data(),key=v64Scope()+'|'+localDate();
+ var plan=d.plans[key];
+ if(!plan||!Number.isInteger(plan.index)||plan.index<0||plan.index>=V63_LESSONS.length){
+  var choice=v64Choice();
+  plan={index:choice.index,reason:choice.reason,created:localDate(),weak:choice.weak};
+  d.plans[key]=plan;
+  var keys=Object.keys(d.plans).sort();
+  if(keys.length>90)keys.slice(0,keys.length-90).forEach(function(k){delete d.plans[k]});
+  store();
+ }
+ return plan;
+}
+function v64Agenda(){
+ var p=v64Plan(),unit=V63_LESSONS[p.index],day=v6Day(),completed=V64_TASKS.filter(function(t){return !!day[t[0]]}).length;
+ var note=p.reason==='review'?'Time to revisit a familiar sound!':p.reason==='new'?'Let us meet a new sound!':'A little extra practice today!';
+ var next=V64_TASKS.find(function(t){return !day[t[0]]});
+ return '<section class="v6-card v64-agenda"><div class="v6-headbar"><h2>🗓️ My English Plan</h2><span class="v6-badge">'+completed+'/5</span></div>'+
+ '<p class="v6-note">'+note+' Today’s sound: <strong>'+v5Html(unit.name)+'</strong>. You can stop and rest whenever you want.</p>'+
+ '<div class="v64-steps">'+V64_TASKS.map(function(t){
+  return '<div class="v64-step '+(day[t[0]]?'done':'')+'"><span>'+t[1]+'</span><strong>'+t[2]+'</strong><small>'+(day[t[0]]?'✓ Done':t[3]+' min')+'</small></div>';
+ }).join('')+'</div>'+
+ (next?'<button class="v6-btn primary full" data-v64="next">▶ Start: '+v5Html(next[2])+'</button>':
+ '<div class="v6-check">🌟 You finished your plan! Come back another day.</div>')+
+ '<p class="v6-note">Your plan is picked automatically once a day. The time is a gentle suggestion, not a deadline.</p></section>';
+}
+function v64Launch(){
+ if(examIsActive())return;
+ var t=V64_TASKS.find(function(x){return !v6Day()[x[0]]});
+ if(!t){toast('You completed today’s plan!');return;}
+ var p=v64Plan();v6Go(t[0]);
+ if(t[0]==='phonics')v63Start(p.index);
+}
+function v64ParentReport(){
+ var plan=v64Plan(),unit=V63_LESSONS[plan.index],lessons=V63_LESSONS.map(v64LessonStats);
+ var kind=plan.reason==='review'?'到期复习':plan.reason==='new'?'接触新知识':'巩固练习';
+ var scope=saveData.grade+'年级 / '+labelTerm(saveData.term)+' / 英语L'+v5Level();
+ var legacy=v63Data().records.filter(function(r){return r.grade===saveData.grade&&r.term===saveData.term&&r.ability===v5Level()&&!r.stageResults}).length;
+ return '<p>今日安排：<strong>'+v5Html(unit.name)+'</strong>（'+kind+'），建议 12 分钟，五项活动完成后自动结束；可随时暂停。</p>'+
+ '<p>本统计只基于本设备的真实作答；同一天重复练习不会增加“跨天稳定”次数。<strong>持续稳定</strong>指同一技能跨至少三次不同日期独立首次答对，不代表正式测评已掌握。</p>'+
+ '<div class="v64-report">'+lessons.map(function(x){
+  return '<div class="v64-report-row"><strong>'+x.lesson.icon+' '+v5Html(x.lesson.name)+'</strong><small>'+
+  (x.existing?x.stable+'/4 项持续稳定 · '+x.due+' 项到期':'尚无分步骤记录')+'</small>'+
+  '<div class="v64-skillchips">'+x.skills.map(function(p,i){
+   return '<span title="'+V64_STAGE_NAMES[i+1]+'" class="'+(!p?'new':p.due<=localDate()?'due':p.streak>=3?'stable':'learning')+'">'+(i+1)+'·'+(p?v64Mastery(p):'New')+'</span>';
+  }).join('')+'</div></div>';
+ }).join('')+'</div>'+
+ (legacy?'<p class="v6-note">之前保存的 '+legacy+' 轮 V6.3 汇总记录仍保留，但因没有四步明细，不会直接换算成“已掌握”。</p>':'')+
+ '<p class="v6-note">学习记录保存在当前浏览器。换设备或清理网站数据可能丢失，请定期使用原有家长备份功能。</p>';
+}
+
 function v63Data(){
  var d=saveData.v63Phonics;
  if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v63Phonics={};
