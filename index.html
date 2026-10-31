@@ -267,7 +267,7 @@ body.exam-running #aiTeacherFab,body.exam-running #v44LevelBar{display:none!impo
 @media(max-width:355px){.v53-card{padding:13px 11px}.v53-choice{min-height:73px}.v53-tile{padding:10px}.v53-hero{padding:17px 12px}.v53-btn{padding:10px 11px}}
 @media(prefers-reduced-motion:reduce){.v53-chant-art.playing span{animation:none!important}}
 </style><style id="v60WorldStyles">
-body.v6-immersive .topline,body.v6-immersive .tabs,body.v6-immersive .settings,body.v6-immersive .minitools,body.v6-immersive #v44LevelBar,body.v6-immersive .modebar,body.v6-immersive footer{display:none!important}
+body.v6-immersive .topline,body.v6-immersive .tabs,body.v6-immersive .settings,body.v6-immersive .minitools,body.v6-immersive #v44LevelBar,body.v6-immersive .modebar,body.v6-immersive footer,body.v6-immersive #aiTeacherFab,body.v6-immersive .p52-launch{display:none!important}
 body.v6-immersive .shell{max-width:860px}
 body.v6-immersive #app{padding-top:8px}
 .v6-world{font-family:system-ui,"Arial Rounded MT Bold","Microsoft YaHei",sans-serif;color:#31466a;min-width:0}
@@ -2677,12 +2677,16 @@ function v6Exit(){
  if(v5SpeechScene())v5ResetSpeak();
  var s=v6Data().session;
  if(s.running){s.elapsed=v6Elapsed();s.running=false;s.started=0;store();}
- V6.parent=false;V6.page='home';view='home';render();window.scrollTo(0,0);
+ V6.parent=false;V6.page='home';v5ParentConsent=false;view='home';render();window.scrollTo(0,0);
 }
 var v6PriorSpeakUi=v5SpeakUi;
 v5SpeakUi=function(){return v6Ui();};
 var v6PriorRender=render;
 render=function(){
+ if(view!=='speaking'){
+  var s=v6Data().session;if(s.running){s.elapsed=v6Elapsed();s.running=false;s.started=0;store();}
+  v5ParentConsent=false;
+ }
  document.body.classList.toggle('v6-immersive',view==='speaking'&&v6Data().settings.englishOnly);
  v6PriorRender();
 };
@@ -2984,7 +2988,7 @@ function p52Inject(){
  if(view==='practice'){
   if(currentQuestion())bar+='<button type="button" class="p52-button" data-p52="current">📄 打印当前学习题</button>';
   app.insertAdjacentHTML('afterbegin',bar+'</div>');
- }else if(view==='home'||view==='report'||view==='wrongbook'||view==='speaking'||view==='thinking'){
+ }else if(view==='home'||view==='report'||view==='wrongbook'||view==='thinking'){
   app.insertAdjacentHTML('afterbegin',bar+'</div>');
  }
  if(view==='exam'){
