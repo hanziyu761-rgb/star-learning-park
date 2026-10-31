@@ -2488,6 +2488,253 @@ function v6Ui(){
  return h+v6ParentUi()+'</div>';
 }
 
+
+/* V6.0 English World interactions */
+function v6Melody(){
+ v6StoppedMusic();
+ try{
+  var Context=window.AudioContext||window.webkitAudioContext;
+  if(!Context)return;
+  var ctx=new Context();V6.musicCtx=ctx;
+  if(ctx.state==='suspended')ctx.resume().catch(function(){});
+  var notes=[392,440,523,440,392,330,392,0,392,440,523,587,523,440,392,0];
+  notes.forEach(function(freq,i){
+   if(!freq)return;
+   var osc=ctx.createOscillator(),gain=ctx.createGain(),at=ctx.currentTime+i*.4;
+   osc.type='sine';osc.frequency.value=freq;
+   gain.gain.setValueAtTime(.0001,at);
+   gain.gain.exponentialRampToValueAtTime(.018,at+.025);
+   gain.gain.exponentialRampToValueAtTime(.0001,at+.31);
+   osc.connect(gain);gain.connect(ctx.destination);osc.start(at);osc.stop(at+.33);
+  });
+  setTimeout(function(){if(V6.musicCtx===ctx){v6StoppedMusic();}},7200);
+ }catch(e){v6StoppedMusic();}
+}
+function v6SingPlay(slow){
+ var t=v6Topic();V6.songPlayed=true;
+ render();
+ var dancers=document.getElementById('v6-dancers');if(dancers)dancers.classList.add('playing');
+ if(slow)v5SlowVoice(t.chant.join(' '));
+ else{speakSequence(t.chant.map(function(line){return {text:line,lang:'en-US',pause:130}}));v6Melody();}
+}
+function v6StoryListen(slow){
+ var t=v6Topic(),p=V6.bookPage,line=t.pages[p]?.[0];if(!line)return;
+ V6.bookVisited[p]=true;
+ if(slow)v5SlowVoice(line);else v5Voice(line);
+}
+function v6StoryPoint(index){
+ var t=v6Topic(),item=t.objects[index],page=t.pages[V6.bookPage];if(!item||!page)return;
+ if(item[0]===page[2]){
+  V6.bookPoints[V6.bookPage]=true;V6.bookPointed=true;v5Voice('Yes! '+item[0]+'.');
+ }else v5Voice('Let us look again!');
+ render();
+}
+function v6StoryNext(){
+ var total=Object.keys(V6.bookVisited).filter(function(k){return V6.bookVisited[k]===true}).length;
+ if(V6.bookPage<3){V6.bookPage++;render();return;}
+ if(total<3||!V6.bookPointed){v5Voice('Listen and point, then try again.');toast('Listen to three pages, and find a picture.');return;}
+ v6Mark('story');v5Voice('Wonderful! Story time is done!');
+ v6Go('home');
+}
+function v6GameChoose(index){
+ var t=v6Topic(),item=t.objects[index];if(!item||V6.gameStage!=='choose')return;
+ if(V6.gameRole==='helper'&&item[0]!==t.objects[0][0]){
+  v5Voice('Try another one!');return;
+ }
+ V6.gameItem=item[0];V6.gameStage='sound';V6.gameWarmHeard=false;v5Voice(item[0]);render();
+}
+function v6GameSay(){
+ if(V6.gameStage!=='speak')return;
+ V6.gameSpoken=true;V6.gameStage='served';
+ v5Voice(v6Topic().reply);render();
+}
+function v6GameFinish(){
+ if(V6.gameStage!=='served')return;
+ var t=v6Topic();V6.gameStage='finish';v6Mark('play');v5Voice(t.bye);render();
+}
+function v6TalkBegin(){
+ v5Speak.token++;
+ v5Speak.scene=v6Topic().scene;v5Speak.step=0;v5Speak.answers=[];v5Speak.messages=[];v5Speak.pending=false;v5Speak.onlineNote='';v5Speak.lastRecognized='';
+ V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.lessonHint=false;V6.talkAttempt=false;V6.talkDraft='';
+ render();
+}
+async function v6TalkCommit(){
+ if(v5Speak.pending||v5Speak.step>=3||V6.talkPhase!=='free'||!v5SpeechScene())return;
+ var inp=document.getElementById('v5-speech-input');
+ var text=String(inp?.value||V6.talkDraft||'').trim().slice(0,130);
+ if(text&&v5IsPrivate(text)){toast('Please do not share private information.');return;}
+ var method=text?(v5Speak.lastRecognized===text?'voice':'typed'):'self-report';
+ var step=v5Speak.step,token=++v5Speak.token;
+ v5Speak.answers.push({method:method,step:step});
+ if(text)v5Speak.messages.push({who:'child',text:text});
+ v5Speak.step++;v5Speak.lastRecognized='';V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.lessonHint=false;V6.talkDraft='';
+ if(!text||!v5ParentConsent){
+  v5Speak.messages.push({who:'teacher',text:'Nice trying! Keep talking!',source:'local'});
+  render();v5Voice('Nice trying! Keep talking!');return;
+ }
+ v5Speak.pending=true;render();
+ try{
+  const scene=v5SpeechScene(),prompt=scene?.prompts[step]?.q||v6Topic().ask;
+  const body={
+   message:('The child wrote or said: '+text+'. Give one short kind acknowledgement.').slice(0,180),
+   history:v5Speak.messages.slice(0,-1).slice(-4).map(function(m){return {role:m.who==='child'?'user':'assistant',content:String(m.text).slice(0,130)}}),
+   context:{subject:'english',grade:saveData.grade,term:saveData.term,topic:'SPEAKING CLUB: '+v6Topic().name,question:'The child is doing guided role-play. The child replied to: '+prompt+'. Give kind feedback, no new question.',correctAnswer:'',explanation:'One familiar encouragement only.',hint:'Do not ask for personal details or score accent.',solved:true,englishAbility:v5Level()}
+  };
+  const response=await fetch('/api/tutor/chat',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(body),signal:AbortSignal.timeout(22000)});
+  const answer=await response.json();if(!response.ok||!answer.reply)throw Error('offline');
+  if(token!==v5Speak.token)return;
+  var safe=String(answer.reply).replace(/<[^>]+>/g,'').slice(0,160);
+  v5Speak.messages.push({who:'teacher',text:safe,source:'DeepSeek'});v5Voice(safe);
+ }catch(e){
+  if(token!==v5Speak.token)return;
+  v5Speak.messages.push({who:'teacher',text:'Good try! Let us keep going!',source:'local'});
+  v5Voice('Good try! Let us keep going!');
+ }finally{if(token===v5Speak.token){v5Speak.pending=false;render();}}
+}
+function v6TalkSave(){
+ if(v5Speak.step<3)return;
+ var yes=!!document.getElementById('v5-parent-confirm')?.checked;
+ var independent=!!document.getElementById('v5-parent-independent')?.checked;
+ var scene=v5SpeechScene();if(!scene)return;
+ saveData.v5SpeakRecords=Array.isArray(saveData.v5SpeakRecords)?saveData.v5SpeakRecords:[];
+ saveData.v5SpeakRecords.push({
+  at:v5Now(),grade:saveData.grade,term:saveData.term,ability:v5Level(),scene:scene.id,
+  rounds:3,voiceRecognitions:v5Speak.answers.filter(function(x){return x.method==='voice'}).length,
+  parentConfirmed:yes,independent:yes&&independent
+ });
+ saveData.v5SpeakRecords=saveData.v5SpeakRecords.slice(-120);
+ if(yes)v6Mark('talk');
+ store();v5ResetSpeak();V6.talkPhase='warm';V6.page='home';v6StopAllAudio();render();
+ toast(yes?'🌟 Grown-up confirmed: speaking adventure complete!':'Practice saved. A grown-up can confirm speaking next time.');
+}
+function v6Mic(){
+ if(!v5ParentConsent){toast('Ask a grown-up to allow the microphone.');return;}
+ var Rec=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!Rec){toast('Microphone recognition is unavailable. You can still try speaking.');return;}
+ try{
+  var rec=new Rec();rec.lang='en-US';rec.continuous=false;rec.interimResults=false;rec.maxAlternatives=1;
+  var button=document.querySelector('[data-v6="talk-mic"]');
+  if(button){button.disabled=true;button.textContent='🎤 Listening…';}
+  rec.onresult=function(event){
+   var text=String(event.results?.[0]?.[0]?.transcript||'').slice(0,130);
+   if(!text||v5IsPrivate(text)){toast('Please do not share private information.');return;}
+   var inp=document.getElementById('v5-speech-input');if(inp)inp.value=text;
+   v5Speak.lastRecognized=text;V6.talkDraft=text;
+   toast('I heard some words! Tap “I tried speaking” to continue.');
+  };
+  rec.onerror=function(){toast('I could not hear you. Try again or speak without the mic.');};
+  rec.onend=function(){var button=document.querySelector('[data-v6="talk-mic"]');if(button){button.disabled=false;button.textContent='🎙️ Use My Microphone';}};
+  rec.start();
+ }catch(e){toast('Mic is not available. You can still speak on your own.');}
+}
+function v6ParentSave(){
+ var d=v6Data(),time=document.getElementById('v6-daily-at')?.value||d.settings.dailyAt;
+ if(/^\d\d:\d\d$/.test(time))d.settings.dailyAt=time;
+ var duration=Number(document.getElementById('v6-minutes')?.value);
+ if([8,12,15].includes(duration))d.settings.minutes=duration;
+ d.settings.englishOnly=!!document.getElementById('v6-english-only')?.checked;
+ v5ParentConsent=!!document.getElementById('v5-speaking-consent')?.checked;
+ V6.parent=false;store();render();
+ toast('家长设置已保存');
+}
+function v6Exit(){
+ v6StopAllAudio();
+ if(v5SpeechScene())v5ResetSpeak();
+ var s=v6Data().session;
+ if(s.running){s.elapsed=v6Elapsed();s.running=false;s.started=0;store();}
+ V6.parent=false;V6.page='home';view='home';render();window.scrollTo(0,0);
+}
+var v6PriorSpeakUi=v5SpeakUi;
+v5SpeakUi=function(){return v6Ui();};
+var v6PriorRender=render;
+render=function(){
+ document.body.classList.toggle('v6-immersive',view==='speaking'&&v6Data().settings.englishOnly);
+ v6PriorRender();
+};
+document.addEventListener('click',function(event){
+ var button=event.target.closest('[data-v6]');if(!button)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ var op=button.dataset.v6,t=v6Topic();
+ if(examIsActive()){toast('请先保存并退出在线考试。');return;}
+ switch(op){
+ case 'exit':v6Exit();break;
+ case 'home':v6Go('home');break;
+ case 'parent':V6.parent=true;render();break;
+ case 'parent-close':V6.parent=false;render();break;
+ case 'parent-save':v6ParentSave();break;
+ case 'parent-switch':v6ParentSave();v6Exit();break;
+ case 'timer':v6TimerPlay();break;
+ case 'timer-reset':v6TimerStop();break;
+ case 'go':v6Go(button.dataset.page);break;
+ case 'theme':
+  if(!V6_THEMES.some(function(x){return x.id===button.dataset.theme}))return;
+  v6StopAllAudio();v6Data().theme=button.dataset.theme;
+  V6.contextKey='';V6.page='home';store();render();break;
+ case 'song-play':v6SingPlay(false);break;
+ case 'song-slow':v6SingPlay(true);break;
+ case 'song-stop':v6StopAllAudio();break;
+ case 'song-finish':if(V6.songPlayed){v6Mark('song');v6StopAllAudio();v6Go('home');}break;
+ case 'sound-main':v5Voice(t.sound.main+'. '+t.sound.main+'.');break;
+ case 'sound-slow':v5SlowVoice(t.sound.main+' '+t.sound.main);break;
+ case 'sound-option':
+  var w=t.sound.options[Number(button.dataset.index)];if(w)v5Voice(w[0]);break;
+ case 'sound-pick':
+  var picked=t.sound.options[Number(button.dataset.index)];if(!picked)return;
+  V6.phonicsGuess=picked[0];V6.phonicsPassed=picked[0]===t.sound.match;
+  if(V6.phonicsPassed){v6Mark('phonics');v5Voice('Great listening!');}
+  else v5Voice('Listen again. You can try!');
+  render();break;
+ case 'book-hear':v6StoryListen(false);break;
+ case 'book-slow':v6StoryListen(true);break;
+ case 'book-point':v6StoryPoint(Number(button.dataset.index));break;
+ case 'book-prev':V6.bookPage=Math.max(0,V6.bookPage-1);render();break;
+ case 'book-next':v6StoryNext();break;
+ case 'role':
+  if(!['customer','helper'].includes(button.dataset.role))return;
+  V6.gameRole=button.dataset.role;V6.gameStage='choose';V6.gameWarmHeard=false;V6.gameSpoken=false;V6.gameItem='';render();break;
+ case 'game-pick':v6GameChoose(Number(button.dataset.index));break;
+ case 'game-question':v5Voice(V6.gameRole==='helper'?t.roleAsk:t.ask);break;
+ case 'game-sound':V6.gameWarmHeard=true;v5Voice(V6.gameItem);render();break;
+ case 'game-sound-slow':V6.gameWarmHeard=true;v5SlowVoice(V6.gameItem);render();break;
+ case 'game-ready':if(!V6.gameWarmHeard)return;V6.gameStage='speak';render();break;
+ case 'game-model':v5Voice(v6PlayPhrase(t,V6.gameItem));break;
+ case 'game-model-slow':v5SlowVoice(v6PlayPhrase(t,V6.gameItem));break;
+ case 'game-spoke':v6GameSay();break;
+ case 'game-thanks':v6GameFinish();break;
+ case 'talk-begin':v6TalkBegin();break;
+ case 'talk-warm-hear':V6.talkWarmDone=true;v5Voice(t.sound.main);render();break;
+ case 'talk-warm-ready':
+  if(!V6.talkWarmDone)return;V6.talkPhase='listen';render();
+  if(v6TalkPrompt())v5Voice(v6TalkPrompt().q);break;
+ case 'talk-listen':if(v6TalkPrompt())v5Voice(v6TalkPrompt().q);break;
+ case 'talk-into-repeat':
+  V6.talkPhase='repeat';V6.talkModelHeard=true;render();
+  if(v6TalkPrompt())v5Voice(v6TalkPrompt().choices[0]);break;
+ case 'talk-model':if(v6TalkPrompt())v5Voice(v6TalkPrompt().choices[0]);break;
+ case 'talk-model-slow':if(v6TalkPrompt())v5SlowVoice(v6TalkPrompt().choices[0]);break;
+ case 'talk-into-free':V6.talkPhase='free';render();break;
+ case 'talk-question-repeat':if(v6TalkPrompt())v5Voice(v6TalkPrompt().q);break;
+ case 'talk-hint':V6.lessonHint=!V6.lessonHint;render();break;
+ case 'talk-self':v6TalkCommit();break;
+ case 'talk-mic':v6Mic();break;
+ case 'talk-save':v6TalkSave();break;
+ }
+},true);
+document.addEventListener('keydown',function(event){
+ if(event.key==='Escape'&&V6.parent){V6.parent=false;render();}
+},true);
+document.addEventListener('click',function(event){
+ if(event.target.classList?.contains('v6-parent-overlay')){V6.parent=false;render();}
+},true);
+setInterval(function(){
+ if(view!=='speaking')return;
+ var clock=document.getElementById('v6-live-clock');if(clock)clock.textContent=v6Clock();
+ var d=v6Data(),s=d.session;
+ if(s.running&&v6Elapsed()>=d.settings.minutes*60){
+  s.elapsed=v6Elapsed();s.running=false;s.started=0;store();render();toast('🌟 English Time is complete!');v5Voice('Great job! You did it!');
+ }
+},1000);
+
 v5Init();render();
 })();
 
