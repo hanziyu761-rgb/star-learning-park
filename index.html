@@ -2489,6 +2489,8 @@ function v6TalkUi(){
  html+='<section class="v6-card"><div class="v6-headbar"><h2>Round '+(step+1)+' / 3</h2><span class="v6-badge">'+v5Html(t.name)+'</span></div>'+
  '<div class="v6-progress"><span style="width:'+(step/3*100)+'%"></span></div>'+
  '<div class="v6-talk-stages">'+['🔤 Sound','🎧 Listen','🗣️ Repeat','🎤 Speak'].map(function(x,i){return '<span class="'+(i===['warm','listen','repeat','free'].indexOf(phase)?'on':'')+'">'+x+'</span>'}).join('')+'</div>';
+ var lastEncouragement=v5Speak.messages.slice().reverse().find(function(m){return m.who==='teacher';});
+ if(lastEncouragement&&step>0)html+='<div class="v6-check" role="status">✨ '+v5Html(lastEncouragement.text)+'</div>';
  if(phase==='warm'){
   html+='<div class="v6-art"><span class="emoji">'+t.sound.mainArt+'</span><strong class="v6-english">'+v5Html(t.sound.main)+'</strong>'+
    '<span class="caption">First, warm up your ears and your voice.</span></div>'+
@@ -2511,8 +2513,9 @@ function v6TalkUi(){
    '<button class="v6-btn" data-v6="talk-hint">'+(V6.lessonHint?'🙈 Hide a Model':'💡 Show a Model')+'</button></div>'+
    (V6.lessonHint?'<div class="v6-dialog v6-english">'+v5Html(model)+'</div>':'')+
    '<button class="v6-btn primary full" data-v6="talk-self">🙋 I tried speaking! →</button>'+
-   '<div class="v6-actions"><button class="v6-btn" data-v6="talk-mic" '+(!(window.SpeechRecognition||window.webkitSpeechRecognition)||!v5ParentConsent?'disabled':'')+'>🎙️ Use My Microphone</button></div>'+
-   '<details><summary class="v6-note">Optional: check recognized words / type with a grown-up</summary><input id="v5-speech-input" class="v6-mini-input" maxlength="130" autocomplete="off" placeholder="Your words (optional)"/></details>'+
+   '<div class="v6-actions"><button class="v6-btn" data-v6="talk-mic" '+(!(window.SpeechRecognition||window.webkitSpeechRecognition)||!v5ParentConsent?'disabled':'')+'>🎙️ Use My Microphone</button></div>'+ 
+   '<p class="v6-note" id="v61-mic-status" role="status" aria-live="polite">'+v5Html(V6.micStatus||'No microphone? Say it aloud to a grown-up, then tap I tried speaking!')+'</p>'+
+   '<details><summary class="v6-note">Optional: check recognized words / type with a grown-up</summary><input id="v5-speech-input" class="v6-mini-input" maxlength="130" autocomplete="off" placeholder="Your words (optional)" value="'+v5Html(V6.talkDraft)+'"/></details>'+
    '<p class="v6-note">Mic is optional and needs a grown-up’s permission. If no words are recorded, the app only logs that you tried; it does not invent what you said.</p>';
  }
  if(v5Speak.pending)html+='<p class="v6-note">🤖 English Buddy is responding…</p>';
@@ -2605,6 +2608,7 @@ async function v6TalkCommit(){
  if(v5Speak.pending||v5Speak.step>=3||V6.talkPhase!=='free'||!v5SpeechScene())return;
  var inp=document.getElementById('v5-speech-input');
  var text=String(inp?.value||V6.talkDraft||'').trim().slice(0,130);
+ if(V6.micRec){var active=V6.micRec;V6.micRec=null;active.onresult=null;active.onerror=null;active.onend=null;try{active.abort();}catch(e){}}
  if(text&&(v5IsPrivate(text)||/\b(?:my name is|i live at|i live in|my address|my phone|my school|my email|my wechat|my instagram|my tiktok|my birthday)\b/i.test(text))){toast('Please do not share private information.');return;}
  var method=text?(v5Speak.lastRecognized===text?'voice':'typed'):'self-report';
  var step=v5Speak.step,token=++v5Speak.token;
@@ -2650,25 +2654,44 @@ function v6TalkSave(){
  store();v5ResetSpeak();V6.talkPhase='warm';V6.page='home';v6StopAllAudio();render();
  toast(yes?'🌟 Grown-up confirmed: speaking adventure complete!':'Practice saved. A grown-up can confirm speaking next time.');
 }
+function v61MicStatus(message){
+ V6.micStatus=message;
+ var el=document.getElementById('v61-mic-status');if(el)el.textContent=message;
+}
 function v6Mic(){
- if(!v5ParentConsent){toast('Ask a grown-up to allow the microphone.');return;}
+ if(!v5ParentConsent){v61MicStatus('Ask a grown-up to enable the microphone in Parent settings.');return;}
  var Rec=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!Rec){toast('Microphone recognition is unavailable. You can still try speaking.');return;}
+ if(!Rec){v61MicStatus('Microphone recognition is unavailable. Speak to your grown-up instead.');return;}
+ if(V6.micRec)return;
  try{
-  var rec=new Rec();rec.lang='en-US';rec.continuous=false;rec.interimResults=false;rec.maxAlternatives=1;
+  var rec=new Rec(),step=v5Speak.step;
+  V6.micRec=rec;rec.lang='en-US';rec.continuous=false;rec.interimResults=false;rec.maxAlternatives=1;
   var button=document.querySelector('[data-v6="talk-mic"]');
   if(button){button.disabled=true;button.textContent='🎤 Listening…';}
+  v61MicStatus('Listening… Say one short sentence, or continue without the microphone.');
   rec.onresult=function(event){
-   var text=String(event.results?.[0]?.[0]?.transcript||'').slice(0,130);
-   if(!text||v5IsPrivate(text)){toast('Please do not share private information.');return;}
-   var inp=document.getElementById('v5-speech-input');if(inp)inp.value=text;
-   v5Speak.lastRecognized=text;V6.talkDraft=text;
-   toast('I heard some words! Tap “I tried speaking” to continue.');
+   if(V6.micRec!==rec||V6.page!=='talk'||V6.talkPhase!=='free'||v5Speak.step!==step)return;
+   var heard=String(event.results?.[0]?.[0]?.transcript||'').trim().slice(0,130);
+   if(!heard)return;
+   if(v5IsPrivate(heard)){v61MicStatus('Please do not share private information. You can try again.');return;}
+   var inp=document.getElementById('v5-speech-input');if(inp)inp.value=heard;
+   v5Speak.lastRecognized=heard;V6.talkDraft=heard;
+   v61MicStatus('I heard: '+heard+'. You can try again or continue.');
   };
-  rec.onerror=function(){toast('I could not hear you. Try again or speak without the mic.');};
-  rec.onend=function(){var button=document.querySelector('[data-v6="talk-mic"]');if(button){button.disabled=false;button.textContent='🎙️ Use My Microphone';}};
+  rec.onerror=function(event){
+   if(V6.micRec!==rec)return;
+   var denied=event?.error==='not-allowed'||event?.error==='service-not-allowed';
+   v61MicStatus(denied?'Microphone permission was not granted. Say it to your grown-up.':'I could not recognize the words. Your speaking attempt still counts.');
+  };
+  rec.onend=function(){
+   if(V6.micRec===rec)V6.micRec=null;
+   var b=document.querySelector('[data-v6="talk-mic"]');if(b){b.disabled=false;b.textContent='🎙️ Use My Microphone';}
+  };
   rec.start();
- }catch(e){toast('Mic is not available. You can still speak on your own.');}
+ }catch(e){
+  V6.micRec=null;v61MicStatus('Microphone unavailable. Say it aloud, then tap I tried speaking!');
+  var b=document.querySelector('[data-v6="talk-mic"]');if(b){b.disabled=false;b.textContent='🎙️ Use My Microphone';}
+ }
 }
 function v6ParentSave(){
  var d=v6Data(),time=document.getElementById('v6-daily-at')?.value||d.settings.dailyAt;
@@ -2789,6 +2812,9 @@ document.addEventListener('click',function(event){
  case 'talk-mic':v6Mic();break;
  case 'talk-save':v6TalkSave();break;
  }
+},true);
+document.addEventListener('input',function(event){
+ if(event.target?.id==='v5-speech-input'&&view==='speaking'&&V6.page==='talk')V6.talkDraft=String(event.target.value||'').slice(0,130);
 },true);
 document.addEventListener('dragstart',function(event){
  var el=event.target.closest?.('[data-v6-drag-index]');
