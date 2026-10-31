@@ -1880,7 +1880,7 @@ function v53GameTargets(){
  var progress=v53Data().words,lvl=v5Level(),now=localDate();
  if(Array.isArray(V53.gameOrder)&&V53.gameOrderKey===v53DayKey())return V53.gameOrder;
  var choices=words.slice().sort(function(a,b){
-  function priority(w){var v=progress[lvl+'|'+w[0]];return !v||!v.due||v.due<=now?0:1}
+  function priority(w){var v=progress[lvl+'|'+w[0]];return !v||(!v.mastered&&(!v.due||v.due<=now))?0:v.mastered?2:1}
   return priority(a)-priority(b);
  }).slice(0,3);
  V53.gameOrder=choices;V53.gameOrderKey=v53DayKey();return choices;
@@ -1986,8 +1986,14 @@ v5GrowthReport=function(){
 };
 function v53WordRecord(w,correct){
  var data=v53Data(),k=v5Level()+'|'+w,rec=data.words[k]||{success:0,mistakes:0};
- if(correct){rec.success=Math.min(3,(rec.success||0)+1);rec.due=localDate([0,1,3,7][rec.success]);}
- else{rec.mistakes=(rec.mistakes||0)+1;rec.success=0;rec.due=localDate(1);}
+ if(correct){
+  // Additional practice on the same day does not skip the spaced-review interval.
+  if(!rec.mastered&&(!(rec.success>0)||!rec.due||rec.due<=localDate())){
+   rec.success=Math.min(3,(rec.success||0)+1);
+   rec.mastered=rec.success>=3;
+   rec.due=rec.mastered?'9999-12-31':localDate([0,1,3,7][rec.success]);
+  }
+ }else{rec.mistakes=(rec.mistakes||0)+1;rec.success=0;rec.mastered=false;rec.due=localDate(1);}
  rec.lastAt=new Date().toISOString();data.words[k]=rec;store();
 }
 function v53FinishModule(kind){
