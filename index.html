@@ -319,6 +319,7 @@ body.v6-immersive #app{padding-top:8px}
 .v6-object .emoji{font-size:clamp(32px,8vw,52px)}
 .v6-object.selected{background:#ebfff3;border-color:#5ac29a}
 .v6-object.wrong{border-color:#edd4bc;background:#fffaf3}
+.v6-dropzone{background:#faf8ff;border:2px dashed #b8a3e6;border-radius:16px;padding:17px;text-align:center;color:#6855a6;font-size:14px;font-weight:800;min-height:64px;margin-top:11px}.v6-dropzone.over{background:#eae6ff;border-color:#6d50da}
 .v6-story{background:#fffaf0;border:1px solid #e8e2d0;border-radius:20px;padding:18px;margin:13px 0}
 .v6-story-scene{text-align:center;font-size:clamp(52px,13vw,91px);line-height:1.5}
 .v6-story p{font-size:clamp(19px,5vw,27px);color:#404c64;line-height:1.65;text-align:center;font-weight:800;margin:11px 0}
@@ -2249,7 +2250,7 @@ const V6_STEPS=[
  ['play','🏡','Life Adventures','3 min'],
  ['talk','🎤','Talk to AI','3 min']
 ];
-const V6={page:'home',parent:false,songPlayed:false,songMoved:false,bookPage:0,bookVisited:{},bookPoints:{},bookPointed:false,phonicsGuess:'',phonicsPassed:false,gameStage:'choose',gameItem:'',gameRole:'customer',gameWarmHeard:false,gameSpoken:false,talkPhase:'warm',talkWarmDone:false,talkModelHeard:false,talkAttempt:false,talkDraft:'',musicCtx:null,contextKey:'',lessonHint:false};
+const V6={page:'home',parent:false,songPlayed:false,songMoved:false,bookPage:0,bookVisited:{},bookPoints:{},bookPointed:false,bookWarmed:false,bookWarmHeard:false,bookMode:'listen',phonicsGuess:'',phonicsPassed:false,gameStage:'choose',gameItem:'',gameRole:'customer',gameWarmHeard:false,gameSpoken:false,talkPhase:'warm',talkWarmDone:false,talkModelHeard:false,talkAttempt:false,talkDraft:'',musicCtx:null,contextKey:'',lessonHint:false};
 function v6Data(){
  var d=saveData.v6English;
  if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v6English={};
@@ -2296,7 +2297,7 @@ function v6StoppedMusic(){
 }
 function v6StopAllAudio(){stopSpeech();v6StoppedMusic();}
 function v6ClearActivity(){
- V6.songPlayed=false;V6.songMoved=false;V6.bookPage=0;V6.bookVisited={};V6.bookPoints={};V6.bookPointed=false;V6.phonicsGuess='';V6.phonicsPassed=false;
+ V6.songPlayed=false;V6.songMoved=false;V6.bookPage=0;V6.bookVisited={};V6.bookPoints={};V6.bookPointed=false;V6.bookWarmed=false;V6.bookWarmHeard=false;V6.bookMode='listen';V6.phonicsGuess='';V6.phonicsPassed=false;
  V6.gameStage='choose';V6.gameItem='';V6.gameRole='customer';V6.gameWarmHeard=false;V6.gameSpoken=false;V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.talkAttempt=false;V6.talkDraft='';
 }
 function v6SessionSync(){
@@ -2324,7 +2325,7 @@ function v6Footer(){
 function v6ParentUi(){
  var d=v6Data(),parent=V6.parent,day=v6Day(),s=d.session;
  if(!parent)return '';
- return '<div class="v6-parent-overlay" role="dialog" aria-modal="true" aria-labelledby="v6-parent-title"><div class="v6-parent-dialog">'+
+ return '<div class="v6-parent-overlay" role="dialog" aria-modal="true" aria-labelledby="v6-parent-title"><div class="v6-parent-dialog" lang="zh-CN">'+
  '<div class="v6-headbar"><h2 id="v6-parent-title">👨‍👩‍👧 家长中心</h2><button class="v6-topbtn" data-v6="parent-close">关闭 ✕</button></div>'+
  '<p>孩子端默认只显示英语、图片和动作。这里保留中文帮助与隐私设置，不要求家长英语流利。</p>'+
  '<div class="v6-divider"></div><h3>每日纯英语时间</h3>'+
@@ -2333,7 +2334,7 @@ function v6ParentUi(){
  '<label><input type="checkbox" id="v6-english-only" '+(d.settings.englishOnly?'checked':'')+'/> 孩子学习时隐藏中文学科菜单（英语沉浸模式）</label>'+
  '<p class="v6-note">开始时间仅作家长安排参考，不会在后台自动提醒。每日计时可由家长或孩子主动开始、暂停，时间结束不强制退出。</p>'+
  '<div class="v6-divider"></div><h3>麦克风和 AI</h3>'+
- '<label><input type="checkbox" id="v5-speaking-consent" '+(v5ParentConsent?'checked':'')+'/> 家长同意本次使用语音识别和可选 DeepSeek 对话</label>'+
+ '<label><input type="checkbox" id="v6-speaking-consent" '+(v5ParentConsent?'checked':'')+'/> 家长同意本次使用语音识别和可选 DeepSeek 对话</label>'+
  '<p class="v6-note">语音识别可能通过浏览器厂商处理音频。只有本次练习的转写文字经允许才可能发给 DeepSeek；点击“我试着说了”不会伪造录音或提交假文本。不保存原始录音，不给儿童口音打分。切换页面后请根据需要关闭授权。</p>'+
  '<div class="v6-divider"></div><h3>今天的成长记录</h3>'+
  '<p>课程主题：'+v5Html(v6Topic().name)+' · 已完成 '+v6DoneCount()+'/5 项 · 练习计时 '+Math.floor(v6Elapsed()/60)+' 分钟。</p>'+
@@ -2397,7 +2398,10 @@ function v6SoundUi(){
 function v6StoryUi(){
  var t=v6Topic(),p=Math.min(3,Math.max(0,V6.bookPage)),page=t.pages[p],done=v6Day().story,asked=page[2],pointed=V6.bookPoints[p]===true;
  var html=v6Header('📚 Story Together','Look at the picture. Listen and point.');
+ if(!V6.bookWarmed)return html+'<section class="v6-card"><h2>🔤 First, a Sound Warm-up</h2><div class="v6-art"><span class="emoji">'+t.sound.mainArt+'</span><strong>'+v5Html(t.sound.main)+'</strong><span class="caption">Hear the word before you read the story.</span></div><button class="v6-btn primary full" data-v6="book-warm-hear">🔊 Listen & Repeat</button><button class="v6-btn good full" data-v6="book-warm-ready" '+(!V6.bookWarmHeard?'disabled':'')+'>📖 Ready for the Story →</button></section>'+v6Footer();
  html+='<section class="v6-card"><div class="v6-headbar"><h2>📖 '+v5Html(t.name)+' Story</h2><span class="v6-badge">Page '+(p+1)+' / 4</span></div>'+
+ '<div class="v6-shelf"><button class="'+(V6.bookMode==='listen'?'active':'')+'" data-v6="book-mode" data-mode="listen">🎧 Listen</button><button class="'+(V6.bookMode==='together'?'active':'')+'" data-v6="book-mode" data-mode="together">👨‍👩‍👧 Together</button>'+(v5Level()>0?'<button class="'+(V6.bookMode==='independent'?'active':'')+'" data-v6="book-mode" data-mode="independent">📖 I Can Read</button>':'')+'</div>'+ 
+ '<p class="v6-note">'+(V6.bookMode==='listen'?'Listen and point to the picture.':V6.bookMode==='together'?'Read with a grown-up. Point, speak, and smile.':'Try reading first, then tap Listen to check.')+'</p>'+ 
  '<div class="v6-story"><div class="v6-story-scene">'+page[1]+'</div><p class="v6-english">'+v5Html(page[0])+'</p>'+
  '<div class="v6-story-dots">'+t.pages.map(function(_,i){return '<span class="'+(i===p?'on':'')+'"></span>'}).join('')+'</div></div>'+
  '<div class="v6-actions"><button class="v6-btn primary" data-v6="book-hear">🔊 Listen</button><button class="v6-btn" data-v6="book-slow">🐢 Repeat</button></div>'+
@@ -2428,7 +2432,8 @@ function v6PlayUi(){
  '<strong class="v6-english">'+v5Html(stage==='choose'?(V6.gameRole==='helper'?t.roleAsk:t.ask):stage==='sound'?'Sound Warm-up!':stage==='speak'?phrase:stage==='served'?t.reply:t.bye)+'</strong></div>';
  if(stage==='choose'){
   html+='<p class="v6-note">'+(V6.gameRole==='helper'?'Listen and find the requested item.':'Tap what you want. Then use English to ask for it.')+'</p>'+
-  '<div class="v6-items">'+t.objects.map(function(w,i){return '<button class="v6-object" data-v6="game-pick" data-index="'+i+'" aria-label="Pick '+v5Html(w[0])+'"><span class="emoji">'+w[1]+'</span><span>'+v5Html(w[0])+'</span></button>'}).join('')+'</div>'+
+  '<div class="v6-dropzone" data-v6-drop="counter" role="group" aria-label="Place an item here">🛒 Drop it here · or tap an item</div>'+ 
+ '<div class="v6-items">'+t.objects.map(function(w,i){return '<button draggable="true" data-v6-drag-index="'+i+'" class="v6-object" data-v6="game-pick" data-index="'+i+'" aria-label="Pick '+v5Html(w[0])+'"><span class="emoji">'+w[1]+'</span><span>'+v5Html(w[0])+'</span></button>'}).join('')+'</div>'+
   '<button class="v6-btn primary full" data-v6="game-question">🔊 Hear the Teacher</button>';
  }
  if(stage==='sound'){
@@ -2663,7 +2668,7 @@ function v6ParentSave(){
  var duration=Number(document.getElementById('v6-minutes')?.value);
  if([8,12,15].includes(duration))d.settings.minutes=duration;
  d.settings.englishOnly=!!document.getElementById('v6-english-only')?.checked;
- v5ParentConsent=!!document.getElementById('v5-speaking-consent')?.checked;
+ v5ParentConsent=!!document.getElementById('v6-speaking-consent')?.checked;
  V6.parent=false;store();render();
  toast('家长设置已保存');
 }
@@ -2714,6 +2719,9 @@ document.addEventListener('click',function(event){
   if(V6.phonicsPassed){v6Mark('phonics');v5Voice('Great listening!');}
   else v5Voice('Listen again. You can try!');
   render();break;
+ case 'book-warm-hear':V6.bookWarmHeard=true;v5Voice(t.sound.main);render();break;
+ case 'book-warm-ready':if(!V6.bookWarmHeard)return;V6.bookWarmed=true;render();break;
+ case 'book-mode':if(!['listen','together','independent'].includes(button.dataset.mode))return;if(button.dataset.mode==='independent'&&v5Level()===0)return;V6.bookMode=button.dataset.mode;render();break;
  case 'book-hear':v6StoryListen(false);break;
  case 'book-slow':v6StoryListen(true);break;
  case 'book-point':v6StoryPoint(Number(button.dataset.index));break;
