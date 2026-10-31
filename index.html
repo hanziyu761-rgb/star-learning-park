@@ -1618,7 +1618,7 @@ async function v5SpeakAnswer(raw,method='typed'){
  v5Speak.onlineNote='';
  if(!v5ParentConsent){
   v5Speak.messages.push({who:'teacher',text:step===2?'Wonderful! You finished!':'Nice try! Let us try the next one.',source:'本地示范'});
-  render();v5Voice(next);return;
+  render();speakSequence([{text:step===2?'Wonderful! You finished!':'Nice try! Let us try the next one.',lang:'en-US',pause:300}].concat(v5Speak.step<3?[{text:next,lang:'en-US'}]:[]));return;
  }
  v5Speak.pending=true;render();
  try{
@@ -1632,7 +1632,7 @@ async function v5SpeakAnswer(raw,method='typed'){
   if(token!==v5Speak.token)return;
   v5Speak.messages.push({who:'teacher',text:'Good try! Keep going!',source:'本地示范'});v5Speak.onlineNote='在线 AI 暂时不可用，这一轮使用了本地示范。';
  }finally{
-  if(token===v5Speak.token){v5Speak.pending=false;render();v5Voice(next);}
+  if(token===v5Speak.token){v5Speak.pending=false;render();const last=v5Speak.messages[v5Speak.messages.length-1];const feedback=last?.source==='DeepSeek 在线'?String(last.text).slice(0,110):'Good try! Keep going!';speakSequence([{text:feedback,lang:'en-US',pause:350}].concat(v5Speak.step<3?[{text:next,lang:'en-US'}]:[]));}
  }
 }
 function v5Mic(){
@@ -1790,7 +1790,7 @@ var V53_PH_L2=[
  {example:'chat / chin',target:'chip',art:'🍟',choices:[['chip','🍟'],['ship','🚢'],['shop','🏬']],rule:'比较 ch 和 sh 的开头声音，听到再选，不靠中文译名。'},
  {example:'rain / train',target:'mail',art:'✉️',choices:[['mail','✉️'],['mill','🏭'],['moon','🌙']],rule:'观察 rain、train 的常见 ai 元音组合，再看 mail。'}
 ];
-var V53={page:'dashboard',theme:0,phonics:0,phonicsCorrect:false,phonicsPicked:'',game:0,gamePicked:'',gameWrong:false,gameOrder:null,gameOrderKey:'',readPicked:'',readCorrect:false,songPlays:0,songMoved:false,preview:'',showHint:false};
+var V53={page:'dashboard',theme:(new Date().getDate()-1)%V53_TOPICS.length,phonics:0,phonicsCorrect:false,phonicsPicked:'',game:0,gamePicked:'',gameWrong:false,gameOrder:null,gameOrderKey:'',readPicked:'',readCorrect:false,songPlays:0,songMoved:false,preview:'',showHint:false};
 function v53Data(){
  var d=saveData.v53English;
  if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v53English={daily:{},words:{},records:[]};
@@ -1958,6 +1958,15 @@ function v53Screen(){
  if(V53.page==='read')return v53Book();
  return v53Today();
 }
+var v53PriorSelectSubject=selectSubject;
+selectSubject=function(sub){
+ if(sub==='english'&&!examIsActive()){
+  if(v5SpeechScene())v5ResetSpeak();
+  V53.page='dashboard';saveData.subject='english';view='speaking';
+  reviewEntry=null;resetTrial();store();render();window.scrollTo(0,0);return;
+ }
+ v53PriorSelectSubject(sub);
+};
 var v53PriorSpeakUi=v5SpeakUi;
 v5SpeakUi=function(){return v53Screen();};
 var v53PriorSpeakSave=v5SpeakSave;
