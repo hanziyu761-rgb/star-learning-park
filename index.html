@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
-<meta name="description" content="星星闯关乐园V6.4：英语新增自然拼读与听力训练中心、独立音素示范、单词拼合、听音辨图与真实作答成长记录，保留语文、数学、绘本、动画和口语陪练。">
-<title>星星闯关乐园 V6.4 · Smart English Review</title>
+<meta name="description" content="星星闯关乐园V6.5：分级原创绘本、逐页听读找图、故事理解练习、自然拼读复习衔接，保留语文数学、动画口语、考试打印及学习记录。">
+<title>星星闯关乐园 V6.5 · Reading Adventures</title>
 <style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
 
 /* V4.2 AI learning assistant: child-friendly dialog with responsive controls */
@@ -455,7 +455,7 @@ body.v6-immersive #app{padding-top:8px}
 @media(prefers-reduced-motion:reduce){.v6-dancers.playing span{animation:none!important}}
 </style></head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.4</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.5</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
@@ -2431,7 +2431,7 @@ function v6Go(page){
 function v6Header(title,subtitle){
  var d=v6Data(),topic=v6Topic(),percent=Math.round(v6DoneCount()/5*100);
  return '<div class="v6-head"><div class="v6-headbar"><button class="v6-topbtn" type="button" data-v6="exit">← Exit</button>'+
- '<span class="v6-kicker">ENGLISH WORLD V6.4 · L'+v5Level()+'</span><button class="v6-topbtn" type="button" data-v6="parent">👨‍👩‍👧 Parent</button></div>'+
+ '<span class="v6-kicker">ENGLISH WORLD V6.5 · L'+v5Level()+'</span><button class="v6-topbtn" type="button" data-v6="parent">👨‍👩‍👧 Parent</button></div>'+
  '<h1>'+v5Html(title)+'</h1><p class="v6-english">'+v5Html(subtitle)+'</p><div class="v6-headbar">'+
  '<span class="v6-badge">'+topic.icon+' '+v5Html(topic.name)+'</span><span class="v6-badge">⏰ <span id="v6-live-clock">'+v6Clock()+'</span> · '+percent+'% done</span></div></div>';
 }
@@ -2459,6 +2459,7 @@ function v6ParentUi(){
  '<p>课程主题：'+v5Html(v6Topic().name)+' · 已完成 '+v6DoneCount()+'/5 项 · 练习计时 '+Math.floor(v6Elapsed()/60)+' 分钟。</p>'+
  '<p>已完成：'+(V6_STEPS.filter(function(x){return day[x[0]]}).map(function(x){return x[1]+' '+x[2]}).join('、')||'尚未完成')+'</p>'+
  '<div class="v6-divider"></div><h3>🔤 自然拼读听力记录</h3>'+v63ParentReport()+
+ '<div class="v6-divider"></div><h3>📚 V6.5 分级阅读与故事理解</h3>'+v65ParentReport()+
  '<div class="v6-divider"></div><h3>🧠 V6.4 智能复习与能力观察</h3>'+v64ParentReport()+
  '<div class="v6-divider"></div><h3>课程说明</h3>'+
  '<p>第一步听唱进入英文环境；自然拼读使用离线合成音素示范与整词朗读，非专业真人录音，请家长留意音质，勿把字母名称当作音素。绘本为原创简短故事，可亲子共读，不要求逐句中文翻译。</p>'+
@@ -2477,6 +2478,7 @@ function v6Home(){
  '<button class="v6-btn" data-v6="timer-reset">↻ Reset Timer</button></div>'+
  '<button class="v6-btn good full" data-v64="next">'+(done===5?'🌟 All done today':'▶ Next: '+next[2])+'</button></section>';
  html+=v64Agenda();
+ html+='<section class="v6-card"><h2>📚 Today’s Reading Adventure</h2><p class="v6-note">Listen, read, find pictures and answer story questions! Your Sound Bridge reviews today’s phonics word.</p><button type="button" class="v6-btn good full" data-v6="go" data-page="story">📖 Open My Graded Storybook</button></section>';
  html+='<section class="v6-card"><h2>🧭 Explore Your English World</h2><div class="v6-grid">'+V6_STEPS.map(function(x){return '<button class="v6-activity '+(day[x[0]]?'done':'')+'" data-v6="go" data-page="'+x[0]+'"><span class="emoji">'+x[1]+'</span><b>'+x[2]+'</b><small>'+(day[x[0]]?'✓ Great work!':x[3])+'</small></button>'}).join('')+'</div></section>';
  html+='<section class="v6-card"><h2>🌍 Choose a World</h2><div class="v6-grid">'+V6_THEMES.map(function(t){return '<button class="v6-activity '+(d.theme===t.id?'done':'')+'" data-v6="theme" data-theme="'+t.id+'"><span class="emoji">'+t.icon+'</span><b>'+v5Html(t.name)+'</b><small>'+v5Html(t.desc)+'</small></button>'}).join('')+'</div></section>';
  html+='<section class="v6-card"><h2>🌟 My Little Wins</h2><div class="v6-headbar"><span>🎧 Listen · 🔤 Sounds · 📚 Stories · 🎤 Speak</span><span class="v6-badge">'+done+' / 5</span></div>'+
@@ -3245,7 +3247,8 @@ function v6SongUi(){
 }
 function v6SoundUi(){return v63Ui();}
 
-function v6StoryUi(){
+function v6StoryUi(){return v65StoryUi();}
+function v65LegacyStoryUi(){
  var t=v6Topic(),p=Math.min(3,Math.max(0,V6.bookPage)),page=t.pages[p],done=v6Day().story;
  var heard=V6.bookVisited[p]===true,pointed=V6.bookPoints[p]===true;
  var html=v6Header('📚 My Storybook','Listen. Tap a word. Find the picture!');
@@ -3689,6 +3692,12 @@ document.addEventListener('click',function(event){
  event.preventDefault();event.stopImmediatePropagation();
  if(b.dataset.v64==='next')v64Launch();
  else if(b.dataset.v64==='review'){var p=v64Plan();v6Go('phonics');v63Start(p.index);}
+},true);
+document.addEventListener('click',function(event){
+ var button=event.target.closest('[data-v65]');if(!button||view!=='speaking'||V6.page!=='story')return;
+ event.preventDefault();event.stopImmediatePropagation();
+ if(examIsActive())return;
+ v65Action(button);
 },true);
 document.addEventListener('dragstart',function(event){
  var el=event.target.closest?.('[data-v6-drag-index]');
