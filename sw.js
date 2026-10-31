@@ -1,5 +1,5 @@
 // Cache only authorized learning assets after visiting the app while online.
-const VERSION='star-park-v6.2-interactive-world-20261031';
+const VERSION='star-park-v6.3-phonics-listening-20261031';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(VERSION).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('star-park-')&&k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
