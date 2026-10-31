@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
-<meta name="description" content="星星闯关乐园V6.1：保留语文数学与考试打印，英语世界包含听唱、自然拼读、亲子绘本、生活游戏和循序口语，新增麦克风替代方案与独立AI授权。">
-<title>星星闯关乐园 V6.1 · English World</title>
+<meta name="description" content="星星闯关乐园V6.2：保留语文数学、考试与打印，英语世界新增可点读绘本、可触摸的轻量卡通动画、分阶段互动口语伙伴。">
+<title>星星闯关乐园 V6.2 · Interactive English World</title>
 <style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
 
 /* V4.2 AI learning assistant: child-friendly dialog with responsive controls */
@@ -342,10 +342,43 @@ body.v6-immersive #app{padding-top:8px}
 .v6-shelf button{background:white;border:1px solid #dedff2;border-radius:12px;padding:9px 12px;min-height:44px;font-weight:800;color:#5a638f}
 .v6-shelf button.active{background:#eae5ff;border-color:#a599e5;color:#5e4cb0}
 @media(max-width:360px){.v6-grid{gap:7px}.v6-card{padding:13px 11px}.v6-activity{padding:11px 8px}.v6-items{gap:5px}.v6-object{padding:6px 2px}.v6-head{padding:13px}}
+
+/* V6.2: animated, touch-friendly mini-scenes and guided English buddy */
+.v62-scene{position:relative;isolation:isolate;overflow:hidden;min-height:275px;border:2px solid #d8e5fc;border-radius:22px;margin:14px 0;background:linear-gradient(#bce9ff 0%,#e7f8ff 61%,#a1e7ae 62%,#6cc889 100%);box-shadow:inset 0 -10px 30px #26734a15}
+.v62-scene.v62-cafe{background:linear-gradient(#cbdffb 0%,#fff0d5 60%,#d3a47f 61%,#b98261 100%)}
+.v62-scene.v62-hello{background:linear-gradient(#bcecff 0%,#e8f6ff 60%,#b7d8fa 61%,#87b7de 100%)}
+.v62-scene.v62-toys{background:linear-gradient(#e9d9ff 0%,#fff1d3 61%,#eccfae 62%,#c99576 100%)}
+.v62-scene.v62-farm{background:linear-gradient(#a8e7ff 0%,#def7fc 61%,#91d78c 62%,#58b46c 100%)}
+.v62-sun{position:absolute;top:14px;right:18px;font-size:37px;animation:v62-float 3.6s ease-in-out infinite alternate}
+.v62-cloud{position:absolute;top:30px;left:8%;font-size:42px;opacity:.85;animation:v62-drift 7s ease-in-out infinite alternate}
+.v62-scenery{position:absolute;left:50%;top:52px;transform:translateX(-50%);font-size:clamp(35px,10vw,58px);white-space:nowrap;filter:drop-shadow(0 5px 5px #4562a328)}
+.v62-scene-caption{position:relative;z-index:1;margin:8px 55px 0 12px!important;font-size:13px!important;color:#325e78!important;font-weight:900!important;text-align:left!important}
+.v62-actors{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:9px;padding:96px 13px 12px;min-height:245px}
+.v62-actor{cursor:pointer;background:#ffffffed;border:2px solid #ffffff;border-radius:19px;min-width:0;min-height:107px;padding:8px 2px;box-shadow:0 7px 17px #3d638136;color:#365071;font-weight:900;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;animation:v62-wiggle 2.5s ease-in-out infinite alternate}
+.v62-actor:nth-child(2){animation-delay:.45s}.v62-actor:nth-child(3){animation-delay:.85s}
+.v62-actor:focus-visible,.v62-word:focus-visible{outline:4px solid #4e53ce;outline-offset:2px}
+.v62-actor .v62-icon{font-size:clamp(35px,10vw,61px);line-height:1.25}
+.v62-actor .v62-label{font-size:clamp(13px,3.4vw,17px);overflow-wrap:anywhere}
+.v62-actor.selected{border-color:#31af7f;background:#f1fff0;box-shadow:0 0 0 4px #46dfab66}
+.v62-actor.burst{animation:v62-celebrate .55s ease-out!important}
+.v62-wordline{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;margin:8px auto 12px}
+.v62-word{border:1px solid #dfdcf8;background:white;border-radius:13px;color:#45568a;padding:5px 8px;min-height:45px;min-width:32px;font-size:clamp(18px,4.7vw,24px);font-weight:900;cursor:pointer}
+.v62-word:active{background:#e6e1ff}
+.v62-book-progress{display:flex;justify-content:space-around;gap:5px;color:#5c6583;font-size:12px;font-weight:800}
+.v62-buddy{position:relative;display:flex;gap:12px;align-items:center;padding:12px;margin:13px 0;background:linear-gradient(120deg,#f1eaff,#e7f8ff);border-radius:20px;border:1px solid #dad9fa;min-height:115px}
+.v62-buddy-face{font-size:clamp(54px,14vw,82px);min-width:80px;text-align:center;animation:v62-float 1.7s ease-in-out infinite alternate}
+.v62-buddy-txt{background:white;border-radius:17px 17px 17px 4px;padding:12px;min-width:0;flex:1;font-size:16px;line-height:1.45;color:#3c527c;font-weight:850;overflow-wrap:anywhere}
+.v62-buddy-txt small{display:block;color:#8275aa;font-size:11px;margin-bottom:4px}
+.v62-motion-off *{animation:none!important;transition:none!important}
+@keyframes v62-wiggle{from{transform:translateY(3px) rotate(-1.5deg)}to{transform:translateY(-5px) rotate(1.5deg)}}
+@keyframes v62-float{from{transform:translateY(4px)}to{transform:translateY(-6px)}}
+@keyframes v62-drift{from{transform:translateX(-6px)}to{transform:translateX(28px)}}
+@keyframes v62-celebrate{0%{transform:scale(1)}45%{transform:scale(1.23) rotate(9deg)}100%{transform:scale(1)}}
+@media(max-width:390px){.v62-scene{min-height:245px}.v62-actors{padding:90px 7px 10px;gap:5px;min-height:226px}.v62-actor{min-height:96px;padding:5px 2px}.v62-buddy-face{min-width:58px}.v62-buddy{gap:7px}}
 @media(prefers-reduced-motion:reduce){.v6-dancers.playing span{animation:none!important}}
 </style></head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.0</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.2</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
@@ -2251,13 +2284,14 @@ const V6_STEPS=[
  ['play','🏡','Life Adventures','3 min'],
  ['talk','🎤','Talk to AI','3 min']
 ];
-const V6={page:'home',parent:false,songPlayed:false,songMoved:false,bookPage:0,bookVisited:{},bookPoints:{},bookPointed:false,bookWarmed:false,bookWarmHeard:false,bookMode:'listen',phonicsGuess:'',phonicsPassed:false,gameStage:'choose',gameItem:'',gameRole:'customer',gameWarmHeard:false,gameSpoken:false,talkPhase:'warm',talkWarmDone:false,talkModelHeard:false,talkAttempt:false,talkDraft:'',musicCtx:null,contextKey:'',lessonHint:false,micRec:null,micStatus:'',gameModelHeard:false,gameRepeatTried:false};
+const V6={page:'home',parent:false,songPlayed:false,songMoved:false,songTouches:0,bookPage:0,bookVisited:{},bookPoints:{},bookPointed:false,bookWarmed:false,bookWarmHeard:false,bookMode:'listen',phonicsGuess:'',phonicsPassed:false,gameStage:'choose',gameItem:'',gameRole:'customer',gameWarmHeard:false,gameSpoken:false,talkPhase:'warm',talkWarmDone:false,talkModelHeard:false,talkAttempt:false,talkDraft:'',musicCtx:null,contextKey:'',lessonHint:false,micRec:null,micStatus:'',gameModelHeard:false,gameRepeatTried:false};
 function v6Data(){
  var d=saveData.v6English;
  if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v6English={};
  if(!d.settings||typeof d.settings!=='object')d.settings={};
  if(typeof d.settings.englishOnly!=='boolean')d.settings.englishOnly=true;
  if(typeof d.settings.aiReplies!=='boolean')d.settings.aiReplies=false;
+ if(typeof d.settings.animations!=='boolean')d.settings.animations=true;
  if(!/^\d\d:\d\d$/.test(d.settings.dailyAt||''))d.settings.dailyAt='19:30';
  if(![8,12,15].includes(Number(d.settings.minutes)))d.settings.minutes=12;
  if(!V6_THEMES.some(function(t){return t.id===d.theme}))d.theme='cafe';
@@ -2302,7 +2336,7 @@ function v6StopAllAudio(){
  V6.micStatus='';stopSpeech();v6StoppedMusic();
 }
 function v6ClearActivity(){
- V6.songPlayed=false;V6.songMoved=false;V6.bookPage=0;V6.bookVisited={};V6.bookPoints={};V6.bookPointed=false;V6.bookWarmed=false;V6.bookWarmHeard=false;V6.bookMode='listen';V6.phonicsGuess='';V6.phonicsPassed=false;
+ V6.songPlayed=false;V6.songMoved=false;V6.songTouches=0;V6.bookPage=0;V6.bookVisited={};V6.bookPoints={};V6.bookPointed=false;V6.bookWarmed=false;V6.bookWarmHeard=false;V6.bookMode='listen';V6.phonicsGuess='';V6.phonicsPassed=false;
  V6.gameStage='choose';V6.gameItem='';V6.gameRole='customer';V6.gameWarmHeard=false;V6.gameSpoken=false;V6.gameModelHeard=false;V6.gameRepeatTried=false;V6.micStatus='';V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.talkAttempt=false;V6.talkDraft='';
 }
 function v6SessionSync(){
@@ -2368,6 +2402,54 @@ function v6Home(){
  return html;
 }
 
+
+
+/* V6.2: original lightweight animated scenes; no external media or tracking */
+function v62Scene(topic,kind,pageIndex){
+ var story=kind==='story',p=story?Math.min(3,Math.max(0,pageIndex)):0;
+ var target=story?topic.pages[p][2]:'',correct=story&&V6.bookPoints[p]===true;
+ return '<div class="v62-scene v62-'+v5Html(topic.id)+'" role="group" aria-label="'+(story?'Interactive story picture':'Animated English play scene')+'">'+
+  '<div class="v62-sun" aria-hidden="true">☀️</div><div class="v62-cloud" aria-hidden="true">☁️</div>'+
+  '<div class="v62-scenery" aria-hidden="true">'+v5Html(story?topic.pages[p][1]:topic.art)+'</div>'+
+  '<p class="v62-scene-caption">'+(story?'👆 Find: '+v5Html(target):'✨ Tap the friends to hear the words!')+'</p>'+
+  '<div class="v62-actors">'+topic.objects.map(function(w,i){
+   var selected=correct&&w[0]===target;
+   return '<button type="button" class="v62-actor '+(selected?'selected':'')+'" data-v6="'+(story?'book-point':'anim-tap')+'" data-index="'+i+'" aria-label="'+(story?'Find ':'Listen to ')+v5Html(w[0])+'" '+(selected?'aria-pressed="true"':'aria-pressed="false"')+'><span class="v62-icon" aria-hidden="true">'+w[1]+'</span><span class="v62-label">'+v5Html(w[0])+'</span></button>';
+  }).join('')+'</div></div>';
+}
+function v62BookWords(sentence){
+ return '<div class="v62-wordline" role="group" aria-label="Tap each English word to listen">'+
+ String(sentence||'').split(/\s+/).map(function(token){
+  var spoken=token.replace(/[^A-Za-z']/g,'')||token;
+  return '<button type="button" class="v62-word" data-v6="book-word" data-word="'+v5Html(spoken)+'" aria-label="Hear '+v5Html(spoken)+'">'+v5Html(token)+'</button>';
+ }).join('')+'</div>';
+}
+function v62Buddy(topic,phase,step){
+ var prompt=V6_DIALOGUES[topic.id]?.[step],words=phase==='listen'?prompt?.q:
+  phase==='repeat'?prompt?.choices?.[0]:
+  phase==='free'?'Your turn! I am listening.':
+  phase==='finished'?'You are a brave explorer!':'Ready, explorer?';
+ return '<div class="v62-buddy" role="group" aria-label="Friendly English speaking buddy">'+
+ '<div class="v62-buddy-face" aria-hidden="true">'+(phase==='finished'?'🥳':'🤖')+'</div>'+
+ '<div class="v62-buddy-txt"><small>ENGLISH BUDDY · '+v5Html(topic.name)+'</small>'+v5Html(words||'Let us try!')+'</div></div>';
+}
+function v62LocalReply(topic,step,words){
+ if(!words)return 'You tried speaking! I am happy to play with you.';
+ var t=String(words).toLowerCase();
+ if(topic.id==='cafe')return step===0?(/milk|apple|bread/.test(t)?'Yummy! Here you go!':'Nice asking! Let us play!'):step===1?'You are welcome!':'Thank you for sharing!';
+ if(topic.id==='hello')return step===2?'See you soon, friend!':(/hello|hi|happy|fine|good/.test(t)?'Hello, friend! Big smiles!':'I like talking with you!');
+ if(topic.id==='toys')return step===1?'Sharing is kind!':(/ball|car|bear/.test(t)?'That toy sounds fun!':'Let us play together!');
+ if(topic.id==='farm')return /dog|duck|cat|animal|swim/.test(t)?'Animals are fun!':'I like learning about animals!';
+ return 'Thanks for talking with me!';
+}
+function v62TouchAnimation(index,button){
+ var t=v6Topic(),item=t.objects[index];if(!item)return;
+ V6.songTouches=(V6.songTouches||0)+1;
+ if(button){button.classList.remove('burst');void button.offsetWidth;button.classList.add('burst');}
+ var count=document.getElementById('v62-touch-count');
+ if(count)count.textContent=V6.songTouches+' friendly taps!';
+ v5Voice(item[0]);
+}
 
 /* V6.0 English World activities */
 function v6SongUi(){
@@ -2523,7 +2605,7 @@ function v6TalkUi(){
 }
 function v6Ui(){
  v6SessionSync();
- var page=V6.page,h='<div class="v6-world" lang="en-US">';
+ var page=V6.page,h='<div class="v6-world '+(v6Data().settings.animations?'':'v62-motion-off')+'" lang="en-US">';
  if(page==='song')h+=v6SongUi();
  else if(page==='phonics')h+=v6SoundUi();
  else if(page==='story')h+=v6StoryUi();
