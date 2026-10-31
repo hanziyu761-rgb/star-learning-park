@@ -374,6 +374,33 @@ body.v6-immersive #app{padding-top:8px}
 .v63-option:focus-visible,.v63-slot:focus-visible{outline:3px solid #3b78f0;outline-offset:2px}
 @media(max-width:380px){.v63-option{min-height:100px;padding:5px 2px}.v63-options{gap:5px}.v63-slot{height:58px;font-size:32px}}
 
+/* V6.5: graded original stories, listening and meaningful comprehension */
+.v65-levels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:12px 0}
+.v65-level{border:2px solid #d9dcf5;background:white;border-radius:14px;min-height:63px;padding:8px 3px;color:#59628c;font-size:13px;font-weight:900;cursor:pointer}
+.v65-level.active{border-color:#7772d4;background:#ede9ff;color:#51449e}
+.v65-stage{display:flex;gap:5px;align-items:center;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.v65-stage span{background:#f0effb;color:#717a9e;border-radius:99px;font-weight:850;font-size:12px;padding:7px 10px}
+.v65-stage span.active{background:#d7f5e9;color:#286a52}
+.v65-picture{position:relative;overflow:hidden;background:linear-gradient(#c2e9ff,#eaf8ff 62%,#9ed6a7 63%,#69bf88);border:2px solid #b9def7;min-height:174px;border-radius:19px;display:grid;place-items:center;padding:20px;margin:12px 0}
+.v65-picture .art{font-size:clamp(65px,17vw,96px);text-align:center;line-height:1.5;animation:v62-float 2.7s ease-in-out infinite alternate}
+.v65-line{font-size:clamp(21px,6vw,30px);font-weight:950;color:#435381;line-height:1.6;min-height:53px;text-align:center}
+.v65-picture-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:13px 0}
+.v65-picture-choice{border:2px solid #e0e5f4;background:#fff;border-radius:17px;min-width:0;min-height:110px;display:grid;place-items:center;gap:3px;padding:9px 3px;color:#476187;font-weight:900;cursor:pointer}
+.v65-picture-choice span{font-size:clamp(37px,11vw,60px)}
+.v65-picture-choice small{font-size:12px;overflow-wrap:anywhere}
+.v65-picture-choice.selected{background:#e4f9ee;border-color:#4baa82}
+.v65-picture-choice:disabled{opacity:.63;cursor:default}
+.v65-quiz-choice{border:2px solid #dfe4f3;border-radius:13px;background:#fff;min-height:56px;display:block;text-align:left;width:100%;font-size:17px;font-weight:850;color:#415478;padding:12px 15px;margin:7px 0}
+.v65-quiz-choice:disabled{opacity:.63}.v65-quiz-choice.selected{background:#e1f8eb;border-color:#40aa77}
+.v65-summary{background:#f1f7ff;border-radius:16px;padding:13px;line-height:1.7}
+.v65-soundbridge{background:linear-gradient(140deg,#f1eeff,#fff7db);padding:12px;border-radius:17px;margin:12px 0}
+.v65-review{display:grid;gap:6px;margin:9px 0}
+.v65-review>div{padding:8px 10px;border:1px solid #dfdef2;border-radius:10px;background:#fafaff}
+.v65-step-note{font-size:12px;color:#687c97;line-height:1.6}
+@media(max-width:380px){.v65-levels{gap:4px}.v65-picture-choices{gap:5px}.v65-picture-choice{min-height:96px}.v65-quiz-choice{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.v65-picture .art{animation:none!important}}
+
+
 /* V6.4: calm learning agenda and honest parent mastery signals */
 .v64-agenda{border-color:#dcd3fc;background:linear-gradient(155deg,#fff,#f4f2ff)}
 .v64-agenda h2{margin:0!important}
@@ -2870,6 +2897,58 @@ function v63ParentReport(){
  return '<p>已完成自然拼读 '+r.length+' 轮。最近 '+last.length+' 轮首次答对 '+first+'/'+(last.length*4)+' 个步骤（家长代读不算独立首次答对）；家长代读 '+assisted+' 个步骤；选错重试 '+miss+' 次。</p>'+
  '<p>这些数据反映听辨、字音对应、拼合和听词找图的作答，不代表口音、英语等级或完整的拼读能力测评。</p>';
 }
+
+
+/* V6.5: Original 4-theme x 4-level story collection. A level is a content tier, not an assessed CEFR score. */
+const V65_ICONS={
+ milk:'🥛',apple:'🍎',bread:'🍞',friend:'🧒',hello:'👋',happy:'😄',ball:'⚽',car:'🚗',bear:'🧸',dog:'🐶',
+ duck:'🦆',cat:'🐱',cap:'🧢',map:'🗺️',mat:'🧘',tap:'🚰',sun:'☀️',school:'🏫',home:'🏠',book:'📖',
+ water:'💧',juice:'🧃',menu:'📋',cup:'🥤',toy:'🪀',box:'📦',tree:'🌳',pond:'🏞️',hat:'🎩',
+ bag:'🎒',teacher:'👩‍🏫',red:'🔴',green:'🟢',rain:'🌧️',umbrella:'☂️',smile:'😊',gate:'🚪',
+ thank:'🙏',table:'🪑',food:'🍱',farm:'🚜',picnic:'🧺'
+};
+const V65_STORIES={
+ cafe:[
+  {pages:[['I see milk.','🏠🥛','milk'],['I want milk.','🧒🥛','milk'],['Milk, please!','🥛🤲','milk'],['Here you go!','🧑‍🍳🥛','milk']],
+   quiz:[['What did the child ask for?',['Milk','Bread','Water'],0],['What can you say when someone helps?',['Goodbye','Thank you','No'],1]]},
+  {pages:[['A cat sits at the café.','🐱🏠','cat'],['The cat has a cap.','🐱🧢','cap'],['The cat sees a map.','🐱🗺️','map'],['The cat gets milk.','🐱🥛','milk']],
+   quiz:[['What does the cat wear?',['A cap','A bag','A hat'],0],['What does the cat drink?',['Juice','Water','Milk'],2]]},
+  {pages:[['Sam looks at the menu.','🧒📋','menu'],['Sam asks for apple juice.','🧒🍎🧃','juice'],['The helper brings a cup.','🧑‍🍳🥤','cup'],['Sam says, "Thank you!"','🧒🙏','thank']],
+   quiz:[['What drink does Sam ask for?',['Milk','Apple juice','Water'],1],['Who brings the cup?',['The helper','A dog','A teacher'],0]]},
+  {pages:[['The café is busy today.','🏠👥','table'],['Mia sees that her friend has no cup.','🧒🧒🥤','friend'],['Mia shares an extra cup.','🧒🥤🤲','cup'],['Her friend smiles and thanks Mia.','🧒😊🙏','smile']],
+   quiz:[['Why does Mia give her friend a cup?',['There is no cup for the friend','The cup is broken','She wants to leave'],0],['What does the friend do after Mia helps?',['Runs away','Smiles and says thanks','Closes the café'],1]]}
+ ],
+ hello:[
+  {pages:[['I see a friend.','🧒🧒','friend'],['We say hello.','👋👋','hello'],['We wave our hands.','🙋🙋','hello'],['We are happy.','😄😄','happy']],
+   quiz:[['Who does the child meet?',['A friend','A dog','A teacher'],0],['How do the friends greet each other?',['They sleep','They wave and say hello','They eat'],1]]},
+  {pages:[['I have a map.','🧒🗺️','map'],['I put my cap in my bag.','🧒🧢🎒','cap'],['I see my friend at school.','🏫🧒🧒','friend'],['We say hello!','👋🧒','hello']],
+   quiz:[['Where does the child see a friend?',['At a farm','At school','At a café'],1],['What does the child put in the bag?',['A cap','A cup','A ball'],0]]},
+  {pages:[['Ben comes to school early.','🧒🏫','school'],['He sees a new student at the gate.','🧒🚪','gate'],['Ben smiles and says hello.','🧒😊👋','smile'],['They walk to class together.','🏫🧒🧒','friend']],
+   quiz:[['Who does Ben see?',['A new student','A duck','His dog'],0],['What do they do at the end?',['Go home','Walk to class together','Go shopping'],1]]},
+  {pages:[['A new child looks worried at school.','🏫🧒','school'],['Ella invites the child to play.','🧒⚽🧒','ball'],['They play a game and smile.','⚽😊','smile'],['The new child feels welcome.','🧒😊','happy']],
+   quiz:[['Why does Ella invite the child to play?',['To help the child feel included','To get a new bag','To leave school'],0],['How does the new child feel at the end?',['Welcome','Sleepy','Hungry'],0]]}
+ ],
+ toys:[
+  {pages:[['I see a ball.','🧒⚽','ball'],['I have a red car.','🚗🔴','car'],['My bear is soft.','🧸✨','bear'],['We play together.','🧒🧒⚽','ball']],
+   quiz:[['Which toy is red?',['A car','A bear','A ball'],0],['What do the friends do?',['Play together','Go swimming','Cook food'],0]]},
+  {pages:[['A cat has a ball.','🐱⚽','cat'],['I have a toy car.','🧒🚗','car'],['We put the car in a box.','🚗📦','box'],['The cat naps on a mat.','🐱🧘','mat']],
+   quiz:[['Where do we put the car?',['In a box','In a pond','In a bag'],0],['Where does the cat nap?',['On a mat','At school','Under a tree'],0]]},
+  {pages:[['Lily finds a toy car.','🧒🚗','car'],['Her brother wants a turn.','🧒🧒🚗','friend'],['Lily gives him the car.','🧒🤲🚗','car'],['They take turns playing.','🚗🧒🧒','toy']],
+   quiz:[['Who wants a turn?',['Her brother','A teacher','A shop helper'],0],['How do they play fairly?',['They take turns','They hide the car','They stop playing'],0]]},
+  {pages:[['Noah wants to build a toy town.','🧒🪀🏠','toy'],['He puts toy cars by a big tree.','🚗🌳','tree'],['His friend adds a small school.','🧒🏫','school'],['They build a town together.','🏠🏫🚗','home']],
+   quiz:[['What does the friend add?',['A small school','A new pond','A red hat'],0],['What helps them finish their toy town?',['Working together','Hiding the toys','Leaving early'],0]]}
+ ],
+ farm:[
+  {pages:[['I see a dog.','🧒🐶','dog'],['A duck can swim.','🦆💦','duck'],['The cat can jump.','🐱⬆️','cat'],['We love animals.','🧒🐶🦆','dog']],
+   quiz:[['Which animal can swim?',['The duck','The cat','The dog'],0],['Which animal can jump in the story?',['The duck','The cat','The cow'],1]]},
+  {pages:[['A cat sits on a mat.','🐱🧘','mat'],['A dog runs by the tree.','🐶🌳','dog'],['A duck swims in the pond.','🦆🏞️','duck'],['The sun shines on the farm.','☀️🚜','sun']],
+   quiz:[['Where does the cat sit?',['On a mat','In the pond','In a car'],0],['Where does the duck swim?',['In a pond','At school','On a mat'],0]]},
+  {pages:[['The dog waits by the gate.','🐶🚪','dog'],['The duck walks to the pond.','🦆🏞️','pond'],['Dark clouds bring rain.','☁️🌧️','rain'],['The animals hurry home.','🐶🦆🏠','home']],
+   quiz:[['What changes the weather?',['Rain clouds','A red car','A sunny picnic'],0],['Where do the animals go when it rains?',['Home','To school','To a café'],0]]},
+  {pages:[['The pond is quiet this morning.','🏞️🌞','pond'],['A small duck cannot find the others.','🦆🏞️','duck'],['The dog barks beside the path.','🐶🐾','dog'],['The ducks hear him and come back.','🦆🦆🐶','duck']],
+   quiz:[['Why does the dog bark by the path?',['To help the lost duck be found','To ask for bread','To call a teacher'],0],['What happens after the dog barks?',['The ducks come back','The pond dries up','The animals go to school'],0]]}
+ ]
+};
 
 /* V6.0 English World activities */
 function v6SongUi(){
