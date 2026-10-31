@@ -2597,7 +2597,7 @@ async function v6TalkCommit(){
  if(v5Speak.pending||v5Speak.step>=3||V6.talkPhase!=='free'||!v5SpeechScene())return;
  var inp=document.getElementById('v5-speech-input');
  var text=String(inp?.value||V6.talkDraft||'').trim().slice(0,130);
- if(text&&v5IsPrivate(text)){toast('Please do not share private information.');return;}
+ if(text&&(v5IsPrivate(text)||/\b(?:my name is|i live at|i live in|my address|my phone|my school|my email|my wechat|my instagram|my tiktok|my birthday)\b/i.test(text))){toast('Please do not share private information.');return;}
  var method=text?(v5Speak.lastRecognized===text?'voice':'typed'):'self-report';
  var step=v5Speak.step,token=++v5Speak.token;
  v5Speak.answers.push({method:method,step:step});
@@ -2757,6 +2757,26 @@ document.addEventListener('click',function(event){
  case 'talk-mic':v6Mic();break;
  case 'talk-save':v6TalkSave();break;
  }
+},true);
+document.addEventListener('dragstart',function(event){
+ var el=event.target.closest?.('[data-v6-drag-index]');
+ if(!el||view!=='speaking'||V6.page!=='play'||V6.gameStage!=='choose')return;
+ if(event.dataTransfer){event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',String(el.dataset.v6DragIndex));}
+},true);
+document.addEventListener('dragover',function(event){
+ var target=event.target.closest?.('[data-v6-drop]');
+ if(!target||view!=='speaking'||V6.page!=='play'||V6.gameStage!=='choose')return;
+ event.preventDefault();target.classList.add('over');
+ if(event.dataTransfer)event.dataTransfer.dropEffect='move';
+},true);
+document.addEventListener('dragleave',function(event){
+ var target=event.target.closest?.('[data-v6-drop]');if(target)target.classList.remove('over');
+},true);
+document.addEventListener('drop',function(event){
+ var target=event.target.closest?.('[data-v6-drop]');if(!target||V6.page!=='play'||V6.gameStage!=='choose')return;
+ event.preventDefault();target.classList.remove('over');
+ var value=event.dataTransfer?.getData('text/plain');
+ if(/^[0-2]$/.test(value||''))v6GameChoose(Number(value));
 },true);
 document.addEventListener('keydown',function(event){
  if(event.key==='Escape'&&V6.parent){V6.parent=false;render();}
