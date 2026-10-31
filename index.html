@@ -2331,6 +2331,163 @@ function v6Home(){
  return html;
 }
 
+
+/* V6.0 English World activities */
+function v6SongUi(){
+ var t=v6Topic();
+ var html=v6Header('🎵 Sing & Watch','Listen, move, and join in!');
+ html+='<section class="v6-card"><h2>🎶 '+v5Html(t.name)+' Song</h2><div class="v6-chant">'+
+ '<div id="v6-dancers" class="v6-dancers '+(V6.songPlayed?'playing':'')+'">'+t.objects.map(function(w){return '<span>'+w[1]+'</span>'}).join('')+'</div>'+
+ '<div class="v6-chant-lines v6-english">'+t.chant.map(function(line){return '<div>'+v5Html(line)+'</div>'}).join('')+'</div></div>'+
+ '<div class="v6-actions"><button class="v6-btn primary" data-v6="song-play">▶ Listen & Move</button><button class="v6-btn" data-v6="song-slow">🐢 Slowly</button><button class="v6-btn" data-v6="song-stop">◼ Stop</button></div>'+
+ '<div class="v6-art"><span class="emoji">👋 👏 🕺</span><strong>Clap! Wave! Move!</strong><span class="caption">Do the actions when you hear the words.</span></div>'+
+ '<button class="v6-btn good full" data-v6="song-finish" '+(!V6.songPlayed?'disabled':'')+'>'+(v6Day().song?'✓ I joined in!':'🙌 I listened and moved!')+'</button>'+
+ '<p class="v6-note">Short original English rhythm chant with simple music notes and animated pictures.</p></section>'+v6Footer();
+ return html;
+}
+function v6SoundUi(){
+ var t=v6Topic(),sound=t.sound,correct=V6.phonicsPassed;
+ var html=v6Header('🔤 Sound Lab','Listen to the first sound. Find a matching word!');
+ html+='<section class="v6-card"><div class="v6-art"><span class="emoji">'+sound.mainArt+' 🔤</span>'+
+ '<strong class="v6-english">'+v5Html(sound.main)+'</strong>'+
+ '<span class="caption">Listen for the first sound.</span></div>'+
+ '<div class="v6-actions"><button class="v6-btn primary" data-v6="sound-main">🔊 Listen</button>'+
+ '<button class="v6-btn" data-v6="sound-slow">🐢 Again, slowly</button></div>'+
+ '<h2>Which word begins the same way?</h2><p class="v6-note">Tap a picture to hear it. Tap “This one!” to answer.</p>'+
+ '<div class="v6-items">'+sound.options.map(function(w,i){return '<div class="v6-art" style="padding:7px;min-height:0"><div class="emoji" style="font-size:44px">'+w[1]+'</div>'+
+ (v5Level()>0?'<strong style="font-size:16px">'+v5Html(w[0])+'</strong>':'')+
+ '<button type="button" class="v6-btn" data-v6="sound-option" data-index="'+i+'" aria-label="Listen to '+v5Html(w[0])+'">🔊 Listen</button>'+
+ '<button type="button" class="v6-btn '+(V6.phonicsGuess===w[0]?'good':'')+'" data-v6="sound-pick" data-index="'+i+'">This one!</button></div>'}).join('')+'</div>';
+ if(V6.phonicsGuess)html+='<div class="'+(correct?'v6-check':'v6-gentle')+'">'+
+ (correct?'✨ Great listening! '+v5Html(sound.info):'You can try again. Listen to the first sound.')+'</div>';
+ html+='<p class="v6-note">Sound warm-up: the letter <b>'+v5Html(sound.letter)+'</b> is often used for this starting sound. The demo uses whole English words; it does not pretend that saying a letter name is an isolated phoneme.</p>'+
+ (correct?'<button class="v6-btn good full" data-v6="go" data-page="story">📖 Read a Story →</button>':'')+'</section>'+v6Footer();
+ return html;
+}
+function v6StoryUi(){
+ var t=v6Topic(),p=Math.min(3,Math.max(0,V6.bookPage)),page=t.pages[p],done=v6Day().story,asked=page[2],pointed=V6.bookVisited[p]===true;
+ var html=v6Header('📚 Story Together','Look at the picture. Listen and point.');
+ html+='<section class="v6-card"><div class="v6-headbar"><h2>📖 '+v5Html(t.name)+' Story</h2><span class="v6-badge">Page '+(p+1)+' / 4</span></div>'+
+ '<div class="v6-story"><div class="v6-story-scene">'+page[1]+'</div><p class="v6-english">'+v5Html(page[0])+'</p>'+
+ '<div class="v6-story-dots">'+t.pages.map(function(_,i){return '<span class="'+(i===p?'on':'')+'"></span>'}).join('')+'</div></div>'+
+ '<div class="v6-actions"><button class="v6-btn primary" data-v6="book-hear">🔊 Listen</button><button class="v6-btn" data-v6="book-slow">🐢 Repeat</button></div>'+
+ '<h3>👆 Point to: <span class="v6-english">'+v5Html(asked)+'</span></h3>'+
+ '<div class="v6-items">'+t.objects.map(function(w,i){return '<button class="v6-object '+(pointed&&w[0]===asked?'selected':'')+'" data-v6="book-point" data-index="'+i+'" aria-label="'+v5Html(w[0])+'"><span class="emoji">'+w[1]+'</span><span>'+v5Html(w[0])+'</span></button>'}).join('')+'</div>'+
+ (pointed?'<div class="v6-check">🌟 Yes! You found it!</div>':'')+
+ '<div class="v6-actions"><button class="v6-btn" data-v6="book-prev" '+(p===0?'disabled':'')+'>← Back</button>'+
+ '<button class="v6-btn primary" data-v6="book-next">'+(p===3?'🏅 Finish Story':'Next Page →')+'</button></div>'+
+ (done?'<div class="v6-check">📚 Story time done! Let us play!</div>':'')+
+ '<p class="v6-note">Read together. Listen, point and repeat. You do not need to translate every word.</p></section>'+v6Footer();
+ return html;
+}
+function v6PlayPhrase(t,item){
+ if(V6.gameRole==='helper')return 'Here you go!';
+ if(t.id==='cafe')return (item==='milk'?'Milk':item==='apple'?'An apple':'Bread')+', please!';
+ if(t.id==='hello')return item==='hello'?'Hello, friend!':item==='happy'?'I am happy!':'Hello, my friend!';
+ if(t.id==='toys')return 'A '+item+', please!';
+ if(t.id==='farm')return 'I like '+(item==='cat'?'cats':item==='duck'?'ducks':'dogs')+'!';
+ return 'Hello!';
+}
+function v6PlayUi(){
+ var t=v6Topic(),stage=V6.gameStage,item=V6.gameItem,phrase=v6PlayPhrase(t,item||t.objects[0][0]);
+ var html=v6Header('🏡 Life Adventures','Look, touch, move, and talk!');
+ html+='<section class="v6-card"><h2>'+t.icon+' '+v5Html(t.name)+'</h2>'+
+ '<div class="v6-shelf"><button class="'+(V6.gameRole==='customer'?'active':'')+'" data-v6="role" data-role="customer">🧒 My Turn</button>'+
+ '<button class="'+(V6.gameRole==='helper'?'active':'')+'" data-v6="role" data-role="helper">🧑‍🍳 Be the Helper</button></div>'+
+ '<div class="v6-art"><span class="emoji">'+v5Html(t.art)+'</span>'+
+ '<strong class="v6-english">'+v5Html(stage==='choose'?(V6.gameRole==='helper'?t.roleAsk:t.ask):stage==='sound'?'Sound Warm-up!':stage==='speak'?phrase:stage==='served'?t.reply:t.bye)+'</strong></div>';
+ if(stage==='choose'){
+  html+='<p class="v6-note">'+(V6.gameRole==='helper'?'Listen and find the requested item.':'Tap what you want. Then use English to ask for it.')+'</p>'+
+  '<div class="v6-items">'+t.objects.map(function(w,i){return '<button class="v6-object" data-v6="game-pick" data-index="'+i+'" aria-label="Pick '+v5Html(w[0])+'"><span class="emoji">'+w[1]+'</span><span>'+v5Html(w[0])+'</span></button>'}).join('')+'</div>'+
+  '<button class="v6-btn primary full" data-v6="game-question">🔊 Hear the Teacher</button>';
+ }
+ if(stage==='sound'){
+  html+='<h3>🔤 Listen before speaking</h3><p class="v6-center v6-english">'+v5Html(item)+'</p>'+
+   '<div class="v6-actions"><button class="v6-btn primary" data-v6="game-sound">🔊 Listen</button><button class="v6-btn" data-v6="game-sound-slow">🐢 Slowly</button></div>'+
+   '<button class="v6-btn good full" data-v6="game-ready">I heard it! →</button>';
+ }
+ if(stage==='speak'){
+  html+='<h3>🗣️ Listen → Repeat → Try!</h3><p class="v6-note">Hear the sentence and try to say it yourself.</p>'+
+   '<div class="v6-actions"><button class="v6-btn primary" data-v6="game-model">🔊 Hear a Sentence</button><button class="v6-btn" data-v6="game-model-slow">🐢 Again</button></div>'+
+   '<button class="v6-btn good full" data-v6="game-spoke">🙋 I tried saying it!</button>'+
+   '<p class="v6-note">This button records an attempt, not a pronunciation score.</p>';
+ }
+ if(stage==='served'){
+  html+='<div class="v6-check">✨ '+v5Html(t.reply)+'</div>'+
+  '<button class="v6-btn primary full" data-v6="game-thanks">🔊 '+v5Html(t.bye)+' · My Turn!</button>';
+ }
+ if(stage==='finish'){
+  html+='<div class="v6-check">🏅 Great! You used English in your adventure.</div>'+
+   '<button class="v6-btn good full" data-v6="go" data-page="talk">🎤 Talk to My English Buddy →</button>';
+ }
+ html+='</section>'+v6Footer();return html;
+}
+function v6TalkPrompt(){
+ var scene=v5SpeechScene();
+ return scene&&v5Speak.step<3?scene.prompts[v5Speak.step]:null;
+}
+function v6TalkUi(){
+ var t=v6Topic(),scene=v5SpeechScene(),step=v5Speak.step,phase=V6.talkPhase;
+ var html=v6Header('🎤 Talk to My English Buddy','Listen. Repeat. Then use your own words!');
+ if(!scene){
+  html+='<section class="v6-card"><div class="v6-art"><span class="emoji">🤖 🎤 🧒</span><strong>Ready to talk?</strong><span class="caption">'+v5Html(t.name)+' · Three short turns</span></div>'+
+   '<p class="v6-note">We will practise a sound before each spoken sentence. You can always ask to listen again.</p>'+
+   '<button class="v6-btn primary full" data-v6="talk-begin">▶ Start Talking</button></section>'+v6Footer();
+  return html;
+ }
+ if(step>=3){
+  html+='<section class="v6-card"><div class="v6-art"><span class="emoji">🏆🤖</span><strong>You did it!</strong><span class="caption">You tried three short conversations.</span></div>'+
+   '<div class="v6-check">🌟 Speaking is brave! Every try counts.</div>'+
+   '<label style="display:flex;gap:9px;align-items:start;padding:12px;line-height:1.6"><input type="checkbox" id="v5-parent-confirm" style="width:19px;height:19px;flex-shrink:0"/> A grown-up heard me speak English.</label>'+
+   '<label style="display:flex;gap:9px;align-items:start;padding:12px;line-height:1.6"><input type="checkbox" id="v5-parent-independent" style="width:19px;height:19px;flex-shrink:0"/> I answered once without a model.</label>'+
+   '<button class="v6-btn good full" data-v6="talk-save">✅ Save My Talking Adventure</button>'+
+   '<p class="v6-note">The app cannot reliably grade a child’s accent or pronunciation. A parent can confirm that speaking happened.</p></section>'+v6Footer();return html;
+ }
+ var it=v6TalkPrompt(),model=it?.choices[0]||t.example,question=it?.q||t.ask;
+ html+='<section class="v6-card"><div class="v6-headbar"><h2>Round '+(step+1)+' / 3</h2><span class="v6-badge">'+v5Html(t.name)+'</span></div>'+
+ '<div class="v6-progress"><span style="width:'+(step/3*100)+'%"></span></div>'+
+ '<div class="v6-talk-stages">'+['🔤 Sound','🎧 Listen','🗣️ Repeat','🎤 Speak'].map(function(x,i){return '<span class="'+(i===['warm','listen','repeat','free'].indexOf(phase)?'on':'')+'">'+x+'</span>'}).join('')+'</div>';
+ if(phase==='warm'){
+  html+='<div class="v6-art"><span class="emoji">'+t.sound.mainArt+'</span><strong class="v6-english">'+v5Html(t.sound.main)+'</strong>'+
+   '<span class="caption">First, warm up your ears and your voice.</span></div>'+
+   '<button class="v6-btn primary full" data-v6="talk-warm-hear">🔊 Listen to the Word</button>'+
+   '<button class="v6-btn good full" data-v6="talk-warm-ready" '+(!V6.talkWarmDone?'disabled':'')+'>✓ Ready for a Question</button>';
+ }
+ if(phase==='listen'){
+  html+='<div class="v6-dialog v6-english"><small>🤖 Teacher says:</small>'+v5Html(question)+'</div>'+
+   '<button class="v6-btn primary full" data-v6="talk-listen">🔊 Listen Again</button>'+
+   '<button class="v6-btn good full" data-v6="talk-into-repeat">→ Repeat with Me</button>';
+ }
+ if(phase==='repeat'){
+  html+='<div class="v6-dialog v6-english"><small>🎧 My model:</small>'+v5Html(model)+'</div>'+
+   '<div class="v6-actions"><button class="v6-btn primary" data-v6="talk-model">🔊 Hear the Sentence</button><button class="v6-btn" data-v6="talk-model-slow">🐢 Slowly</button></div>'+
+   '<button class="v6-btn good full" data-v6="talk-into-free">🙋 I tried repeating it</button>';
+ }
+ if(phase==='free'){
+  html+='<div class="v6-art"><span class="emoji">🎤🌟</span><strong>Your Turn!</strong><span class="caption">Try saying something on your own.</span></div>'+
+   '<div class="v6-actions"><button class="v6-btn" data-v6="talk-question-repeat">🔊 Hear Question</button>'+
+   '<button class="v6-btn" data-v6="talk-hint">'+(V6.lessonHint?'🙈 Hide a Model':'💡 Show a Model')+'</button></div>'+
+   (V6.lessonHint?'<div class="v6-dialog v6-english">'+v5Html(model)+'</div>':'')+
+   '<button class="v6-btn primary full" data-v6="talk-self">🙋 I tried speaking! →</button>'+
+   '<div class="v6-actions"><button class="v6-btn" data-v6="talk-mic" '+(!(window.SpeechRecognition||window.webkitSpeechRecognition)||!v5ParentConsent?'disabled':'')+'>🎙️ Use My Microphone</button></div>'+
+   '<details><summary class="v6-note">Optional: check recognized words / type with a grown-up</summary><input id="v5-speech-input" class="v6-mini-input" maxlength="130" autocomplete="off" placeholder="Your words (optional)"/></details>'+
+   '<p class="v6-note">Mic is optional and needs a grown-up’s permission. If no words are recorded, the app only logs that you tried; it does not invent what you said.</p>';
+ }
+ if(v5Speak.pending)html+='<p class="v6-note">🤖 English Buddy is responding…</p>';
+ html+='</section>'+v6Footer();return html;
+}
+function v6Ui(){
+ v6SessionSync();
+ var page=V6.page,h='<div class="v6-world" lang="en-US">';
+ if(page==='song')h+=v6SongUi();
+ else if(page==='phonics')h+=v6SoundUi();
+ else if(page==='story')h+=v6StoryUi();
+ else if(page==='play')h+=v6PlayUi();
+ else if(page==='talk')h+=v6TalkUi();
+ else h+=v6Home();
+ return h+v6ParentUi()+'</div>';
+}
+
 v5Init();render();
 })();
 
