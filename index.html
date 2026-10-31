@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
-<meta name="description" content="星星闯关乐园V6.6：口语伙伴根据孩子的回答调整后续问题，新增离线家庭英语任务和家长真实反馈；保留分级绘本、智能复习、语数考试与打印。">
-<title>星星闯关乐园 V6.6 · Speaking & Family Missions</title>
+<meta name="description" content="星星闯关乐园V6.7：新增中国课标预备级主题衔接，适龄听词找图、英文认读与家长确认口语观察，保留互动绘本、智能复习、家庭任务以及语文数学考试打印。">
+<title>星星闯关乐园 V6.7 · School English Bridge</title>
 <style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
 
 /* V4.2 AI learning assistant: child-friendly dialog with responsive controls */
@@ -400,6 +400,33 @@ body.v6-immersive #app{padding-top:8px}
 @media(max-width:380px){.v65-levels{gap:4px}.v65-picture-choices{gap:5px}.v65-picture-choice{min-height:96px}.v65-quiz-choice{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.v65-picture .art{animation:none!important}}
 
+
+/* V6.7 Chinese curriculum bridge: assessment without pseudo pronunciation scores */
+.v67-track{background:linear-gradient(135deg,#edf6ff,#fff7e9);border:2px solid #dde5f9;border-radius:19px;padding:14px;margin:12px 0}
+.v67-topics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.v67-topic{border:2px solid #e0e4f4;border-radius:16px;background:#fff;min-height:98px;padding:9px 4px;cursor:pointer;font-size:14px;color:#506085;font-weight:900}
+.v67-topic span{font-size:37px;display:block}
+.v67-topic.selected{border-color:#7262cc;background:#f0ebff}
+.v67-topic:focus-visible,.v67-answer:focus-visible{outline:3px solid #6875d9;outline-offset:2px}
+.v67-progress{display:flex;justify-content:center;gap:6px;margin:14px 0;flex-wrap:wrap}
+.v67-progress span{border-radius:30px;background:#edf0f8;color:#74809d;padding:7px 13px;font-size:12px;font-weight:900}
+.v67-progress .on{background:#e5dfff;color:#5e4eac}
+.v67-answergrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:13px 0}
+.v67-answer{min-height:116px;border:2px solid #dfe6f5;border-radius:17px;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-size:14px;font-weight:900;color:#506180;padding:8px 2px}
+.v67-answer span{font-size:clamp(40px,11vw,68px)}.v67-answer:disabled{opacity:.6;cursor:default}
+.v67-answer.correct{border-color:#37ae81;background:#e6f8ee}
+.v67-prompt{background:linear-gradient(150deg,#f0eeff,#f5faff);padding:17px;border-radius:17px;text-align:center;margin:15px 0;min-height:115px;display:grid;place-items:center}
+.v67-prompt strong{font-size:clamp(22px,6vw,31px);color:#4d588e}
+.v67-prompt .hint{font-size:12px;color:#657797}
+.v67-guardian{border:2px solid #d6e7dd;border-radius:16px;padding:13px;margin:14px 0;background:#f4fcf7}
+.v67-guardian label{display:flex;align-items:flex-start;gap:10px;margin:10px 0}
+.v67-guardian input{width:20px;height:20px;flex-shrink:0}
+.v67-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0}
+.v67-results div{padding:12px 4px;background:#edf5ff;border-radius:13px;text-align:center;font-weight:850;color:#4c638e;font-size:12px}
+.v67-results strong{font-size:24px;display:block;color:#494b9a}
+.v67-report{padding:10px;background:#f4f7ff;border:1px solid #e0e5f4;border-radius:12px;margin:9px 0;font-size:13px;line-height:1.65}
+@media(max-width:390px){.v67-topics{gap:4px}.v67-topic{min-height:88px;padding:4px 2px;font-size:12px}.v67-answergrid{gap:5px}.v67-answer{min-height:99px}}
+
 /* V6.6: child-sized speaking choice chips and offline family missions */
 .v66-mission{background:linear-gradient(135deg,#ecf8ff,#fff7e8);border:2px solid #d9e9f2;border-radius:20px;padding:15px;margin:14px 0}
 .v66-mission-hero{font-size:clamp(64px,17vw,104px);text-align:center;line-height:1.6}
@@ -471,7 +498,7 @@ body.v6-immersive #app{padding-top:8px}
 @media(prefers-reduced-motion:reduce){.v6-dancers.playing span{animation:none!important}}
 </style></head><body>
 <div class="shell mx-auto w-full">
-<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.6</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
+<header class="topline"><div><div class="school" id="schoolTitle">🏫 星星家庭学习乐园</div><div class="brand">🌈 星星闯关乐园 <span style="font-size:11px;color:#8995b3;font-weight:850">V6.7</span></div></div><div class="stat-pill growth-pill" id="starTotal" aria-label="我的成长值与升级进度">🌱 成长值</div></header>
 <nav class="tabs" aria-label="学科切换"><button class="tab active" data-subject="math" aria-pressed="true"><span class="e">🔢</span><span id="navMath">数学</span></button><button class="tab" data-subject="chinese" aria-pressed="false"><span class="e">📖</span><span id="navChinese">语文</span></button><button class="tab" data-subject="english" aria-pressed="false"><span class="e">🚀</span><span id="navEnglish">英文</span></button></nav>
 <section class="settings" aria-label="学习设置"><label class="field">年级<select id="gradeSel" aria-label="选择年级"><option value="1">一年级</option><option value="2">二年级</option><option value="3">三年级</option><option value="4">四年级</option><option value="5">五年级</option><option value="6">六年级</option></select></label><label class="field">学期<select id="termSel" aria-label="选择学期"><option value="1">上册</option><option value="2">下册</option></select></label><label class="field">知识主题<select id="unitSel" aria-label="选择知识主题"></select></label></section>
 <div class="minitools"><span class="small">📘 <span id="curriculumLabel">按知识主题练习</span></span><div class="voice-tools"><button class="micro" id="voiceToggle">🔊 自动鼓励：开</button><button class="micro voice-open" id="voiceSettingsBtn" type="button">🎙️ 声音设置</button></div></div>
@@ -2439,7 +2466,7 @@ function v6SessionSync(){
 }
 function v6Go(page){
  if(examIsActive()){toast('请先保存并退出考试。');return;}
- if(!['home','song','phonics','story','play','talk','mission'].includes(page))return;
+ if(!['home','song','phonics','story','play','talk','mission','school'].includes(page))return;
  v6StopAllAudio();
  if(V6.page==='talk'&&page!=='talk'&&v5SpeechScene())v5ResetSpeak();
  V6.page=page;V6.lessonHint=false;render();window.scrollTo(0,0);
@@ -2448,7 +2475,7 @@ function v6Go(page){
 function v6Header(title,subtitle){
  var d=v6Data(),topic=v6Topic(),percent=Math.round(v6DoneCount()/5*100);
  return '<div class="v6-head"><div class="v6-headbar"><button class="v6-topbtn" type="button" data-v6="exit">← Exit</button>'+
- '<span class="v6-kicker">ENGLISH WORLD V6.6 · L'+v5Level()+'</span><button class="v6-topbtn" type="button" data-v6="parent">👨‍👩‍👧 Parent</button></div>'+
+ '<span class="v6-kicker">ENGLISH WORLD V6.7 · L'+v5Level()+'</span><button class="v6-topbtn" type="button" data-v6="parent">👨‍👩‍👧 Parent</button></div>'+
  '<h1>'+v5Html(title)+'</h1><p class="v6-english">'+v5Html(subtitle)+'</p><div class="v6-headbar">'+
  '<span class="v6-badge">'+topic.icon+' '+v5Html(topic.name)+'</span><span class="v6-badge">⏰ <span id="v6-live-clock">'+v6Clock()+'</span> · '+percent+'% done</span></div></div>';
 }
@@ -2468,6 +2495,9 @@ function v6ParentUi(){
  '<label><input type="checkbox" id="v6-english-only" '+(d.settings.englishOnly?'checked':'')+'/> 孩子学习时隐藏中文学科菜单（英语沉浸模式）</label>'+ 
  '<label><input type="checkbox" id="v62-animations" '+(d.settings.animations?'checked':'')+'/> 显示轻量卡通动画（关闭后保留绘本点读和游戏）</label>'+
  '<p class="v6-note">开始时间仅作家长安排参考，不会在后台自动提醒。每日计时可由家长或孩子主动开始、暂停，时间结束不强制退出。</p>'+
+ '<div class="v6-divider"></div><h3>学校英语主题衔接（家长设置）</h3>'+ 
+ '<label>主题组织方式 <select id="v67-track">'+Object.keys(V67_TRACKS).map(function(k){return '<option value="'+k+'" '+(v67Track()===k?'selected':'')+'>'+v5Html(V67_TRACKS[k].name)+'</option>'}).join('')+'</select></label>'+ 
+ '<p class="v6-note">国家课程要求小学英语通常从三年级开始，一至二年级有条件的学校可开设，以听说为主。以上人教版/沪教版是原创主题衔接顺序，不代表精确教材单元、课文或页码。要做真正逐单元同步，需要核对孩子实际课本。</p>'+ 
  '<div class="v6-divider"></div><h3>麦克风和 AI</h3>'+
  '<label><input type="checkbox" id="v6-speaking-consent" '+(v5ParentConsent?'checked':'')+'/> 家长同意本次使用浏览器语音识别</label>'+ 
  '<label><input type="checkbox" id="v61-ai-replies" '+(d.settings.aiReplies?'checked':'')+'/> 允许将本次口语转写或输入文字发送给 DeepSeek 获取简短鼓励（可选，默认关闭）</label>'+
@@ -2478,6 +2508,7 @@ function v6ParentUi(){
  '<div class="v6-divider"></div><h3>🔤 自然拼读听力记录</h3>'+v63ParentReport()+
  '<div class="v6-divider"></div><h3>📚 V6.5 分级阅读与故事理解</h3>'+v65ParentReport()+
  '<div class="v6-divider"></div><h3>🏠 V6.6 家庭英语与口语观察</h3>'+v66ParentReport()+
+ '<div class="v6-divider"></div><h3>🏫 V6.7 校内英语衔接与适龄观察</h3>'+v67ParentReport()+
  '<div class="v6-divider"></div><h3>🧠 V6.4 智能复习与能力观察</h3>'+v64ParentReport()+
  '<div class="v6-divider"></div><h3>课程说明</h3>'+
  '<p>第一步听唱进入英文环境；自然拼读使用离线合成音素示范与整词朗读，非专业真人录音，请家长留意音质，勿把字母名称当作音素。绘本为原创简短故事，可亲子共读，不要求逐句中文翻译。</p>'+
@@ -2496,6 +2527,7 @@ function v6Home(){
  '<button class="v6-btn" data-v6="timer-reset">↻ Reset Timer</button></div>'+
  '<button class="v6-btn good full" data-v64="next">'+(done===5?'🌟 All done today':'▶ Next: '+next[2])+'</button></section>';
  html+=v64Agenda();
+ html+='<section class="v6-card"><h2>🏫 My School English Bridge</h2><p class="v6-note">Short listening, word-picture reading and talking checks inspired by China’s grade 1–2 preparation themes.</p><button type="button" class="v6-btn good full" data-v6="go" data-page="school">🎒 Explore School English</button></section>';
  html+='<section class="v6-card"><h2>🏠 My English Mission</h2><p class="v6-note">Use one English sentence with your grown-up today, away from the screen.</p><button type="button" class="v6-btn good full" data-v6="go" data-page="mission">🏠 Try Today’s Home Mission</button></section>';
  html+='<section class="v6-card"><h2>📚 Today’s Reading Adventure</h2><p class="v6-note">Listen, read, find pictures and answer story questions! Your Sound Bridge reviews today’s phonics word.</p><button type="button" class="v6-btn good full" data-v6="go" data-page="story">📖 Open My Graded Storybook</button></section>';
  html+='<section class="v6-card"><h2>🧭 Explore Your English World</h2><div class="v6-grid">'+V6_STEPS.map(function(x){return '<button class="v6-activity '+(day[x[0]]?'done':'')+'" data-v6="go" data-page="'+x[0]+'"><span class="emoji">'+x[1]+'</span><b>'+x[2]+'</b><small>'+(day[x[0]]?'✓ Great work!':x[3])+'</small></button>'}).join('')+'</div></section>';
@@ -3428,6 +3460,192 @@ function v66SpeakReportUi(){
  ' · '+(r.independent?'曾独立表达':'有示范/帮助')+'</div>';}).join('');
 }
 
+
+/* V6.7 · original foundation content aligned to general pre-primary themes, NOT exact publisher textbook pages */
+const V67_TRACKS={
+ general:{name:'通用新课标 · 1—2年级预备级',order:['hello','school','colors','family','animals','food']},
+ pep:{name:'人教版主题衔接 · 非教材目录',order:['hello','colors','school','family','food','animals']},
+ shanghai:{name:'沪教版主题衔接 · 非教材目录',order:['hello','family','school','animals','colors','food']}
+};
+const V67_UNITS={
+ hello:{name:'Hello! / 问候',art:'👋',words:[['hello','👋'],['happy','😄'],['goodbye','🚪']],prompt:'Can you say hello to your grown-up?',model:'Hello, my friend!'},
+ school:{name:'My School / 校园',art:'🎒',words:[['book','📚'],['bag','🎒'],['pencil','✏️']],prompt:'What do you have?',model:'I have a book!'},
+ colors:{name:'Colors / 颜色',art:'🌈',words:[['red','🔴'],['blue','🔵'],['yellow','🟡']],prompt:'What color do you like?',model:'I like blue!'},
+ family:{name:'My Family / 家庭',art:'🏠',words:[['mother','👩'],['father','👨'],['baby','👶']],prompt:'Who is in your family?',model:'This is my family!'},
+ animals:{name:'Animals / 动物',art:'🐶',words:[['cat','🐱'],['dog','🐶'],['duck','🦆']],prompt:'What animal do you like?',model:'I like cats!'},
+ food:{name:'Food / 食物',art:'🍎',words:[['apple','🍎'],['milk','🥛'],['bread','🍞']],prompt:'What would you like?',model:'Milk, please!'}
+};
+const V67={key:'',unit:'hello',stage:'choose',audioReady:false,parentHelp:false,attempts:0,errors:0,
+ listenFirst:false,readFirst:false,listenFirstCount:0,readFirstCount:0,listenIndex:0,readIndex:0,
+ listenWrong:0,readWrong:0,listenWrongCurrent:0,readWrongCurrent:0,listenAdult:false,readAdult:false,
+ listenHelpCount:0,readHelpCount:0,
+ spokenTried:false,spokenModel:false,guardianConfirmed:false,heardPrompt:false,message:'',done:false};
+function v67Data(){
+ var d=saveData.v67SchoolBridge;
+ if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v67SchoolBridge={};
+ if(!Array.isArray(d.records))d.records=[];
+ if(!d.selected||typeof d.selected!=='object'||Array.isArray(d.selected))d.selected={};
+ return d;
+}
+function v67Profile(){return [saveData.grade,saveData.term,v5Level()].join('|');}
+function v67Track(){
+ var val=v67Data().selected[v67Profile()];
+ return V67_TRACKS[val]?val:'general';
+}
+function v67SetTrack(name){
+ if(!V67_TRACKS[name])return;
+ v67Data().selected[v67Profile()]=name;store();v67Reset();render();
+}
+function v67Key(){return v67Profile()+'|'+v67Track()+'|'+v6Topic().id;}
+function v67Reset(){
+ V67.stage='choose';V67.audioReady=false;V67.parentHelp=false;V67.attempts=0;V67.errors=0;
+ V67.listenFirst=false;V67.readFirst=false;V67.listenFirstCount=0;V67.readFirstCount=0;
+ V67.listenIndex=0;V67.readIndex=0;V67.listenWrong=0;V67.readWrong=0;
+ V67.listenWrongCurrent=0;V67.readWrongCurrent=0;
+ V67.listenHelpCount=0;V67.readHelpCount=0;
+ V67.listenAdult=false;V67.readAdult=false;V67.spokenTried=false;V67.spokenModel=false;
+ V67.guardianConfirmed=false;V67.heardPrompt=false;V67.done=false;V67.message='';
+}
+function v67Sync(){
+ var key=v67Key();
+ if(V67.key!==key){V67.key=key;v67Reset();V67.unit=V67_TRACKS[v67Track()].order[0];}
+}
+function v67Start(id){
+ if(!V67_UNITS[id])return;
+ v67Reset();V67.unit=id;V67.stage='listen';render();
+}
+function v67Unit(){return V67_UNITS[V67.unit]||V67_UNITS.hello;}
+function v67ListenTarget(){return v67Unit().words[V67.listenIndex%3];}
+function v67ReadTarget(){return v67Unit().words[(V67.readIndex+1)%3];}
+function v67Options(stage){
+ var arr=v67Unit().words.slice(),move=stage==='listen'?(V67.listenIndex===0?1:2):(V67.readIndex===0?2:1);
+ return arr.slice(move).concat(arr.slice(0,move));
+}
+function v67Progress(){
+ var current=['choose','listen','read','speak','done'].indexOf(V67.stage);
+ return '<div class="v67-progress">'+['Choose','🎧 Listen','📖 Read','🎤 Talk','⭐ Done'].map(function(t,i){
+  return '<span class="'+(i===current?'on':'')+'">'+t+'</span>';
+ }).join('')+'</div>';
+}
+function v67SchoolUi(){
+ v67Sync();var track=V67_TRACKS[v67Track()],u=v67Unit();
+ var h=v6Header('🏫 My School English Bridge','Listen · Match · Speak · Grown-up helps')+v67Progress();
+ if(V67.stage==='choose'){
+  h+='<section class="v6-card"><h2>🌱 My School-English Topics</h2>'+
+  '<div class="v67-track"><strong>'+v5Html(track.name)+'</strong>'+
+  '<p class="v6-note">First-grade English preparation, with speaking and listening first. These original topics are NOT an official textbook unit-by-unit copy. A grown-up can change the track.</p></div>'+
+  '<div class="v67-topics">'+track.order.map(function(id,i){var t=V67_UNITS[id];return '<button type="button" class="v67-topic '+(V67.unit===id?'selected':'')+'" data-v67="start" data-unit="'+id+'"><span aria-hidden="true">'+t.art+'</span>'+v5Html(t.name)+'</button>'}).join('')+'</div>'+
+  '<p class="v6-note">Every tiny check has a sound task, a word-picture task and a real speaking turn. No countdown and no accent scoring.</p></section>';
+ }else if(V67.stage==='listen'||V67.stage==='read'){
+  var listening=V67.stage==='listen',target=listening?v67ListenTarget():v67ReadTarget(),options=v67Options(V67.stage);
+  h+='<section class="v6-card"><h2>'+(listening?'🎧 Listen and Find':'📖 Look and Read')+'</h2>'+ 
+ '<p class="v6-note">Question '+((listening?V67.listenIndex:V67.readIndex)+1)+' / 2 · small steps, take your time</p>'+
+  '<div class="v67-prompt">'+(listening?'<strong>👂 What did you hear?</strong><small class="hint">Listen without seeing the English word.</small>':
+  '<strong lang="en">'+v5Html(target[0])+'</strong><small class="hint">Look at the word. Find the right picture!</small>')+'</div>'+
+  (listening?'<div class="v6-actions"><button class="v6-btn primary" data-v67="hear">🔊 Hear the Word</button>'+
+   '<button class="v6-btn soft" data-v67="adult">👨‍👩‍👧 Grown-up Says It</button></div>':
+   '<div class="v6-actions"><button class="v6-btn" data-v67="read-hear">🔊 Hear the Word</button></div>')+
+  '<div class="v67-answergrid">'+options.map(function(w,i){return '<button type="button" class="v67-answer" data-v67="answer" data-index="'+i+'" '+(listening&&!V67.audioReady?'disabled':'')+' aria-label="Picture '+v5Html(w[0])+'"><span aria-hidden="true">'+w[1]+'</span></button>'}).join('')+'</div>'+
+  (V67.message?'<div class="v63-notice" role="status">'+v5Html(V67.message)+'</div>':'')+
+  '<p class="v6-note">You can listen again and try again. The first answer counts separately from later practice.</p></section>';
+ }else if(V67.stage==='speak'){
+  h+='<section class="v6-card"><h2>🎤 Speak to a Grown-up</h2>'+
+  '<div class="v67-prompt"><strong>'+u.art+' '+v5Html(u.prompt)+'</strong></div>'+
+  '<div class="v6-actions"><button class="v6-btn primary" data-v67="hear-question">🔊 Hear Question</button>'+
+  '<button class="v6-btn" data-v67="hear-model">🐢 Hear a Model</button></div>'+
+  '<p class="v6-note">Say anything you can: a word is enough. Do not type your name or private details.</p>'+
+  '<button class="v6-btn good full" data-v67="said" '+(!V67.heardPrompt?'disabled':'')+'>🙋 I tried answering!</button>'+
+  (V67.spokenTried?'<div class="v67-guardian" lang="zh-CN"><strong>家长观察确认（不是自动语音评分）</strong>'+
+   '<label><input type="checkbox" id="v67-parent-heard"/> 我确实听到孩子用英语尝试回答</label>'+
+   '<label><input type="checkbox" id="v67-parent-independent"/> 孩子至少一次尝试独立回答</label>'+
+   '<label><input type="checkbox" id="v67-parent-understood"/> 孩子大致理解了对话的意思</label>'+
+   '<button class="v6-btn primary full" data-v67="save">✅ 记录本次听说认读练习</button></div>':'')+
+  '<p class="v6-note">This is a friendly parent observation. We do not record the child’s voice or rate pronunciation.</p></section>';
+ }else{
+  var row=v67Latest();
+  h+='<section class="v6-card"><h2>🌟 Great English Explorer!</h2><div style="font-size:75px;text-align:center">🏆🌈</div>'+
+  '<div class="v67-results"><div><strong>'+(row.listenFirstCount||0)+'/2</strong>Listening first try</div><div><strong>'+(row.readFirstCount||0)+'/2</strong>Reading first try</div><div><strong>♥</strong>Speaking tried</div></div>'+
+  '<p class="v6-note">You practised listening, matching a written word and speaking with your grown-up. Keep using English for fun!</p>'+
+  '<button class="v6-btn primary full" data-v67="again">📚 Try a New Topic</button></section>';
+ }
+ return h+v6Footer();
+}
+function v67Latest(){
+ return v67Data().records.slice().reverse().find(function(r){
+  return r.grade===saveData.grade&&r.term===saveData.term&&r.ability===v5Level()&&r.unit===V67.unit;
+ })||{};
+}
+function v67Answer(index){
+ if(!['listen','read'].includes(V67.stage))return;
+ if(V67.stage==='listen'&&!V67.audioReady)return;
+ var stage=V67.stage,options=v67Options(stage);
+ if(!Number.isInteger(index)||index<0||index>=options.length)return;
+ var target=(stage==='listen'?v67ListenTarget():v67ReadTarget())[0],ok=options[index][0]===target;
+ V67.attempts++;
+ if(!ok){
+  V67.errors++;
+  if(stage==='listen'){V67.listenWrong++;V67.listenWrongCurrent++;}
+  else{V67.readWrong++;V67.readWrongCurrent++;}
+  V67.message='Nice trying! Let us give it another go.';render();return;
+ }
+ if(stage==='listen'){
+  var firstListen=V67.listenWrongCurrent===0&&!V67.listenAdult;
+  if(firstListen)V67.listenFirstCount++;
+  V67.listenFirst=V67.listenFirstCount===2;
+  V67.listenIndex++;V67.listenWrongCurrent=0;V67.listenAdult=false;
+  if(V67.listenIndex>=2)V67.stage='read';
+ }else{
+  var firstRead=V67.readWrongCurrent===0&&!V67.readAdult;
+  if(firstRead)V67.readFirstCount++;
+  V67.readFirst=V67.readFirstCount===2;
+  V67.readIndex++;V67.readWrongCurrent=0;V67.readAdult=false;
+  if(V67.readIndex>=2)V67.stage='speak';
+ }
+ V67.audioReady=false;V67.message='';v5Voice('Great try!');render();
+}
+function v67Save(){
+ if(V67.stage!=='speak'||!V67.spokenTried)return;
+ var heard=!!document.getElementById('v67-parent-heard')?.checked;
+ if(!heard){toast('请家长确认已经听到孩子尝试说英语。');return;}
+ var independent=!!document.getElementById('v67-parent-independent')?.checked;
+ var understood=!!document.getElementById('v67-parent-understood')?.checked;
+ var data=v67Data(),row={day:localDate(),grade:saveData.grade,term:saveData.term,ability:v5Level(),
+  track:v67Track(),unit:V67.unit,listenFirst:V67.listenFirst,readFirst:V67.readFirst,
+  listenFirstCount:V67.listenFirstCount,readFirstCount:V67.readFirstCount,listenQuestions:2,readQuestions:2,
+  listenWrong:V67.listenWrong,readWrong:V67.readWrong,
+  listenHelpCount:V67.listenHelpCount,readHelpCount:V67.readHelpCount,spokenTried:true,parentConfirmed:true,independent:independent,understood:understood,
+  modelHelp:V67.spokenModel};
+ data.records.push(row);data.records=data.records.slice(-160);
+ V67.stage='done';V67.done=true;store();render();v5Voice('Great! You used English today!');
+}
+function v67ParentReport(){
+ var rows=v67Data().records.filter(function(r){return r.grade===saveData.grade&&r.term===saveData.term&&r.ability===v5Level();});
+ var last=rows.slice(-12),heard=last.reduce(function(sum,r){return sum+(r.listenFirstCount||0);},0),
+  read=last.reduce(function(sum,r){return sum+(r.readFirstCount||0);},0),
+  independent=last.filter(function(r){return r.independent}).length;
+ return '<p>当前衔接模式：<strong>'+v5Html(V67_TRACKS[v67Track()].name)+'</strong>。这是原创主题衔接，不是官方教材页码同步。</p>'+
+ '<p>已完成 '+rows.length+' 次适龄观察。最近 '+last.length+' 次：听词找图首次独立答对 '+heard+
+ '/'+(last.length*2)+' 道；认读找图首次独立答对 '+read+'/'+(last.length*2)+' 道；家长确认有独立开口尝试 '+independent+' 次。</p>'+
+ '<div class="v67-report">'+(last.length?last.slice(-5).reverse().map(function(r){return '<div class="v66-report-row">📆 '+v5Html(r.day)+' · '+
+  v5Html(V67_UNITS[r.unit]?.name||r.unit)+' · 听 '+(r.listenFirstCount||0)+'/2 首次答对 · 认读 '+
+  (r.readFirstCount||0)+'/2 首次答对 · 说 '+(r.independent?'尝试独立':'有帮助')+'</div>';
+ }).join(''):'还没有记录。建议先从 Hello! 开始。')+'</div>'+
+ '<p class="v6-note">家长口语观察≠标准化能力测评；不采集儿童原始录音，也不对口音和流利度自动打分。学习记录保存在本浏览器。</p>';
+}
+function v67Action(button){
+ v67Sync();var op=button.dataset.v67;
+ if(op==='start'){v67Start(button.dataset.unit);return;}
+ if(op==='hear'&&V67.stage==='listen'){V67.audioReady=true;v5Voice(v67ListenTarget()[0]);render();return;}
+ if(op==='adult'&&V67.stage==='listen'){if(!V67.listenAdult)V67.listenHelpCount++;V67.listenAdult=true;V67.audioReady=true;V67.message='Thanks for listening together!';render();return;}
+ if(op==='read-hear'&&V67.stage==='read'){if(!V67.readAdult)V67.readHelpCount++;V67.readAdult=true;v5Voice(v67ReadTarget()[0]);render();return;}
+ if(op==='answer'){v67Answer(Number(button.dataset.index));return;}
+ if(op==='hear-question'&&V67.stage==='speak'){V67.heardPrompt=true;v5Voice(v67Unit().prompt);render();return;}
+ if(op==='hear-model'&&V67.stage==='speak'){V67.spokenModel=true;v5Voice(v67Unit().model);render();return;}
+ if(op==='said'&&V67.stage==='speak'&&V67.heardPrompt){V67.spokenTried=true;render();return;}
+ if(op==='save'){v67Save();return;}
+ if(op==='again'&&V67.stage==='done'){v67Reset();render();return;}
+}
+
 /* V6.0 English World activities */
 function v6SongUi(){
  var t=v6Topic();
@@ -3582,6 +3800,7 @@ function v6Ui(){
  else if(page==='play')h+=v6PlayUi();
  else if(page==='talk')h+=v6TalkUi();
  else if(page==='mission')h+=v66MissionUi();
+ else if(page==='school')h+=v67SchoolUi();
  else h+=v6Home();
  return h+v6ParentUi()+'</div>';
 }
@@ -3767,6 +3986,8 @@ function v6ParentSave(){
  d.settings.aiReplies=!!document.getElementById('v61-ai-replies')?.checked;
  d.settings.animations=!!document.getElementById('v62-animations')?.checked;
  if(!d.settings.animations)v62CartoonStop();
+ var nextTrack=document.getElementById('v67-track')?.value;
+ if(V67_TRACKS[nextTrack]){v67Data().selected[v67Profile()]=nextTrack;V67.key='';}
  d.settings.englishOnly=!!document.getElementById('v6-english-only')?.checked;
  v5ParentConsent=!!document.getElementById('v6-speaking-consent')?.checked;
  V6.parent=false;store();render();
@@ -3916,6 +4137,11 @@ document.addEventListener('click',function(event){
  else if(op==='mission-slow'){V66.missionHeard=true;v5SlowVoice(item.line);render();}
  else if(op==='mission-tried'&&V66.missionHeard){V66.missionTried=true;render();}
  else if(op==='mission-save')v66MissionSave();
+},true);
+document.addEventListener('click',function(event){
+ var button=event.target.closest('[data-v67]');if(!button||view!=='speaking'||V6.page!=='school')return;
+ event.preventDefault();event.stopImmediatePropagation();if(examIsActive())return;
+ v67Action(button);
 },true);
 document.addEventListener('dragstart',function(event){
  var el=event.target.closest?.('[data-v6-drag-index]');
