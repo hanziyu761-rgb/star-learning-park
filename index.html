@@ -2370,7 +2370,8 @@ function v6ParentUi(){
  '<div class="v6-divider"></div><h3>每日纯英语时间</h3>'+
  '<label>每日建议开始时间 <input type="time" id="v6-daily-at" value="'+v5Html(d.settings.dailyAt)+'"/></label>'+
  '<label>每日练习时长 <select id="v6-minutes">'+[8,12,15].map(function(x){return '<option value="'+x+'" '+(d.settings.minutes===x?'selected':'')+'>'+x+'分钟</option>'}).join('')+'</select></label>'+
- '<label><input type="checkbox" id="v6-english-only" '+(d.settings.englishOnly?'checked':'')+'/> 孩子学习时隐藏中文学科菜单（英语沉浸模式）</label>'+
+ '<label><input type="checkbox" id="v6-english-only" '+(d.settings.englishOnly?'checked':'')+'/> 孩子学习时隐藏中文学科菜单（英语沉浸模式）</label>'+ 
+ '<label><input type="checkbox" id="v62-animations" '+(d.settings.animations?'checked':'')+'/> 显示轻量卡通动画（关闭后保留绘本点读和游戏）</label>'+
  '<p class="v6-note">开始时间仅作家长安排参考，不会在后台自动提醒。每日计时可由家长或孩子主动开始、暂停，时间结束不强制退出。</p>'+
  '<div class="v6-divider"></div><h3>麦克风和 AI</h3>'+
  '<label><input type="checkbox" id="v6-speaking-consent" '+(v5ParentConsent?'checked':'')+'/> 家长同意本次使用浏览器语音识别</label>'+ 
@@ -2459,7 +2460,8 @@ function v6SongUi(){
  '<div id="v6-dancers" class="v6-dancers '+(V6.songPlayed?'playing':'')+'">'+t.objects.map(function(w){return '<span>'+w[1]+'</span>'}).join('')+'</div>'+
  '<div class="v6-chant-lines v6-english">'+t.chant.map(function(line){return '<div>'+v5Html(line)+'</div>'}).join('')+'</div></div>'+
  '<div class="v6-actions"><button class="v6-btn primary" data-v6="song-play">▶ Listen & Move</button><button class="v6-btn" data-v6="song-slow">🐢 Slowly</button><button class="v6-btn" data-v6="song-stop">◼ Stop</button></div>'+
- '<div class="v6-art"><span class="emoji">👋 👏 🕺</span><strong>Clap! Wave! Move!</strong><span class="caption">Do the actions when you hear the words.</span></div>'+
+ v62Scene(t,'song')+'<p class="v6-note" id="v62-touch-count">'+(V6.songTouches||0)+' friendly taps!</p>'+ 
+ '<div class="v6-art"><span class="emoji">👋 👏 🕺</span><strong>Clap! Wave! Move!</strong><span class="caption">Listen to the chant. Tap a character and say its word!</span></div>'+
  '<button class="v6-btn good full" data-v6="song-finish" '+(!V6.songPlayed?'disabled':'')+'>'+(v6Day().song?'✓ I joined in!':'🙌 I listened and moved!')+'</button>'+
  '<p class="v6-note">Short original English rhythm chant with simple music notes and animated pictures.</p></section>'+v6Footer();
  return html;
@@ -2484,22 +2486,26 @@ function v6SoundUi(){
  return html;
 }
 function v6StoryUi(){
- var t=v6Topic(),p=Math.min(3,Math.max(0,V6.bookPage)),page=t.pages[p],done=v6Day().story,asked=page[2],pointed=V6.bookPoints[p]===true;
- var html=v6Header('📚 Story Together','Look at the picture. Listen and point.');
- if(!V6.bookWarmed)return html+'<section class="v6-card"><h2>🔤 First, a Sound Warm-up</h2><div class="v6-art"><span class="emoji">'+v6SoundRule().mainArt+'</span><strong>'+v5Html(v6SoundRule().main)+'</strong><span class="caption">Hear the word before you read the story.</span></div><button class="v6-btn primary full" data-v6="book-warm-hear">🔊 Listen & Repeat</button><button class="v6-btn good full" data-v6="book-warm-ready" '+(!V6.bookWarmHeard?'disabled':'')+'>📖 Ready for the Story →</button></section>'+v6Footer();
+ var t=v6Topic(),p=Math.min(3,Math.max(0,V6.bookPage)),page=t.pages[p],done=v6Day().story;
+ var heard=V6.bookVisited[p]===true,pointed=V6.bookPoints[p]===true;
+ var html=v6Header('📚 My Storybook','Listen. Tap a word. Find the picture!');
+ if(!V6.bookWarmed)return html+'<section class="v6-card"><h2>🔤 First, a Sound Warm-up</h2><div class="v6-art"><span class="emoji">'+v6SoundRule().mainArt+'</span><strong>'+v5Html(v6SoundRule().main)+'</strong><span class="caption">Hear the word before you read the story.</span></div>'+
+  '<button class="v6-btn primary full" data-v6="book-warm-hear">🔊 Listen & Repeat</button><button class="v6-btn good full" data-v6="book-warm-ready" '+(!V6.bookWarmHeard?'disabled':'')+'>📖 Open My Story →</button></section>'+v6Footer();
  html+='<section class="v6-card"><div class="v6-headbar"><h2>📖 '+v5Html(t.name)+' Story</h2><span class="v6-badge">Page '+(p+1)+' / 4</span></div>'+
- '<div class="v6-shelf"><button class="'+(V6.bookMode==='listen'?'active':'')+'" data-v6="book-mode" data-mode="listen">🎧 Listen</button><button class="'+(V6.bookMode==='together'?'active':'')+'" data-v6="book-mode" data-mode="together">👨‍👩‍👧 Together</button>'+(v5Level()>0?'<button class="'+(V6.bookMode==='independent'?'active':'')+'" data-v6="book-mode" data-mode="independent">📖 I Can Read</button>':'')+'</div>'+ 
- '<p class="v6-note">'+(V6.bookMode==='listen'?'Listen and point to the picture.':V6.bookMode==='together'?'Read with a grown-up. Point, speak, and smile.':'Try reading first, then tap Listen to check.')+'</p>'+ 
- '<div class="v6-story"><div class="v6-story-scene">'+page[1]+'</div><p class="v6-english">'+v5Html(page[0])+'</p>'+
- '<div class="v6-story-dots">'+t.pages.map(function(_,i){return '<span class="'+(i===p?'on':'')+'"></span>'}).join('')+'</div></div>'+
- '<div class="v6-actions"><button class="v6-btn primary" data-v6="book-hear">🔊 Listen</button><button class="v6-btn" data-v6="book-slow">🐢 Repeat</button></div>'+
- '<h3>👆 Point to: <span class="v6-english">'+v5Html(asked)+'</span></h3>'+
- '<div class="v6-items">'+t.objects.map(function(w,i){return '<button class="v6-object '+(pointed&&w[0]===asked?'selected':'')+'" data-v6="book-point" data-index="'+i+'" aria-label="'+v5Html(w[0])+'"><span class="emoji">'+w[1]+'</span><span>'+v5Html(w[0])+'</span></button>'}).join('')+'</div>'+
- (pointed?'<div class="v6-check">🌟 Yes! You found it!</div>':'')+
+ '<div class="v6-story-dots" aria-label="Story page progress">'+t.pages.map(function(_,i){return '<span class="'+(i===p?'on':'')+'"></span>'}).join('')+'</div>'+
+ '<div class="v6-shelf"><button class="'+(V6.bookMode==='listen'?'active':'')+'" data-v6="book-mode" data-mode="listen">🎧 Listen</button><button class="'+(V6.bookMode==='together'?'active':'')+'" data-v6="book-mode" data-mode="together">👨‍👩‍👧 Together</button>'+
+ (v5Level()>0?'<button class="'+(V6.bookMode==='independent'?'active':'')+'" data-v6="book-mode" data-mode="independent">📖 I Can Read</button>':'')+'</div>'+
+ v62Scene(t,'story',p)+
+ '<h3 class="v6-center">🔊 Tap the English words!</h3>'+v62BookWords(page[0])+
+ '<div class="v6-actions"><button class="v6-btn primary" data-v6="book-hear">🎧 Listen to the Page</button><button class="v6-btn" data-v6="book-slow">🐢 Listen Slowly</button>'+
+ '<button class="v6-btn soft" data-v6="book-parent-read">👨‍👩‍👧 Read with an Adult</button></div>'+
+ '<p class="v6-note">'+(V6.bookMode==='independent'?'Read first, then listen or ask your grown-up to read with you.':V6.bookMode==='together'?'A grown-up can read aloud. Tap the picture together.':'Listen, tap the words and find the picture. You do not need a translation.')+'</p>'+
+ '<div class="v62-book-progress"><span>'+(heard?'✅ Heard or read':'① Hear or read')+'</span><span>'+(pointed?'✅ Found the picture':'② Find the picture')+'</span></div>'+
+ (pointed?'<div class="v6-check">🌟 Great looking! You found '+v5Html(page[2])+'!</div>':'')+
  '<div class="v6-actions"><button class="v6-btn" data-v6="book-prev" '+(p===0?'disabled':'')+'>← Back</button>'+
- '<button class="v6-btn primary" data-v6="book-next">'+(p===3?'🏅 Finish Story':'Next Page →')+'</button></div>'+
- (done?'<div class="v6-check">📚 Story time done! Let us play!</div>':'')+
- '<p class="v6-note">Read together. Listen, point and repeat. You do not need to translate every word.</p></section>'+v6Footer();
+ '<button class="v6-btn primary" data-v6="book-next" '+(!heard||!pointed?'disabled':'')+'>'+(p===3?'🏅 Finish Story':'Next Page →')+'</button></div>'+
+ (done?'<div class="v6-check">📚 Wonderful! Story time is complete.</div>':'')+
+ '<p class="v6-note">Every page invites listening, a word tap and a picture-finding game. You can always replay a page.</p></section>'+v6Footer();
  return html;
 }
 function v6PlayPhrase(t,item){
@@ -2648,6 +2654,7 @@ function v6StoryListen(slow){
  var t=v6Topic(),p=V6.bookPage,line=t.pages[p]?.[0];if(!line)return;
  V6.bookVisited[p]=true;
  if(slow)v5SlowVoice(line);else v5Voice(line);
+ render();
 }
 function v6StoryPoint(index){
  var t=v6Topic(),item=t.objects[index],page=t.pages[V6.bookPage];if(!item||!page)return;
@@ -2657,11 +2664,13 @@ function v6StoryPoint(index){
  render();
 }
 function v6StoryNext(){
- var total=Object.keys(V6.bookVisited).filter(function(k){return V6.bookVisited[k]===true}).length;
- if(V6.bookPage<3){V6.bookPage++;render();return;}
- if(total<3||!V6.bookPointed){v5Voice('Listen and point, then try again.');toast('Listen to three pages, and find a picture.');return;}
- v6Mark('story');v5Voice('Wonderful! Story time is done!');
- v6Go('home');
+ var p=V6.bookPage;
+ if(!V6.bookVisited[p]||!V6.bookPoints[p]){v5Voice('Listen and find the picture. You can do it!');return;}
+ if(p<3){V6.bookPage++;render();return;}
+ if([0,1,2,3].some(function(i){return !V6.bookVisited[i]||!V6.bookPoints[i]})){
+  v5Voice('Let us finish every page together!');return;
+ }
+ v6Mark('story');v5Voice('Wonderful! You finished your storybook!');v6Go('home');
 }
 function v6GameChoose(index){
  var t=v6Topic(),item=t.objects[index];if(!item||V6.gameStage!=='choose')return;
@@ -2781,6 +2790,7 @@ function v6ParentSave(){
  var duration=Number(document.getElementById('v6-minutes')?.value);
  if([8,12,15].includes(duration))d.settings.minutes=duration;
  d.settings.aiReplies=!!document.getElementById('v61-ai-replies')?.checked;
+ d.settings.animations=!!document.getElementById('v62-animations')?.checked;
  d.settings.englishOnly=!!document.getElementById('v6-english-only')?.checked;
  v5ParentConsent=!!document.getElementById('v6-speaking-consent')?.checked;
  V6.parent=false;store();render();
@@ -2841,6 +2851,7 @@ document.addEventListener('click',function(event){
   if(!V6_THEMES.some(function(x){return x.id===button.dataset.theme}))return;
   v6StopAllAudio();v6Data().theme=button.dataset.theme;
   V6.contextKey='';V6.page='home';store();render();break;
+ case 'anim-tap':v62TouchAnimation(Number(button.dataset.index),button);break;
  case 'song-play':v6SingPlay(false);break;
  case 'song-slow':v6SingPlay(true);break;
  case 'song-stop':v6StopAllAudio();break;
@@ -2859,6 +2870,8 @@ document.addEventListener('click',function(event){
  case 'book-warm-ready':if(!V6.bookWarmHeard)return;V6.bookWarmed=true;render();break;
  case 'book-mode':if(!['listen','together','independent'].includes(button.dataset.mode))return;if(button.dataset.mode==='independent'&&v5Level()===0)return;V6.bookMode=button.dataset.mode;render();break;
  case 'book-hear':v6StoryListen(false);break;
+ case 'book-word':if(button.dataset.word)v5Voice(button.dataset.word);break;
+ case 'book-parent-read':V6.bookVisited[V6.bookPage]=true;render();break;
  case 'book-slow':v6StoryListen(true);break;
  case 'book-point':v6StoryPoint(Number(button.dataset.index));break;
  case 'book-prev':V6.bookPage=Math.max(0,V6.bookPage-1);render();break;
