@@ -2413,6 +2413,7 @@ function v6ParentUi(){
  '<p>课程主题：'+v5Html(v6Topic().name)+' · 已完成 '+v6DoneCount()+'/5 项 · 练习计时 '+Math.floor(v6Elapsed()/60)+' 分钟。</p>'+
  '<p>已完成：'+(V6_STEPS.filter(function(x){return day[x[0]]}).map(function(x){return x[1]+' '+x[2]}).join('、')||'尚未完成')+'</p>'+
  '<div class="v6-divider"></div><h3>🔤 自然拼读听力记录</h3>'+v63ParentReport()+
+ '<div class="v6-divider"></div><h3>🧠 V6.4 智能复习与能力观察</h3>'+v64ParentReport()+
  '<div class="v6-divider"></div><h3>课程说明</h3>'+
  '<p>第一步听唱进入英文环境；正式读句子和对话前有发音热身。拼读示范目前使用英语整词朗读，不把字母名称冒充音素。绘本是原创简短故事，适合亲子共读，不要求逐句中文翻译。</p>'+
  '<p>生活任务中的“我说过了”是孩子自主确认；真正独立开口，需要家长倾听并确认。没有经过专业儿童语音测评，不能给发音打分。</p>'+
@@ -2428,7 +2429,8 @@ function v6Home(){
  '<p class="v6-note">Your time: '+v5Html(d.settings.dailyAt)+' · '+d.settings.minutes+' minutes. Take a break whenever you need.</p>'+
  '<div class="v6-actions"><button class="v6-btn primary" data-v6="timer">'+(d.session.running?'⏸ Pause English Time':'▶ Start English Time')+'</button>'+
  '<button class="v6-btn" data-v6="timer-reset">↻ Reset Timer</button></div>'+
- '<button class="v6-btn good full" data-v6="go" data-page="'+next[0]+'">'+(done===5?'🌟 Play again':'▶ Next: '+next[2])+'</button></section>';
+ '<button class="v6-btn good full" data-v64="next">'+(done===5?'🌟 All done today':'▶ Next: '+next[2])+'</button></section>';
+ html+=v64Agenda();
  html+='<section class="v6-card"><h2>🧭 Explore Your English World</h2><div class="v6-grid">'+V6_STEPS.map(function(x){return '<button class="v6-activity '+(day[x[0]]?'done':'')+'" data-v6="go" data-page="'+x[0]+'"><span class="emoji">'+x[1]+'</span><b>'+x[2]+'</b><small>'+(day[x[0]]?'✓ Great work!':x[3])+'</small></button>'}).join('')+'</div></section>';
  html+='<section class="v6-card"><h2>🌍 Choose a World</h2><div class="v6-grid">'+V6_THEMES.map(function(t){return '<button class="v6-activity '+(d.theme===t.id?'done':'')+'" data-v6="theme" data-theme="'+t.id+'"><span class="emoji">'+t.icon+'</span><b>'+v5Html(t.name)+'</b><small>'+v5Html(t.desc)+'</small></button>'}).join('')+'</div></section>';
  html+='<section class="v6-card"><h2>🌟 My Little Wins</h2><div class="v6-headbar"><span>🎧 Listen · 🔤 Sounds · 📚 Stories · 🎤 Speak</span><span class="v6-badge">'+done+' / 5</span></div>'+
@@ -2694,7 +2696,7 @@ function v63Sync(){
  var key=localDate()+'|'+saveData.grade+'|'+saveData.term+'|'+v5Level();
  if(V63.ctx!==key){
   v63Stop();V63.ctx=key;V63.lesson=v63Data().lastLesson;V63.stage=0;
-  V63.heard=false;V63.solved=false;V63.errors=0;V63.tries=0;V63.first=[];V63.assisted=[];V63.build=[];V63.message='';
+  V63.heard=false;V63.solved=false;V63.errors=0;V63.tries=0;V63.first=[];V63.assisted=[];V63.stageErrors=[];V63.stageAttempts=[];V63.build=[];V63.message='';
  }
 }
 function v63Current(){return V63_LESSONS[V63.lesson]||V63_LESSONS[0];}
@@ -2718,7 +2720,7 @@ function v63ParentHeard(){if(![1,2,4].includes(V63.stage))return;V63.assisted[V6
 function v63Start(index){
  if(index<0||index>=V63_LESSONS.length)return;
  v63Stop();V63.lesson=index;V63.stage=1;V63.solved=false;V63.heard=false;V63.tries=0;V63.errors=0;
- V63.first=[];V63.assisted=[];V63.build=[];V63.stageTries=0;V63.message='';v63Data().lastLesson=index;store();render();
+ V63.first=[];V63.assisted=[];V63.stageErrors=[];V63.stageAttempts=[];V63.build=[];V63.stageTries=0;V63.message='';v63Data().lastLesson=index;store();render();
 }
 function v63StageLabels(){return ['👂 Hear','🔤 Letter','🧩 Build','🎯 Meaning'];}
 function v63Answer(index){
@@ -2728,7 +2730,8 @@ function v63Answer(index){
   stage===2?l.letters[index]===(l.grapheme||l.focus):
   l.meaning[index]?.[0]===l.word;
  V63.tries++;V63.stageTries++;
- if(!ok){V63.errors++;V63.message='Nice try! Listen again and look carefully.';render();return;}
+ V63.stageAttempts[stage]=(V63.stageAttempts[stage]||0)+1;
+ if(!ok){V63.stageErrors[stage]=(V63.stageErrors[stage]||0)+1;V63.errors++;V63.message='Nice try! Listen again and look carefully.';render();return;}
  V63.first[stage]=V63.stageTries===1&&!V63.assisted[stage];V63.solved=true;
  V63.message=stage===4?'Great listening! You found '+l.word+'!':'Great! Your ears are learning!';
  if(stage===4)v63Finish();else render();
@@ -2740,8 +2743,9 @@ function v63TapLetter(index){
  v63PlayPart(letter);
  if(V63.build.length===l.word.length){
   V63.stageTries++;V63.tries++;
+  V63.stageAttempts[3]=(V63.stageAttempts[3]||0)+1;
   if(V63.build.join('')===l.word){V63.first[3]=V63.stageTries===1;V63.solved=true;V63.message='You blended '+l.word+'!';v63Stop();v5Voice(l.word);}
-  else{V63.errors++;V63.message='Good try! Tap Clear and try another order.';}
+  else{V63.stageErrors[3]=(V63.stageErrors[3]||0)+1;V63.errors++;V63.message='Good try! Tap Clear and try another order.';}
  }
  render();
 }
@@ -2760,8 +2764,9 @@ function v63Finish(){
  if(V63.stage!==4||!V63.solved)return;
  var d=v63Data(),lesson=v63Current();
  d.records.push({day:localDate(),grade:saveData.grade,term:saveData.term,ability:v5Level(),lesson:lesson.id,
-  firstTry:[1,2,3,4].filter(function(st){return V63.first[st]}).length,assistedStages:[1,2,3,4].filter(function(st){return V63.assisted[st]}).length,totalStages:4,wrong:V63.errors,attempts:V63.tries});
- d.records=d.records.slice(-120);v6Mark('phonics');store();
+  firstTry:[1,2,3,4].filter(function(st){return V63.first[st]}).length,assistedStages:[1,2,3,4].filter(function(st){return V63.assisted[st]}).length,totalStages:4,wrong:V63.errors,attempts:V63.tries,
+  stageResults:[1,2,3,4].map(function(st){return {stage:st,firstTry:!!V63.first[st],assisted:!!V63.assisted[st],wrong:V63.stageErrors[st]||0,attempts:V63.stageAttempts[st]||0};})});
+ d.records=d.records.slice(-120);v64ApplyResult(d.records[d.records.length-1]);v6Mark('phonics');store();
  V63.stage=5;V63.heard=false;V63.solved=true;V63.message='';render();v5Voice('Amazing! You finished the Sound Lab!');
 }
 function v63Intro(){var d=v63Data(),l=v63Current(),last=d.records.slice(-10);
@@ -3294,6 +3299,12 @@ document.addEventListener('input',function(event){
 document.addEventListener('click',function(event){
  var b=event.target.closest?.('[data-v63]');if(!b||view!=='speaking'||V6.page!=='phonics')return;
  event.preventDefault();event.stopImmediatePropagation();v63Action(b);
+},true);
+document.addEventListener('click',function(event){
+ var b=event.target.closest('[data-v64]');if(!b||view!=='speaking')return;
+ event.preventDefault();event.stopImmediatePropagation();
+ if(b.dataset.v64==='next')v64Launch();
+ else if(b.dataset.v64==='review'){var p=v64Plan();v6Go('phonics');v63Start(p.index);}
 },true);
 document.addEventListener('dragstart',function(event){
  var el=event.target.closest?.('[data-v6-drag-index]');
