@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f9ff">
-<meta name="description" content="星星闯关乐园V5.0：小学一至六年级知识主题练习、语音讲解、随机出题、英文冒险、错题复习与打印。">
+<meta name="description" content="星星闯关乐园V5.3：一至六年级三科学习、考试与打印，英语增加自然拼读、节奏童谣、词汇游戏、分级阅读与引导式口语。">
 <title>星星闯关乐园 V5.1 · 考试随时退出与恢复版</title>
 <style id="tailwind-compiled">/*! Tailwind CSS utility subset embedded for complete offline single-file use; custom children-friendly styles follow */.flex{display:flex}.grid{display:grid}.items-center{align-items:center}.justify-between{justify-content:space-between}.w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}.gap-2{gap:8px}.gap-3{gap:12px}.rounded-2xl{border-radius:24px}
 
@@ -1578,7 +1578,7 @@ function v5Init(){
  const nav=document.querySelector('.modebar');if(nav&&!nav.classList.contains('v5-modebar')){
   nav.classList.add('v5-modebar');
   const exam=nav.querySelector('[data-view="exam"]');
-  exam?.insertAdjacentHTML('beforebegin','<button type="button" class="mode" data-view="speaking">🗣️ 英语口语</button><button type="button" class="mode" data-view="thinking">🧠 思维训练</button>');
+  exam?.insertAdjacentHTML('beforebegin','<button type="button" class="mode" data-view="speaking">🇺🇸 英语冒险</button><button type="button" class="mode" data-view="thinking">🧠 思维训练</button>');
  }
  document.querySelector('.brand span')?.replaceChildren(document.createTextNode('V5.3'));
  document.title='星星闯关乐园 V5.3 · 英语成长版';
@@ -1586,7 +1586,7 @@ function v5Init(){
 function v5Voice(text){if(!text)return;try{speakSequence([{text:String(text).slice(0,200),lang:'en-US'}]);}catch{toast('此设备暂无法播放英文语音，可直接阅读提示。');}}
 function v5SlowVoice(text){if(!text)return;try{if(!('speechSynthesis'in window)||typeof SpeechSynthesisUtterance==='undefined')throw Error('speech');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text).slice(0,200));u.lang='en-US';u.rate=.7;const v=pickVoice('en-US');if(v)u.voice=v;speechSynthesis.speak(u);}catch{toast('当前设备无法慢速播放，可用普通播放键。');}}
 function v5Text(text){if(!text)return;try{sayZh(String(text).slice(0,150));}catch{}}
-function v5Header(title,sub){return `<section class="v5-hero"><div class="v5-tag">🌈 V5.1 · ${sub}</div><h1>${v5Html(title)}</h1><p>${sub==='Speaking Club'?'像玩游戏一样听、说、交流。每次只做三轮，不需要先会读英语。':'先想，再解释。家长可以听孩子说思路，不必强迫写很多字。'}</p></section>`;}
+function v5Header(title,sub){return `<section class="v5-hero"><div class="v5-tag">🌈 V5.3 · ${sub}</div><h1>${v5Html(title)}</h1><p>${sub==='Speaking Club'?'像玩游戏一样听、说、交流。每次只做三轮，不需要先会读英语。':'先想，再解释。家长可以听孩子说思路，不必强迫写很多字。'}</p></section>`;}
 function v5SpeechScene(){return V5_SCENES[v5Speak.scene]||null;}
 function v5TeacherPrompt(scene,step){const it=scene.prompts[step];if(!it)return'';return it.q;}
 function v5SpeakUi(){
