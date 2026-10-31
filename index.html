@@ -1791,7 +1791,7 @@ var V53_PH_L2=[
  {example:'chat / chin',target:'chip',art:'🍟',choices:[['chip','🍟'],['ship','🚢'],['shop','🏬']],rule:'比较 ch 和 sh 的开头声音，听到再选，不靠中文译名。'},
  {example:'rain / train',target:'mail',art:'✉️',choices:[['mail','✉️'],['mill','🏭'],['moon','🌙']],rule:'观察 rain、train 的常见 ai 元音组合，再看 mail。'}
 ];
-var V53={page:'dashboard',theme:(new Date().getDate()-1)%V53_TOPICS.length,phonics:0,phonicsCorrect:false,phonicsPicked:'',game:0,gamePicked:'',gameWrong:false,gameOrder:null,gameOrderKey:'',readPicked:'',readCorrect:false,songPlays:0,songMoved:false,preview:'',showHint:false};
+var V53={page:'dashboard',theme:(new Date().getDate()-1)%V53_TOPICS.length,phonics:0,phonicsCorrect:false,phonicsPicked:'',game:0,gamePicked:'',gameWrong:false,gameOrder:null,gameOrderKey:'',contextKey:'',readPicked:'',readCorrect:false,songPlays:0,songMoved:false,preview:'',showHint:false};
 function v53Data(){
  var d=saveData.v53English;
  if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v53English={daily:{},words:{},records:[]};
@@ -1952,6 +1952,12 @@ function v53Dialogue(){
  return h+v53BackBar();
 }
 function v53Screen(){
+ var key=v53DayKey();
+ if(V53.contextKey!==key){
+  V53.contextKey=key;V53.phonics=0;V53.phonicsPicked='';V53.phonicsCorrect=false;
+  V53.game=0;V53.gamePicked='';V53.gameWrong=false;V53.gameOrder=null;V53.gameOrderKey='';
+  V53.readPicked='';V53.readCorrect=false;V53.songPlays=0;V53.preview='';
+ }
  if(v5SpeechScene()||V53.page==='dialogue')return v53Dialogue();
  if(V53.page==='phonics')return v53Phonics();
  if(V53.page==='song')return v53Song();
