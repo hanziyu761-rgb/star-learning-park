@@ -400,6 +400,22 @@ body.v6-immersive #app{padding-top:8px}
 @media(max-width:380px){.v65-levels{gap:4px}.v65-picture-choices{gap:5px}.v65-picture-choice{min-height:96px}.v65-quiz-choice{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.v65-picture .art{animation:none!important}}
 
+/* V6.6: child-sized speaking choice chips and offline family missions */
+.v66-mission{background:linear-gradient(135deg,#ecf8ff,#fff7e8);border:2px solid #d9e9f2;border-radius:20px;padding:15px;margin:14px 0}
+.v66-mission-hero{font-size:clamp(64px,17vw,104px);text-align:center;line-height:1.6}
+.v66-mission-words{font-size:clamp(20px,5.3vw,28px);color:#345c8f;font-weight:900;text-align:center;line-height:1.5}
+.v66-parent-check{background:white;border:2px solid #e4e1f3;border-radius:15px;padding:13px;margin:13px 0}
+.v66-parent-check label{display:flex;align-items:flex-start;gap:10px;margin:10px 0;line-height:1.5;font-size:14px}
+.v66-parent-check input[type=checkbox]{width:21px;height:21px;flex-shrink:0;accent-color:#7d67da}
+.v66-choicebar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:13px 0}
+.v66-choicebar button{background:#f4f2ff;border:2px solid #ddd7fb;border-radius:15px;min-height:66px;padding:9px 5px;color:#47558a;font-size:15px;font-weight:850;overflow-wrap:anywhere;cursor:pointer}
+.v66-choicebar button:focus-visible,.v66-parent-check button:focus-visible{outline:3px solid #5066c9;outline-offset:2px}
+.v66-parent-feedback{padding:10px;background:#f6f5ff;border-radius:12px;margin:9px 0;font-size:14px;color:#58678a;line-height:1.6}
+.v66-report-row{border-bottom:1px solid #e1e6f2;padding:7px 3px;font-size:13px;line-height:1.6}
+.v66-mini{font-size:12px;color:#6c7e99;line-height:1.5}
+@media(max-width:400px){.v66-choicebar{gap:5px}.v66-choicebar button{font-size:13px;padding:6px 3px;min-height:60px}}
+
+
 
 /* V6.4: calm learning agenda and honest parent mastery signals */
 .v64-agenda{border-color:#dcd3fc;background:linear-gradient(155deg,#fff,#f4f2ff)}
@@ -2422,7 +2438,7 @@ function v6SessionSync(){
 }
 function v6Go(page){
  if(examIsActive()){toast('请先保存并退出考试。');return;}
- if(!['home','song','phonics','story','play','talk'].includes(page))return;
+ if(!['home','song','phonics','story','play','talk','mission'].includes(page))return;
  v6StopAllAudio();
  if(V6.page==='talk'&&page!=='talk'&&v5SpeechScene())v5ResetSpeak();
  V6.page=page;V6.lessonHint=false;render();window.scrollTo(0,0);
@@ -2460,6 +2476,7 @@ function v6ParentUi(){
  '<p>已完成：'+(V6_STEPS.filter(function(x){return day[x[0]]}).map(function(x){return x[1]+' '+x[2]}).join('、')||'尚未完成')+'</p>'+
  '<div class="v6-divider"></div><h3>🔤 自然拼读听力记录</h3>'+v63ParentReport()+
  '<div class="v6-divider"></div><h3>📚 V6.5 分级阅读与故事理解</h3>'+v65ParentReport()+
+ '<div class="v6-divider"></div><h3>🏠 V6.6 家庭英语与口语观察</h3>'+v66ParentReport()+
  '<div class="v6-divider"></div><h3>🧠 V6.4 智能复习与能力观察</h3>'+v64ParentReport()+
  '<div class="v6-divider"></div><h3>课程说明</h3>'+
  '<p>第一步听唱进入英文环境；自然拼读使用离线合成音素示范与整词朗读，非专业真人录音，请家长留意音质，勿把字母名称当作音素。绘本为原创简短故事，可亲子共读，不要求逐句中文翻译。</p>'+
@@ -2478,6 +2495,7 @@ function v6Home(){
  '<button class="v6-btn" data-v6="timer-reset">↻ Reset Timer</button></div>'+
  '<button class="v6-btn good full" data-v64="next">'+(done===5?'🌟 All done today':'▶ Next: '+next[2])+'</button></section>';
  html+=v64Agenda();
+ html+='<section class="v6-card"><h2>🏠 My English Mission</h2><p class="v6-note">Use one English sentence with your grown-up today, away from the screen.</p><button type="button" class="v6-btn good full" data-v6="go" data-page="mission">🏠 Try Today’s Home Mission</button></section>';
  html+='<section class="v6-card"><h2>📚 Today’s Reading Adventure</h2><p class="v6-note">Listen, read, find pictures and answer story questions! Your Sound Bridge reviews today’s phonics word.</p><button type="button" class="v6-btn good full" data-v6="go" data-page="story">📖 Open My Graded Storybook</button></section>';
  html+='<section class="v6-card"><h2>🧭 Explore Your English World</h2><div class="v6-grid">'+V6_STEPS.map(function(x){return '<button class="v6-activity '+(day[x[0]]?'done':'')+'" data-v6="go" data-page="'+x[0]+'"><span class="emoji">'+x[1]+'</span><b>'+x[2]+'</b><small>'+(day[x[0]]?'✓ Great work!':x[3])+'</small></button>'}).join('')+'</div></section>';
  html+='<section class="v6-card"><h2>🌍 Choose a World</h2><div class="v6-grid">'+V6_THEMES.map(function(t){return '<button class="v6-activity '+(d.theme===t.id?'done':'')+'" data-v6="theme" data-theme="'+t.id+'"><span class="emoji">'+t.icon+'</span><b>'+v5Html(t.name)+'</b><small>'+v5Html(t.desc)+'</small></button>'}).join('')+'</div></section>';
@@ -3231,6 +3249,118 @@ function v65Action(button){
  if(op==='hunt-answer'){v65AnswerHunt(i);return;}
 }
 
+
+/* V6.6 - offline family-life missions. Adult confirmation, no voice recording or private child text. */
+const V66_MISSIONS={
+ cafe:[
+  {id:'water',art:'🥛💧',line:'Water, please!',prompt:'Ask your grown-up for a glass of water.',adult:'吃饭时请孩子用英语要一杯水，家长实际回应。'},
+  {id:'apple',art:'🍎🤲',line:'An apple, please!',prompt:'Ask for an apple at snack time.',adult:'加餐时用英语要苹果；没有苹果可使用图片或玩具代替。'},
+  {id:'thanks',art:'🙏🌟',line:'Thank you!',prompt:'Say thank you when someone helps you.',adult:'家长帮忙拿东西后，让孩子在真实情境说 Thank you。'}
+ ],
+ hello:[
+  {id:'greet',art:'👋🧒',line:'Hello! How are you?',prompt:'Greet someone in your home.',adult:'和家人面对面问好，并让家长用英文简单回答。'},
+  {id:'happy',art:'😄💛',line:'I am happy!',prompt:'Tell your grown-up how you feel.',adult:'孩子向家长表达今天心情，可说 Happy 或 I am happy。'},
+  {id:'bye',art:'🚪👋',line:'Bye-bye! See you!',prompt:'Say goodbye before leaving a room.',adult:'离开房间时自然说再见，不必为练习刻意离家。'}
+ ],
+ toys:[
+  {id:'ask',art:'🧸🤲',line:'Can I have the toy, please?',prompt:'Ask to borrow a toy.',adult:'借玩具时用英文表达请求，家长模拟借给孩子。'},
+  {id:'share',art:'⚽🧒',line:'Here you go!',prompt:'Share a toy with someone.',adult:'孩子递玩具时说 Here you go，家长说 Thank you。'},
+  {id:'choose',art:'🚗🧸',line:'I like this toy!',prompt:'Show a toy that you like.',adult:'孩子指向一个喜欢的玩具并用英文描述喜欢它。'}
+ ],
+ farm:[
+  {id:'dog',art:'🐶🏠',line:'I see a dog!',prompt:'Find a picture of an animal and tell someone.',adult:'使用书本或玩具中的动物图片，不需要去户外寻找真动物。'},
+  {id:'duck',art:'🦆💦',line:'A duck can swim!',prompt:'Show the picture of a duck and say what it can do.',adult:'找鸭子的图片或玩具，说出 A duck can swim。'},
+  {id:'cat',art:'🐱✨',line:'A cat can jump!',prompt:'Pretend to be a cat. Jump and speak!',adult:'亲子模仿小猫跳的动作，并练习 A cat can jump。'}
+ ]
+};
+const V66={missionTried:false,missionHeard:false,missionKey:'',chosenReply:'',talkIntent:[],talkUsedHint:[],talkModelPlayed:[],talkParentConfirmed:false};
+function v66Data(){
+ var d=saveData.v66LifeEnglish;
+ if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v66LifeEnglish={};
+ if(!Array.isArray(d.records))d.records=[];
+ if(!Array.isArray(d.speaking))d.speaking=[];
+ return d;
+}
+function v66Mission(){
+ var group=V66_MISSIONS[v6Topic().id]||V66_MISSIONS.cafe;
+ // Use a local calendar day, not network time, for an automatically rotating offline task.
+ var part=(localDate()||'').split('-');
+ var day=Number(part[2])||1;
+ return group[(day-1)%group.length];
+}
+function v66MissionKey(){
+ return [localDate(),saveData.grade,saveData.term,v5Level(),v6Topic().id,v66Mission().id].join('|');
+}
+function v66MissionRecord(){
+ var key=v66MissionKey();
+ return v66Data().records.find(function(r){return r.key===key;})||null;
+}
+function v66MissionSync(){
+ var key=v66MissionKey();
+ if(V66.missionKey!==key){
+  V66.missionKey=key;V66.missionHeard=false;V66.missionTried=false;
+ }
+}
+function v66MissionUi(){
+ v66MissionSync();
+ var item=v66Mission(),saved=v66MissionRecord();
+ var h=v6Header('🏠 My Real-Life English Mission','Try English with a real person at home!');
+ h+='<section class="v6-card"><h2>🌈 Today’s Tiny Mission</h2>'+
+ '<div class="v66-mission"><div class="v66-mission-hero" aria-hidden="true">'+item.art+'</div>'+
+ '<div class="v66-mission-words" lang="en">'+v5Html(item.line)+'</div>'+
+ '<p class="v6-note">'+v5Html(item.prompt)+'</p></div>'+
+ '<div class="v6-actions"><button type="button" class="v6-btn primary" data-v66="mission-listen">🔊 Listen to the Words</button>'+
+ '<button type="button" class="v6-btn" data-v66="mission-slow">🐢 Slowly</button></div>'+
+ '<p class="v66-mini">Listen, try it with your grown-up, then come back and tell us how it went. You can try without the microphone.</p>';
+ if(saved){
+  h+='<div class="v6-check">🌟 You completed today’s real-life mission with a grown-up!</div>'+
+   '<p class="v66-mini">A grown-up confirmed the attempt'+(saved.independent?' and reported an independent attempt':'')+'. You can enjoy this phrase again tomorrow.</p>';
+ }else{
+  h+='<button class="v6-btn good full" data-v66="mission-tried" '+(!V66.missionHeard?'disabled':'')+'>🙋 I tried with a grown-up!</button>'+
+   (V66.missionTried?'<div class="v66-parent-check" lang="zh-CN"><strong>👨‍👩‍👧 请家长确认（仅自报）</strong>'+
+    '<p>请确认孩子确实尝试在生活中说了这句话，不用判断口音，也不要因为说错而批评。</p>'+
+    '<label><input id="v66-parent-heard" type="checkbox"/> 我亲耳听到孩子尝试用英语表达</label>'+
+    '<label><input id="v66-parent-independent" type="checkbox"/> 孩子至少有一次不跟读，尝试自己表达</label>'+
+    '<label><input id="v66-parent-understood" type="checkbox"/> 孩子大致理解了这句话的用途</label>'+
+    '<button type="button" class="v6-btn primary full" data-v66="mission-save">✅ 保存家庭英语任务</button></div>':'');
+ }
+ h+='<details class="v6-note" lang="zh-CN"><summary>家长任务提示</summary><p>'+v5Html(item.adult)+'</p>'+
+ '<p>建议约 1—2 分钟，不需要额外买玩具或外出。确实进行了真实交流后再确认。</p></details></section>'+v6Footer();
+ return h;
+}
+function v66MissionSave(){
+ v66MissionSync();
+ if(v66MissionRecord()||!V66.missionTried)return;
+ var heard=!!document.getElementById('v66-parent-heard')?.checked;
+ if(!heard){toast('请家长先确认已经亲耳听到孩子尝试说英语。');return;}
+ var independent=!!document.getElementById('v66-parent-independent')?.checked;
+ var understood=!!document.getElementById('v66-parent-understood')?.checked;
+ var d=v66Data(),item=v66Mission();
+ d.records.push({key:v66MissionKey(),day:localDate(),grade:saveData.grade,term:saveData.term,
+  ability:v5Level(),theme:v6Topic().id,task:item.id,adultConfirmed:true,independent:independent,understood:understood});
+ d.records=d.records.slice(-150);
+ v6Mark('mission');store();V66.missionTried=false;render();
+ v5Voice('Wonderful! You used English at home!');
+}
+function v66ParentReport(){
+ var d=v66Data(),grade=saveData.grade,term=saveData.term,ability=v5Level();
+ var missions=d.records.filter(function(r){return r.grade===grade&&r.term===term&&r.ability===ability});
+ var speaking=d.speaking.filter(function(r){return r.grade===grade&&r.term===term&&r.ability===ability});
+ var recent=missions.slice(-8),independent=recent.filter(function(r){return r.independent}).length,
+  understood=recent.filter(function(r){return r.understood}).length;
+ return '<p>家庭英语任务：已由家长确认 '+missions.length+' 次；最近 '+recent.length+' 次中，家长反馈独立开口 '+independent+
+ ' 次、理解情境 '+understood+' 次。这些都是家长观察记录，并非语音测评。</p>'+
+ '<div class="v66-parent-feedback">'+
+ (recent.length?recent.slice(-4).reverse().map(function(r){
+  var task=(V66_MISSIONS[r.theme]||[]).find(function(x){return x.id===r.task;});
+  return '<div class="v66-report-row">🏠 '+v5Html(r.day)+' · '+v5Html(task?task.line:r.task)+
+  ' · '+(r.independent?'自己尝试开口':'需要跟读/帮助')+'</div>';
+ }).join(''):'还没有家庭任务记录，建议从今天的一句英语开始。')+'</div>'+
+ '<p>口语伙伴：最近保留 '+speaking.length+' 次会话摘要，其中家长确认 '+speaking.filter(function(r){return r.parentConfirmed}).length+
+ ' 次。仅记录练习次数、帮助情况与确认结果，不保存孩子的原始语音或本次口语文字。</p>'+
+ '<p class="v6-note">仅保存在当前浏览器；清理浏览器数据可能丢失。可使用原有学习记录备份功能。</p>';
+}
+
 /* V6.0 English World activities */
 function v6SongUi(){
  var t=v6Topic();
@@ -3381,6 +3511,7 @@ function v6Ui(){
  else if(page==='story')h+=v6StoryUi();
  else if(page==='play')h+=v6PlayUi();
  else if(page==='talk')h+=v6TalkUi();
+ else if(page==='mission')h+=v66MissionUi();
  else h+=v6Home();
  return h+v6ParentUi()+'</div>';
 }
@@ -3698,6 +3829,15 @@ document.addEventListener('click',function(event){
  event.preventDefault();event.stopImmediatePropagation();
  if(examIsActive())return;
  v65Action(button);
+},true);
+document.addEventListener('click',function(event){
+ var button=event.target.closest('[data-v66]');if(!button||view!=='speaking'||V6.page!=='mission')return;
+ event.preventDefault();event.stopImmediatePropagation();if(examIsActive())return;
+ var op=button.dataset.v66,item=v66Mission();v66MissionSync();
+ if(op==='mission-listen'){V66.missionHeard=true;v5Voice(item.line);render();}
+ else if(op==='mission-slow'){V66.missionHeard=true;v5SlowVoice(item.line);render();}
+ else if(op==='mission-tried'&&V66.missionHeard){V66.missionTried=true;render();}
+ else if(op==='mission-save')v66MissionSave();
 },true);
 document.addEventListener('dragstart',function(event){
  var el=event.target.closest?.('[data-v6-drag-index]');
