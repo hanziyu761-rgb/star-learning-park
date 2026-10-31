@@ -2902,7 +2902,7 @@ function v63ParentReport(){
 /* V6.5: Original 4-theme x 4-level story collection. A level is a content tier, not an assessed CEFR score. */
 const V65_ICONS={
  milk:'🥛',apple:'🍎',bread:'🍞',friend:'🧒',hello:'👋',happy:'😄',ball:'⚽',car:'🚗',bear:'🧸',dog:'🐶',
- duck:'🦆',cat:'🐱',cap:'🧢',map:'🗺️',mat:'🧘',tap:'🚰',sun:'☀️',school:'🏫',home:'🏠',book:'📖',
+ duck:'🦆',cat:'🐱',sat:'🧒🪑',cap:'🧢',map:'🗺️',mat:'🧘',tap:'🚰',sun:'☀️',school:'🏫',home:'🏠',book:'📖',
  water:'💧',juice:'🧃',menu:'📋',cup:'🥤',toy:'🪀',box:'📦',tree:'🌳',pond:'🏞️',hat:'🎩',
  bag:'🎒',teacher:'👩‍🏫',red:'🔴',green:'🟢',rain:'🌧️',umbrella:'☂️',smile:'😊',gate:'🚪',
  thank:'🙏',table:'🪑',food:'🍱',farm:'🚜',picnic:'🧺'
@@ -2949,6 +2949,285 @@ const V65_STORIES={
    quiz:[['Why does the dog bark by the path?',['To help the lost duck be found','To ask for bread','To call a teacher'],0],['What happens after the dog barks?',['The ducks come back','The pond dries up','The animals go to school'],0]]}
  ]
 };
+
+
+const V65={key:'',level:0,phase:'intro',page:0,mode:'listen',listened:{},readTried:{},adult:{},
+  found:{},pageWrong:{},pageFirst:{},quizIndex:0,quizHeard:{},quizAdult:{},quizWrong:{},quizFirst:{},
+  huntHeard:false,huntAdult:false,huntWrong:0,huntFirst:false,finished:false,message:''};
+function v65Profile(){return [saveData.grade,saveData.term,v5Level()].join('|');}
+function v65Data(){
+ var d=saveData.v65Reading;
+ if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v65Reading={};
+ if(!Array.isArray(d.records))d.records=[];
+ if(!d.levels||typeof d.levels!=='object'||Array.isArray(d.levels))d.levels={};
+ return d;
+}
+function v65Reset(){
+ V65.phase='intro';V65.page=0;V65.mode='listen';V65.listened={};V65.readTried={};V65.adult={};
+ V65.found={};V65.pageWrong={};V65.pageFirst={};V65.quizIndex=0;V65.quizHeard={};V65.quizAdult={};
+ V65.quizWrong={};V65.quizFirst={};V65.huntHeard=false;V65.huntAdult=false;V65.huntWrong=0;
+ V65.huntFirst=false;V65.finished=false;V65.message='';
+}
+function v65Sync(){
+ var key=v6Key();
+ if(V65.key!==key){
+  V65.key=key;v65Reset();
+  var chosen=v65Data().levels[v65Profile()];
+  V65.level=Number.isInteger(chosen)&&chosen>=0&&chosen<=3?chosen:Math.max(0,Math.min(3,v5Level()));
+ }
+}
+function v65Story(){return (V65_STORIES[v6Topic().id]||V65_STORIES.cafe)[V65.level];}
+function v65LevelName(i){return ['L0 · Listen & Point','L1 · First Sentences','L2 · Short Stories','L3 · Think & Explain'][i];}
+function v65Page(i){return v65Story().pages[i];}
+function v65PageReady(i){return !!(V65.listened[i]||V65.adult[i]||V65.readTried[i]);}
+function v65Choices(target,offset,pool){
+ var all=(pool||Object.keys(V65_ICONS)).filter(function(w){return w!==target&&V65_ICONS[w];});
+ var result=[target],start=(offset*3+5)%all.length;
+ for(var n=0;n<all.length&&result.length<3;n++){
+  var w=all[(start+n*7)%all.length];
+  if(!result.includes(w))result.push(w);
+ }
+ var shift=offset%3;
+ return result.slice(shift).concat(result.slice(0,shift));
+}
+function v65PageChoices(){
+ var p=v65Page(V65.page),group={
+  cafe:['milk','apple','bread','cat','cap','map','menu','cup','smile'],
+  hello:['friend','hello','happy','school','cap','bag','gate','smile','ball'],
+  toys:['ball','car','bear','cat','box','mat','friend','tree','school'],
+  farm:['dog','duck','cat','mat','tree','pond','rain','home','sun']
+ }[v6Topic().id];
+ return v65Choices(p[2],V65.page+V65.level,group);
+}
+function v65QuizOptions(q){
+ var shift=(V65.quizIndex+V65.level+V65_STORIES[v6Topic().id].indexOf(v65Story()))%3;
+ return q[1].map(function(label,index){return {label:label,index:index}}).slice(shift)
+  .concat(q[1].map(function(label,index){return {label:label,index:index}}).slice(0,shift));
+}
+function v65HuntLesson(){return V63_LESSONS[v64Plan().index]||V63_LESSONS[0];}
+function v65HuntChoices(){
+ var unit=v65HuntLesson(),pool=V63_LESSONS.map(function(l){return l.word;});
+ return v65Choices(unit.word,V65.level+V65.page+V65.quizIndex+1,pool);
+}
+function v65Steps(){
+ var ix=V65.phase==='intro'?0:V65.phase==='page'?1:V65.phase==='quiz'?2:V65.phase==='hunt'?3:4;
+ return '<div class="v65-stage">'+['📚 Pick','🎧 Story','❓ Think','🔤 Sounds','🏆 Done'].map(function(t,i){
+  return '<span class="'+(ix===i?'active':'')+'">'+t+'</span>';
+ }).join('')+'</div>';
+}
+function v65IntroUi(){
+ var topic=v6Topic(),rec=v65Data().records.filter(function(r){return r.grade===saveData.grade&&r.term===saveData.term&&r.ability===v5Level()&&r.topic===topic.id});
+ return '<section class="v6-card"><h2>🌈 '+v5Html(topic.name)+' Story Library</h2>'+
+ '<p class="v6-note">Choose an English story level. Start with listening; reading aloud is never graded by a microphone.</p>'+
+ '<div class="v65-levels">'+[0,1,2,3].map(function(n){
+  return '<button type="button" class="v65-level '+(V65.level===n?'active':'')+'" data-v65="level" data-level="'+n+'" aria-pressed="'+(V65.level===n?'true':'false')+'">L'+n+'<small style="display:block;font-size:10px">'+['Listen','Sentences','Stories','Reason'][n]+'</small></button>';
+ }).join('')+'</div>'+
+ '<div class="v65-picture"><div class="art" aria-hidden="true">'+topic.art+'</div></div>'+
+ '<div class="v65-line">'+v5Html(v65LevelName(V65.level))+'</div>'+
+ '<p class="v65-step-note">Four illustrated pages, two understanding questions and one Sound Bridge linked to your phonics review.</p>'+
+ '<button type="button" class="v6-btn primary full" data-v65="start">▶ Open My Storybook</button>'+
+ '<p class="v6-note">'+rec.length+' story reading sessions recorded for this theme. Levels describe content difficulty, not a certified English ability score.</p></section>';
+}
+function v65PageUi(){
+ var i=V65.page,p=v65Page(i),ready=v65PageReady(i),found=V65.found[i],showText=V65.mode!=='listen'||ready;
+ var html='<section class="v6-card"><div class="v6-headbar"><h2>📖 '+v5Html(v6Topic().name)+'</h2>'+
+ '<span class="v6-badge">'+v5Html(v65LevelName(V65.level))+' · '+(i+1)+'/4</span></div>'+
+ '<div class="v6-shelf">'+[['listen','🎧 Listen'],['together','👨‍👩‍👧 Together']].concat(V65.level>0?[['read','📖 I Can Try']]:[]).map(function(x){
+  return '<button type="button" class="'+(V65.mode===x[0]?'active':'')+'" data-v65="mode" data-mode="'+x[0]+'">'+x[1]+'</button>';
+ }).join('')+'</div>'+
+ '<div class="v65-picture" role="img" aria-label="Story picture"><div class="art" aria-hidden="true">'+p[1]+'</div></div>'+
+ '<div class="v65-line" lang="en">'+(showText?v5Html(p[0]):'🎧 Listen to discover the story!')+'</div>'+
+ (showText?v62BookWords(p[0]):'')+
+ '<div class="v6-actions"><button class="v6-btn primary" data-v65="hear-page">🔊 Listen to Page</button>'+
+ '<button class="v6-btn" data-v65="hear-slow">🐢 Slowly</button>'+
+ '<button class="v6-btn soft" data-v65="adult-page">👨‍👩‍👧 Grown-up Read</button></div>'+
+ (V65.level>0?'<button class="v6-btn soft full" data-v65="tried-read">🗣️ I tried reading out loud</button>':'')+
+ '<h3>👆 Find: <span lang="en">'+v5Html(p[2])+'</span></h3>'+
+ '<div class="v65-picture-choices">'+v65PageChoices().map(function(word,idx){
+  return '<button type="button" class="v65-picture-choice '+(found===word?'selected':'')+'" data-v65="find" data-index="'+idx+'" '+(!ready||!!found?'disabled':'')+' aria-label="'+v5Html(word)+'"><span aria-hidden="true">'+V65_ICONS[word]+'</span>'+
+  (V65.level>0?'<small>'+v5Html(word)+'</small>':'')+'</button>';
+ }).join('')+'</div>'+
+ '<p class="v65-step-note">'+(ready?'✓ Listening/reading attempted':'① Listen or read with a grown-up')+' · '+(found?'✓ Picture found':'② Find the picture')+
+ (V65.readTried[i]?' · 🗣️ Reading attempt noted (not scored)':'')+'</p>'+
+ (V65.message?'<div class="'+(found?'v6-check':'v63-notice')+'" role="status">'+v5Html(V65.message)+'</div>':'')+
+ '<div class="v6-actions"><button class="v6-btn" data-v65="prev" '+(i===0?'disabled':'')+'>← Back</button>'+
+ '<button class="v6-btn primary" data-v65="next" '+(!ready||!found?'disabled':'')+'>'+(i===3?'❓ Story Questions':'Next Page →')+'</button></div></section>';
+ return html;
+}
+function v65QuizUi(){
+ var ix=V65.quizIndex,q=v65Story().quiz[ix],heard=V65.quizHeard[ix]||V65.quizAdult[ix],correct=V65.quizFirst[ix]!==undefined;
+ return '<section class="v6-card"><h2>🤔 What Happened?</h2>'+
+ '<p class="v6-note">Question '+(ix+1)+' / 2. Listen, think, and choose. You can try again.</p>'+
+ '<div class="v65-picture"><div class="art" aria-hidden="true">🧒📖💭</div></div>'+
+ '<div class="v65-line">'+(V65.mode==='listen'&&!heard?'🎧 Listen to the question!':v5Html(q[0]))+'</div>'+
+ '<div class="v6-actions"><button class="v6-btn primary" data-v65="hear-question">🔊 Hear Question</button>'+
+ '<button class="v6-btn soft" data-v65="adult-question">👨‍👩‍👧 Grown-up Read</button>'+
+ (V65.level>0?'<button class="v6-btn" data-v65="read-question">📖 I Read It</button>':'')+'</div>'+
+ v65QuizOptions(q).map(function(o){
+  return '<button type="button" class="v65-quiz-choice '+(correct&&o.index===q[2]?'selected':'')+'" data-v65="quiz-answer" data-index="'+o.index+'" '+(!heard||correct?'disabled':'')+'>'+v5Html(o.label)+'</button>';
+ }).join('')+
+ (V65.message?'<div class="'+(correct?'v6-check':'v63-notice')+'" role="status">'+v5Html(V65.message)+'</div>':'')+
+ (correct?'<button class="v6-btn good full" data-v65="quiz-next">'+(ix===1?'🔤 Sound Bridge →':'Next Question →')+'</button>':'')+
+ '<p class="v65-step-note">We count independent first answers only when no grown-up has supplied the question. This is story comprehension practice, not an English proficiency score.</p></section>';
+}
+function v65HuntUi(){
+ var unit=v65HuntLesson(),chosen=V65.huntFirst;
+ return '<section class="v6-card"><h2>🔤 Sound Bridge</h2><div class="v65-soundbridge">'+
+ '<h3>From Sound Lab to My Story!</h3><p>Listen to a word from today’s phonics plan. Find its picture!</p>'+
+ '<button type="button" class="v6-btn primary full" data-v65="hear-hunt">🔊 Hear the Word</button>'+
+ '<button type="button" class="v6-btn soft full" data-v65="adult-hunt">👨‍👩‍👧 Grown-up Says the Word</button></div>'+
+ '<div class="v65-picture-choices">'+v65HuntChoices().map(function(w,idx){
+  return '<button type="button" class="v65-picture-choice" data-v65="hunt-answer" data-index="'+idx+'" '+(!V65.huntHeard&&!V65.huntAdult?'disabled':'')+' aria-label="Picture '+v5Html(w)+'"><span aria-hidden="true">'+(V65_ICONS[w]||'🎈')+'</span>'+
+  (V65.level>0?'<small>'+v5Html(w)+'</small>':'')+'</button>';
+ }).join('')+'</div>'+
+ (V65.message?'<div class="v63-notice" role="status">'+v5Html(V65.message)+'</div>':'')+
+ '<p class="v65-step-note">This is a separate review of '+v5Html(unit.word)+'; it may not appear in today’s story text.</p></section>';
+}
+function v65DoneUi(){
+ var rows=v65Data().records.filter(function(r){return r.grade===saveData.grade&&r.term===saveData.term&&r.ability===v5Level()&&r.topic===v6Topic().id&&r.level===V65.level});
+ var last=rows[rows.length-1];
+ return '<section class="v6-card"><div style="font-size:70px;text-align:center">🏆📚</div><h2>My Story Adventure!</h2>'+
+ '<div class="v65-summary"><p>🌟 You finished a story, answered two questions, and practised a sound!</p>'+
+ '<p>🔍 First-try picture finds: '+last.pageFirst+'/4 · Story understanding: '+last.quizFirst+'/2 · Sound Bridge: '+(last.huntFirst?'First try':'Practised')+'</p>'+
+ '<p>🗣️ Reading attempts: '+last.readAttempts+' (self-reported, not pronunciation assessed)</p></div>'+
+ '<div class="v6-actions"><button class="v6-btn primary" data-v65="again">📖 Read Another Story</button>'+
+ '<button class="v6-btn good" data-v6="go" data-page="home">🌞 My English World</button></div>'+
+ '<p class="v65-step-note">Progress is based on picture choices and story answers; the app does not claim to evaluate pronunciation or reading fluency.</p></section>';
+}
+function v65StoryUi(){
+ v65Sync();
+ var html=v6Header('📚 Reading Adventure','Listen → Read → Think → Sound Bridge')+v65Steps();
+ if(V65.phase==='intro')html+=v65IntroUi();
+ else if(V65.phase==='page')html+=v65PageUi();
+ else if(V65.phase==='quiz')html+=v65QuizUi();
+ else if(V65.phase==='hunt')html+=v65HuntUi();
+ else html+=v65DoneUi();
+ return html+v6Footer();
+}
+function v65Start(){
+ v65Reset();V65.phase='page';V65.mode=V65.level===0?'listen':'listen';render();
+}
+function v65Find(index){
+ if(V65.phase!=='page'||!v65PageReady(V65.page)||V65.found[V65.page])return;
+ var target=v65Page(V65.page)[2],picked=v65PageChoices()[index];
+ if(!picked)return;
+ if(picked!==target){
+  V65.pageWrong[V65.page]=(V65.pageWrong[V65.page]||0)+1;
+  V65.message='Nice try! Look and listen again!';v5Voice('Try again!');render();return;
+ }
+ V65.found[V65.page]=picked;
+ V65.pageFirst[V65.page]=!(V65.pageWrong[V65.page]||0)&&!V65.adult[V65.page];
+ V65.message='Great! You found '+target+'!';
+ v5Voice('Great! '+target+'!');render();
+}
+function v65Next(){
+ if(V65.phase!=='page'||!v65PageReady(V65.page)||!V65.found[V65.page])return;
+ if(V65.page<3)V65.page++;
+ else{V65.phase='quiz';V65.quizIndex=0;}
+ V65.message='';render();
+}
+function v65AnswerQuiz(index){
+ if(V65.phase!=='quiz'||!(V65.quizHeard[V65.quizIndex]||V65.quizAdult[V65.quizIndex])||
+    V65.quizFirst[V65.quizIndex]!==undefined)return;
+ var q=v65Story().quiz[V65.quizIndex];
+ if(!Number.isInteger(index)||index<0||index>=q[1].length)return;
+ if(index!==q[2]){
+  V65.quizWrong[V65.quizIndex]=(V65.quizWrong[V65.quizIndex]||0)+1;
+  V65.message='Not quite. Think about what happened in the story.';v5Voice('Let us think again!');render();return;
+ }
+ V65.quizFirst[V65.quizIndex]=!(V65.quizWrong[V65.quizIndex]||0)&&!V65.quizAdult[V65.quizIndex];
+ V65.message='Yes! '+q[1][q[2]]+'. Great thinking!';
+ v5Voice('Great thinking!');render();
+}
+function v65NextQuiz(){
+ if(V65.phase!=='quiz'||V65.quizFirst[V65.quizIndex]===undefined)return;
+ if(V65.quizIndex===0)V65.quizIndex=1;
+ else V65.phase='hunt';
+ V65.message='';render();
+}
+function v65AnswerHunt(index){
+ if(V65.phase!=='hunt'||!(V65.huntHeard||V65.huntAdult)||V65.finished)return;
+ var choice=v65HuntChoices()[index],target=v65HuntLesson().word;
+ if(!choice)return;
+ if(choice!==target){V65.huntWrong++;V65.message='Try again. Listen to the word!';v5Voice('Try again!');render();return;}
+ V65.huntFirst=V65.huntWrong===0&&!V65.huntAdult;
+ v65Finish();
+}
+function v65Finish(){
+ if(V65.finished||V65.phase!=='hunt'||V65.quizFirst[0]===undefined||V65.quizFirst[1]===undefined)return;
+ V65.finished=true;
+ var data=v65Data(),hunt=v65HuntLesson(),row={
+  day:localDate(),grade:saveData.grade,term:saveData.term,ability:v5Level(),topic:v6Topic().id,level:V65.level,
+  pageFirst:[0,1,2,3].filter(function(i){return V65.pageFirst[i]}).length,
+  pageMistakes:[0,1,2,3].reduce(function(n,i){return n+(V65.pageWrong[i]||0)},0),
+  quizFirst:[0,1].filter(function(i){return V65.quizFirst[i]}).length,
+  quizMistakes:[0,1].reduce(function(n,i){return n+(V65.quizWrong[i]||0)},0),
+  assistedPages:Object.keys(V65.adult).filter(function(k){return V65.adult[k]}).length,
+  quizAdult:Object.keys(V65.quizAdult).filter(function(k){return V65.quizAdult[k]}).length,
+  readAttempts:Object.keys(V65.readTried).filter(function(k){return V65.readTried[k]}).length,
+  huntWord:hunt.word,huntFirst:V65.huntFirst,huntMistakes:V65.huntWrong
+ };
+ data.records.push(row);data.records=data.records.slice(-150);
+ V65.phase='done';v6Mark('story');store();render();v5Voice('Wonderful! You finished your story!');
+}
+function v65ParentReport(){
+ var rec=v65Data().records.filter(function(r){return r.grade===saveData.grade&&r.term===saveData.term&&r.ability===v5Level()});
+ if(!rec.length)return '<p>分级阅读尚无完成记录。建议先从 L0 听读找图开始，L1—L3 可由家长协助选择。</p>';
+ var last=rec.slice(-10),first=last.reduce(function(n,r){return n+r.quizFirst},0);
+ var mistakes=last.reduce(function(n,r){return n+r.quizMistakes},0);
+ var assisted=last.reduce(function(n,r){return n+r.quizAdult},0);
+ return '<p>已完成 '+rec.length+' 次分级阅读。最近 '+last.length+' 次故事理解题首次独立答对 '+first+'/'+(last.length*2)+'；重试 '+mistakes+' 次；家长朗读题目 '+assisted+' 次。</p>'+
+ '<div class="v65-review">'+last.slice(-4).reverse().map(function(r){return '<div>📖 '+v5Html((V6_THEMES.find(function(t){return t.id===r.topic})||{name:r.topic}).name)+
+ ' · L'+r.level+' · '+r.quizFirst+'/2 道理解题独立首次答对 · '+v5Html(r.day)+'</div>';}).join('')+'</div>'+
+ '<p class="v65-step-note">阅读点击和“我读过了”是自报尝试，不用于判断发音、独立流利阅读或英语等级。数据仅存于当前浏览器。</p>';
+}
+function v65Action(button){
+ v65Sync();
+ var op=button.dataset.v65,i=Number(button.dataset.index);
+ if(op==='level'&&V65.phase==='intro'){
+  var level=Number(button.dataset.level);if(!Number.isInteger(level)||level<0||level>3)return;
+  V65.level=level;v65Data().levels[v65Profile()]=level;store();render();return;
+ }
+ if(op==='start'&&V65.phase==='intro'){v65Start();return;}
+ if(op==='again'&&V65.phase==='done'){v65Reset();render();return;}
+ if(op==='mode'&&V65.phase==='page'){
+  var mode=button.dataset.mode;if(!['listen','together','read'].includes(mode)||mode==='read'&&V65.level===0)return;
+  V65.mode=mode;render();return;
+ }
+ if(op==='hear-page'&&V65.phase==='page'){
+  V65.listened[V65.page]=true;V65.message='';v5Voice(v65Page(V65.page)[0]);render();return;
+ }
+ if(op==='hear-slow'&&V65.phase==='page'){
+  V65.listened[V65.page]=true;V65.message='';v5SlowVoice(v65Page(V65.page)[0]);render();return;
+ }
+ if(op==='adult-page'&&V65.phase==='page'){
+  V65.adult[V65.page]=true;V65.message='Thanks for reading together!';render();return;
+ }
+ if(op==='tried-read'&&V65.phase==='page'&&V65.level>0){
+  V65.readTried[V65.page]=true;V65.message='Thank you for trying to read!';render();return;
+ }
+ if(op==='find'){v65Find(i);return;}
+ if(op==='prev'&&V65.phase==='page'&&V65.page>0){V65.page--;V65.message='';render();return;}
+ if(op==='next'){v65Next();return;}
+ if(op==='hear-question'&&V65.phase==='quiz'){
+  V65.quizHeard[V65.quizIndex]=true;V65.message='';v5Voice(v65Story().quiz[V65.quizIndex][0]);render();return;
+ }
+ if(op==='adult-question'&&V65.phase==='quiz'){
+  V65.quizAdult[V65.quizIndex]=true;V65.message='Read together, then choose.';render();return;
+ }
+ if(op==='read-question'&&V65.phase==='quiz'&&V65.level>0){
+  V65.quizHeard[V65.quizIndex]=true;V65.message='I tried reading the question.';render();return;
+ }
+ if(op==='quiz-answer'){v65AnswerQuiz(i);return;}
+ if(op==='quiz-next'){v65NextQuiz();return;}
+ if(op==='hear-hunt'&&V65.phase==='hunt'){
+  V65.huntHeard=true;V65.message='';v5Voice(v65HuntLesson().word);render();return;
+ }
+ if(op==='adult-hunt'&&V65.phase==='hunt'){
+  V65.huntAdult=true;V65.message='Ask your grown-up to say the word aloud.';render();return;
+ }
+ if(op==='hunt-answer'){v65AnswerHunt(i);return;}
+}
 
 /* V6.0 English World activities */
 function v6SongUi(){
