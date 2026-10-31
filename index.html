@@ -2434,7 +2434,7 @@ function v6ParentUi(){
  '<div class="v6-divider"></div><h3>🔤 自然拼读听力记录</h3>'+v63ParentReport()+
  '<div class="v6-divider"></div><h3>🧠 V6.4 智能复习与能力观察</h3>'+v64ParentReport()+
  '<div class="v6-divider"></div><h3>课程说明</h3>'+
- '<p>第一步听唱进入英文环境；正式读句子和对话前有发音热身。拼读示范目前使用英语整词朗读，不把字母名称冒充音素。绘本是原创简短故事，适合亲子共读，不要求逐句中文翻译。</p>'+
+ '<p>第一步听唱进入英文环境；自然拼读使用离线合成音素示范与整词朗读，非专业真人录音，请家长留意音质，勿把字母名称当作音素。绘本为原创简短故事，可亲子共读，不要求逐句中文翻译。</p>'+
  '<p>生活任务中的“我说过了”是孩子自主确认；真正独立开口，需要家长倾听并确认。没有经过专业儿童语音测评，不能给发音打分。</p>'+
  '<div class="v6-actions"><button class="v6-btn primary" data-v6="parent-save">保存设置</button><button class="v6-btn" data-v6="parent-switch">返回三科学习</button></div></div></div>';
 }
@@ -2666,14 +2666,18 @@ function v64Plan(){
  }
  return plan;
 }
+function v64Minutes(i){
+ var m=v6Data().settings.minutes;
+ return m===8?[1,2,1,2,2][i]:m===15?[3,4,3,3,2][i]:V64_TASKS[i][3];
+}
 function v64Agenda(){
  var p=v64Plan(),unit=V63_LESSONS[p.index],day=v6Day(),completed=V64_TASKS.filter(function(t){return !!day[t[0]]}).length;
  var note=p.reason==='review'?'Time to revisit a familiar sound!':p.reason==='new'?'Let us meet a new sound!':'A little extra practice today!';
  var next=V64_TASKS.find(function(t){return !day[t[0]]});
  return '<section class="v6-card v64-agenda"><div class="v6-headbar"><h2>🗓️ My English Plan</h2><span class="v6-badge">'+completed+'/5</span></div>'+
  '<p class="v6-note">'+note+' Today’s sound: <strong>'+v5Html(unit.name)+'</strong>. You can stop and rest whenever you want.</p>'+
- '<div class="v64-steps">'+V64_TASKS.map(function(t){
-  return '<div class="v64-step '+(day[t[0]]?'done':'')+'"><span>'+t[1]+'</span><strong>'+t[2]+'</strong><small>'+(day[t[0]]?'✓ Done':t[3]+' min')+'</small></div>';
+ '<div class="v64-steps">'+V64_TASKS.map(function(t,i){
+  return '<div class="v64-step '+(day[t[0]]?'done':'')+'"><span>'+t[1]+'</span><strong>'+t[2]+'</strong><small>'+(day[t[0]]?'✓ Done':v64Minutes(i)+' min')+'</small></div>';
  }).join('')+'</div>'+
  (next?'<button class="v6-btn primary full" data-v64="next">▶ Start: '+v5Html(next[2])+'</button>':
  '<div class="v6-check">🌟 You finished your plan! Come back another day.</div>')+
@@ -2691,7 +2695,7 @@ function v64ParentReport(){
  var kind=plan.reason==='review'?'到期复习':plan.reason==='new'?'接触新知识':'巩固练习';
  var scope=saveData.grade+'年级 / '+labelTerm(saveData.term)+' / 英语L'+v5Level();
  var legacy=v63Data().records.filter(function(r){return r.grade===saveData.grade&&r.term===saveData.term&&r.ability===v5Level()&&!r.stageResults}).length;
- return '<p>今日安排：<strong>'+v5Html(unit.name)+'</strong>（'+kind+'），建议 12 分钟，五项活动完成后自动结束；可随时暂停。</p>'+
+ return '<p>今日安排：<strong>'+v5Html(unit.name)+'</strong>（'+kind+'），按家长设置建议 '+v6Data().settings.minutes+' 分钟，五项任务可分段完成；可随时暂停。</p>'+
  '<p>本统计只基于本设备的真实作答；同一天重复练习不会增加“跨天稳定”次数。<strong>持续稳定</strong>指同一技能跨至少三次不同日期独立首次答对，不代表正式测评已掌握。</p>'+
  '<div class="v64-report">'+lessons.map(function(x){
   return '<div class="v64-report-row"><strong>'+x.lesson.icon+' '+v5Html(x.lesson.name)+'</strong><small>'+
