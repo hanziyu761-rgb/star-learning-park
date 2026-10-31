@@ -2470,7 +2470,7 @@ function v68CurrentHint(page){
   }
   if(page==='story'){
    if(V65.phase==='intro')return '先选第一档小故事，再点开始。';
-   if(V65.phase==='page')return V65.pageReady?.(V65.page)&&V65.found[V65.page]?'真棒！点下一页，继续听故事。':
+   if(V65.phase==='page')return v65PageReady(V65.page)&&V65.found[V65.page]?'真棒！点下一页，继续听故事。':
     '先点喇叭听故事，再点故事里说到的那幅图。';
    if(V65.phase==='quiz')return '点喇叭听问题，想一想故事说了什么，再选答案。';
    if(V65.phase==='hunt')return '点喇叭听单词，再找到对应的图画。';
