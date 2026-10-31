@@ -2184,6 +2184,153 @@ document.addEventListener('click',function(event){
  }
 },true);
 
+
+/* V6.0 English World core */
+const V6_THEMES=[
+ {id:'cafe',name:'Little Café',icon:'🥛',desc:'Ask for food and say thank you.',scene:1,art:'🏠🥛🍎',
+  objects:[['milk','🥛'],['apple','🍎'],['bread','🍞']],
+  sound:{letter:'m',main:'milk',mainArt:'🥛',match:'moon',options:[['moon','🌙'],['cat','🐱'],['sun','☀️']],info:'milk and moon begin with the same sound.'},
+  chant:['Hello, hello, at the café!','Milk, milk, can I play?','Apple, apple, red and round.','Please and thank you, what a sound!'],
+  pages:[['I see milk.','🏠🥛','milk'],['I want milk.','🧒🥛','milk'],['Milk, please!','🥛🤲','milk'],['Here you go!','🧑‍🍳🥛','milk']],
+  ask:'What would you like?',example:'Milk, please!',reply:'Here you go!',roleAsk:'Milk, please!',bye:'Thank you!'},
+ {id:'hello',name:'Hello School',icon:'👋',desc:'Meet a friend and say hello.',scene:0,art:'🏫👋🧒',
+  objects:[['hello','👋'],['friend','🧒'],['happy','😄']],
+  sound:{letter:'h',main:'hello',mainArt:'👋',match:'hat',options:[['hat','🎩'],['cat','🐱'],['dog','🐶']],info:'hello and hat begin with the same sound.'},
+  chant:['Hello, hello, wave your hand!','Hello, hello, here I stand!','Smile and clap, one, two, three!','Hello, friend, come play with me!'],
+  pages:[['I see a friend.','🧒🧒','friend'],['We say hello.','👋👋','hello'],['We wave our hands.','🙋🙋','hello'],['We are happy.','😄😄','happy']],
+  ask:'Hello! How are you?',example:'I am happy!',reply:'Hello, my friend!',roleAsk:'Say hello, please!',bye:'Bye-bye!'},
+ {id:'toys',name:'Toy Room',icon:'🧸',desc:'Play with toys and share.',scene:5,art:'🧸🧩🚗',
+  objects:[['ball','⚽'],['car','🚗'],['bear','🧸']],
+  sound:{letter:'b',main:'ball',mainArt:'⚽',match:'bag',options:[['bag','🎒'],['cat','🐱'],['sun','☀️']],info:'ball and bag begin with the same sound.'},
+  chant:['Ball, ball, bounce so high!','Car, car, zoom on by!','Bear, bear, come and play!','Toys and friends make a happy day!'],
+  pages:[['I see a ball.','🧒⚽','ball'],['I have a red car.','🚗🔴','car'],['My bear is soft.','🧸✨','bear'],['We play together.','🧒🧒⚽','ball']],
+  ask:'What toy do you want?',example:'A ball, please!',reply:'Let us play!',roleAsk:'Can I have the ball?',bye:'Thank you, friend!'},
+ {id:'farm',name:'Animal Farm',icon:'🐶',desc:'Meet animals and move.',scene:3,art:'🐶🦆🐱',
+  objects:[['dog','🐶'],['duck','🦆'],['cat','🐱']],
+  sound:{letter:'d',main:'dog',mainArt:'🐶',match:'duck',options:[['duck','🦆'],['cat','🐱'],['sun','☀️']],info:'dog and duck begin with the same sound.'},
+  chant:['Dog, dog, wag your tail!','Duck, duck, swim and sail!','Cat, cat, jump up high!','Hello, friends, the clouds go by!'],
+  pages:[['I see a dog.','🧒🐶','dog'],['A duck can swim.','🦆💦','duck'],['The cat can jump.','🐱⬆️','cat'],['We love animals.','🧒🐶🦆','dog']],
+  ask:'Which animal do you like?',example:'I like dogs!',reply:'Animals are fun!',roleAsk:'Show me the dog, please!',bye:'Bye-bye, animals!'}
+];
+const V6_STEPS=[
+ ['song','🎵','Sing & Watch','2 min'],
+ ['phonics','🔤','Sound Lab','2 min'],
+ ['story','📚','Story Together','2 min'],
+ ['play','🏡','Life Adventures','3 min'],
+ ['talk','🎤','Talk to AI','3 min']
+];
+const V6={page:'home',parent:false,songPlayed:false,songMoved:false,bookPage:0,bookVisited:{},bookPointed:false,phonicsGuess:'',phonicsPassed:false,gameStage:'choose',gameItem:'',gameRole:'customer',gameSpoken:false,talkPhase:'warm',talkWarmDone:false,talkModelHeard:false,talkAttempt:false,talkDraft:'',musicCtx:null,contextKey:'',lessonHint:false};
+function v6Data(){
+ var d=saveData.v6English;
+ if(!d||typeof d!=='object'||Array.isArray(d))d=saveData.v6English={};
+ if(!d.settings||typeof d.settings!=='object')d.settings={};
+ if(typeof d.settings.englishOnly!=='boolean')d.settings.englishOnly=true;
+ if(!/^\d\d:\d\d$/.test(d.settings.dailyAt||''))d.settings.dailyAt='19:30';
+ if(![8,12,15].includes(Number(d.settings.minutes)))d.settings.minutes=12;
+ if(!V6_THEMES.some(function(t){return t.id===d.theme}))d.theme='cafe';
+ if(!d.days||typeof d.days!=='object'||Array.isArray(d.days))d.days={};
+ if(!d.session||d.session.day!==localDate())d.session={day:localDate(),elapsed:0,started:0,running:false};
+ return d;
+}
+function v6Topic(){var data=v6Data();return V6_THEMES.find(function(t){return t.id===data.theme})||V6_THEMES[0];}
+function v6Key(){return [localDate(),saveData.grade,saveData.term,v5Level(),v6Topic().id].join('|');}
+function v6Day(){return v6Data().days[v6Key()]||{};}
+function v6DoneCount(){var day=v6Day();return V6_STEPS.filter(function(x){return day[x[0]]}).length;}
+function v6Mark(step){
+ var d=v6Data(),key=v6Key();
+ if(!d.days[key])d.days[key]={};
+ if(d.days[key][step])return;
+ d.days[key][step]=true;
+ var keys=Object.keys(d.days).sort();
+ if(keys.length>120)keys.slice(0,keys.length-120).forEach(function(k){delete d.days[k]});
+ store();
+}
+function v6Elapsed(){
+ var s=v6Data().session;
+ return Math.max(0,Math.round(Number(s.elapsed)||0)+(s.running?Math.max(0,Math.floor((Date.now()-s.started)/1000)):0));
+}
+function v6Clock(){
+ var seconds=v6Elapsed(),limit=v6Data().settings.minutes*60,remaining=Math.max(0,limit-seconds);
+ return String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');
+}
+function v6TimerPlay(){
+ var s=v6Data().session;
+ if(s.running){s.elapsed=v6Elapsed();s.running=false;s.started=0;}
+ else{s.started=Date.now();s.running=true;}
+ store();render();
+}
+function v6TimerStop(){var s=v6Data().session;s.elapsed=0;s.started=0;s.running=false;store();render();}
+function v6StoppedMusic(){
+ if(V6.musicCtx){try{V6.musicCtx.close()}catch(e){}V6.musicCtx=null;}
+ var dance=document.getElementById('v6-dancers');if(dance)dance.classList.remove('playing');
+}
+function v6StopAllAudio(){stopSpeech();v6StoppedMusic();}
+function v6ClearActivity(){
+ V6.songPlayed=false;V6.songMoved=false;V6.bookPage=0;V6.bookVisited={};V6.bookPointed=false;V6.phonicsGuess='';V6.phonicsPassed=false;
+ V6.gameStage='choose';V6.gameItem='';V6.gameRole='customer';V6.gameSpoken=false;V6.talkPhase='warm';V6.talkWarmDone=false;V6.talkModelHeard=false;V6.talkAttempt=false;V6.talkDraft='';
+}
+function v6SessionSync(){
+ var key=v6Key();if(V6.contextKey!==key){V6.contextKey=key;v6ClearActivity();if(v5SpeechScene())v5ResetSpeak();}
+}
+function v6Go(page){
+ if(examIsActive()){toast('请先保存并退出考试。');return;}
+ if(!['home','song','phonics','story','play','talk'].includes(page))return;
+ v6StopAllAudio();
+ if(V6.page==='talk'&&page!=='talk'&&v5SpeechScene())v5ResetSpeak();
+ V6.page=page;V6.lessonHint=false;render();window.scrollTo(0,0);
+ if(page==='talk'&&v5SpeechScene()&&V6.talkPhase==='warm'){} 
+}
+function v6Header(title,subtitle){
+ var d=v6Data(),topic=v6Topic(),percent=Math.round(v6DoneCount()/5*100);
+ return '<div class="v6-head"><div class="v6-headbar"><button class="v6-topbtn" type="button" data-v6="exit">← Exit</button>'+
+ '<span class="v6-kicker">ENGLISH WORLD · L'+v5Level()+'</span><button class="v6-topbtn" type="button" data-v6="parent">👨‍👩‍👧 Parent</button></div>'+
+ '<h1>'+v5Html(title)+'</h1><p class="v6-english">'+v5Html(subtitle)+'</p><div class="v6-headbar">'+
+ '<span class="v6-badge">'+topic.icon+' '+v5Html(topic.name)+'</span><span class="v6-badge">⏰ <span id="v6-live-clock">'+v6Clock()+'</span> · '+percent+'% done</span></div></div>';
+}
+function v6Footer(){
+ return '<div class="v6-actions"><button type="button" class="v6-btn" data-v6="home">⌂ My English World</button>'+
+ '<button type="button" class="v6-btn soft" data-v6="parent">⚙ Parent</button></div>';
+}
+function v6ParentUi(){
+ var d=v6Data(),parent=V6.parent,day=v6Day(),s=d.session;
+ if(!parent)return '';
+ return '<div class="v6-parent-overlay" role="dialog" aria-modal="true" aria-labelledby="v6-parent-title"><div class="v6-parent-dialog">'+
+ '<div class="v6-headbar"><h2 id="v6-parent-title">👨‍👩‍👧 家长中心</h2><button class="v6-topbtn" data-v6="parent-close">关闭 ✕</button></div>'+
+ '<p>孩子端默认只显示英语、图片和动作。这里保留中文帮助与隐私设置，不要求家长英语流利。</p>'+
+ '<div class="v6-divider"></div><h3>每日纯英语时间</h3>'+
+ '<label>每日建议开始时间 <input type="time" id="v6-daily-at" value="'+v5Html(d.settings.dailyAt)+'"/></label>'+
+ '<label>每日练习时长 <select id="v6-minutes">'+[8,12,15].map(function(x){return '<option value="'+x+'" '+(d.settings.minutes===x?'selected':'')+'>'+x+'分钟</option>'}).join('')+'</select></label>'+
+ '<label><input type="checkbox" id="v6-english-only" '+(d.settings.englishOnly?'checked':'')+'/> 孩子学习时隐藏中文学科菜单（英语沉浸模式）</label>'+
+ '<p class="v6-note">开始时间仅作家长安排参考，不会在后台自动提醒。每日计时可由家长或孩子主动开始、暂停，时间结束不强制退出。</p>'+
+ '<div class="v6-divider"></div><h3>麦克风和 AI</h3>'+
+ '<label><input type="checkbox" id="v5-speaking-consent" '+(v5ParentConsent?'checked':'')+'/> 家长同意本次使用语音识别和可选 DeepSeek 对话</label>'+
+ '<p class="v6-note">语音识别可能通过浏览器厂商处理音频。只有本次练习的转写文字经允许才可能发给 DeepSeek；点击“我试着说了”不会伪造录音或提交假文本。不保存原始录音，不给儿童口音打分。切换页面后请根据需要关闭授权。</p>'+
+ '<div class="v6-divider"></div><h3>今天的成长记录</h3>'+
+ '<p>课程主题：'+v5Html(v6Topic().name)+' · 已完成 '+v6DoneCount()+'/5 项 · 练习计时 '+Math.floor(v6Elapsed()/60)+' 分钟。</p>'+
+ '<p>已完成：'+(V6_STEPS.filter(function(x){return day[x[0]]}).map(function(x){return x[1]+' '+x[2]}).join('、')||'尚未完成')+'</p>'+
+ '<div class="v6-divider"></div><h3>课程说明</h3>'+
+ '<p>第一步听唱进入英文环境；正式读句子和对话前有发音热身。拼读示范目前使用英语整词朗读，不把字母名称冒充音素。绘本是原创简短故事，适合亲子共读，不要求逐句中文翻译。</p>'+
+ '<p>生活任务中的“我说过了”是孩子自主确认；真正独立开口，需要家长倾听并确认。没有经过专业儿童语音测评，不能给发音打分。</p>'+
+ '<div class="v6-actions"><button class="v6-btn primary" data-v6="parent-save">保存设置</button><button class="v6-btn" data-v6="parent-switch">返回三科学习</button></div></div></div>';
+}
+function v6Home(){
+ var d=v6Data(),topic=v6Topic(),day=v6Day(),done=v6DoneCount();
+ var next=V6_STEPS.find(function(x){return !day[x[0]]})||V6_STEPS[0];
+ var html=v6Header('Hello, Explorer! 👋','Listen, play, read, and talk. Let us have fun!');
+ html+='<section class="v6-card"><h2>🌞 Today’s English Time</h2><div class="v6-headbar"><strong>🎯 '+v5Html(topic.name)+'</strong>'+
+ '<span class="v6-badge">'+done+'/5 adventures</span></div>'+
+ '<div class="v6-progress" aria-label="Daily English progress" role="progressbar" aria-valuenow="'+done+'" aria-valuemax="5"><span style="width:'+(done*20)+'%"></span></div>'+
+ '<p class="v6-note">Your time: '+v5Html(d.settings.dailyAt)+' · '+d.settings.minutes+' minutes. Take a break whenever you need.</p>'+
+ '<div class="v6-actions"><button class="v6-btn primary" data-v6="timer">'+(d.session.running?'⏸ Pause English Time':'▶ Start English Time')+'</button>'+
+ '<button class="v6-btn" data-v6="timer-reset">↻ Reset Timer</button></div>'+
+ '<button class="v6-btn good full" data-v6="go" data-page="'+next[0]+'">'+(done===5?'🌟 Play again':'▶ Next: '+next[2])+'</button></section>';
+ html+='<section class="v6-card"><h2>🧭 Explore Your English World</h2><div class="v6-grid">'+V6_STEPS.map(function(x){return '<button class="v6-activity '+(day[x[0]]?'done':'')+'" data-v6="go" data-page="'+x[0]+'"><span class="emoji">'+x[1]+'</span><b>'+x[2]+'</b><small>'+(day[x[0]]?'✓ Great work!':x[3])+'</small></button>'}).join('')+'</div></section>';
+ html+='<section class="v6-card"><h2>🌍 Choose a World</h2><div class="v6-grid">'+V6_THEMES.map(function(t){return '<button class="v6-activity '+(d.theme===t.id?'done':'')+'" data-v6="theme" data-theme="'+t.id+'"><span class="emoji">'+t.icon+'</span><b>'+v5Html(t.name)+'</b><small>'+v5Html(t.desc)+'</small></button>'}).join('')+'</div></section>';
+ html+='<section class="v6-card"><h2>🌟 My Little Wins</h2><div class="v6-headbar"><span>🎧 Listen · 🔤 Sounds · 📚 Stories · 🎤 Speak</span><span class="v6-badge">'+done+' / 5</span></div>'+
+ '<p class="v6-note">Small steps make a big difference. You can try again tomorrow!</p></section>';
+ return html;
+}
+
 v5Init();render();
 })();
 
