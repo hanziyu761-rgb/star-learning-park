@@ -9,7 +9,8 @@ import { BigButton, SpeakerButton, StarBadge, tapFeedback } from '@/components/u
 import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
-import { completedSubjectToday, SUBJECTS } from '@/progress/stats';
+import { reviewQueue } from '@/progress/plan';
+import { completedSubjectToday, isSameLocalDay, SUBJECTS } from '@/progress/stats';
 import { speak } from '@/speech/speech';
 import { colors, radius, shadow, space, subjectTheme } from '@/theme';
 
@@ -28,7 +29,13 @@ export default function HomeScreen() {
 
   const active = state.active ? getLesson(state.active.lessonId) : undefined;
   const completedLessons = LESSONS.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
-  const todayDone = SUBJECTS.filter((s) => completedSubjectToday(state, s, now)).length;
+  // 今日复习：有到期错题时出现；今天复习过且已清空则显示完成
+  const reviewCount = reviewQueue(state, LESSONS, now).length;
+  const reviewedToday = state.reviews.some((r) => isSameLocalDay(r.at, now));
+  const showReview = reviewCount > 0 || reviewedToday;
+  const todayDone =
+    SUBJECTS.filter((s) => completedSubjectToday(state, s, now)).length + (showReview && reviewCount === 0 ? 1 : 0);
+  const todayTotal = SUBJECTS.length + (showReview ? 1 : 0);
 
   return (
     <Screen testID="home">
@@ -103,9 +110,36 @@ export default function HomeScreen() {
         <View style={styles.panelHead}>
           <DisplayTextView text={zh('今天的任务', 'jīn tiān de rèn wu')} size={22} />
           <Text style={styles.panelCount}>
-            {todayDone}/{SUBJECTS.length}
+            {todayDone}/{todayTotal}
           </Text>
         </View>
+        {showReview ? (
+          <Pressable
+            testID="task-review"
+            accessibilityRole="button"
+            onPress={() => {
+              tapFeedback();
+              speak({ text: '今日复习', lang: 'zh-CN' });
+              nav.push({ name: 'review' });
+            }}
+            style={styles.task}
+          >
+            <Text style={styles.taskEmoji}>{reviewCount === 0 ? '✅' : '🔁'}</Text>
+            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end', gap: 6 }}>
+              <DisplayTextView text={zh('今日复习', 'jīn rì fù xí')} size={20} />
+              {reviewCount > 0 ? (
+                <Text style={styles.badge} testID="review-count">
+                  {reviewCount}
+                </Text>
+              ) : null}
+            </View>
+            <DisplayTextView
+              text={reviewCount === 0 ? zh('完成', 'wán chéng') : zh('去复习', 'qù fù xí')}
+              size={16}
+              color={reviewCount === 0 ? colors.correct : colors.primary}
+            />
+          </Pressable>
+        ) : null}
         {SUBJECTS.map((s) => {
           const lesson = lessonsFor(s)[0];
           const done = completedSubjectToday(state, s, now);
@@ -189,6 +223,17 @@ const styles = StyleSheet.create({
   panelCount: { fontSize: 20, fontWeight: '900', color: colors.primary },
   task: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 64, borderTopWidth: 1, borderTopColor: colors.line },
   taskEmoji: { fontSize: 30 },
+  badge: {
+    minWidth: 26,
+    paddingHorizontal: 6,
+    borderRadius: 13,
+    backgroundColor: colors.wrong,
+    color: '#fff',
+    fontWeight: '900',
+    fontSize: 15,
+    textAlign: 'center',
+    overflow: 'hidden',
+  },
   barBg: { height: 18, borderRadius: radius.round, backgroundColor: '#F3E9D2', overflow: 'hidden' },
   barFill: { height: '100%', backgroundColor: colors.star, borderRadius: radius.round },
   progressText: { fontSize: 16, color: colors.textSoft, fontWeight: '700' },

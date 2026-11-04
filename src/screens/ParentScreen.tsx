@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { exerciseLabel, getLesson, skillLabel } from '@/content';
+import { exerciseLabel, getLesson, LESSONS, skillLabel } from '@/content';
 import { plainText } from '@/content/zh';
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
 import { ParentGate } from '@/components/ParentGate';
 import { Card, SectionTitle, Stars } from '@/components/ui';
 import { useNav } from '@/nav/Nav';
+import { suggestNext, type Suggestion } from '@/progress/plan';
 import { useProgress } from '@/progress/ProgressContext';
 import {
   activeDaysLast7,
@@ -44,6 +45,8 @@ function ParentDashboard() {
   const mistakes = openMistakes(state);
   const hasData = state.results.length > 0 || state.sessions.length > 0;
   const completedLessons = Object.values(state.lessons).filter((l) => l.completedCount > 0).length;
+  const suggestions = suggestNext(state, LESSONS, now, 3);
+  const mastered = Object.values(state.mistakes).filter((m) => m.resolved).length;
 
   return (
     <View style={{ gap: space.lg }} testID="parent-dashboard">
@@ -59,6 +62,17 @@ function ParentDashboard() {
           <Metric label="今天学习" value={formatDuration(studySecOnDay(state, now))} testID="m-today" />
           <Metric label="近 7 天学习" value={`${activeDaysLast7(state, now)} 天`} testID="m-days" />
         </View>
+      </Card>
+
+      <Card>
+        <SectionTitle>下一步学习建议</SectionTitle>
+        <Text style={styles.small}>根据真实学习记录自动生成：先完成未学完的课，再复习到期错题，再巩固薄弱知识点</Text>
+        {suggestions.map((sg, i) => (
+          <View key={i} style={styles.row} testID="suggestion-row">
+            <Text style={styles.rowEmoji}>{['①', '②', '③'][i]}</Text>
+            <Text style={[styles.rowTitle, { flex: 1 }]}>{describeSuggestion(sg)}</Text>
+          </View>
+        ))}
       </Card>
 
       {SUBJECTS.map((s) => {
@@ -123,7 +137,9 @@ function ParentDashboard() {
 
       <Card>
         <SectionTitle>错题（尚未掌握）</SectionTitle>
-        <Text style={styles.small}>第一次答错的题目；之后再次一次答对会自动移出</Text>
+        <Text style={styles.small}>
+          第一次答错的题目会进入“今日复习”，按 1 天、3 天的间隔再练，连续答对 2 次视为掌握。已掌握 {mastered} 道 · 完成复习 {state.reviews.length} 次
+        </Text>
         {mistakes.length === 0 ? <Text style={styles.empty}>暂无错题</Text> : null}
         {mistakes.map((m) => (
           <View key={m.key} style={styles.row} testID="mistake-row">
@@ -131,7 +147,7 @@ function ParentDashboard() {
             <View style={{ flex: 1 }}>
               <Text style={styles.rowTitle}>{exerciseLabel(m.lessonId, m.exerciseId)}</Text>
               <Text style={styles.small}>
-                {skillLabel(m.skill)} · 答错 {m.wrongCount} 次 · {formatDateTime(m.lastWrongAt)}
+                {skillLabel(m.skill)} · 答错 {m.wrongCount} 次 · 下次复习 {m.srs.nextReviewDay.slice(5).replace('-', '月')}日
               </Text>
             </View>
           </View>
@@ -162,6 +178,26 @@ function ParentDashboard() {
       ) : null}
     </View>
   );
+}
+
+function lessonName(id: string): string {
+  const l = getLesson(id);
+  return l ? `《${plainText(l.title)}》` : id;
+}
+
+function describeSuggestion(s: Suggestion): string {
+  switch (s.kind) {
+    case 'continue':
+      return `继续学完 ${lessonName(s.lessonId)}`;
+    case 'review':
+      return `完成今日复习（${s.count} 道错题）`;
+    case 'weak':
+      return `“${skillLabel(s.skill)}”一次答对率 ${s.accuracy}%，建议重学 ${lessonName(s.lessonId)}`;
+    case 'new':
+      return `学习新课 ${lessonName(s.lessonId)}`;
+    case 'more-stars':
+      return `再学一次 ${lessonName(s.lessonId)}，争取 3 颗星（目前 ${s.bestStars} 颗）`;
+  }
 }
 
 function Metric({ label, value, testID }: { label: string; value: string; testID?: string }) {

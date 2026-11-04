@@ -110,7 +110,8 @@ describe('学习建议', () => {
     ]);
     const sug = suggestNext(s, LESSONS, T0 + 3000, 5);
     expect(sug[0]).toEqual({ kind: 'continue', lessonId: 'chinese-ri-yue-shui-huo' });
-    expect(sug[1]).toEqual({ kind: 'review', count: 2 });
+    // x2 不是可单独重做的题目（不存在于课程中），只有 compare-fish 进入复习
+    expect(sug[1]).toEqual({ kind: 'review', count: 1 });
     expect(sug[2]).toMatchObject({ kind: 'weak', lessonId: math.id, skill: 'math.compare', accuracy: 0 });
     expect(sug[3]).toEqual({ kind: 'new', lessonId: 'english-fruits' });
   });

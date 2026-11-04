@@ -12,6 +12,7 @@ import { ProgressProvider } from '@/progress/ProgressContext';
 import HomeScreen from '@/screens/HomeScreen';
 import LessonScreen from '@/screens/LessonScreen';
 import ParentScreen from '@/screens/ParentScreen';
+import ReviewScreen from '@/screens/ReviewScreen';
 import SubjectScreen from '@/screens/SubjectScreen';
 import { colors } from '@/theme';
 
@@ -25,6 +26,8 @@ function renderRoute(route: Route) {
       return <LessonScreen id={route.id} resume={!!route.resume} />;
     case 'parent':
       return <ParentScreen />;
+    case 'review':
+      return <ReviewScreen />;
   }
 }
 

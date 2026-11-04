@@ -6,9 +6,38 @@
  * 再结合可用的学习资源给出计划。EduAgent 把这些交给大模型写计划；
  * 这里先用确定性规则直接给出可点击的下一步，结果完全由真实学习记录决定，可测试、离线可用。
  */
-import type { Lesson } from '@/lesson/types';
-import type { ProgressState } from './model';
+import type { Exercise, Lesson } from '@/lesson/types';
+import type { MistakeEntry, ProgressState } from './model';
 import { dueMistakes, weakSkills } from './stats';
+
+export interface ReviewItem {
+  mistake: MistakeEntry;
+  lesson: Lesson;
+  exercise: Exercise;
+}
+
+export function findExercise(lessons: Lesson[], lessonId: string, exerciseId: string) {
+  const lesson = lessons.find((l) => l.id === lessonId);
+  if (!lesson) return null;
+  for (const s of lesson.steps) {
+    if (s.kind === 'exercise' && s.exercise.id === exerciseId) return { lesson, exercise: s.exercise };
+  }
+  return null;
+}
+
+/**
+ * 今天可以在“今日复习”里单独重做的错题（最多 limit 道）。
+ * 演示类、操作类环节（如“合起来”“开放题”）不能单独重做，它们通过“薄弱知识点 → 重学该课”来复习。
+ */
+export function reviewQueue(state: ProgressState, lessons: Lesson[], now: number, limit = 10): ReviewItem[] {
+  const items: ReviewItem[] = [];
+  for (const m of dueMistakes(state, now)) {
+    const found = findExercise(lessons, m.lessonId, m.exerciseId);
+    if (found) items.push({ mistake: m, ...found });
+    if (items.length >= limit) break;
+  }
+  return items;
+}
 
 export type Suggestion =
   | { kind: 'continue'; lessonId: string }
@@ -43,7 +72,7 @@ export function suggestNext(state: ProgressState, lessons: Lesson[], now: number
     push({ kind: 'continue', lessonId: state.active.lessonId });
   }
   // 2. 今天到期的错题复习
-  const due = dueMistakes(state, now).length;
+  const due = reviewQueue(state, lessons, now).length;
   if (due > 0) out.push({ kind: 'review', count: due });
   // 3. 薄弱知识点 → 推荐包含该知识点的课程再学一次
   for (const w of weakSkills(state)) {

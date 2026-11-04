@@ -229,6 +229,37 @@ with sync_playwright() as p:
     mistakes = page.locator('[data-testid="mistake-row"]').count()
     ok(f"家长中心：数学一次答对率 {acc}，最近课程 {sessions} 条，错题 {mistakes} 条")
     assert sessions == 1, sessions
+    sug = page.locator('[data-testid="suggestion-row"]').all_inner_texts()
+    ok("家长中心学习建议：" + " / ".join(x.replace("\n", " ") for x in sug))
+
+    # ---------- V2：今日复习（间隔复习） ----------
+    tid(page, "back").click(); page.wait_for_selector('[data-testid="home"]')
+    expect(tid(page, "review-count")).to_have_text("2")
+    stars_before = int(re.findall(r"\d+", tid(page, "total-stars").inner_text())[0])
+    tid(page, "task-review").click()
+    page.wait_for_selector('[data-testid="review-screen"]')
+    page.screenshot(path=f"{OUT}/17-review.png")
+    # 两道错题（顺序由复习优先级决定）：数学拖动配对、英语听音选图
+    for i in range(2):
+        page.wait_for_timeout(300)
+        if page.locator('[data-testid="drag-2"]').count():
+            for n in ["2", "3", "5"]:
+                tid(page, f"drag-{n}").click(); tid(page, f"target-{n}").click()
+        else:
+            tid(page, "option-banana").click()
+        expect(tid(page, "feedback-correct")).to_be_visible()
+        tid(page, "review-next").click()
+    page.wait_for_selector('[data-testid="review-summary"]')
+    ok("今日复习：" + tid(page, "review-score").inner_text())
+    page.screenshot(path=f"{OUT}/18-review-done.png")
+    tid(page, "review-home").click(); page.wait_for_selector('[data-testid="home"]')
+    stars_after = int(re.findall(r"\d+", tid(page, "total-stars").inner_text())[0])
+    assert stars_after == stars_before + 1, (stars_before, stars_after)
+    expect(tid(page, "review-count")).to_have_count(0)
+    ok(f"复习后：星星 {stars_before} → {stars_after}，今天的复习显示完成；错题明天再出现")
+    page.reload(); page.wait_for_selector('[data-testid="home"]')
+    expect(tid(page, "task-review")).to_be_visible()
+    ok("重新打开后复习完成状态保留")
 
     print(json.dumps({"errors": errors}, ensure_ascii=False, indent=1))
     browser.close()

@@ -11,6 +11,8 @@ function toHref(route: Route) {
       return { pathname: '/lesson/[id]' as const, params: route.resume ? { id: route.id, resume: '1' } : { id: route.id } };
     case 'parent':
       return '/parent' as const;
+    case 'review':
+      return '/review' as const;
   }
 }
 

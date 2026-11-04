@@ -10,7 +10,8 @@ export type Route =
   | { name: 'home' }
   | { name: 'subject'; subject: Subject }
   | { name: 'lesson'; id: string; resume?: boolean }
-  | { name: 'parent' };
+  | { name: 'parent' }
+  | { name: 'review' };
 
 export interface Nav {
   push: (route: Route) => void;
