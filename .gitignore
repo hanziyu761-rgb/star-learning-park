@@ -43,3 +43,4 @@ yarn-error.*
 # 打包产物
 *.apk
 *.aab
+dist-android/
