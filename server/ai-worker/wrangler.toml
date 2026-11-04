@@ -1,0 +1,9 @@
+# Cloudflare Worker 配置。部署：npx wrangler deploy
+# 密钥不要写在这里：npx wrangler secret put DEEPSEEK_API_KEY
+name = "star-ai-teacher"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+DEEPSEEK_MODEL = "deepseek-flash"
+RATE_LIMIT_PER_MINUTE = "20"

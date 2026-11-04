@@ -8,7 +8,7 @@ import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 /** 简单排序：按顺序依次点击（例如从小到大） */
 export function SortExercise({ exercise, lang, onFeedback, onSolved }: ExerciseProps<SortData>) {
-  const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved);
+  const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved, exercise.explanation);
   const [picked, setPicked] = useState<string[]>([]);
   const [shake, setShake] = useState<string | null>(null);
 

@@ -9,6 +9,7 @@ import { BigButton, SpeakerButton, StarBadge, tapFeedback } from '@/components/u
 import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
+import { resolveExercise } from '@/content/resolve';
 import { reviewQueue } from '@/progress/plan';
 import { completedSubjectToday, isSameLocalDay, SUBJECTS } from '@/progress/stats';
 import { speak } from '@/speech/speech';
@@ -30,7 +31,7 @@ export default function HomeScreen() {
   const active = state.active ? getLesson(state.active.lessonId) : undefined;
   const completedLessons = LESSONS.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
   // 今日复习：有到期错题时出现；今天复习过且已清空则显示完成
-  const reviewCount = reviewQueue(state, LESSONS, now).length;
+  const reviewCount = reviewQueue(state, resolveExercise, now).length;
   const reviewedToday = state.reviews.some((r) => isSameLocalDay(r.at, now));
   const showReview = reviewCount > 0 || reviewedToday;
   const todayDone =
@@ -104,6 +105,27 @@ export default function HomeScreen() {
           </Pressable>
         ))}
       </View>
+
+      {/* AI 老师入口：家长开启后才显示 */}
+      {state.settings.aiEnabled ? (
+        <Pressable
+          testID="teacher-entry"
+          accessibilityRole="button"
+          onPress={() => {
+            tapFeedback();
+            speak({ text: '问问星星宝', lang: 'zh-CN' });
+            nav.push({ name: 'teacher' });
+          }}
+          style={[styles.continue, { borderColor: colors.parent }]}
+        >
+          <Mascot size={48} bounce={false} />
+          <View style={{ flex: 1 }}>
+            <DisplayTextView text={zh('问问星星宝', 'wèn wen xīng xing bǎo')} size={22} color={colors.parent} />
+            <Text style={styles.continueSub}>AI 老师 · 有问题就问我</Text>
+          </View>
+          <Text style={styles.play}>💬</Text>
+        </Pressable>
+      ) : null}
 
       {/* 今日学习任务 */}
       <View style={styles.panel} testID="today-tasks">

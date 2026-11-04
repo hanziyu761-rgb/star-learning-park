@@ -11,7 +11,11 @@ export type Route =
   | { name: 'subject'; subject: Subject }
   | { name: 'lesson'; id: string; resume?: boolean }
   | { name: 'parent' }
-  | { name: 'review' };
+  | { name: 'review' }
+  /** 题库单元（bank:单元id）或口算（oral:主题id）练习 */
+  | { name: 'practice'; id: string }
+  /** 问问星星宝（AI 老师） */
+  | { name: 'teacher' };
 
 export interface Nav {
   push: (route: Route) => void;

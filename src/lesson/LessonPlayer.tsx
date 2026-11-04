@@ -9,6 +9,7 @@ import { DisplayTextView } from '@/components/PinyinText';
 import { BigButton, Stars } from '@/components/ui';
 import type { ExerciseOutcome } from '@/exercises/common';
 import { ExerciseView } from '@/exercises/ExerciseView';
+import { AskTeacher } from '@/ai/AskTeacher';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDuration } from '@/progress/stats';
 import { speak, stopSpeaking } from '@/speech/speech';
@@ -129,6 +130,11 @@ export function LessonPlayer({ lesson, resume, onExit, onHome }: Props) {
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Animated.View key={step.id} entering={FadeIn.duration(250)}>
           <StepView step={step} lang={lang} onFeedback={setFeedback} onDone={handleDone} />
+          {step.kind === 'exercise' ? (
+            <View style={{ marginTop: space.md }}>
+              <AskTeacher key={step.id} exercise={step.exercise} subject={lesson.subject} solved={done} />
+            </View>
+          ) : null}
         </Animated.View>
       </ScrollView>
 

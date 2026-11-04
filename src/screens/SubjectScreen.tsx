@@ -8,6 +8,7 @@ import { BigButton, Stars } from '@/components/ui';
 import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
+import { BankSection, OralSection } from './PracticeSections';
 import { colors, radius, shadow, space, subjectTheme } from '@/theme';
 
 const TITLES: Record<Subject, ReturnType<typeof zh>> = {
@@ -75,7 +76,9 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
           </View>
         );
       })}
-      <Text style={styles.more}>更多课程正在制作中</Text>
+      <Text style={styles.more}>更多精做课程正在制作中</Text>
+      {subject === 'math' ? <OralSection state={state} /> : null}
+      <BankSection subject={subject} state={state} />
     </Screen>
   );
 }

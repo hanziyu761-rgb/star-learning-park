@@ -1,0 +1,290 @@
+[
+ {
+  "id": "chinese-g1a",
+  "subject": "chinese",
+  "grade": 1,
+  "term": "上",
+  "title": "统编版小学语文一年级上册",
+  "units": 8,
+  "questions": 253
+ },
+ {
+  "id": "chinese-g1b",
+  "subject": "chinese",
+  "grade": 1,
+  "term": "下",
+  "title": "统编版小学语文一年级下册",
+  "units": 8,
+  "questions": 259
+ },
+ {
+  "id": "chinese-g2a",
+  "subject": "chinese",
+  "grade": 2,
+  "term": "上",
+  "title": "统编版小学语文二年级上册",
+  "units": 8,
+  "questions": 252
+ },
+ {
+  "id": "chinese-g2b",
+  "subject": "chinese",
+  "grade": 2,
+  "term": "下",
+  "title": "统编版小学语文二年级下册",
+  "units": 8,
+  "questions": 253
+ },
+ {
+  "id": "chinese-g3a",
+  "subject": "chinese",
+  "grade": 3,
+  "term": "上",
+  "title": "统编版小学语文三年级上册",
+  "units": 8,
+  "questions": 268
+ },
+ {
+  "id": "chinese-g3b",
+  "subject": "chinese",
+  "grade": 3,
+  "term": "下",
+  "title": "统编版小学语文三年级下册",
+  "units": 8,
+  "questions": 264
+ },
+ {
+  "id": "chinese-g4a",
+  "subject": "chinese",
+  "grade": 4,
+  "term": "上",
+  "title": "统编版小学语文四年级上册",
+  "units": 8,
+  "questions": 259
+ },
+ {
+  "id": "chinese-g4b",
+  "subject": "chinese",
+  "grade": 4,
+  "term": "下",
+  "title": "统编版小学语文四年级下册",
+  "units": 8,
+  "questions": 260
+ },
+ {
+  "id": "chinese-g5a",
+  "subject": "chinese",
+  "grade": 5,
+  "term": "上",
+  "title": "统编版小学语文五年级上册",
+  "units": 8,
+  "questions": 264
+ },
+ {
+  "id": "chinese-g5b",
+  "subject": "chinese",
+  "grade": 5,
+  "term": "下",
+  "title": "统编版小学语文五年级下册",
+  "units": 8,
+  "questions": 259
+ },
+ {
+  "id": "chinese-g6a",
+  "subject": "chinese",
+  "grade": 6,
+  "term": "上",
+  "title": "统编版小学语文六年级上册",
+  "units": 8,
+  "questions": 257
+ },
+ {
+  "id": "chinese-g6b",
+  "subject": "chinese",
+  "grade": 6,
+  "term": "下",
+  "title": "统编版小学语文六年级下册",
+  "units": 6,
+  "questions": 194
+ },
+ {
+  "id": "english-g3a",
+  "subject": "english",
+  "grade": 3,
+  "term": "上",
+  "title": "人教版 PEP 英语三年级上册",
+  "units": 6,
+  "questions": 196
+ },
+ {
+  "id": "english-g3b",
+  "subject": "english",
+  "grade": 3,
+  "term": "下",
+  "title": "人教版 PEP 英语三年级下册",
+  "units": 6,
+  "questions": 201
+ },
+ {
+  "id": "english-g4a",
+  "subject": "english",
+  "grade": 4,
+  "term": "上",
+  "title": "人教版 PEP 英语四年级上册",
+  "units": 6,
+  "questions": 204
+ },
+ {
+  "id": "english-g4b",
+  "subject": "english",
+  "grade": 4,
+  "term": "下",
+  "title": "人教版 PEP 英语四年级下册",
+  "units": 6,
+  "questions": 199
+ },
+ {
+  "id": "english-g5a",
+  "subject": "english",
+  "grade": 5,
+  "term": "上",
+  "title": "人教版 PEP 英语五年级上册",
+  "units": 6,
+  "questions": 195
+ },
+ {
+  "id": "english-g5b",
+  "subject": "english",
+  "grade": 5,
+  "term": "下",
+  "title": "PEP Primary English Book Grade 5 Volume 2",
+  "units": 6,
+  "questions": 196
+ },
+ {
+  "id": "english-g6a",
+  "subject": "english",
+  "grade": 6,
+  "term": "上",
+  "title": "PEP Primary English Book 7 (Grade 6 Upper)",
+  "units": 7,
+  "questions": 229
+ },
+ {
+  "id": "english-g6b",
+  "subject": "english",
+  "grade": 6,
+  "term": "下",
+  "title": "人教版 PEP 英语六年级下册",
+  "units": 5,
+  "questions": 163
+ },
+ {
+  "id": "math-g1a",
+  "subject": "math",
+  "grade": 1,
+  "term": "上",
+  "title": "人教版小学数学一年级上册",
+  "units": 9,
+  "questions": 372
+ },
+ {
+  "id": "math-g1b",
+  "subject": "math",
+  "grade": 1,
+  "term": "下",
+  "title": "人教版小学数学一年级下册",
+  "units": 8,
+  "questions": 352
+ },
+ {
+  "id": "math-g2a",
+  "subject": "math",
+  "grade": 2,
+  "term": "上",
+  "title": "人教版小学数学二年级上册",
+  "units": 9,
+  "questions": 385
+ },
+ {
+  "id": "math-g2b",
+  "subject": "math",
+  "grade": 2,
+  "term": "下",
+  "title": "人教版小学数学二年级下册",
+  "units": 10,
+  "questions": 343
+ },
+ {
+  "id": "math-g3a",
+  "subject": "math",
+  "grade": 3,
+  "term": "上",
+  "title": "人教版小学数学三年级上册",
+  "units": 10,
+  "questions": 421
+ },
+ {
+  "id": "math-g3b",
+  "subject": "math",
+  "grade": 3,
+  "term": "下",
+  "title": "人教版小学数学三年级下册",
+  "units": 9,
+  "questions": 360
+ },
+ {
+  "id": "math-g4a",
+  "subject": "math",
+  "grade": 4,
+  "term": "上",
+  "title": "人教版小学数学四年级上册",
+  "units": 9,
+  "questions": 355
+ },
+ {
+  "id": "math-g4b",
+  "subject": "math",
+  "grade": 4,
+  "term": "下",
+  "title": "人教版小学数学四年级下册",
+  "units": 10,
+  "questions": 432
+ },
+ {
+  "id": "math-g5a",
+  "subject": "math",
+  "grade": 5,
+  "term": "上",
+  "title": "人教版小学数学五年级上册",
+  "units": 8,
+  "questions": 302
+ },
+ {
+  "id": "math-g5b",
+  "subject": "math",
+  "grade": 5,
+  "term": "下",
+  "title": "人教版小学数学五年级下册",
+  "units": 9,
+  "questions": 382
+ },
+ {
+  "id": "math-g6a",
+  "subject": "math",
+  "grade": 6,
+  "term": "上",
+  "title": "人教版小学数学六年级上册",
+  "units": 9,
+  "questions": 393
+ },
+ {
+  "id": "math-g6b",
+  "subject": "math",
+  "grade": 6,
+  "term": "下",
+  "title": "人教版小学数学六年级下册",
+  "units": 6,
+  "questions": 257
+ }
+]

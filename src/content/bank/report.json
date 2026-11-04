@@ -1,0 +1,37 @@
+{
+ "source": "https://github.com/tanle-mtr/ChinaStudyFree (MIT)",
+ "importedAt": "2026-11-04T08:53:45.847Z",
+ "kept": 8979,
+ "dropped": 2401,
+ "keptBySubjectGrade": {
+  "math-1": 724,
+  "math-3": 781,
+  "math-2": 728,
+  "math-5": 684,
+  "math-6": 650,
+  "math-4": 787,
+  "chinese-1": 512,
+  "chinese-3": 532,
+  "chinese-2": 505,
+  "chinese-5": 523,
+  "chinese-6": 451,
+  "chinese-4": 519,
+  "english-3": 397,
+  "english-5": 391,
+  "english-6": 392,
+  "english-4": 403
+ },
+ "droppedByReason": {
+  "题型 fill_blank_text": 933,
+  "题型 matching": 733,
+  "含无法转换的公式代码": 447,
+  "含不适合儿童的词语": 115,
+  "重复题目": 63,
+  "一二年级题干过长": 52,
+  "一年级数学超纲": 23,
+  "一二年级选项过长": 15,
+  "题型 fill_blank（非整数答案）": 12,
+  "题型 calculation（非整数答案）": 4,
+  "排序题选项重复": 4
+ }
+}

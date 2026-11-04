@@ -34,7 +34,20 @@ export const SKILL_LABELS: Record<string, string> = {
   'en.dialogue': '对话听力',
 };
 
+const ORAL_LABELS: Record<string, string> = {
+  add10: '口算：10以内加法',
+  sub10: '口算：10以内减法',
+  add20: '口算：20以内进位加法',
+  sub20: '口算：20以内退位减法',
+  add100: '口算：100以内加法',
+  sub100: '口算：100以内减法',
+  mul99: '口算：乘法口诀',
+  div99: '口算：表内除法',
+};
+
 export function skillLabel(skill: string): string {
+  if (skill.startsWith('bank:')) return skill.split(':').slice(2).join(':'); // 题库知识点名称
+  if (skill.startsWith('oral.')) return ORAL_LABELS[skill.slice(5)] ?? skill;
   return SKILL_LABELS[skill] ?? skill;
 }
 

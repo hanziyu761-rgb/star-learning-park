@@ -30,6 +30,8 @@ export interface FeedbackMessage {
   kind: 'correct' | 'wrong' | 'info';
   text: DisplayText;
   hint?: Prompt;
+  /** 补充说明（例如答对后的讲解），小字显示 */
+  note?: string;
 }
 
 let praiseIndex = 0;

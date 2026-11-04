@@ -1,0 +1,107 @@
+/**
+ * AI 老师客户端：只调用“星星 AI 服务”（server/ai-worker），APP 内不保存任何大模型密钥。
+ * 发送的内容只有：科目、年级、题目文字、孩子的问题；不发送名字、设备号等身份信息。
+ */
+import type { Subject } from '@/lesson/types';
+
+export type AiErrorCode =
+  | 'NOT_CONFIGURED' // 家长没有填写服务地址
+  | 'DISABLED' // 家长没有开启
+  | 'NETWORK' // 网络不通或超时
+  | 'RATE_LIMITED'
+  | 'LLM_NOT_CONFIGURED' // 服务端没有配置 DeepSeek 密钥
+  | 'SERVER';
+
+export class AiError extends Error {
+  constructor(
+    public code: AiErrorCode,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+/** 构建时可通过环境变量预设服务地址（不是密钥，可以公开） */
+export const DEFAULT_AI_BASE_URL = (process.env.EXPO_PUBLIC_AI_BASE_URL ?? '').replace(/\/$/, '');
+
+export const AI_ERROR_TEXT: Record<AiErrorCode, string> = {
+  NOT_CONFIGURED: '还没有设置 AI 老师，请爸爸妈妈在家长中心设置。',
+  DISABLED: 'AI 老师还没有打开，请爸爸妈妈在家长中心打开。',
+  NETWORK: '星星宝老师连不上网络，等一会儿再试试吧。',
+  RATE_LIMITED: '问得太快啦，休息一下再问吧。',
+  LLM_NOT_CONFIGURED: 'AI 老师还没准备好（服务端未配置），请爸爸妈妈检查设置。',
+  SERVER: '星星宝老师暂时休息了，等一会儿再试试吧。',
+};
+
+export interface AiConfig {
+  enabled: boolean;
+  baseUrl: string;
+}
+
+async function call<T>(cfg: AiConfig, path: string, body?: unknown, timeoutMs = 20000): Promise<T> {
+  if (!cfg.enabled) throw new AiError('DISABLED', AI_ERROR_TEXT.DISABLED);
+  const base = (cfg.baseUrl || DEFAULT_AI_BASE_URL).replace(/\/$/, '');
+  if (!base) throw new AiError('NOT_CONFIGURED', AI_ERROR_TEXT.NOT_CONFIGURED);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  let res: Response;
+  try {
+    res = await fetch(base + path, {
+      method: body === undefined ? 'GET' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: ctrl.signal,
+    });
+  } catch {
+    throw new AiError('NETWORK', AI_ERROR_TEXT.NETWORK);
+  } finally {
+    clearTimeout(timer);
+  }
+  let data: { ok?: boolean; code?: string } & Record<string, unknown>;
+  try {
+    data = await res.json();
+  } catch {
+    throw new AiError('SERVER', AI_ERROR_TEXT.SERVER);
+  }
+  if (!res.ok || !data.ok) {
+    if (data.code === 'RATE_LIMITED') throw new AiError('RATE_LIMITED', AI_ERROR_TEXT.RATE_LIMITED);
+    if (data.code === 'LLM_NOT_CONFIGURED') throw new AiError('LLM_NOT_CONFIGURED', AI_ERROR_TEXT.LLM_NOT_CONFIGURED);
+    throw new AiError('SERVER', AI_ERROR_TEXT.SERVER);
+  }
+  return data as T;
+}
+
+export async function aiHealth(cfg: AiConfig): Promise<{ llm: boolean; model: string }> {
+  return call(cfg, '/api/health', undefined, 8000);
+}
+
+export async function aiHint(
+  cfg: AiConfig,
+  req: {
+    subject: Subject;
+    grade: number;
+    mode: 'hint' | 'explain';
+    question: string;
+    options?: string[];
+    answer?: string;
+    knowledgePoint?: string;
+  },
+): Promise<string> {
+  return (await call<{ text: string }>(cfg, '/api/tutor/hint', req)).text;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export async function aiChat(cfg: AiConfig, req: { subject: Subject; grade: number; messages: ChatMessage[] }): Promise<string> {
+  return (await call<{ text: string }>(cfg, '/api/tutor/chat', { ...req, messages: req.messages.slice(-6) })).text;
+}
+
+export async function aiReport(
+  cfg: AiConfig,
+  req: { grade: number; weakSkills: { label: string; accuracy: number; total: number }[]; mistakes: string[] },
+): Promise<string> {
+  return (await call<{ text: string }>(cfg, '/api/tutor/report', req, 30000)).text;
+}

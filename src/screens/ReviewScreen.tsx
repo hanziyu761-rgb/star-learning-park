@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LESSONS } from '@/content';
+import { resolveExercise } from '@/content/resolve';
 import { zh } from '@/content/zh';
 import { FeedbackBar } from '@/components/FeedbackBar';
 import { Mascot } from '@/components/Mascot';
@@ -14,6 +14,7 @@ import { Header, LoadingView } from '@/components/Screen';
 import { BigButton, Stars } from '@/components/ui';
 import type { ExerciseOutcome } from '@/exercises/common';
 import { ExerciseView } from '@/exercises/ExerciseView';
+import { AskTeacher } from '@/ai/AskTeacher';
 import { langForSubject, type FeedbackMessage } from '@/lesson/feedback';
 import { useNav } from '@/nav/Nav';
 import { reviewQueue, type ReviewItem } from '@/progress/plan';
@@ -32,7 +33,7 @@ function ReviewSession() {
   const insets = useSafeAreaInsets();
   const { state, dispatch } = useProgress();
   // 进入页面时确定本轮题目，作答过程中不再变化
-  const [queue] = useState<ReviewItem[]>(() => reviewQueue(state, LESSONS, Date.now()));
+  const [queue] = useState<ReviewItem[]>(() => reviewQueue(state, resolveExercise, Date.now()));
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
@@ -62,14 +63,14 @@ function ReviewSession() {
   }
 
   const item = queue[index];
-  const theme = subjectTheme[item.lesson.subject];
+  const theme = subjectTheme[item.subject];
 
   const onSolved = (o: ExerciseOutcome) => {
     dispatch({
       type: 'exercise/result',
-      lessonId: item.lesson.id,
+      lessonId: item.mistake.lessonId,
       exerciseId: item.exercise.id,
-      subject: item.lesson.subject,
+      subject: item.subject,
       skill: item.exercise.skill,
       firstTryCorrect: o.firstTryCorrect,
       attempts: o.attempts,
@@ -122,15 +123,16 @@ function ReviewSession() {
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.from}>
-          {theme.emoji} 来自：{typeof item.lesson.title === 'string' ? item.lesson.title : item.lesson.title.map((s) => s.char).join('')}
+          {theme.emoji} 来自：{item.source}
         </Text>
         <ExerciseView
           key={item.mistake.key}
           exercise={item.exercise}
-          lang={langForSubject(item.lesson.subject)}
+          lang={langForSubject(item.subject)}
           onFeedback={setFeedback}
           onSolved={onSolved}
         />
+        <AskTeacher key={item.mistake.key} exercise={item.exercise} subject={item.subject} solved={done} />
       </ScrollView>
       <View style={[styles.bottom, { paddingBottom: insets.bottom + space.md }]}>
         <FeedbackBar message={feedback} />

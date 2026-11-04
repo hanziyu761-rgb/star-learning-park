@@ -57,6 +57,8 @@ export interface ChoiceOption {
 }
 
 export interface ChoiceExercise {
+  /** 答对后显示的讲解（可选） */
+  explanation?: string;
   kind: 'choice';
   id: string;
   skill: string;
@@ -74,6 +76,8 @@ export interface ChoiceExercise {
 }
 
 export interface TrueFalseExercise {
+  /** 答对后显示的讲解（可选） */
+  explanation?: string;
   kind: 'truefalse';
   id: string;
   skill: string;
@@ -90,6 +94,8 @@ export interface DragMatchPair {
 }
 
 export interface DragMatchExercise {
+  /** 答对后显示的讲解（可选） */
+  explanation?: string;
   kind: 'drag-match';
   id: string;
   skill: string;
@@ -99,6 +105,8 @@ export interface DragMatchExercise {
 }
 
 export interface SortExercise {
+  /** 答对后显示的讲解（可选） */
+  explanation?: string;
   kind: 'sort';
   id: string;
   skill: string;

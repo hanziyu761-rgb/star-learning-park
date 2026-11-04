@@ -3,7 +3,8 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LESSONS } from '@/content';
-import { createEmptyProgress, parseProgress, progressReducer, type ProgressAction, type ProgressState } from '@/progress/model';
+import { resolveExercise } from '@/content/resolve';
+import { createEmptyProgress, parseProgress, progressReducer, PROGRESS_VERSION, type ProgressAction, type ProgressState } from '@/progress/model';
 import { lessonSkills, suggestNext } from '@/progress/plan';
 import { dayKey, isDue, isGraduated, newSrs, reviewSrs } from '@/progress/srs';
 import { dueMistakes, subjectStats } from '@/progress/stats';
@@ -70,7 +71,9 @@ describe('v1 → v2 数据迁移（旧进度不丢失）', () => {
 
   it('保留全部旧记录，未掌握的错题今天可复习，已掌握的保持掌握', () => {
     const s = parseProgress(JSON.stringify(v1), T0)!;
-    expect(s.version).toBe(2);
+    expect(s.version).toBe(PROGRESS_VERSION);
+    expect(s.settings).toEqual({ grade: 1, aiEnabled: false, aiBaseUrl: '' });
+    expect(s.hidden).toEqual([]);
     expect(s.totalStars).toBe(5);
     expect(s.sessions).toHaveLength(1);
     expect(s.results).toHaveLength(1);
@@ -86,7 +89,7 @@ describe('v1 → v2 数据迁移（旧进度不丢失）', () => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(v1));
     const r = await loadProgress();
     expect(r.ok).toBe(true);
-    expect(r.state.version).toBe(2);
+    expect(r.state.version).toBe(PROGRESS_VERSION);
     expect(r.state.mistakes['L/q1'].srs).toBeDefined();
   });
 });
@@ -95,7 +98,7 @@ describe('学习建议', () => {
   const math = LESSONS.find((l) => l.subject === 'math')!;
 
   it('新用户：推荐还没学过的课', () => {
-    const sug = suggestNext(createEmptyProgress(), LESSONS, T0);
+    const sug = suggestNext(createEmptyProgress(), LESSONS, resolveExercise, T0);
     expect(sug.every((s) => s.kind === 'new')).toBe(true);
     expect(sug).toHaveLength(3);
   });
@@ -108,7 +111,7 @@ describe('学习建议', () => {
       { type: 'lesson/complete', lessonId: math.id, subject: 'math', now: T0 + 1000 },
       { type: 'lesson/start', lessonId: 'chinese-ri-yue-shui-huo', subject: 'chinese', now: T0 + 2000, resume: false },
     ]);
-    const sug = suggestNext(s, LESSONS, T0 + 3000, 5);
+    const sug = suggestNext(s, LESSONS, resolveExercise, T0 + 3000, 5);
     expect(sug[0]).toEqual({ kind: 'continue', lessonId: 'chinese-ri-yue-shui-huo' });
     // x2 不是可单独重做的题目（不存在于课程中），只有 compare-fish 进入复习
     expect(sug[1]).toEqual({ kind: 'review', count: 1 });

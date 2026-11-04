@@ -1,0 +1,13 @@
+{
+  "name": "star-ai-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "星星学习乐园 AI 老师服务（Cloudflare Worker + DeepSeek）",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "dev": "node dev-server.mjs",
+    "dev:mock": "MOCK_LLM=1 node dev-server.mjs",
+    "deploy": "npx wrangler deploy"
+  }
+}

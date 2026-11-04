@@ -13,6 +13,10 @@ function toHref(route: Route) {
       return '/parent' as const;
     case 'review':
       return '/review' as const;
+    case 'teacher':
+      return '/teacher' as const;
+    case 'practice':
+      return { pathname: '/practice/[id]' as const, params: { id: route.id } };
   }
 }
 

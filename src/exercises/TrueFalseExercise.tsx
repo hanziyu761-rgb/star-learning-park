@@ -9,7 +9,7 @@ import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 /** 正误判断：看图听句子，判断对还是不对 */
 export function TrueFalseExercise({ exercise, lang, onFeedback, onSolved }: ExerciseProps<TrueFalseData>) {
-  const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved);
+  const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved, exercise.explanation);
   const [tried, setTried] = useState<boolean[]>([]);
 
   const choose = (value: boolean) => {

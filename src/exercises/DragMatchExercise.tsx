@@ -13,7 +13,7 @@ import { PromptHeader, useAttempts, type ExerciseProps } from './common';
  * 为方便小手操作，也支持“先点卡片、再点位置”的方式完成配对。
  */
 export function DragMatchExercise({ exercise, lang, onFeedback, onSolved }: ExerciseProps<DragMatchData>) {
-  const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved);
+  const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved, exercise.explanation);
   const [placed, setPlaced] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
 

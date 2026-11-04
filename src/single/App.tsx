@@ -12,7 +12,9 @@ import { ProgressProvider } from '@/progress/ProgressContext';
 import HomeScreen from '@/screens/HomeScreen';
 import LessonScreen from '@/screens/LessonScreen';
 import ParentScreen from '@/screens/ParentScreen';
+import PracticeScreen from '@/screens/PracticeScreen';
 import ReviewScreen from '@/screens/ReviewScreen';
+import TeacherScreen from '@/screens/TeacherScreen';
 import SubjectScreen from '@/screens/SubjectScreen';
 import { colors } from '@/theme';
 
@@ -28,6 +30,10 @@ function renderRoute(route: Route) {
       return <ParentScreen />;
     case 'review':
       return <ReviewScreen />;
+    case 'practice':
+      return <PracticeScreen id={route.id} />;
+    case 'teacher':
+      return <TeacherScreen />;
   }
 }
 

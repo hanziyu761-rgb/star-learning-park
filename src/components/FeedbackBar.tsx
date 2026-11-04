@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { FeedbackMessage } from '@/lesson/feedback';
 import { colors, radius, space } from '@/theme';
@@ -23,6 +23,11 @@ export function FeedbackBar({ message }: { message: FeedbackMessage | null }) {
       <View style={styles.texts}>
         <DisplayTextView text={message.text} size={20} color={fg} />
         {message.hint ? <DisplayTextView text={message.hint.text} size={16} color={colors.text} /> : null}
+        {message.note ? (
+          <Text style={styles.note} testID="feedback-note">
+            {message.note}
+          </Text>
+        ) : null}
       </View>
     </Animated.View>
   );
@@ -38,4 +43,5 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   texts: { flex: 1, alignItems: 'center', gap: 2 },
+  note: { fontSize: 13, color: colors.textSoft, textAlign: 'center' },
 });

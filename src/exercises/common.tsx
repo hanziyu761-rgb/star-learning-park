@@ -22,7 +22,12 @@ export interface ExerciseProps<T> {
 /**
  * 统一的作答流程：答错给提示并允许重试，答对后报告结果（只报告一次）。
  */
-export function useAttempts(lang: FeedbackLang, onFeedback: (m: FeedbackMessage | null) => void, onSolved: (o: ExerciseOutcome) => void) {
+export function useAttempts(
+  lang: FeedbackLang,
+  onFeedback: (m: FeedbackMessage | null) => void,
+  onSolved: (o: ExerciseOutcome) => void,
+  explanation?: string,
+) {
   const attempts = useRef(0);
   const firstWrong = useRef(false);
   const [solved, setSolved] = useState(false);
@@ -40,9 +45,9 @@ export function useAttempts(lang: FeedbackLang, onFeedback: (m: FeedbackMessage 
     if (solved) return;
     attempts.current += 1;
     setSolved(true);
-    onFeedback(praise(lang));
+    onFeedback({ ...praise(lang), note: explanation });
     onSolved({ firstTryCorrect: !firstWrong.current, attempts: attempts.current });
-  }, [solved, lang, onFeedback, onSolved]);
+  }, [solved, lang, onFeedback, onSolved, explanation]);
 
   return { solved, wrong, correct };
 }

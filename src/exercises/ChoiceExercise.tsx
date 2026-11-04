@@ -11,7 +11,7 @@ import { PromptHeader, useAttempts, type ExerciseProps } from './common';
  * 选择题：支持图片选择、数字选择、文字选择和听音选择（有 listen 字段时显示大喇叭）。
  */
 export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: ExerciseProps<ChoiceExerciseData>) {
-  const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved);
+  const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved, exercise.explanation);
   const [wrongIds, setWrongIds] = useState<string[]>([]);
 
   // 听音题：先读题目，再自动播放一次要听的内容

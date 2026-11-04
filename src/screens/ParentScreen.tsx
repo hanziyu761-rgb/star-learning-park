@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { exerciseLabel, getLesson, LESSONS, skillLabel } from '@/content';
+import { getLesson, LESSONS, skillLabel } from '@/content';
 import { plainText } from '@/content/zh';
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
 import { ParentGate } from '@/components/ParentGate';
 import { Card, SectionTitle, Stars } from '@/components/ui';
 import { useNav } from '@/nav/Nav';
+import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
+import { AiCard, GradeCard, HiddenCard } from './ParentSettings';
 import { useProgress } from '@/progress/ProgressContext';
 import {
   activeDaysLast7,
@@ -44,8 +46,8 @@ function ParentDashboard() {
   const weak = weakSkills(state);
   const mistakes = openMistakes(state);
   const hasData = state.results.length > 0 || state.sessions.length > 0;
-  const completedLessons = Object.values(state.lessons).filter((l) => l.completedCount > 0).length;
-  const suggestions = suggestNext(state, LESSONS, now, 3);
+  const completedLessons = LESSONS.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
+  const suggestions = suggestNext(state, LESSONS, resolveExercise, now, 3);
   const mastered = Object.values(state.mistakes).filter((m) => m.resolved).length;
 
   return (
@@ -103,12 +105,11 @@ function ParentDashboard() {
         <SectionTitle>最近完成的课程</SectionTitle>
         {sessions.length === 0 ? <Text style={styles.empty}>暂无</Text> : null}
         {sessions.map((x, i) => {
-          const lesson = getLesson(x.lessonId);
           return (
             <View key={`${x.endedAt}-${i}`} style={styles.row} testID="session-row">
               <Text style={styles.rowEmoji}>{subjectTheme[x.subject].emoji}</Text>
               <View style={{ flex: 1 }}>
-                <Text style={styles.rowTitle}>{lesson ? plainText(lesson.title) : x.lessonId}</Text>
+                <Text style={styles.rowTitle}>{sourceName(x.lessonId)}</Text>
                 <Text style={styles.small}>
                   {formatDateTime(x.endedAt)} · 用时 {formatDuration(x.durationSec)}
                   {x.exerciseCount > 0 ? ` · 一次答对 ${x.firstTryCorrect}/${x.exerciseCount}` : ''}
@@ -145,7 +146,7 @@ function ParentDashboard() {
           <View key={m.key} style={styles.row} testID="mistake-row">
             <Text style={styles.rowEmoji}>{subjectTheme[m.subject].emoji}</Text>
             <View style={{ flex: 1 }}>
-              <Text style={styles.rowTitle}>{exerciseLabel(m.lessonId, m.exerciseId)}</Text>
+              <Text style={styles.rowTitle}>{mistakeLabel(m.lessonId, m.exerciseId)}</Text>
               <Text style={styles.small}>
                 {skillLabel(m.skill)} · 答错 {m.wrongCount} 次 · 下次复习 {m.srs.nextReviewDay.slice(5).replace('-', '月')}日
               </Text>
@@ -154,7 +155,11 @@ function ParentDashboard() {
         ))}
       </Card>
 
-      <Notice text="说明：所有数据只保存在这台设备上，不会上传。学习时长按完成的课程统计（单次最多计 60 分钟），中途退出的课程不计时长。" />
+      <GradeCard />
+      <AiCard />
+      <HiddenCard />
+
+      <Notice text="说明：学习数据只保存在这台设备上；开启 AI 老师后，只有题目内容和孩子的提问会发送到 AI 服务，不会上传个人信息。学习时长按完成的课程和练习统计（单次最多计 60 分钟），中途退出的课程不计时长。" />
 
       <Pressable
         accessibilityRole="button"
@@ -191,6 +196,8 @@ function describeSuggestion(s: Suggestion): string {
       return `继续学完 ${lessonName(s.lessonId)}`;
     case 'review':
       return `完成今日复习（${s.count} 道错题）`;
+    case 'practice':
+      return `“${skillLabel(s.skill)}”一次答对率 ${s.accuracy}%，建议再练「${sourceName(s.lessonId)}」`;
     case 'weak':
       return `“${skillLabel(s.skill)}”一次答对率 ${s.accuracy}%，建议重学 ${lessonName(s.lessonId)}`;
     case 'new':

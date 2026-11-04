@@ -24,6 +24,8 @@ const ACCEPTED: Record<string, string> = {
   '啦:la:lā': '语气词“啦”读轻声',
   '害:hai:hài': '“厉害”中“害”读轻声',
   '试:shi:shì': '“试试”重叠时第二个字读轻声',
+  '星:xing:xīng': '“星星”第二个字读轻声',
+  '问:wen:wèn': '“问问”重叠时第二个字读轻声',
 };
 
 function isZhText(v: unknown): v is ZhText {
