@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { getLesson, LESSONS, skillLabel } from '@/content';
 import { plainText } from '@/content/zh';
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
-import { ParentGate } from '@/components/ParentGate';
+import { markParentUnlocked, ParentGate } from '@/components/ParentGate';
 import { Card, SectionTitle, Stars } from '@/components/ui';
 import { useNav } from '@/nav/Nav';
 import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
@@ -34,12 +34,22 @@ export default function ParentScreen() {
   return (
     <Screen bg="#F2F1FF" testID="parent-screen">
       <Header title="家长中心" onBack={goBack} />
-      {passed ? <ParentDashboard /> : <ParentGate onPass={() => setPassed(true)} />}
+      {passed ? (
+        <ParentDashboard />
+      ) : (
+        <ParentGate
+          onPass={() => {
+            markParentUnlocked();
+            setPassed(true);
+          }}
+        />
+      )}
     </Screen>
   );
 }
 
 function ParentDashboard() {
+  const nav = useNav();
   const { state, dispatch } = useProgress();
   const [confirmReset, setConfirmReset] = useState(false);
   const [now] = useState(() => Date.now());
@@ -53,9 +63,7 @@ function ParentDashboard() {
 
   return (
     <View style={{ gap: space.lg }} testID="parent-dashboard">
-      {!hasData ? (
-        <Notice text="还没有学习记录。孩子完成课程或练习后，这里会显示真实的学习情况。" />
-      ) : null}
+      {!hasData ? <Notice text="还没有学习记录。孩子完成课程或练习后，这里会显示真实的学习情况。" /> : null}
 
       <Card>
         <SectionTitle>总览</SectionTitle>
@@ -78,6 +86,19 @@ function ParentDashboard() {
         ))}
       </Card>
 
+      <Card>
+        <SectionTitle>试卷生成</SectionTitle>
+        <Text style={styles.small}>按年级、上下册和单元随时生成一套试卷，可以打印或存成 PDF，附参考答案。</Text>
+        <Pressable
+          onPress={() => nav.push({ name: 'exam' })}
+          style={styles.examBtn}
+          accessibilityRole="button"
+          testID="exam-entry"
+        >
+          <Text style={styles.examBtnText}>📝 生成试卷</Text>
+        </Pressable>
+      </Card>
+
       <KnowledgeCard />
 
       {SUBJECTS.map((s) => {
@@ -94,7 +115,11 @@ function ParentDashboard() {
                 <View style={styles.grid}>
                   <Metric label="完成课程" value={`${st.completedLessons} 节`} />
                   <Metric label="完成次数" value={`${st.sessions} 次`} />
-                  <Metric label="一次答对率" value={st.accuracy === null ? '—' : `${st.accuracy}%`} testID={`acc-${s}`} />
+                  <Metric
+                    label="一次答对率"
+                    value={st.accuracy === null ? '—' : `${st.accuracy}%`}
+                    testID={`acc-${s}`}
+                  />
                   <Metric label="学习时长" value={formatDuration(st.studySec)} />
                 </View>
               )}
@@ -142,7 +167,8 @@ function ParentDashboard() {
       <Card>
         <SectionTitle>错题（尚未掌握）</SectionTitle>
         <Text style={styles.small}>
-          第一次答错的题目会进入“今日复习”，按 1 天、3 天的间隔再练，连续答对 2 次视为掌握。已掌握 {mastered} 道 · 完成复习 {state.reviews.length} 次
+          第一次答错的题目会进入“今日复习”，按 1 天、3 天的间隔再练，连续答对 2 次视为掌握。已掌握 {mastered} 道 ·
+          完成复习 {state.reviews.length} 次
         </Text>
         {mistakes.length === 0 ? <Text style={styles.empty}>暂无错题</Text> : null}
         {mistakes.map((m) => (
@@ -151,7 +177,8 @@ function ParentDashboard() {
             <View style={{ flex: 1 }}>
               <Text style={styles.rowTitle}>{mistakeLabel(m.lessonId, m.exerciseId)}</Text>
               <Text style={styles.small}>
-                {skillLabel(m.skill)} · 答错 {m.wrongCount} 次 · 下次复习 {m.srs.nextReviewDay.slice(5).replace('-', '月')}日
+                {skillLabel(m.skill)} · 答错 {m.wrongCount} 次 · 下次复习{' '}
+                {m.srs.nextReviewDay.slice(5).replace('-', '月')}日
               </Text>
             </View>
           </View>
@@ -222,17 +249,39 @@ function Metric({ label, value, testID }: { label: string; value: string; testID
 }
 
 const styles = StyleSheet.create({
+  examBtn: {
+    marginTop: space.sm,
+    minHeight: 52,
+    borderRadius: radius.md,
+    backgroundColor: colors.parent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  examBtnText: { color: '#fff', fontSize: 18, fontWeight: '800' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   metric: { flexBasis: '46%', flexGrow: 1, backgroundColor: '#F7F6FF', borderRadius: radius.md, padding: space.md },
   metricValue: { fontSize: 22, fontWeight: '900', color: colors.text },
   metricLabel: { fontSize: 13, color: colors.textSoft, marginTop: 2 },
   empty: { fontSize: 15, color: colors.textSoft, paddingVertical: space.sm },
   small: { fontSize: 13, color: colors.textSoft, marginTop: 2 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm, borderTopWidth: 1, borderTopColor: '#EEE' },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    paddingVertical: space.sm,
+    borderTopWidth: 1,
+    borderTopColor: '#EEE',
+  },
   rowEmoji: { fontSize: 24 },
   rowTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   bad: { fontSize: 15, fontWeight: '800', color: colors.wrong },
-  reset: { borderWidth: 2, borderColor: colors.wrong, borderRadius: radius.md, padding: space.md, alignItems: 'center' },
+  reset: {
+    borderWidth: 2,
+    borderColor: colors.wrong,
+    borderRadius: radius.md,
+    padding: space.md,
+    alignItems: 'center',
+  },
   resetText: { color: colors.wrong, fontWeight: '800', fontSize: 16 },
   cancel: { alignItems: 'center', padding: space.sm },
 });

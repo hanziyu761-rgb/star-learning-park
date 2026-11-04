@@ -171,6 +171,7 @@ with sync_playwright() as p:
     page.screenshot(path=f"{OUT}/c-06-diagnose-result.png")
     ok(f"找原因（跨年级）：依次检查 {' → '.join(dict.fromkeys(asked))}；找到三年级根因：{root[:40]}")
     tid(page, "diagnose-back").click()
+    page.wait_for_selector('[data-testid="map-screen"]')
 
     # 4. 语文、英语：题库出题
     page.goto(BASE); page.wait_for_selector('[data-testid="home"]')

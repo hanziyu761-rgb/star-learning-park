@@ -9,6 +9,15 @@ export function makeGateQuestion(rand: () => number = Math.random) {
   return { a, b, answer: a * b };
 }
 
+/** 家长验证通过后 30 分钟内，进入家长功能页（如试卷生成）不用再验证 */
+let unlockedAt = 0;
+export function markParentUnlocked() {
+  unlockedAt = Date.now();
+}
+export function isParentUnlocked() {
+  return unlockedAt > 0 && Date.now() - unlockedAt < 30 * 60_000;
+}
+
 export function ParentGate({ onPass, rand }: { onPass: () => void; rand?: () => number }) {
   const [q, setQ] = useState(() => makeGateQuestion(rand));
   const [input, setInput] = useState('');

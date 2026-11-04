@@ -8,7 +8,10 @@ function toHref(route: Route) {
     case 'subject':
       return { pathname: '/subject/[subject]' as const, params: { subject: route.subject } };
     case 'lesson':
-      return { pathname: '/lesson/[id]' as const, params: route.resume ? { id: route.id, resume: '1' } : { id: route.id } };
+      return {
+        pathname: '/lesson/[id]' as const,
+        params: route.resume ? { id: route.id, resume: '1' } : { id: route.id },
+      };
     case 'parent':
       return '/parent' as const;
     case 'review':
@@ -19,6 +22,8 @@ function toHref(route: Route) {
       return { pathname: '/diagnose/[kp]' as const, params: { kp: route.kp } };
     case 'teacher':
       return '/teacher' as const;
+    case 'exam':
+      return '/exam' as const;
     case 'practice':
       return { pathname: '/practice/[id]' as const, params: { id: route.id } };
   }

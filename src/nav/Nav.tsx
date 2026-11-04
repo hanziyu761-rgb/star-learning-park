@@ -19,7 +19,9 @@ export type Route =
   /** 我的知识小地图（一年级数学） */
   | { name: 'map' }
   /** 找原因小游戏：前置知识诊断 */
-  | { name: 'diagnose'; kp: string };
+  | { name: 'diagnose'; kp: string }
+  /** 家长中心：试卷生成 */
+  | { name: 'exam' };
 
 export interface Nav {
   push: (route: Route) => void;
