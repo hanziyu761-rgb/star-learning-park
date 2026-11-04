@@ -18,7 +18,10 @@ export function GradeCard() {
   return (
     <Card>
       <SectionTitle>孩子年级</SectionTitle>
-      <Text style={styles.small}>决定“题库闯关”和“口算闯关”显示哪个年级的内容，也会告诉 AI 老师用多简单的话讲解。</Text>
+      <Text style={styles.small}>
+        决定“题库闯关”“口算闯关”和“知识小地图”默认显示哪个年级，推荐的新知识也按这个年级；也会告诉 AI
+        老师用多简单的话讲解。
+      </Text>
       <View style={styles.chips}>
         {[1, 2, 3, 4, 5, 6].map((g) => (
           <Pressable
@@ -69,7 +72,11 @@ export function AiCard() {
         { enabled: aiEnabled, baseUrl: aiBaseUrl },
         {
           grade,
-          weakSkills: weakSkills(state).map((w) => ({ label: skillLabel(w.skill), accuracy: w.accuracy, total: w.total })),
+          weakSkills: weakSkills(state).map((w) => ({
+            label: skillLabel(w.skill),
+            accuracy: w.accuracy,
+            total: w.total,
+          })),
           mistakes: openMistakes(state)
             .slice(0, 8)
             .map((m) => mistakeLabel(m.lessonId, m.exerciseId).slice(0, 100)),
@@ -146,8 +153,15 @@ export function HiddenCard() {
   return (
     <Card>
       <SectionTitle>已屏蔽的题目</SectionTitle>
-      <Text style={styles.small}>孩子或家长在题库中长按“这题有问题”屏蔽了 {state.hidden.length} 道题，它们不会再出现。</Text>
-      <Pressable onPress={() => dispatch({ type: 'bank/unhide-all' })} style={styles.btn} accessibilityRole="button" testID="unhide-all">
+      <Text style={styles.small}>
+        孩子或家长在题库中长按“这题有问题”屏蔽了 {state.hidden.length} 道题，它们不会再出现。
+      </Text>
+      <Pressable
+        onPress={() => dispatch({ type: 'bank/unhide-all' })}
+        style={styles.btn}
+        accessibilityRole="button"
+        testID="unhide-all"
+      >
         <Text style={styles.btnText}>全部恢复</Text>
       </Pressable>
     </Card>
@@ -157,15 +171,41 @@ export function HiddenCard() {
 const styles = StyleSheet.create({
   small: { fontSize: 13, color: colors.textSoft, marginTop: 2, lineHeight: 19 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.sm },
-  chip: { paddingHorizontal: space.md, minHeight: 44, borderRadius: radius.round, backgroundColor: '#EEEDFB', justifyContent: 'center' },
+  chip: {
+    paddingHorizontal: space.md,
+    minHeight: 44,
+    borderRadius: radius.round,
+    backgroundColor: '#EEEDFB',
+    justifyContent: 'center',
+  },
   chipOn: { backgroundColor: colors.parent },
   chipText: { fontSize: 15, fontWeight: '800', color: colors.text },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: space.sm },
   label: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: space.sm },
-  input: { minHeight: 48, borderRadius: radius.md, backgroundColor: '#F7F6FF', paddingHorizontal: space.md, fontSize: 15, marginTop: 4 },
-  btn: { minHeight: 48, borderRadius: radius.md, backgroundColor: colors.parent, alignItems: 'center', justifyContent: 'center', marginTop: space.sm },
+  input: {
+    minHeight: 48,
+    borderRadius: radius.md,
+    backgroundColor: '#F7F6FF',
+    paddingHorizontal: space.md,
+    fontSize: 15,
+    marginTop: 4,
+  },
+  btn: {
+    minHeight: 48,
+    borderRadius: radius.md,
+    backgroundColor: colors.parent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: space.sm,
+  },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
   divider: { height: 1, backgroundColor: '#EEE', marginVertical: space.md },
-  reportBox: { borderWidth: 2, borderColor: '#D9D6FF', borderRadius: radius.md, padding: space.md, marginTop: space.sm },
+  reportBox: {
+    borderWidth: 2,
+    borderColor: '#D9D6FF',
+    borderRadius: radius.md,
+    padding: space.md,
+    marginTop: space.sm,
+  },
   reportText: { fontSize: 15, lineHeight: 23, color: colors.text },
 });

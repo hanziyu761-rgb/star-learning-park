@@ -8,15 +8,28 @@
  * 状态：未经一线教师审核（见 docs/KNOWLEDGE_GRAPH.md）。
  */
 
+import { zh } from '@/content/zh';
+import type { DisplayText } from '@/lesson/types';
+import { CHINESE } from './curriculum/chinese';
+import { ENGLISH } from './curriculum/english';
+import { MATH_UPPER } from './curriculum/math';
+
 export type Strength = 'hard' | 'soft';
+
+export type KpSubject = 'math' | 'chinese' | 'english';
 
 export interface KnowledgePoint {
   id: string;
+  /** 学科；未填写的是一年级数学（V2.0 原有数据） */
+  subject?: KpSubject;
+  /** 对应的题库单元（ChinaStudyFree 单元 id，如 math-g3a-u6）；这些单元的作答记录归到本知识点 */
+  units?: string[];
   /** 给家长看的名称 */
   name: string;
   /** 给孩子看的短名称与拼音（知识小地图） */
   kidName: string;
-  kidPy: string;
+  /** 拼音（一、二年级必填；三年级起不注音） */
+  kidPy?: string;
   emoji: string;
   grade: number;
   term: '上' | '下';
@@ -31,7 +44,7 @@ export interface KnowledgePoint {
 
 const kp = (k: KnowledgePoint) => k;
 
-export const KNOWLEDGE_POINTS: KnowledgePoint[] = [
+const MATH_G1: KnowledgePoint[] = [
   kp({
     id: 'm1.count5',
     name: '认识 1～5',
@@ -377,6 +390,31 @@ export const KNOWLEDGE_POINTS: KnowledgePoint[] = [
   }),
 ];
 
+/** 全部知识点：一年级数学（原有）+ 二～六年级数学 + 一～六年级语文 + 三～六年级英语（V2.2） */
+export const KNOWLEDGE_POINTS: KnowledgePoint[] = [
+  ...MATH_G1.map((k) => ({ ...k, subject: 'math' as const })),
+  ...MATH_UPPER.map((k) => ({ ...k, practicable: true })),
+  ...CHINESE.map((k) => ({ ...k, practicable: true })),
+  ...ENGLISH.map((k) => ({ ...k, practicable: true })),
+];
+
+export const kpSubject = (k: KnowledgePoint): KpSubject => k.subject ?? 'math';
+
+/** 孩子看到的名称：有拼音时上注音 */
+export const kpLabel = (k: KnowledgePoint): DisplayText => (k.kidPy ? zh(k.kidName, k.kidPy) : k.kidName);
+
+/** 某学科某年级的知识点，按学期、顺序排好 */
+export function kpsFor(subject: KpSubject, grade: number): KnowledgePoint[] {
+  return KNOWLEDGE_POINTS.filter((k) => kpSubject(k) === subject && k.grade === grade).sort((a, b) =>
+    a.term === b.term ? a.order - b.order : a.term === '上' ? -1 : 1,
+  );
+}
+
+/** 题库单元 → 知识点 */
+export const UNIT_TO_KP: Record<string, string> = Object.fromEntries(
+  KNOWLEDGE_POINTS.flatMap((k) => (k.units ?? []).map((u) => [u, k.id])),
+);
+
 export const KP_BY_ID: Record<string, KnowledgePoint> = Object.fromEntries(KNOWLEDGE_POINTS.map((k) => [k.id, k]));
 
 export function getKp(id: string): KnowledgePoint | undefined {
@@ -401,6 +439,12 @@ export function ancestors(id: string, onlyHard = false): string[] {
 }
 
 /** 拓扑排序（先修在前；同层按 order） */
+/** 学习顺序：年级 → 学期 → 单元顺序 */
+function seq(id: string): number {
+  const k = KP_BY_ID[id];
+  return k ? k.grade * 1000 + (k.term === '下' ? 500 : 0) + k.order : 0;
+}
+
 export function topoOrder(ids: string[] = KNOWLEDGE_POINTS.map((k) => k.id)): string[] {
   const set = new Set(ids);
   const done = new Set<string>();
@@ -410,14 +454,12 @@ export function topoOrder(ids: string[] = KNOWLEDGE_POINTS.map((k) => k.id)): st
     if (path.has(id)) throw new Error(`知识图谱存在环：${[...path, id].join(' → ')}`);
     path.add(id);
     const k = KP_BY_ID[id];
-    const pres = [...(k?.prerequisites ?? [])].sort(
-      (a, b) => (KP_BY_ID[a.id]?.order ?? 0) - (KP_BY_ID[b.id]?.order ?? 0),
-    );
+    const pres = [...(k?.prerequisites ?? [])].sort((a, b) => seq(a.id) - seq(b.id));
     for (const p of pres) if (set.has(p.id)) visit(p.id, path);
     path.delete(id);
     done.add(id);
     out.push(id);
   };
-  [...ids].sort((a, b) => (KP_BY_ID[a]?.order ?? 0) - (KP_BY_ID[b]?.order ?? 0)).forEach((id) => visit(id, new Set()));
+  [...ids].sort((a, b) => seq(a) - seq(b)).forEach((id) => visit(id, new Set()));
   return out;
 }

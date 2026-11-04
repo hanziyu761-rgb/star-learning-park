@@ -9,6 +9,7 @@
  * 4. ChinaStudyFree 一年级数学题库：按原题“知识点”标签 + 题干关键词映射（较粗，见 RULES）
  */
 import { findBankExercise } from '@/content/bank';
+import { UNIT_TO_KP } from './graph';
 
 /** 精做课程逐题映射：课程id/题目或环节id → 知识点 */
 export const LESSON_MAP: Record<string, string> = {
@@ -74,19 +75,25 @@ export function kpForBankLabel(label: string, question: string): string | null {
 }
 
 /**
- * 一条练习记录属于哪个知识点；不属于一年级数学知识图谱的返回 null。
+ * 一条练习记录属于哪个知识点；不属于知识图谱的返回 null。
  */
 export function kpForRecord(lessonId: string, exerciseId: string, skill: string): string | null {
   if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:')) {
-    const m = exerciseId.match(/^kp:(m\d\.[\w]+):/);
+    const m = exerciseId.match(/^kp:([a-z]\d\.[\w]+):/);
     return m ? m[1] : null;
   }
   if (lessonId.startsWith('oral:')) return ORAL_MAP[lessonId.slice(5)] ?? null;
   if (lessonId.startsWith('bank:math-g1')) {
     const label = skill.split(':').slice(2).join(':');
     const ex = findBankExercise(lessonId, exerciseId)?.exercise;
-    const text = ex ? (ex.kind === 'truefalse' ? JSON.stringify(ex.statement.text) : JSON.stringify(ex.prompt.text)) : '';
+    const text = ex
+      ? ex.kind === 'truefalse'
+        ? JSON.stringify(ex.statement.text)
+        : JSON.stringify(ex.prompt.text)
+      : '';
     return kpForBankLabel(label, text);
   }
+  // 二～六年级数学、语文、英语题库：按单元归到知识点（V2.2）
+  if (lessonId.startsWith('bank:')) return UNIT_TO_KP[lessonId.slice(5)] ?? null;
   return LESSON_MAP[`${lessonId}/${exerciseId}`] ?? null;
 }

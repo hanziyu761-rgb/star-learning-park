@@ -1,5 +1,5 @@
 /**
- * 我的知识小地图（儿童端）：一年级数学的本领按学习顺序排成一条小路，
+ * 我的知识小地图（儿童端）：选择学科和年级（默认是家长设置的年级），本领按学习顺序排成一条小路，
  * 每个本领用颜色和小图标表示掌握情况。不展示复杂的先修网络。
  */
 import React, { useState } from 'react';
@@ -10,8 +10,8 @@ import { DisplayTextView } from '@/components/PinyinText';
 import { Header, LoadingView, Screen } from '@/components/Screen';
 import { BigButton, tapFeedback } from '@/components/ui';
 import { isStruggling } from '@/knowledge/diagnose';
-import { hasGenerator } from '@/knowledge/generators';
-import { KNOWLEDGE_POINTS, type KnowledgePoint } from '@/knowledge/graph';
+import { hasGenerator, hasOriginalGenerator } from '@/knowledge/generators';
+import { getKp, kpLabel, kpsFor, kpSubject, type KnowledgePoint, type KpSubject } from '@/knowledge/graph';
 import { computeMastery, type MasteryState } from '@/knowledge/mastery';
 import { recommendKps } from '@/knowledge/recommend';
 import { useNav } from '@/nav/Nav';
@@ -40,14 +40,19 @@ function MapBody() {
   const [now] = useState(() => Date.now());
   const mastery = computeMastery(state, now);
   const [selected, setSelected] = useState<KnowledgePoint | null>(null);
-  const kps = [...KNOWLEDGE_POINTS].sort((a, b) => a.order - b.order);
-  const todo = recommendKps(state, mastery, now, 3).filter((r) => r.kind === 'review' || r.kind === 'diagnose');
+  const [subject, setSubject] = useState<KpSubject>('math');
+  const [grade, setGrade] = useState(state.settings.grade ?? 1);
+  const kps = kpsFor(subject, grade);
+  const todo = recommendKps(state, mastery, now, 3, { grade, subject }).filter(
+    (r) => r.kind === 'review' || r.kind === 'diagnose',
+  );
   const learned = kps.filter((k) => mastery[k.id].state === 'emerging' || mastery[k.id].state === 'stable').length;
 
   const open = (k: KnowledgePoint) => {
     tapFeedback();
     setSelected(k);
-    speak({ text: `${k.kidName}，${KID_STATE[mastery[k.id].state].text}`, lang: 'zh-CN' });
+    if (kpSubject(k) === 'english') speak({ text: k.kidName, lang: 'en-US' });
+    else speak({ text: `${k.kidName}，${KID_STATE[mastery[k.id].state].text}`, lang: 'zh-CN' });
   };
 
   return (
@@ -57,15 +62,70 @@ function MapBody() {
         <View style={styles.summary}>
           <Mascot size={56} bounce={false} />
           <Text style={styles.summaryText} testID="map-learned">
-            一年级数学：学会了 {learned} / {kps.length} 个本领
+            {GRADE_CN[grade]}年级{SUBJECTS.find((x) => x.id === subject)!.name}：学会了 {learned} / {kps.length} 个本领
           </Text>
         </View>
+
+        <View style={styles.tabs}>
+          {SUBJECTS.map((x) => (
+            <Pressable
+              key={x.id}
+              onPress={() => {
+                tapFeedback();
+                setSelected(null);
+                setSubject(x.id);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: subject === x.id }}
+              testID={`map-subject-${x.id}`}
+              style={[styles.tab, subject === x.id && styles.tabOn]}
+            >
+              <DisplayTextView text={zh(x.name, x.py)} size={18} color={subject === x.id ? '#fff' : colors.text} />
+            </Pressable>
+          ))}
+        </View>
+        <View style={styles.gradeRow}>
+          <Pressable
+            onPress={() => {
+              setSelected(null);
+              setGrade((g) => Math.max(1, g - 1));
+            }}
+            disabled={grade <= 1}
+            style={[styles.gradeBtn, grade <= 1 && { opacity: 0.3 }]}
+            accessibilityRole="button"
+            accessibilityLabel="上一个年级"
+            testID="map-grade-prev"
+          >
+            <Text style={styles.gradeArrow}>◀</Text>
+          </Pressable>
+          <View testID="map-grade-label">
+            <DisplayTextView text={zh(`${GRADE_CN[grade]}年级`, `${GRADE_PY[grade]} nián jí`)} size={20} />
+          </View>
+          <Pressable
+            onPress={() => {
+              setSelected(null);
+              setGrade((g) => Math.min(6, g + 1));
+            }}
+            disabled={grade >= 6}
+            style={[styles.gradeBtn, grade >= 6 && { opacity: 0.3 }]}
+            accessibilityRole="button"
+            accessibilityLabel="下一个年级"
+            testID="map-grade-next"
+          >
+            <Text style={styles.gradeArrow}>▶</Text>
+          </Pressable>
+        </View>
+        {kps.length === 0 ? (
+          <Text style={styles.emptyNote} testID="map-empty">
+            英语知识地图从三年级开始（人教版 PEP 三年级起点）。一、二年级可以先学 APP 里的英语启蒙课。
+          </Text>
+        ) : null}
 
         {todo.length > 0 ? (
           <View style={styles.todo} testID="map-todo">
             <DisplayTextView text={zh('今天要复习的本领', 'jīn tiān yào fù xí de běn lǐng')} size={20} />
             {todo.map((r) => {
-              const k = kps.find((x) => x.id === r.kpId)!;
+              const k = getKp(r.kpId)!; // 可能是低年级的知识点
               return (
                 <Pressable
                   key={r.kpId}
@@ -75,7 +135,7 @@ function MapBody() {
                   testID={`todo-${r.kpId}`}
                 >
                   <Text style={styles.todoEmoji}>{r.kind === 'diagnose' ? '🔍' : '🔔'}</Text>
-                  <DisplayTextView text={zh(k.kidName, k.kidPy)} size={20} />
+                  <DisplayTextView text={kpLabel(k)} size={20} />
                 </Pressable>
               );
             })}
@@ -111,7 +171,7 @@ function MapBody() {
                   ]}
                 >
                   <Text style={styles.stopEmoji}>{k.emoji}</Text>
-                  <DisplayTextView text={zh(k.kidName, k.kidPy)} size={15} />
+                  <DisplayTextView text={kpLabel(k)} size={15} />
                   <Text style={styles.badge}>{st.icon}</Text>
                   {k.term === '下' && i > 0 && kps[i - 1].term === '上' ? (
                     <Text style={styles.termTag}>下册</Text>
@@ -155,7 +215,7 @@ function KpCard({
       <View style={styles.cardHead}>
         <Text style={styles.cardEmoji}>{k.emoji}</Text>
         <View style={{ flex: 1, alignItems: 'flex-start' }}>
-          <DisplayTextView text={zh(k.kidName, k.kidPy)} size={24} />
+          <DisplayTextView text={kpLabel(k)} size={24} />
           <DisplayTextView text={zh(st.text, st.py)} size={16} color={st.color} />
         </View>
         <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="关闭" style={styles.close}>
@@ -164,6 +224,9 @@ function KpCard({
       </View>
       {hasGenerator(k.id) ? (
         <>
+          {!hasOriginalGenerator(k.id) ? (
+            <Text style={styles.cardNote}>题目来自题库（AI 生成，未逐题人工审核）。</Text>
+          ) : null}
           <BigButton
             emoji="✏️"
             label={zh('练一练', 'liàn yi liàn')}
@@ -198,7 +261,38 @@ function KpCard({
   );
 }
 
+const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
+const GRADE_PY = ['', 'yī', 'èr', 'sān', 'sì', 'wǔ', 'liù'];
+const SUBJECTS: { id: KpSubject; name: string; py: string }[] = [
+  { id: 'math', name: '数学', py: 'shù xué' },
+  { id: 'chinese', name: '语文', py: 'yǔ wén' },
+  { id: 'english', name: '英语', py: 'yīng yǔ' },
+];
+
 const styles = StyleSheet.create({
+  tabs: { flexDirection: 'row', gap: space.sm },
+  tab: {
+    flex: 1,
+    minHeight: 56,
+    borderRadius: radius.md,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow,
+  },
+  tabOn: { backgroundColor: colors.parent },
+  gradeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.lg },
+  gradeBtn: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow,
+  },
+  gradeArrow: { fontSize: 22, color: colors.parent },
+  emptyNote: { fontSize: 15, color: colors.textSoft, textAlign: 'center', padding: space.md },
   summary: {
     flexDirection: 'row',
     alignItems: 'center',

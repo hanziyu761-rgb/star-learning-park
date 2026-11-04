@@ -23,10 +23,11 @@ export const resolveExercise: ExerciseResolver = (lessonId, exerciseId) => {
   if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:')) {
     const ex = exerciseFromKpId(exerciseId);
     const kp = getKp(lessonId.split(':')[1]);
-    return ex ? { exercise: ex, subject: 'math', source: `知识点 · ${kp?.name ?? ''}` } : null;
+    return ex ? { exercise: ex, subject: kp?.subject ?? 'math', source: `知识点 · ${kp?.name ?? ''}` } : null;
   }
   const bank = findBankExercise(lessonId, exerciseId);
-  if (bank) return { exercise: bank.exercise, subject: bank.book.subject, source: `${bank.book.title} · ${bank.unit.title}` };
+  if (bank)
+    return { exercise: bank.exercise, subject: bank.book.subject, source: `${bank.book.title} · ${bank.unit.title}` };
   const oral = findOralExercise(lessonId, exerciseId);
   if (oral) return { exercise: oral.exercise, subject: 'math', source: `口算 · ${oral.topic.title}` };
   const lesson = getLesson(lessonId);

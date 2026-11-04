@@ -5,7 +5,10 @@
  */
 import { zh } from '@/content/zh';
 import type { ChoiceExercise, Exercise, Prompt } from '@/lesson/types';
+import { bankExercise, findUnit } from '@/content/bank';
+import { getKp } from './graph';
 import { GRAPHICS_GENERATORS, pickSig } from './graphics';
+import { UPPER_GENERATORS } from './genUpper';
 
 type Rand = () => number;
 const r = (rand: Rand, lo: number, hi: number) => lo + Math.floor(rand() * (hi - lo + 1));
@@ -255,17 +258,37 @@ const GENERATORS: Record<string, Gen> = {
   },
 };
 
+/** 有原创生成器（答案由程序计算） */
+export function hasOriginalGenerator(kpId: string): boolean {
+  return kpId in GENERATORS || kpId in GRAPHICS_GENERATORS || kpId in UPPER_GENERATORS;
+}
+
+/** 有题可练：原创生成器，或对应的题库单元（V2.2：二～六年级、语文、英语） */
 export function hasGenerator(kpId: string): boolean {
-  return kpId in GENERATORS || kpId in GRAPHICS_GENERATORS;
+  return hasOriginalGenerator(kpId) || (getKp(kpId)?.units?.length ?? 0) > 0;
+}
+
+/** 题库题的签名：b:单元id:题目id */
+function bankSigs(kpId: string): string[] {
+  return (getKp(kpId)?.units ?? []).flatMap((u) => (findUnit(u)?.unit.questions ?? []).map((q) => `b:${u}:${q.id}`));
+}
+
+function bankKpExercise(kpId: string, sig: string): Exercise {
+  const [, unitId, qid] = sig.split(':');
+  const found = findUnit(unitId);
+  const q = found?.unit.questions.find((x) => x.id === qid);
+  if (!found || !q || !(getKp(kpId)?.units ?? []).includes(unitId)) throw new Error(`没有这道题：${sig}`);
+  return { ...bankExercise(found.book, q), id: kpExerciseId(kpId, sig), skill: kpId };
 }
 
 export const kpExerciseId = (kpId: string, sig: string) => `kp:${kpId}:${sig}`;
 
 /** 由知识点和签名生成题目（计算类为选择题；图形/规律类为各种互动题） */
 export function kpExercise(kpId: string, sig: string): Exercise {
+  if (sig.startsWith('b:')) return bankKpExercise(kpId, sig);
   const full = GRAPHICS_GENERATORS[kpId];
   if (full) return { ...full.build(sig), id: kpExerciseId(kpId, sig), skill: kpId } as Exercise;
-  const g = GENERATORS[kpId];
+  const g = GENERATORS[kpId] ?? UPPER_GENERATORS[kpId];
   if (!g) throw new Error(`知识点 ${kpId} 没有题目生成器`);
   const built = g.build(sig);
   return {
@@ -285,8 +308,13 @@ export function kpRound(
   avoid: Set<string> = new Set(),
 ): Exercise[] {
   const full = GRAPHICS_GENERATORS[kpId];
-  const make = full ? (rd: Rand) => pickSig(full, rd) : GENERATORS[kpId]?.make;
-  if (!make) return [];
+  let make = full ? (rd: Rand) => pickSig(full, rd) : (GENERATORS[kpId] ?? UPPER_GENERATORS[kpId])?.make;
+  if (!make) {
+    // 只有题库的知识点：从对应单元抽题（题库题为 AI 生成、未逐题人工审核）
+    const pool = bankSigs(kpId);
+    if (!pool.length) return [];
+    make = (rd: Rand) => pool[Math.floor(rd() * pool.length)];
+  }
   const sigs = new Set<string>();
   let guard = 0;
   while (sigs.size < count && guard++ < 300) {
@@ -298,7 +326,7 @@ export function kpRound(
 
 /** 从题目 id（kp:知识点:签名）还原 */
 export function exerciseFromKpId(exerciseId: string): Exercise | null {
-  const m = exerciseId.match(/^kp:(m\d\.[\w]+):(.+)$/);
+  const m = exerciseId.match(/^kp:([a-z]\d\.[\w]+):(.+)$/);
   if (!m || !hasGenerator(m[1])) return null;
   try {
     return kpExercise(m[1], m[2]);

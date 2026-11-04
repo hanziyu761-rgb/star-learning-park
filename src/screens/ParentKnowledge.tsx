@@ -1,11 +1,11 @@
 /**
- * 家长中心 · 知识掌握情况（一年级数学知识图谱）
+ * 家长中心 · 知识掌握情况（按家长设置的年级，分数学、语文、英语）
  * 所有结论来自真实练习记录，可展开查看判断依据。
  */
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card, SectionTitle } from '@/components/ui';
-import { getKp, KNOWLEDGE_POINTS } from '@/knowledge/graph';
+import { getKp, KNOWLEDGE_POINTS, kpsFor, kpSubject, type KpSubject } from '@/knowledge/graph';
 import { computeMastery, countByState, MASTERY_LABEL, type MasteryState } from '@/knowledge/mastery';
 import { frequentMistakeTypes, recommendKps, type KpRec } from '@/knowledge/recommend';
 import { useProgress } from '@/progress/ProgressContext';
@@ -20,6 +20,9 @@ const STATE_COLOR: Record<MasteryState, string> = {
   stable: '#F5A400',
 };
 
+const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
+const SUBJECT_NAME: Record<KpSubject, string> = { math: '数学', chinese: '语文', english: '英语' };
+
 const REC_TITLE: Record<KpRec['kind'], string> = {
   diagnose: '找原因',
   review: '复习',
@@ -31,19 +34,40 @@ export function KnowledgeCard() {
   const { state } = useProgress();
   const [now] = useState(() => Date.now());
   const [openKp, setOpenKp] = useState<string | null>(null);
+  const [subject, setSubject] = useState<KpSubject>('math');
+  const grade = state.settings.grade ?? 1;
   const mastery = computeMastery(state, now);
-  const counts = countByState(mastery);
-  const notMastered = KNOWLEDGE_POINTS.filter((k) => ['learning', 'needs-review'].includes(mastery[k.id].state));
-  const recs = recommendKps(state, mastery, now, 6);
+  const gradeKps = kpsFor(subject, grade);
+  const counts = countByState(Object.fromEntries(gradeKps.map((k) => [k.id, mastery[k.id]])));
+  // 尚未掌握：当前年级及以下（低年级没学好的也要列出）
+  const notMastered = KNOWLEDGE_POINTS.filter(
+    (k) => kpSubject(k) === subject && k.grade <= grade && ['learning', 'needs-review'].includes(mastery[k.id].state),
+  );
+  const recs = recommendKps(state, mastery, now, 6, { subject });
   const types = frequentMistakeTypes(state);
   const diags = [...state.diagnoses].reverse().slice(0, 3);
 
   return (
     <Card>
       <View testID="knowledge-card">
-        <SectionTitle>知识掌握情况 · 一年级数学</SectionTitle>
-        <Text style={styles.small}>
-          共 {KNOWLEDGE_POINTS.length} 个知识点。掌握状态按真实练习计算：最近 5
+        <SectionTitle>
+          知识掌握情况 · {GRADE_CN[grade]}年级{SUBJECT_NAME[subject]}
+        </SectionTitle>
+        <View style={styles.tabs}>
+          {(Object.keys(SUBJECT_NAME) as KpSubject[]).map((x) => (
+            <Pressable
+              key={x}
+              onPress={() => setSubject(x)}
+              style={[styles.tab, subject === x && styles.tabOn]}
+              accessibilityRole="button"
+              testID={`pk-subject-${x}`}
+            >
+              <Text style={[styles.tabText, subject === x && { color: '#fff' }]}>{SUBJECT_NAME[x]}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={styles.small} testID="pk-total">
+          本年级共 {gradeKps.length} 个知识点（年级在上方“孩子年级”中设置）。掌握状态按真实练习计算：最近 5
           题的第一次答对率、练习次数、练习天数和距今时间。知识点及其先后关系为本项目原创，尚未经一线教师审核。
         </Text>
         <View style={styles.bar}>
@@ -173,6 +197,17 @@ function sourceLabel(source: string, lessonId: string): string {
 }
 
 const styles = StyleSheet.create({
+  tabs: { flexDirection: 'row', gap: space.sm, marginVertical: space.xs },
+  tab: {
+    flex: 1,
+    paddingVertical: space.sm,
+    borderRadius: radius.md,
+    borderWidth: 2,
+    borderColor: colors.parent,
+    alignItems: 'center',
+  },
+  tabOn: { backgroundColor: colors.parent },
+  tabText: { fontSize: 15, fontWeight: '800', color: colors.parent },
   small: { fontSize: 13, color: colors.textSoft, lineHeight: 19 },
   bar: {
     flexDirection: 'row',

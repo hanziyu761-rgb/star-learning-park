@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BANK_SOURCE, bankLessonId, booksFor, loadBook } from '@/content/bank';
 import { oralLessonId, topicsForGrade } from '@/content/oral';
-import { getKp } from '@/knowledge/graph';
+import { kpLabel, getKp } from '@/knowledge/graph';
 import { CONTENT_REVIEW, GRAPHICS_GENERATORS, GRAPHICS_KPS } from '@/knowledge/graphics';
 import { zh } from '@/content/zh';
 import { DisplayTextView } from '@/components/PinyinText';
@@ -88,7 +88,7 @@ export function GraphicsSection({ state }: { state: ProgressState }) {
               style={({ pressed }) => [styles.tile, styles.gTile, pressed && { transform: [{ scale: 0.96 }] }]}
             >
               <Text style={styles.tileEmoji}>{k.emoji}</Text>
-              <DisplayTextView text={zh(k.kidName, k.kidPy)} size={16} />
+              <DisplayTextView text={kpLabel(k)} size={16} />
               <Text style={styles.unitMeta}>
                 已练 {Math.min(done, total)}/{total}
               </Text>

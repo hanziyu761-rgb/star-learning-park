@@ -21,6 +21,7 @@ import { AskTeacher } from '@/ai/AskTeacher';
 import type { ExerciseOutcome } from '@/exercises/common';
 import { ExerciseView } from '@/exercises/ExerciseView';
 import { GRAPHICS_GENERATORS } from '@/knowledge/graphics';
+import { getKp } from '@/knowledge/graph';
 import { langForSubject, type FeedbackMessage } from '@/lesson/feedback';
 import type { Exercise, Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
@@ -58,7 +59,9 @@ function buildRound(id: string, done: Set<string>, hidden: Set<string>): Round |
     const kpId = id.slice(3);
     // 图形类是动手操作题，每轮 6 题，避免孩子疲劳
     const exercises = kpRound(kpId, kpId in GRAPHICS_GENERATORS ? 6 : 10, Math.random, done);
-    return exercises.length ? { subject: 'math', title: sourceName(id), isBank: false, exercises } : null;
+    return exercises.length
+      ? { subject: getKp(kpId)?.subject ?? 'math', title: sourceName(id), isBank: false, exercises }
+      : null;
   }
   if (id.startsWith('oral:')) {
     const topic = ORAL_TOPICS.find((t) => `oral:${t.id}` === id);

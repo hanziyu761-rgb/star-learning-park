@@ -70,6 +70,9 @@ describe('知识图谱', () => {
     // 允许的规范读法：重叠词中间的“一”读轻声（分一分）
     const ok = new Set(['yi:yī']);
     for (const k of KNOWLEDGE_POINTS) {
+      // 一、二年级必须注音；三年级起不注音（kidPy 可以不填）
+      if (k.grade <= 2 && /\p{Script=Han}/u.test(k.kidName)) expect(k.kidPy).toBeTruthy();
+      if (!k.kidPy) continue;
       const han = [...k.kidName].filter((c) => /\p{Script=Han}/u.test(c));
       const ours = k.kidPy.split(' ');
       expect(ours).toHaveLength(han.length);
@@ -87,7 +90,8 @@ describe('题目生成器（原创测试数据）', () => {
   it('标为可练习的知识点都有生成器；每题正确答案在选项中且计算正确', () => {
     for (const k of practicable) {
       expect(hasGenerator(k.id)).toBe(true);
-      if (k.id in GRAPHICS_GENERATORS) continue; // 图形类互动题另有专门测试（graphics.test.ts）
+      // 图形类互动题（graphics.test.ts）、二～六年级与语文英语（curriculum.test.ts）另有专门测试
+      if (k.id in GRAPHICS_GENERATORS || k.grade > 1 || (k.subject ?? 'math') !== 'math') continue;
       for (const e of kpRound(k.id, 20, seeded(7)).map(choice)) {
         expect(e.options.map((o) => o.id)).toContain(e.answerId);
         expect(new Set(e.options.map((o) => o.id)).size).toBe(e.options.length);

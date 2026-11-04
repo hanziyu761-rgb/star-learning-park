@@ -15,9 +15,9 @@ import type { ExerciseOutcome } from '@/exercises/common';
 import { ExerciseView } from '@/exercises/ExerciseView';
 import { answer, nextKp, startDiagnosis, summarize, type DiagSession, type DiagSummary } from '@/knowledge/diagnose';
 import { kpRound } from '@/knowledge/generators';
-import { getKp } from '@/knowledge/graph';
+import { kpLabel, getKp } from '@/knowledge/graph';
 import { computeMastery } from '@/knowledge/mastery';
-import type { FeedbackMessage } from '@/lesson/feedback';
+import { langForSubject, type FeedbackMessage } from '@/lesson/feedback';
 import type { Exercise } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
@@ -100,7 +100,7 @@ function DiagnoseGame({ target }: { target: string }) {
       type: 'exercise/result',
       lessonId: `diag:${target}`,
       exerciseId: exercise.id,
-      subject: 'math',
+      subject: getKp(exercise.skill)?.subject ?? 'math',
       skill: exercise.skill,
       firstTryCorrect: o.firstTryCorrect,
       attempts: o.attempts,
@@ -159,7 +159,7 @@ function DiagnoseGame({ target }: { target: string }) {
             <DisplayTextView text={zh('找到啦！先练这个本领：', 'zhǎo dào la xiān liàn zhè ge běn lǐng')} size={22} />
             <View style={styles.found} testID="diagnose-root">
               <Text style={{ fontSize: 40 }}>{first.emoji}</Text>
-              <DisplayTextView text={zh(first.kidName, first.kidPy)} size={28} />
+              <DisplayTextView text={kpLabel(first)} size={28} />
             </View>
             <BigButton
               emoji="✏️"
@@ -212,7 +212,7 @@ function DiagnoseGame({ target }: { target: string }) {
             <ExerciseView
               key={`diag-${exercise.id}`}
               exercise={exercise}
-              lang="zh"
+              lang={langForSubject(getKp(exercise.skill)?.subject ?? 'math')}
               onFeedback={setFeedback}
               onSolved={onSolved}
             />
