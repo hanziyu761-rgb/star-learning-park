@@ -132,7 +132,7 @@ function ReviewSession() {
           onFeedback={setFeedback}
           onSolved={onSolved}
         />
-        <AskTeacher key={item.mistake.key} exercise={item.exercise} subject={item.subject} solved={done} />
+        <AskTeacher key={`ai-${item.mistake.key}`} exercise={item.exercise} subject={item.subject} solved={done} />
       </ScrollView>
       <View style={[styles.bottom, { paddingBottom: insets.bottom + space.md }]}>
         <FeedbackBar message={feedback} />

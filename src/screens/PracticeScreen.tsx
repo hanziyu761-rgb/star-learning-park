@@ -146,7 +146,7 @@ function PracticeSession({ id }: { id: string }) {
           }}
           style={{ alignSelf: 'stretch' }}
           testID="practice-again" />
-        <BigButton emoji="🏠" label={zh('回首页', 'huí shǒu yè')} color={colors.textSoft} size="md" onPress={nav.home} style={{ alignSelf: 'stretch' }} />
+        <BigButton emoji="🏠" label={zh('回首页', 'huí shǒu yè')} color={colors.textSoft} size="md" onPress={nav.home} style={{ alignSelf: 'stretch' }} testID="practice-home" />
       </View>
     );
   }
@@ -175,9 +175,9 @@ function PracticeSession({ id }: { id: string }) {
         {skipped.includes(index) ? (
           <Notice text="这道题已屏蔽，点“继续”做下一题。" />
         ) : (
-          <ExerciseView key={`${index}-${ex.id}`} exercise={ex} lang={langForSubject(round.subject)} onFeedback={setFeedback} onSolved={onSolved} />
+          <ExerciseView key={`ex-${index}-${ex.id}`} exercise={ex} lang={langForSubject(round.subject)} onFeedback={setFeedback} onSolved={onSolved} />
         )}
-        <AskTeacher key={`${index}-${ex.id}`} exercise={ex} subject={round.subject} solved={done && !skipped.includes(index)} />
+        <AskTeacher key={`ai-${index}-${ex.id}`} exercise={ex} subject={round.subject} solved={done && !skipped.includes(index)} />
         {round.isBank ? (
           <View style={styles.sourceRow}>
             <Text style={styles.source}>{BANK_SOURCE}</Text>
