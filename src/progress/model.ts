@@ -7,8 +7,14 @@
  * - 只有真实发生的学习行为才会写入记录，不生成任何示例数据。
  */
 import type { Subject } from '@/lesson/types';
+import { dayKey, isGraduated, newSrs, reviewSrs, type SrsState } from './srs';
 
-export const PROGRESS_VERSION = 1;
+/**
+ * 数据版本：
+ * v1 — V1.0
+ * v2 — 错题增加间隔复习状态 srs；练习结果增加来源 source；新增复习记录 reviews
+ */
+export const PROGRESS_VERSION = 2;
 
 export interface ExerciseResult {
   lessonId: string;
@@ -18,6 +24,8 @@ export interface ExerciseResult {
   firstTryCorrect: boolean;
   attempts: number;
   at: number;
+  /** 来自课程还是“今日复习”；v1 旧记录没有此字段，视为课程 */
+  source?: 'lesson' | 'review';
 }
 
 export interface MistakeEntry {
@@ -28,8 +36,16 @@ export interface MistakeEntry {
   skill: string;
   wrongCount: number;
   lastWrongAt: number;
-  /** 之后某次第一次就答对，视为已掌握 */
+  /** 已掌握：间隔复习达到毕业条件（第 3 盒且累计答对 ≥ 2 次） */
   resolved: boolean;
+  /** 间隔复习状态 */
+  srs: SrsState;
+}
+
+export interface ReviewRecord {
+  at: number;
+  count: number;
+  firstTryCorrect: number;
 }
 
 export interface SessionRecord {
@@ -71,6 +87,8 @@ export interface ProgressState {
   sessions: SessionRecord[];
   /** 未完成的课程，用于“继续上次学习” */
   active: ActiveLesson | null;
+  /** 完成的“今日复习”记录 */
+  reviews: ReviewRecord[];
 }
 
 export const MAX_RESULTS = 2000;
@@ -87,6 +105,7 @@ export function createEmptyProgress(): ProgressState {
     mistakes: {},
     sessions: [],
     active: null,
+    reviews: [],
   };
 }
 
@@ -102,8 +121,11 @@ export type ProgressAction =
       firstTryCorrect: boolean;
       attempts: number;
       now: number;
+      source?: 'lesson' | 'review';
     }
   | { type: 'lesson/complete'; lessonId: string; subject: Subject; now: number }
+  /** 完成一轮今日复习：奖励 1 颗星 */
+  | { type: 'review/complete'; now: number; count: number; firstTryCorrect: number }
   | { type: 'reset' };
 
 /** 按第一次作答正确率给星星：90% 以上 3 颗，60% 以上 2 颗，完成即有 1 颗 */
@@ -157,6 +179,7 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
     }
 
     case 'exercise/result': {
+      const source = action.source ?? 'lesson';
       const result: ExerciseResult = {
         lessonId: action.lessonId,
         exerciseId: action.exerciseId,
@@ -165,11 +188,13 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
         firstTryCorrect: action.firstTryCorrect,
         attempts: Math.max(1, action.attempts),
         at: action.now,
+        source,
       };
       const key = `${action.lessonId}/${action.exerciseId}`;
       const existing = state.mistakes[key];
       let mistakes = state.mistakes;
       if (!action.firstTryCorrect) {
+        // 答错：加入错题，回到第 1 盒，当天就能复习
         mistakes = {
           ...mistakes,
           [key]: {
@@ -181,16 +206,29 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
             wrongCount: (existing?.wrongCount ?? 0) + 1,
             lastWrongAt: action.now,
             resolved: false,
+            srs: existing ? reviewSrs(existing.srs, false, action.now) : newSrs(action.now),
           },
         };
       } else if (existing && !existing.resolved) {
-        mistakes = { ...mistakes, [key]: { ...existing, resolved: true } };
+        // 已有错题再次一次答对：按间隔复习升盒，达到条件才算掌握
+        const srs = reviewSrs(existing.srs, true, action.now);
+        mistakes = { ...mistakes, [key]: { ...existing, srs, resolved: isGraduated(srs) } };
       }
       const results = [...state.results, result];
       return {
         ...state,
         results: results.length > MAX_RESULTS ? results.slice(-MAX_RESULTS) : results,
         mistakes,
+      };
+    }
+
+    case 'review/complete': {
+      if (action.count <= 0) return state;
+      const reviews = [...state.reviews, { at: action.now, count: action.count, firstTryCorrect: action.firstTryCorrect }];
+      return {
+        ...state,
+        totalStars: state.totalStars + 1,
+        reviews: reviews.length > MAX_SESSIONS ? reviews.slice(-MAX_SESSIONS) : reviews,
       };
     }
 
@@ -201,7 +239,7 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
           : action.now;
       // 本次课程的题目结果 = 本次开始之后记录的结果
       const sessionResults = state.results.filter(
-        (r) => r.lessonId === action.lessonId && r.at >= startedAt,
+        (r) => r.lessonId === action.lessonId && r.at >= startedAt && r.source !== 'review',
       );
       const correct = sessionResults.filter((r) => r.firstTryCorrect).length;
       const stars = starsForAccuracy(correct, sessionResults.length);
@@ -250,9 +288,35 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
 }
 
 /**
+ * 把旧版本数据升级到当前版本。只增加字段，不删除任何已有记录。
+ */
+export function migrateProgress(data: ProgressState, now: number = Date.now()): ProgressState {
+  const mistakes: Record<string, MistakeEntry> = {};
+  for (const [k, m] of Object.entries(data.mistakes ?? {})) {
+    const old = m as Partial<MistakeEntry> & MistakeEntry;
+    if (old.srs) {
+      mistakes[k] = old;
+    } else if (old.resolved) {
+      // v1 已掌握的错题：视为已毕业
+      mistakes[k] = { ...old, srs: { box: 3, correctCount: 2, nextReviewDay: dayKey(now) } };
+    } else {
+      // v1 未掌握的错题：进入第 1 盒，今天即可复习
+      mistakes[k] = { ...old, srs: newSrs(now) };
+    }
+  }
+  return {
+    ...createEmptyProgress(),
+    ...data,
+    mistakes,
+    reviews: Array.isArray(data.reviews) ? data.reviews : [],
+    version: PROGRESS_VERSION,
+  };
+}
+
+/**
  * 校验从存储中读出的数据。数据损坏时返回 null，由调用方决定如何处理。
  */
-export function parseProgress(raw: string | null): ProgressState | null {
+export function parseProgress(raw: string | null, now: number = Date.now()): ProgressState | null {
   if (raw === null) return createEmptyProgress();
   try {
     const data = JSON.parse(raw) as Partial<ProgressState>;
@@ -267,8 +331,7 @@ export function parseProgress(raw: string | null): ProgressState | null {
     ) {
       return null;
     }
-    // 以后版本升级时在这里做数据迁移
-    return { ...createEmptyProgress(), ...data, version: PROGRESS_VERSION } as ProgressState;
+    return migrateProgress(data as ProgressState, now);
   } catch {
     return null;
   }

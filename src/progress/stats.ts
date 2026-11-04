@@ -3,6 +3,7 @@
  */
 import type { Subject } from '@/lesson/types';
 import type { MistakeEntry, ProgressState, SessionRecord } from './model';
+import { isDue } from './srs';
 
 export interface SubjectStats {
   subject: Subject;
@@ -27,7 +28,8 @@ export interface SkillStats {
 export const SUBJECTS: Subject[] = ['math', 'chinese', 'english'];
 
 export function subjectStats(state: ProgressState, subject: Subject): SubjectStats {
-  const results = state.results.filter((r) => r.subject === subject);
+  // 正确率只统计课程中的作答；复习作答单独统计，避免重复计入
+  const results = state.results.filter((r) => r.subject === subject && r.source !== 'review');
   const sessions = state.sessions.filter((s) => s.subject === subject);
   const correct = results.filter((r) => r.firstTryCorrect).length;
   const lessons = Object.values(state.lessons).filter((l) => l.subject === subject);
@@ -120,4 +122,11 @@ export function formatDateTime(ts: number): string {
   const d = new Date(ts);
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${d.getMonth() + 1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** 今天到期、需要复习的错题（按盒子从低到高、错得越近越靠前） */
+export function dueMistakes(state: ProgressState, now: number): MistakeEntry[] {
+  return Object.values(state.mistakes)
+    .filter((m) => isDue(m.srs, now))
+    .sort((a, b) => a.srs.box - b.srs.box || b.lastWrongAt - a.lastWrongAt);
 }

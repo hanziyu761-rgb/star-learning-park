@@ -17,6 +17,7 @@ import {
 import { CORRUPT_BACKUP_KEY, flushProgressWrites, loadProgress, saveProgress, STORAGE_KEY } from '@/progress/storage';
 
 const T0 = new Date(2026, 10, 4, 9, 0, 0).getTime();
+const DAY = 24 * 3600_000;
 
 function run(actions: ProgressAction[], start = createEmptyProgress()): ProgressState {
   return actions.reduce(progressReducer, start);
@@ -68,16 +69,20 @@ describe('进度记录', () => {
     expect(subjectStats(s, 'english').accuracy).toBeNull();
   });
 
-  it('错题被记录，之后第一次就答对则标记为已掌握', () => {
+  it('错题被记录；之后需要按间隔复习答对 2 次才算掌握', () => {
     let s = run([
       { type: 'lesson/start', lessonId: 'math-1', subject: 'math', now: T0, resume: false },
       answer('q2', false, T0 + 1000),
     ]);
     expect(openMistakes(s)).toHaveLength(1);
     expect(openMistakes(s)[0].wrongCount).toBe(1);
+    expect(s.mistakes['math-1/q2'].srs.box).toBe(1);
     s = run([answer('q2', true, T0 + 2000)], s);
-    expect(openMistakes(s)).toHaveLength(0);
+    expect(s.mistakes['math-1/q2'].srs.box).toBe(2);
+    expect(openMistakes(s)).toHaveLength(1);
+    s = run([answer('q2', true, T0 + 2 * DAY)], s);
     expect(s.mistakes['math-1/q2'].resolved).toBe(true);
+    expect(openMistakes(s)).toHaveLength(0);
   });
 
   it('继续上次学习时保留步骤位置，不重复计入学习次数', () => {
