@@ -19,6 +19,7 @@ import KnowledgeMapScreen from '@/screens/KnowledgeMapScreen';
 import DiagnoseScreen from '@/screens/DiagnoseScreen';
 import SubjectScreen from '@/screens/SubjectScreen';
 import ExamScreen from '@/screens/ExamScreen';
+import ChallengeScreen from '@/screens/ChallengeScreen';
 import { colors } from '@/theme';
 
 function renderRoute(route: Route) {
@@ -43,6 +44,8 @@ function renderRoute(route: Route) {
       return <DiagnoseScreen kp={route.kp} />;
     case 'exam':
       return <ExamScreen />;
+    case 'challenge':
+      return <ChallengeScreen />;
   }
 }
 

@@ -21,7 +21,9 @@ export type Route =
   /** 找原因小游戏：前置知识诊断 */
   | { name: 'diagnose'; kp: string }
   /** 家长中心：试卷生成 */
-  | { name: 'exam' };
+  | { name: 'exam' }
+  /** 每日挑战（思维题） */
+  | { name: 'challenge' };
 
 export interface Nav {
   push: (route: Route) => void;

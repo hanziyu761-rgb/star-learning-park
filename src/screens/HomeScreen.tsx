@@ -11,6 +11,7 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { resolveExercise } from '@/content/resolve';
 import { reviewQueue } from '@/progress/plan';
+import { thinkingProfile } from '@/thinking/profile';
 import { computeMastery } from '@/knowledge/mastery';
 import { recommendKps } from '@/knowledge/recommend';
 import { completedSubjectToday, isSameLocalDay, SUBJECTS } from '@/progress/stats';
@@ -34,6 +35,7 @@ export default function HomeScreen() {
   const completedLessons = LESSONS.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
   // 今日复习：有到期错题时出现；今天复习过且已清空则显示完成
   const reviewCount = reviewQueue(state, resolveExercise, now).length;
+  const thinking = thinkingProfile(state, now);
   const reviewedToday = state.reviews.some((r) => isSameLocalDay(r.at, now));
   const showReview = reviewCount > 0 || reviewedToday;
   const todayDone =
@@ -146,6 +148,29 @@ export default function HomeScreen() {
           </Text>
         ) : null}
         <Text style={styles.play}>▶️</Text>
+      </Pressable>
+
+      {/* 每日挑战：思维题（V2.5） */}
+      <Pressable
+        testID="challenge-entry"
+        accessibilityRole="button"
+        onPress={() => {
+          tapFeedback();
+          speak({ text: '每日挑战', lang: 'zh-CN' });
+          nav.push({ name: 'challenge' });
+        }}
+        style={[styles.continue, { borderColor: '#E07A2E' }]}
+      >
+        <Text style={styles.continueEmoji}>🧩</Text>
+        <View style={{ flex: 1 }}>
+          <DisplayTextView text={zh('每日挑战', 'měi rì tiǎo zhàn')} size={22} color="#E07A2E" />
+          <Text style={styles.continueSub} testID="challenge-status">
+            {thinking.doneToday
+              ? `今天完成了${thinking.streak > 1 ? ` · 连续 ${thinking.streak} 天` : ''}`
+              : '动动脑筋 · 每天一道思维题'}
+          </Text>
+        </View>
+        {thinking.doneToday ? <Text style={styles.play}>✅</Text> : <Text style={styles.play}>▶️</Text>}
       </Pressable>
 
       {/* AI 老师入口：家长开启后才显示 */}

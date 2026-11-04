@@ -10,6 +10,7 @@ import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
 import { AiCard, GradeCard, HiddenCard } from './ParentSettings';
 import { KnowledgeCard } from './ParentKnowledge';
+import { ThinkingCard } from './ParentThinking';
 import { useProgress } from '@/progress/ProgressContext';
 import {
   activeDaysLast7,
@@ -100,6 +101,7 @@ function ParentDashboard() {
       </Card>
 
       <KnowledgeCard />
+      <ThinkingCard />
 
       {SUBJECTS.map((s) => {
         const st = subjectStats(state, s);

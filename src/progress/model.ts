@@ -15,8 +15,35 @@ import { dayKey, isGraduated, newSrs, reviewSrs, type SrsState } from './srs';
  * v2 — 错题增加间隔复习状态 srs；练习结果增加来源 source；新增复习记录 reviews
  * v3 — 新增设置 settings（年级、AI 老师开关）和家长屏蔽的题库题目 hidden
  * v4 — 新增前置知识诊断记录 diagnoses；练习结果来源增加 diagnose
+ * v5 — 新增思维训练：答对后“你是怎么想的”的思路选择 strategies、每日挑战记录 challenges
  */
-export const PROGRESS_VERSION = 4;
+export const PROGRESS_VERSION = 5;
+
+/** 答对后孩子选的解题思路（没有对错之分） */
+export interface StrategyRecord {
+  at: number;
+  kp: string;
+  lessonId: string;
+  exerciseId: string;
+  /** 思路编号，见 src/thinking/strategies.ts */
+  choice: string;
+}
+
+/** 每日挑战（思维题）：不计入正确率，答错不扣分 */
+export interface ChallengeRecord {
+  at: number;
+  /** 哪一天的挑战（本地日期 YYYY-MM-DD） */
+  day: string;
+  /** 题目 id（ch:类型:签名），可由它还原题目 */
+  id: string;
+  type: string;
+  /** 主要锻炼的思维方面，见 src/thinking/dims.ts */
+  dims: string[];
+  firstTryCorrect: boolean;
+  attempts: number;
+  /** 当天第一道是每日挑战（得星星）；之后的是“再玩一道” */
+  daily: boolean;
+}
 
 export interface DiagnosisRecord {
   at: number;
@@ -113,6 +140,10 @@ export interface ProgressState {
   hidden: string[];
   /** 前置知识诊断记录 */
   diagnoses: DiagnosisRecord[];
+  /** 思路选择记录（v5） */
+  strategies: StrategyRecord[];
+  /** 每日挑战记录（v5） */
+  challenges: ChallengeRecord[];
 }
 
 export const MAX_RESULTS = 2000;
@@ -133,6 +164,8 @@ export function createEmptyProgress(): ProgressState {
     settings: { grade: 1, aiEnabled: false, aiBaseUrl: '' },
     hidden: [],
     diagnoses: [],
+    strategies: [],
+    challenges: [],
   };
 }
 
@@ -170,6 +203,10 @@ export type ProgressAction =
   | { type: 'bank/unhide-all' }
   /** 完成一次前置知识诊断：保存结论，奖励 1 颗星 */
   | { type: 'diagnosis/complete'; record: DiagnosisRecord }
+  /** 答对后选了解题思路 */
+  | { type: 'strategy/choose'; record: StrategyRecord }
+  /** 完成一道挑战题：当天第一道（daily）答对得 2 颗星、答错也得 1 颗星；之后的不再给星 */
+  | { type: 'challenge/complete'; record: ChallengeRecord }
   /** 完成一轮今日复习：奖励 1 颗星 */
   | {
       type: 'review/complete';
@@ -316,6 +353,23 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
       };
     }
 
+    case 'strategy/choose': {
+      const strategies = [...state.strategies, action.record];
+      return { ...state, strategies: strategies.length > MAX_RESULTS ? strategies.slice(-MAX_RESULTS) : strategies };
+    }
+
+    case 'challenge/complete': {
+      const r = action.record;
+      const daily = r.daily && !state.challenges.some((c) => c.daily && c.day === r.day);
+      const record = { ...r, daily };
+      const challenges = [...state.challenges, record];
+      return {
+        ...state,
+        totalStars: state.totalStars + challengeStars(record),
+        challenges: challenges.length > MAX_RESULTS ? challenges.slice(-MAX_RESULTS) : challenges,
+      };
+    }
+
     case 'practice/complete':
       return completeSession(state, action.lessonId, action.subject, action.startedAt, action.now, false);
 
@@ -330,6 +384,12 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
     default:
       return state;
   }
+}
+
+/** 挑战题的星星：每天第一道答对 2 颗、答错 1 颗（鼓励尝试）；“再玩一道”不给星 */
+export function challengeStars(r: Pick<ChallengeRecord, 'daily' | 'firstTryCorrect'>): number {
+  if (!r.daily) return 0;
+  return r.firstTryCorrect ? 2 : 1;
 }
 
 /** 结束一次学习（课程或练习）：计算星星、时长，记录学习次数 */
@@ -411,6 +471,8 @@ export function migrateProgress(data: ProgressState, now: number = Date.now()): 
     settings: { ...createEmptyProgress().settings, ...(data.settings ?? {}) },
     hidden: Array.isArray(data.hidden) ? data.hidden : [],
     diagnoses: Array.isArray(data.diagnoses) ? data.diagnoses : [],
+    strategies: Array.isArray(data.strategies) ? data.strategies : [],
+    challenges: Array.isArray(data.challenges) ? data.challenges : [],
     version: PROGRESS_VERSION,
   };
 }

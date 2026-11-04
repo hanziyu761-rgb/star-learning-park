@@ -14,7 +14,9 @@ const vis = (v: Visual): string =>
   v.figure
     ? v.figure.type === 'clock'
       ? `钟面${v.figure.hour}时`
-      : SHAPE_ZH[v.figure.shape]
+      : v.figure.type === 'puzzle'
+        ? v.figure.alt
+        : SHAPE_ZH[v.figure.shape]
     : v.emoji.repeat(v.count ?? 1);
 
 const txt = (t: DisplayText | undefined) => (t === undefined ? '' : plainText(t));

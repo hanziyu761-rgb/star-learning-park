@@ -41,6 +41,7 @@ function clockSvg(hour: number, minute = 0, size = 110): string {
 }
 
 function figureSvg(f: Figure, small = false): string {
+  if (f.type === 'puzzle') return esc(f.alt);
   return f.type === 'clock'
     ? clockSvg(f.hour, f.minute, small ? 84 : 110)
     : shapeSvg(f.shape, f.color, f.rotation, small ? 44 : 60);

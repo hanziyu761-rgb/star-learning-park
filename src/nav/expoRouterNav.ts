@@ -24,6 +24,8 @@ function toHref(route: Route) {
       return '/teacher' as const;
     case 'exam':
       return '/exam' as const;
+    case 'challenge':
+      return '/challenge' as const;
     case 'practice':
       return { pathname: '/practice/[id]' as const, params: { id: route.id } };
   }

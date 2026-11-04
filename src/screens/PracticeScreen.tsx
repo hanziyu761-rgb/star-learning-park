@@ -22,6 +22,9 @@ import type { ExerciseOutcome } from '@/exercises/common';
 import { ExerciseView } from '@/exercises/ExerciseView';
 import { GRAPHICS_GENERATORS } from '@/knowledge/graphics';
 import { getKp } from '@/knowledge/graph';
+import { kpForRecord } from '@/knowledge/mapping';
+import { shouldAskStrategy } from '@/thinking/strategies';
+import { StrategyAsk } from '@/thinking/StrategyAsk';
 import { langForSubject, type FeedbackMessage } from '@/lesson/feedback';
 import type { Exercise, Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
@@ -90,6 +93,9 @@ function PracticeSession({ id }: { id: string }) {
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
   const [finished, setFinished] = useState(false);
+  /** 本轮一次答对的题数；第 1、4、7… 道一次答对的题问“你是怎么想的” */
+  const [correctCount, setCorrectCount] = useState(0);
+  const [askKp, setAskKp] = useState<string | null>(null);
 
   useEffect(() => () => stopSpeaking(), []);
 
@@ -125,6 +131,7 @@ function PracticeSession({ id }: { id: string }) {
     stopSpeaking();
     setFeedback(null);
     setDone(false);
+    setAskKp(null);
     if (last) finish();
     else setIndex((i) => i + 1);
   };
@@ -140,6 +147,12 @@ function PracticeSession({ id }: { id: string }) {
       attempts: o.attempts,
       now: Date.now(),
     });
+    if (o.firstTryCorrect) {
+      const n = correctCount + 1;
+      setCorrectCount(n);
+      const kp = kpForRecord(id, ex.id, ex.skill);
+      if (shouldAskStrategy(kp, n)) setAskKp(kp);
+    }
     setDone(true);
   };
 
@@ -221,6 +234,7 @@ function PracticeSession({ id }: { id: string }) {
             />
           </View>
         )}
+        {askKp && done ? <StrategyAsk key={`st-${index}`} kp={askKp} lessonId={id} exerciseId={ex.id} /> : null}
         <AskTeacher
           key={`ai-${index}-${ex.id}`}
           exercise={ex}

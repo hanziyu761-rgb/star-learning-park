@@ -1,6 +1,7 @@
 /**
  * 原创图形绘制：平面图形与钟面（react-native-svg），不使用任何第三方素材。
  */
+import { PuzzleView } from './PuzzleFigure';
 import React from 'react';
 import { Text, View } from 'react-native';
 import Svg, { Circle, G, Line, Polygon, Rect, Text as SvgText } from 'react-native-svg';
@@ -147,6 +148,7 @@ export function ClockFace({
 export function FigureView({ figure, size }: { figure: Figure; size?: number }) {
   if (figure.type === 'clock')
     return <ClockFace hour={figure.hour} minute={figure.minute} size={size ?? figure.size ?? 120} />;
+  if (figure.type === 'puzzle') return <PuzzleView puzzle={figure.puzzle} alt={figure.alt} />;
   return (
     <ShapeFigure
       shape={figure.shape}

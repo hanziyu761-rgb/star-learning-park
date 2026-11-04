@@ -40,7 +40,18 @@ export type ShapeKind = 'circle' | 'triangle' | 'square' | 'rect' | 'rtri' | 'ho
 /** 代码绘制的原创图形 */
 export type Figure =
   | { type: 'shape'; shape: ShapeKind; color: string; rotation?: number; size?: number }
-  | { type: 'clock'; hour: number; minute?: number; size?: number };
+  | { type: 'clock'; hour: number; minute?: number; size?: number }
+  /** 思维挑战题的题图（V2.5）；alt 是给 AI 老师和读屏用的文字说明 */
+  | { type: 'puzzle'; puzzle: PuzzleFigure; alt: string; size?: number };
+
+/** 思维挑战题的题图 */
+export type PuzzleFigure =
+  /** 方格谜题：'' = 空着不用填，'?' = 要填的格，其它为表情符号 */
+  | { kind: 'grid'; cells: string[][] }
+  /** 天平：每一行左右两边一样重 */
+  | { kind: 'balance'; rows: { left: string; leftCount: number; right: string; rightCount: number }[] }
+  /** 由小格子拼成的长方形（数长方形 / 正方形） */
+  | { kind: 'rects'; rows: number; cols: number; square?: boolean };
 
 export interface Prompt {
   text: DisplayText;

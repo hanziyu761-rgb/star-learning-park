@@ -6,6 +6,7 @@
 import { pinyin } from 'pinyin-pro';
 import { kpExercise } from '@/knowledge/generators';
 import { GRAPHICS_GENERATORS } from '@/knowledge/graphics';
+import { CHALLENGES, seeded } from '@/thinking/challenges';
 import { LESSONS, SKILL_LABELS } from '@/content';
 import { zh } from '@/content/zh';
 import type { Exercise, Lesson, ZhText } from '@/lesson/types';
@@ -37,6 +38,7 @@ const ACCEPTED: Record<string, string> = {
   '转:zhuàn:zhuǎn': '“转一转、转到”指图形绕着中心旋转，读 zhuàn',
   '上:shang:shàng': '“早上、晚上、身上”中“上”读轻声',
   '看:kan:kàn': '“看看”重叠时第二个字读轻声',
+  '地:de:dì': '“不停地重复”中“地”是结构助词，读轻声 de',
 };
 
 function isZhText(v: unknown): v is ZhText {
@@ -155,6 +157,28 @@ describe('课程内容', () => {
       }
     }
     expect(problems).toEqual([]);
+  });
+
+  it('思维挑战题（模板拼接的题目）拼音与词库一致', () => {
+    const problems: string[] = [];
+    const rand = seeded(20261105);
+    for (const g of CHALLENGES)
+      for (const level of [1, 2] as const)
+        for (let k = 0; k < 40; k++) {
+          const sig = g.sig(rand, level);
+          for (const text of collectZhTexts(g.build(sig))) {
+            const chars = text.map((x) => x.char).join('');
+            const ref = pinyin(chars, { type: 'array', toneType: 'symbol', nonZh: 'removed' });
+            const ours = text.filter((x) => x.py).map((x) => x.py!);
+            expect(ours.length).toBe(ref.length);
+            ours.forEach((py, i) => {
+              const han = text.filter((x) => x.py)[i].char;
+              if (py !== ref[i] && !ACCEPTED[`${han}:${py}:${ref[i]}`])
+                problems.push(`${sig}「${chars}」第${i + 1}字：填写 ${py}，词库 ${ref[i]}`);
+            });
+          }
+        }
+    expect([...new Set(problems)]).toEqual([]);
   });
 
   it('每节课的步骤 id 唯一，练习 id 唯一，知识点都有名称', () => {
