@@ -1,0 +1,41 @@
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import type { FeedbackMessage } from '@/lesson/feedback';
+import { colors, radius, space } from '@/theme';
+import { Mascot } from './Mascot';
+import { DisplayTextView } from './PinyinText';
+
+/** 答题反馈条：答对 / 答错提示 */
+export function FeedbackBar({ message }: { message: FeedbackMessage | null }) {
+  if (!message) return null;
+  const bg =
+    message.kind === 'correct' ? colors.correctSoft : message.kind === 'wrong' ? colors.wrongSoft : colors.bgSky;
+  const fg = message.kind === 'correct' ? colors.correct : message.kind === 'wrong' ? colors.wrong : colors.text;
+  return (
+    <Animated.View
+      entering={FadeInDown.duration(250)}
+      style={[styles.bar, { backgroundColor: bg }]}
+      testID={`feedback-${message.kind}`}
+      accessibilityLiveRegion="polite"
+    >
+      <Mascot size={40} mood={message.kind === 'correct' ? 'cheer' : 'think'} bounce={false} />
+      <View style={styles.texts}>
+        <DisplayTextView text={message.text} size={20} color={fg} />
+        {message.hint ? <DisplayTextView text={message.hint.text} size={16} color={colors.text} /> : null}
+      </View>
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: radius.md,
+    paddingVertical: 4,
+    paddingHorizontal: space.sm,
+    gap: space.sm,
+  },
+  texts: { flex: 1, alignItems: 'center', gap: 2 },
+});
