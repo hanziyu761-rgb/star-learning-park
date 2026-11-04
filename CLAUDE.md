@@ -46,7 +46,7 @@ src/nav/            跳转抽象；src/single/ 单文件 HTML 版入口（内存
 src/knowledge/      知识图谱（原创）：一年级数学 graph.ts + curriculum/（二～六年级数学、一～六年级语文、三～六年级英语）、映射、题目生成器（genUpper.ts 二～六年级数学）、掌握度、诊断、推荐
 src/ai/             AI 老师客户端（只连自家服务，无密钥）
 server/ai-worker/   AI 老师服务（Cloudflare Worker + DeepSeek）
-src/content/        课程数据（只写数据，不写界面）；zh.ts 拼音工具；index.ts 课程目录与知识点名称
+src/content/        课程数据（只写数据，不写界面）；zh.ts 拼音工具；index.ts 课程目录与知识点名称；bank/edition.ts 新版教材单元编排（V2.4：一年级）
 src/lesson/         课程数据类型、课程播放器、各类环节（演示、拖动、跟读、对话、绘本）、反馈语
 src/exercises/      可复用练习组件：选择、正误判断、拖动配对、排序；V2.1 图形互动：拖到方格、地图点选、点选图形、分类篮、旋转、拨钟、找规律
 src/drag/           拖动与放置区（gesture-handler + reanimated）

@@ -30,13 +30,16 @@ if (window.speechSynthesis) {
 
 _books = {}
 def bank_answer(unit_id, qid):
-    book = unit_id.rsplit("-u", 1)[0]
-    if book not in _books:
-        _books[book] = json.load(open(os.path.join(ROOT, "src/content/bank", f"{book}.json"), encoding="utf-8"))
-    for u in _books[book]["units"]:
-        if u["id"] == unit_id:
-            for q in u["questions"]:
-                if q["id"] == qid: return q
+    # 旧版单元 -u3；一年级新版单元 -n3 的题来自同册（数学下册笔算来自二上）的旧版单元
+    book = re.sub(r"-[un]\d+$", "", unit_id)
+    books = [book] + (["math-g2a"] if book == "math-g1b" else [])
+    for b in books:
+        if b not in _books:
+            _books[b] = json.load(open(os.path.join(ROOT, "src/content/bank", f"{b}.json"), encoding="utf-8"))
+        for u in _books[b]["units"]:
+            if u["id"] == unit_id or "-n" in unit_id:
+                for q in u["questions"]:
+                    if q["id"] == qid: return q
     raise KeyError(qid)
 
 def calc_answer(kp, sig):

@@ -3,7 +3,7 @@
  * 覆盖率、先修关系合理性、原创生成器答案（独立重算）、题库抽题、记录归属、按年级推荐、跨年级诊断。
  */
 import { pinyin } from 'pinyin-pro';
-import { BANK_INDEX, loadBook } from '@/content/bank';
+import { BANK_INDEX, bookIdOfUnit, loadBook } from '@/content/bank';
 import { resolveExercise } from '@/content/resolve';
 import { answer, nextKp, startDiagnosis } from '@/knowledge/diagnose';
 import { exerciseFromKpId, hasGenerator, hasOriginalGenerator, kpExercise, kpRound } from '@/knowledge/generators';
@@ -20,7 +20,7 @@ const seeded = (seed: number) => {
   let s = seed;
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 };
-const REVIEW_UNIT = /总复习|整理和复习|期末|Recycle/;
+const REVIEW_UNIT = /总复习|整理和复习|期末|Recycle|综合复习|复习与关联/;
 const choice = (e: Exercise): ChoiceExercise => {
   if (e.kind !== 'choice') throw new Error(`期望选择题，实际 ${e.kind}`);
   return e;
@@ -66,7 +66,7 @@ describe('一～六年级知识图谱覆盖', () => {
     // 知识点引用的单元都存在、且有足够的题
     for (const k of KNOWLEDGE_POINTS)
       for (const u of k.units ?? []) {
-        const book = loadBook(u.replace(/-u\d+$/, ''));
+        const book = loadBook(bookIdOfUnit(u));
         const unit = book?.units.find((x) => x.id === u);
         expect(unit).toBeDefined();
         expect(unit!.questions.length).toBeGreaterThanOrEqual(15);
@@ -309,7 +309,7 @@ describe('语文、英语和其它只有题库的知识点', () => {
         expect(kpForRecord(`kp:${kp}`, e.id, kp)).toBe(kp);
       }
       // 直接在“题库闯关”里做的题也归到同一个知识点
-      const q = loadBook(unit.replace(/-u\d+$/, ''))!.units.find((u) => u.id === unit)!.questions[0];
+      const q = loadBook(bookIdOfUnit(unit))!.units.find((u) => u.id === unit)!.questions[0];
       expect(kpForRecord(`bank:${unit}`, q.id, 'bank:x:y')).toBe(kp);
     }
     // 伪造的签名不能冒充别的单元

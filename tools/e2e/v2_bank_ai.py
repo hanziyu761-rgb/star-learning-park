@@ -96,7 +96,10 @@ with sync_playwright() as p:
     tid(page, "practice-home").click(); page.wait_for_selector('[data-testid="home"]')
 
     # ---------- 题库闯关 ----------
-    unit = json.load(open(os.path.join(ROOT, "src/content/bank/math-g1a.json")))["units"][0]
+    # V2.4：一年级按新版教材单元编排，第一个单元“数学游戏”= 旧版 准备课 + 位置 + 认识钟表
+    raw = json.load(open(os.path.join(ROOT, "src/content/bank/math-g1a.json")))["units"]
+    unit = {"id": "math-g1a-n0", "title": "数学游戏（数一数、位置、认钟表）",
+            "questions": [q for i in (0, 1, 6) for q in raw[i]["questions"]]}
     tid(page, "subject-math").click(); page.wait_for_selector('[data-testid="bank-section"]')
     tid(page, f"unit-{unit['id']}").click(); page.wait_for_selector('[data-testid="practice-screen"]')
     # 第 1 题：先请 AI 提示

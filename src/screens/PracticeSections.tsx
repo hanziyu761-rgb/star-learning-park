@@ -3,7 +3,7 @@
  */
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { BANK_SOURCE, bankLessonId, booksFor, loadBook } from '@/content/bank';
+import { BANK_SOURCE, bankLessonId, booksFor, editionText, loadBook, unitBadge } from '@/content/bank';
 import { oralLessonId, topicsForGrade } from '@/content/oral';
 import { kpLabel, getKp } from '@/knowledge/graph';
 import { CONTENT_REVIEW, GRAPHICS_GENERATORS, GRAPHICS_KPS } from '@/knowledge/graphics';
@@ -148,8 +148,8 @@ export function BankSection({ subject, state }: { subject: Subject; state: Progr
                     size={20}
                     color={theme.color}
                   />
-                  <Text style={styles.bookMeta}>
-                    {b.units} 个单元 · {b.questions} 题
+                  <Text style={styles.bookMeta} testID={`book-meta-${b.id}`}>
+                    {b.units} 个单元 · {b.questions} 题 · {editionText(b.id)}
                   </Text>
                   <Text style={styles.chev}>{open ? '▲' : '▼'}</Text>
                 </Pressable>
@@ -168,7 +168,7 @@ export function BankSection({ subject, state }: { subject: Subject; state: Progr
                       }}
                       style={styles.unitRow}
                     >
-                      <Text style={styles.unitNo}>{u.no}</Text>
+                      <Text style={styles.unitNo}>{unitBadge(u)}</Text>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.unitTitle}>{u.title}</Text>
                         <Text style={styles.unitMeta}>

@@ -6,7 +6,7 @@
 import { zh } from '@/content/zh';
 import type { ChoiceExercise, Exercise, Prompt } from '@/lesson/types';
 import { bankExercise, findUnit } from '@/content/bank';
-import { getKp } from './graph';
+import { getKp, UNIT_TO_KP } from './graph';
 import { GRAPHICS_GENERATORS, pickSig } from './graphics';
 import { UPPER_GENERATORS } from './genUpper';
 
@@ -274,10 +274,13 @@ function bankSigs(kpId: string): string[] {
 }
 
 function bankKpExercise(kpId: string, sig: string): Exercise {
-  const [, unitId, qid] = sig.split(':');
+  const [, unitId, ...rest] = sig.split(':');
+  const qid = rest.join(':');
   const found = findUnit(unitId);
   const q = found?.unit.questions.find((x) => x.id === qid);
-  if (!found || !q || !(getKp(kpId)?.units ?? []).includes(unitId)) throw new Error(`没有这道题：${sig}`);
+  // 旧版单元 id（V2.4 前的记录）也认，只要它现在归这个知识点
+  const ours = (getKp(kpId)?.units ?? []).includes(unitId) || UNIT_TO_KP[unitId] === kpId;
+  if (!found || !q || !ours) throw new Error(`没有这道题：${sig}`);
   return { ...bankExercise(found.book, q), id: kpExerciseId(kpId, sig), skill: kpId };
 }
 

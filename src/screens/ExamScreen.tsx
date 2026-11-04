@@ -3,7 +3,7 @@
  */
 import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
-import { BANK_INDEX, loadBook } from '@/content/bank';
+import { BANK_INDEX, editionText, loadBook, unitBadge } from '@/content/bank';
 import { DisplayTextView } from '@/components/PinyinText';
 import { isParentUnlocked, markParentUnlocked, ParentGate } from '@/components/ParentGate';
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
@@ -148,6 +148,9 @@ function ExamBody() {
         {available && book ? (
           <>
             <Text style={styles.label}>范围（不选 = 全册，可以多选单元）</Text>
+            <Text style={styles.small} testID="exam-edition">
+              单元编排：{editionText(bookIdOf(cfgBase))}
+            </Text>
             <View style={styles.chips}>
               <Chip
                 label="全册"
@@ -158,7 +161,7 @@ function ExamBody() {
               {book.units.map((u) => (
                 <Chip
                   key={u.id}
-                  label={`${u.no}. ${u.title}`}
+                  label={/\d/.test(unitBadge(u)) ? `${u.no}. ${u.title}` : u.title}
                   on={units.includes(u.id)}
                   onPress={() => {
                     setExam(null);
@@ -301,6 +304,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.parent,
     backgroundColor: '#fff',
+    maxWidth: '100%',
+    paddingVertical: 6,
   },
   chipOn: { backgroundColor: colors.parent },
   chipText: { fontSize: 15, fontWeight: '700', color: colors.parent },

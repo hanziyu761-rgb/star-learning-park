@@ -8,6 +8,7 @@
  * 状态：未经一线教师审核（见 docs/KNOWLEDGE_GRAPH.md）。
  */
 
+import { editionUnitId, NEW_EDITION } from '@/content/bank/edition';
 import { zh } from '@/content/zh';
 import type { DisplayText } from '@/lesson/types';
 import { CHINESE } from './curriculum/chinese';
@@ -414,6 +415,12 @@ export function kpsFor(subject: KpSubject, grade: number): KnowledgePoint[] {
 export const UNIT_TO_KP: Record<string, string> = Object.fromEntries(
   KNOWLEDGE_POINTS.flatMap((k) => (k.units ?? []).map((u) => [u, k.id])),
 );
+/** 旧版单元 id（以前的练习记录）→ 新版单元所归的知识点 */
+for (const [bookId, ed] of Object.entries(NEW_EDITION))
+  for (const eu of ed.units) {
+    const kp = UNIT_TO_KP[editionUnitId(bookId, eu.no)];
+    if (kp) for (const src of eu.from) if (src.startsWith(`${bookId}-`)) UNIT_TO_KP[src] ??= kp;
+  }
 
 export const KP_BY_ID: Record<string, KnowledgePoint> = Object.fromEntries(KNOWLEDGE_POINTS.map((k) => [k.id, k]));
 

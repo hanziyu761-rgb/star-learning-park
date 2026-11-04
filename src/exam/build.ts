@@ -7,7 +7,7 @@
  * 只选能印在纸上的题型（选择、判断、排序、计算填空）；拖动、拨钟等互动题不进试卷。
  * 同一个编号（种子）组出的试卷完全相同，方便重印。家长屏蔽的题目不会出现。
  */
-import { bankExercise, BANK_INDEX, loadBook } from '@/content/bank';
+import { bankExercise, BANK_INDEX, editionText, loadBook, NEW_EDITION } from '@/content/bank';
 import { plainText, zh } from '@/content/zh';
 import { hasOriginalGenerator, kpRound } from '@/knowledge/generators';
 import { KNOWLEDGE_POINTS, kpSubject, type KpSubject } from '@/knowledge/graph';
@@ -72,7 +72,6 @@ const SUBJECT_CN: Record<KpSubject, [string, string]> = {
   chinese: ['语文', 'yǔ wén'],
   english: ['英语', 'yīng yǔ'],
 };
-const EDITION: Record<KpSubject, string> = { math: '人教版', chinese: '统编版', english: '人教版 PEP' };
 
 /** 一、二年级的题目说明带拼音 */
 const SECTION_TEXT: Record<ExamKind, { title: [string, string]; ins: [string, string] }> = {
@@ -170,6 +169,12 @@ export function toExamItem(e: Exercise, source: ExamItem['source'], group: strin
   return null;
 }
 
+/** 新版单元 → 对应的一年级原创知识点 */
+function editionKpUnits(c: Pick<ExamConfig, 'subject' | 'grade' | 'term'>): [string, string[]][] {
+  const id = bookIdOf(c);
+  return (NEW_EDITION[id]?.units ?? []).map((u) => [`${id}-n${u.no}`, u.kps ?? []]);
+}
+
 /** 本次组卷可用的全部题目 */
 export function examPool(c: ExamConfig, rand: () => number): ExamItem[] {
   const out: ExamItem[] = [];
@@ -187,7 +192,8 @@ export function examPool(c: ExamConfig, rand: () => number): ExamItem[] {
   // 原创题：本学期、有原创生成器的知识点；选了单元时只取对应单元的知识点
   for (const k of KNOWLEDGE_POINTS) {
     if (kpSubject(k) !== c.subject || k.grade !== c.grade || k.term !== c.term || !hasOriginalGenerator(k.id)) continue;
-    if (units && !(k.units ?? []).some((u) => units.has(u))) continue;
+    if (units && !(k.units ?? []).some((u) => units.has(u)) && !editionKpUnits(c).some(([u, kps]) => units.has(u) && kps.includes(k.id)))
+      continue;
     for (const e of kpRound(k.id, 8, rand)) add(toExamItem(e, 'original', k.id));
   }
   // 题库题
@@ -260,7 +266,7 @@ export function buildExam(c: ExamConfig): Exam {
     title: low
       ? zh(titleText, `${GRADE_PY[c.grade]} nián jí ${c.term === '上' ? 'shàng' : 'xià'} cè ${subjPy} ${size.py}`)
       : titleText,
-    subtitle: `依据${EDITION[c.subject]}教材单元编排 · 非官方试卷`,
+    subtitle: `依据${editionText(bookIdOf(c))}教材单元编排 · 非官方试卷`,
     scopeText: unitTitles.length ? `范围：${unitTitles.join('、')}` : '范围：全册',
     perPoint: count ? Math.round((100 / count) * 10) / 10 : 0,
     total: 100,

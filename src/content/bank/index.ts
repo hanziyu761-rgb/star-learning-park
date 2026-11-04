@@ -5,33 +5,56 @@
 import type { Exercise, PinyinSeg, Prompt, Subject, ZhText } from '@/lesson/types';
 import { zh } from '../zh';
 import indexData from './index.json';
+import { bookIdOfUnit, NEW_EDITION, regroup } from './edition';
 import { BANK_LOADERS } from './loaders';
 import type { BankBook, BankIndexEntry, BankQuestion, BankUnit } from './types';
 
 export type { BankBook, BankIndexEntry, BankQuestion, BankUnit } from './types';
+export { bookIdOfUnit, editionText, NEW_EDITION, unitBadge } from './edition';
 
-export const BANK_INDEX = indexData as BankIndexEntry[];
+const rawCache = new Map<string, BankBook>();
+const cache = new Map<string, BankBook>();
+/** 旧版单元编排的原始题库册（导入时的样子） */
+export function loadRawBook(id: string): BankBook | undefined {
+  if (rawCache.has(id)) return rawCache.get(id);
+  const loader = BANK_LOADERS[id];
+  if (!loader) return undefined;
+  const book = loader();
+  rawCache.set(id, book);
+  return book;
+}
+
+/** 题库目录；已按新版教材重排的册，单元数和题数按重排后的统计 */
+export const BANK_INDEX: BankIndexEntry[] = (indexData as BankIndexEntry[]).map((b) => {
+  if (!NEW_EDITION[b.id]) return b;
+  const book = loadBook(b.id)!;
+  return { ...b, units: book.units.length, questions: book.units.reduce((s, u) => s + u.questions.length, 0) };
+});
 export const BANK_SOURCE = 'ChinaStudyFree 题库（AI 生成，已自动质检，未逐题人工审核）';
 
-const cache = new Map<string, BankBook>();
 
 export function booksFor(subject: Subject, grade: number): BankIndexEntry[] {
   return BANK_INDEX.filter((b) => b.subject === subject && b.grade === grade);
 }
 
+/** 题库册：一年级等已更新的册按新版教材单元编排（见 edition.ts），其它册按旧版 */
 export function loadBook(id: string): BankBook | undefined {
   if (cache.has(id)) return cache.get(id);
-  const loader = BANK_LOADERS[id];
-  if (!loader) return undefined;
-  const book = loader();
+  const raw = loadRawBook(id);
+  if (!raw) return undefined;
+  const ed = NEW_EDITION[id];
+  const book = ed ? regroup(raw, ed, loadRawBook) : raw;
   cache.set(id, book);
   return book;
 }
 
-/** 单元 id 形如 math-g1a-u3 */
+/**
+ * 单元 id：新版形如 math-g1a-n1，旧版形如 math-g1a-u3。
+ * 旧版单元 id 仍能找到（来自以前的练习记录、今日复习），只是不再显示在单元列表里。
+ */
 export function findUnit(unitId: string): { book: BankBook; unit: BankUnit } | undefined {
-  const bookId = unitId.replace(/-u\d+$/, '');
-  const book = loadBook(bookId);
+  const bookId = bookIdOfUnit(unitId);
+  const book = (/-u\d+$/.test(unitId) ? loadRawBook : loadBook)(bookId);
   const unit = book?.units.find((u) => u.id === unitId);
   return book && unit ? { book, unit } : undefined;
 }
