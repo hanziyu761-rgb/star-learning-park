@@ -26,6 +26,9 @@ const ACCEPTED: Record<string, string> = {
   '试:shi:shì': '“试试”重叠时第二个字读轻声',
   '星:xing:xīng': '“星星”第二个字读轻声',
   '问:wen:wèn': '“问问”重叠时第二个字读轻声',
+  '识:shi:shí': '“知识”“认识”中“识”读轻声',
+  '找:zhao:zhǎo': '“找找”重叠时第二个字读轻声',
+  '一:yi:yī': '“练一练、分一分”等动词重叠中间的“一”读轻声',
 };
 
 function isZhText(v: unknown): v is ZhText {

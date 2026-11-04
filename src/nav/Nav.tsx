@@ -15,7 +15,11 @@ export type Route =
   /** 题库单元（bank:单元id）或口算（oral:主题id）练习 */
   | { name: 'practice'; id: string }
   /** 问问星星宝（AI 老师） */
-  | { name: 'teacher' };
+  | { name: 'teacher' }
+  /** 我的知识小地图（一年级数学） */
+  | { name: 'map' }
+  /** 找原因小游戏：前置知识诊断 */
+  | { name: 'diagnose'; kp: string };
 
 export interface Nav {
   push: (route: Route) => void;

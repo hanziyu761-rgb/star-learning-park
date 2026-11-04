@@ -15,6 +15,8 @@ import ParentScreen from '@/screens/ParentScreen';
 import PracticeScreen from '@/screens/PracticeScreen';
 import ReviewScreen from '@/screens/ReviewScreen';
 import TeacherScreen from '@/screens/TeacherScreen';
+import KnowledgeMapScreen from '@/screens/KnowledgeMapScreen';
+import DiagnoseScreen from '@/screens/DiagnoseScreen';
 import SubjectScreen from '@/screens/SubjectScreen';
 import { colors } from '@/theme';
 
@@ -34,6 +36,10 @@ function renderRoute(route: Route) {
       return <PracticeScreen id={route.id} />;
     case 'teacher':
       return <TeacherScreen />;
+    case 'map':
+      return <KnowledgeMapScreen />;
+    case 'diagnose':
+      return <DiagnoseScreen kp={route.kp} />;
   }
 }
 

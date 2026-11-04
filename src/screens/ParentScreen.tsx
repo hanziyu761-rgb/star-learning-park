@@ -9,6 +9,7 @@ import { useNav } from '@/nav/Nav';
 import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
 import { AiCard, GradeCard, HiddenCard } from './ParentSettings';
+import { KnowledgeCard } from './ParentKnowledge';
 import { useProgress } from '@/progress/ProgressContext';
 import {
   activeDaysLast7,
@@ -76,6 +77,8 @@ function ParentDashboard() {
           </View>
         ))}
       </Card>
+
+      <KnowledgeCard />
 
       {SUBJECTS.map((s) => {
         const st = subjectStats(state, s);

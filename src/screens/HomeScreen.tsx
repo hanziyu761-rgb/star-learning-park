@@ -11,6 +11,8 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { resolveExercise } from '@/content/resolve';
 import { reviewQueue } from '@/progress/plan';
+import { computeMastery } from '@/knowledge/mastery';
+import { recommendKps } from '@/knowledge/recommend';
 import { completedSubjectToday, isSameLocalDay, SUBJECTS } from '@/progress/stats';
 import { speak } from '@/speech/speech';
 import { colors, radius, shadow, space, subjectTheme } from '@/theme';
@@ -37,6 +39,10 @@ export default function HomeScreen() {
   const todayDone =
     SUBJECTS.filter((s) => completedSubjectToday(state, s, now)).length + (showReview && reviewCount === 0 ? 1 : 0);
   const todayTotal = SUBJECTS.length + (showReview ? 1 : 0);
+  // 知识小地图上需要复习 / 找原因的本领数
+  const mapTodo = recommendKps(state, computeMastery(state, now), now, 10).filter(
+    (r) => r.kind === 'review' || r.kind === 'diagnose',
+  ).length;
 
   return (
     <Screen testID="home">
@@ -76,7 +82,11 @@ export default function HomeScreen() {
         >
           <Text style={styles.continueEmoji}>{active.emoji}</Text>
           <View style={{ flex: 1 }}>
-            <DisplayTextView text={zh('继续学习', 'jì xù xué xí')} size={22} color={subjectTheme[active.subject].color} />
+            <DisplayTextView
+              text={zh('继续学习', 'jì xù xué xí')}
+              size={22}
+              color={subjectTheme[active.subject].color}
+            />
             <Text style={styles.continueSub}>
               {plainText(active.title)} · 第 {state.active.stepIndex + 1}/{active.steps.length} 步
             </Text>
@@ -98,13 +108,45 @@ export default function HomeScreen() {
               speak({ text: SUBJECT_LABEL[s].say, lang: 'zh-CN' });
               nav.push({ name: 'subject', subject: s });
             }}
-            style={({ pressed }) => [styles.subject, { backgroundColor: subjectTheme[s].color }, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.subject,
+              { backgroundColor: subjectTheme[s].color },
+              pressed && styles.pressed,
+            ]}
           >
             <Text style={styles.subjectEmoji}>{subjectTheme[s].emoji}</Text>
             <DisplayTextView text={SUBJECT_LABEL[s].text} size={30} color="#fff" />
           </Pressable>
         ))}
       </View>
+
+      {/* 我的知识小地图（一年级数学） */}
+      <Pressable
+        testID="map-entry"
+        accessibilityRole="button"
+        onPress={() => {
+          tapFeedback();
+          speak({ text: '我的知识小地图', lang: 'zh-CN' });
+          nav.push({ name: 'map' });
+        }}
+        style={[styles.continue, { borderColor: subjectTheme.math.color }]}
+      >
+        <Text style={styles.continueEmoji}>🗺️</Text>
+        <View style={{ flex: 1 }}>
+          <DisplayTextView
+            text={zh('我的知识小地图', 'wǒ de zhī shi xiǎo dì tú')}
+            size={22}
+            color={subjectTheme.math.color}
+          />
+          <Text style={styles.continueSub}>数学 · 看看学会了哪些本领</Text>
+        </View>
+        {mapTodo > 0 ? (
+          <Text style={styles.badge} testID="map-todo-count">
+            {mapTodo}
+          </Text>
+        ) : null}
+        <Text style={styles.play}>▶️</Text>
+      </Pressable>
 
       {/* AI 老师入口：家长开启后才显示 */}
       {state.settings.aiEnabled ? (
@@ -243,7 +285,14 @@ const styles = StyleSheet.create({
   panel: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, gap: space.sm, ...shadow },
   panelHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   panelCount: { fontSize: 20, fontWeight: '900', color: colors.primary },
-  task: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 64, borderTopWidth: 1, borderTopColor: colors.line },
+  task: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    minHeight: 64,
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+  },
   taskEmoji: { fontSize: 30 },
   badge: {
     minWidth: 26,

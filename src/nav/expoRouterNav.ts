@@ -13,6 +13,10 @@ function toHref(route: Route) {
       return '/parent' as const;
     case 'review':
       return '/review' as const;
+    case 'map':
+      return '/map' as const;
+    case 'diagnose':
+      return { pathname: '/diagnose/[kp]' as const, params: { kp: route.kp } };
     case 'teacher':
       return '/teacher' as const;
     case 'practice':
