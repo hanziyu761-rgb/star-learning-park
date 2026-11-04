@@ -73,6 +73,7 @@ describe('v1 → v2 数据迁移（旧进度不丢失）', () => {
     const s = parseProgress(JSON.stringify(v1), T0)!;
     expect(s.version).toBe(PROGRESS_VERSION);
     expect(s.settings).toEqual({ grade: 1, aiEnabled: false, aiBaseUrl: '' });
+    expect(s.diagnoses).toEqual([]);
     expect(s.hidden).toEqual([]);
     expect(s.totalStars).toBe(5);
     expect(s.sessions).toHaveLength(1);

@@ -29,7 +29,7 @@ export const SUBJECTS: Subject[] = ['math', 'chinese', 'english'];
 
 export function subjectStats(state: ProgressState, subject: Subject): SubjectStats {
   // 正确率只统计课程中的作答；复习作答单独统计，避免重复计入
-  const results = state.results.filter((r) => r.subject === subject && r.source !== 'review');
+  const results = state.results.filter((r) => r.subject === subject && (r.source ?? 'lesson') === 'lesson');
   const sessions = state.sessions.filter((s) => s.subject === subject);
   const correct = results.filter((r) => r.firstTryCorrect).length;
   const lessons = Object.values(state.lessons).filter((l) => l.subject === subject);

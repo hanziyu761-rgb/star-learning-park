@@ -5,6 +5,8 @@
 import type { Exercise, Subject } from '@/lesson/types';
 import { findBankExercise, findUnit } from './bank';
 import { exerciseLabel, getLesson } from './index';
+import { exerciseFromKpId } from '@/knowledge/generators';
+import { getKp } from '@/knowledge/graph';
 import { findOralExercise, ORAL_TOPICS } from './oral';
 import { plainText } from './zh';
 
@@ -18,6 +20,11 @@ export interface ResolvedExercise {
 export type ExerciseResolver = (lessonId: string, exerciseId: string) => ResolvedExercise | null;
 
 export const resolveExercise: ExerciseResolver = (lessonId, exerciseId) => {
+  if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:')) {
+    const ex = exerciseFromKpId(exerciseId);
+    const kp = getKp(lessonId.split(':')[1]);
+    return ex ? { exercise: ex, subject: 'math', source: `知识点 · ${kp?.name ?? ''}` } : null;
+  }
   const bank = findBankExercise(lessonId, exerciseId);
   if (bank) return { exercise: bank.exercise, subject: bank.book.subject, source: `${bank.book.title} · ${bank.unit.title}` };
   const oral = findOralExercise(lessonId, exerciseId);
@@ -37,6 +44,10 @@ export function sourceName(lessonId: string): string {
   if (lessonId.startsWith('bank:')) {
     const f = findUnit(lessonId.slice(5));
     return f ? `${f.book.title} · ${f.unit.title}` : lessonId;
+  }
+  if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:')) {
+    const k = getKp(lessonId.split(':')[1]);
+    return k ? `${lessonId.startsWith('diag:') ? '找原因' : '知识点练习'} · ${k.name}` : lessonId;
   }
   if (lessonId.startsWith('oral:')) {
     const t = ORAL_TOPICS.find((x) => `oral:${x.id}` === lessonId);

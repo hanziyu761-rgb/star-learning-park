@@ -6,16 +6,25 @@
  * - 错题单独汇总，并按知识点（skill）统计，为以后的智能复习做准备。
  * - 只有真实发生的学习行为才会写入记录，不生成任何示例数据。
  */
-import type { Subject } from "@/lesson/types";
-import { dayKey, isGraduated, newSrs, reviewSrs, type SrsState } from "./srs";
+import type { Subject } from '@/lesson/types';
+import { dayKey, isGraduated, newSrs, reviewSrs, type SrsState } from './srs';
 
 /**
  * 数据版本：
  * v1 — V1.0
  * v2 — 错题增加间隔复习状态 srs；练习结果增加来源 source；新增复习记录 reviews
  * v3 — 新增设置 settings（年级、AI 老师开关）和家长屏蔽的题库题目 hidden
+ * v4 — 新增前置知识诊断记录 diagnoses；练习结果来源增加 diagnose
  */
-export const PROGRESS_VERSION = 3;
+export const PROGRESS_VERSION = 4;
+
+export interface DiagnosisRecord {
+  at: number;
+  target: string;
+  verdicts: Record<string, 'mastered' | 'shaky' | 'weak'>;
+  roots: string[];
+  questionCount: number;
+}
 
 export interface Settings {
   /** 题库与口算使用的年级（1–6），由家长设置 */
@@ -35,7 +44,7 @@ export interface ExerciseResult {
   attempts: number;
   at: number;
   /** 来自课程还是“今日复习”；v1 旧记录没有此字段，视为课程 */
-  source?: "lesson" | "review";
+  source?: 'lesson' | 'review' | 'diagnose';
 }
 
 export interface MistakeEntry {
@@ -102,6 +111,8 @@ export interface ProgressState {
   settings: Settings;
   /** 家长或孩子标记“这题有问题”而屏蔽的题库题目 id */
   hidden: string[];
+  /** 前置知识诊断记录 */
+  diagnoses: DiagnosisRecord[];
 }
 
 export const MAX_RESULTS = 2000;
@@ -121,20 +132,21 @@ export function createEmptyProgress(): ProgressState {
     reviews: [],
     settings: { grade: 1, aiEnabled: false, aiBaseUrl: '' },
     hidden: [],
+    diagnoses: [],
   };
 }
 
 export type ProgressAction =
   | {
-      type: "lesson/start";
+      type: 'lesson/start';
       lessonId: string;
       subject: Subject;
       now: number;
       resume: boolean;
     }
-  | { type: "lesson/step"; lessonId: string; stepIndex: number; now: number }
+  | { type: 'lesson/step'; lessonId: string; stepIndex: number; now: number }
   | {
-      type: "exercise/result";
+      type: 'exercise/result';
       lessonId: string;
       exerciseId: string;
       subject: Subject;
@@ -142,28 +154,30 @@ export type ProgressAction =
       firstTryCorrect: boolean;
       attempts: number;
       now: number;
-      source?: "lesson" | "review";
+      source?: 'lesson' | 'review' | 'diagnose';
     }
-  | { type: "lesson/complete"; lessonId: string; subject: Subject; now: number }
+  | { type: 'lesson/complete'; lessonId: string; subject: Subject; now: number }
   /** 完成一轮题库或口算练习（不影响“继续学习”的课程） */
   | {
-      type: "practice/complete";
+      type: 'practice/complete';
       lessonId: string;
       subject: Subject;
       startedAt: number;
       now: number;
     }
-  | { type: "settings/set"; settings: Partial<Settings> }
-  | { type: "bank/hide"; questionId: string }
-  | { type: "bank/unhide-all" }
+  | { type: 'settings/set'; settings: Partial<Settings> }
+  | { type: 'bank/hide'; questionId: string }
+  | { type: 'bank/unhide-all' }
+  /** 完成一次前置知识诊断：保存结论，奖励 1 颗星 */
+  | { type: 'diagnosis/complete'; record: DiagnosisRecord }
   /** 完成一轮今日复习：奖励 1 颗星 */
   | {
-      type: "review/complete";
+      type: 'review/complete';
       now: number;
       count: number;
       firstTryCorrect: number;
     }
-  | { type: "reset" };
+  | { type: 'reset' };
 
 /** 按第一次作答正确率给星星：90% 以上 3 颗，60% 以上 2 颗，完成即有 1 颗 */
 export function starsForAccuracy(correct: number, total: number): number {
@@ -174,17 +188,11 @@ export function starsForAccuracy(correct: number, total: number): number {
   return 1;
 }
 
-export function progressReducer(
-  state: ProgressState,
-  action: ProgressAction,
-): ProgressState {
+export function progressReducer(state: ProgressState, action: ProgressAction): ProgressState {
   switch (action.type) {
-    case "lesson/start": {
+    case 'lesson/start': {
       const prev = state.lessons[action.lessonId];
-      const resuming =
-        action.resume &&
-        state.active !== null &&
-        state.active.lessonId === action.lessonId;
+      const resuming = action.resume && state.active !== null && state.active.lessonId === action.lessonId;
       const active: ActiveLesson = resuming
         ? { ...state.active!, updatedAt: action.now }
         : {
@@ -212,9 +220,8 @@ export function progressReducer(
       };
     }
 
-    case "lesson/step": {
-      if (!state.active || state.active.lessonId !== action.lessonId)
-        return state;
+    case 'lesson/step': {
+      if (!state.active || state.active.lessonId !== action.lessonId) return state;
       return {
         ...state,
         active: {
@@ -225,8 +232,8 @@ export function progressReducer(
       };
     }
 
-    case "exercise/result": {
-      const source = action.source ?? "lesson";
+    case 'exercise/result': {
+      const source = action.source ?? 'lesson';
       const result: ExerciseResult = {
         lessonId: action.lessonId,
         exerciseId: action.exerciseId,
@@ -253,9 +260,7 @@ export function progressReducer(
             wrongCount: (existing?.wrongCount ?? 0) + 1,
             lastWrongAt: action.now,
             resolved: false,
-            srs: existing
-              ? reviewSrs(existing.srs, false, action.now)
-              : newSrs(action.now),
+            srs: existing ? reviewSrs(existing.srs, false, action.now) : newSrs(action.now),
           },
         };
       } else if (existing && !existing.resolved) {
@@ -269,13 +274,12 @@ export function progressReducer(
       const results = [...state.results, result];
       return {
         ...state,
-        results:
-          results.length > MAX_RESULTS ? results.slice(-MAX_RESULTS) : results,
+        results: results.length > MAX_RESULTS ? results.slice(-MAX_RESULTS) : results,
         mistakes,
       };
     }
 
-    case "review/complete": {
+    case 'review/complete': {
       if (action.count <= 0) return state;
       const reviews = [
         ...state.reviews,
@@ -288,50 +292,39 @@ export function progressReducer(
       return {
         ...state,
         totalStars: state.totalStars + 1,
-        reviews:
-          reviews.length > MAX_SESSIONS
-            ? reviews.slice(-MAX_SESSIONS)
-            : reviews,
+        reviews: reviews.length > MAX_SESSIONS ? reviews.slice(-MAX_SESSIONS) : reviews,
       };
     }
 
-    case "settings/set":
+    case 'settings/set':
       return { ...state, settings: { ...state.settings, ...action.settings } };
 
-    case "bank/hide":
+    case 'bank/hide':
       return state.hidden.includes(action.questionId)
         ? state
         : { ...state, hidden: [...state.hidden, action.questionId] };
 
-    case "bank/unhide-all":
+    case 'bank/unhide-all':
       return { ...state, hidden: [] };
 
-    case "practice/complete":
-      return completeSession(
-        state,
-        action.lessonId,
-        action.subject,
-        action.startedAt,
-        action.now,
-        false,
-      );
-
-    case "lesson/complete": {
-      const startedAt =
-        state.active && state.active.lessonId === action.lessonId
-          ? state.active.startedAt
-          : action.now;
-      return completeSession(
-        state,
-        action.lessonId,
-        action.subject,
-        startedAt,
-        action.now,
-        true,
-      );
+    case 'diagnosis/complete': {
+      const diagnoses = [...state.diagnoses, action.record];
+      return {
+        ...state,
+        totalStars: state.totalStars + (action.record.questionCount > 0 ? 1 : 0),
+        diagnoses: diagnoses.length > MAX_SESSIONS ? diagnoses.slice(-MAX_SESSIONS) : diagnoses,
+      };
     }
 
-    case "reset":
+    case 'practice/complete':
+      return completeSession(state, action.lessonId, action.subject, action.startedAt, action.now, false);
+
+    case 'lesson/complete': {
+      const startedAt = state.active && state.active.lessonId === action.lessonId ? state.active.startedAt : action.now;
+      return completeSession(state, action.lessonId, action.subject, startedAt, action.now, true);
+    }
+
+    case 'reset':
       return createEmptyProgress();
 
     default:
@@ -352,17 +345,11 @@ function completeSession(
   {
     // 本次课程的题目结果 = 本次开始之后记录的结果
     const sessionResults = state.results.filter(
-      (r) =>
-        r.lessonId === action.lessonId &&
-        r.at >= startedAt &&
-        r.source !== "review",
+      (r) => r.lessonId === action.lessonId && r.at >= startedAt && (r.source ?? 'lesson') === 'lesson',
     );
     const correct = sessionResults.filter((r) => r.firstTryCorrect).length;
     const stars = starsForAccuracy(correct, sessionResults.length);
-    const durationSec = Math.min(
-      MAX_SESSION_SEC,
-      Math.max(0, Math.round((action.now - startedAt) / 1000)),
-    );
+    const durationSec = Math.min(MAX_SESSION_SEC, Math.max(0, Math.round((action.now - startedAt) / 1000)));
     const session: SessionRecord = {
       lessonId: action.lessonId,
       subject: action.subject,
@@ -378,14 +365,8 @@ function completeSession(
     return {
       ...state,
       totalStars: state.totalStars + stars,
-      active:
-        clearActive && state.active?.lessonId === action.lessonId
-          ? null
-          : state.active,
-      sessions:
-        sessions.length > MAX_SESSIONS
-          ? sessions.slice(-MAX_SESSIONS)
-          : sessions,
+      active: clearActive && state.active?.lessonId === action.lessonId ? null : state.active,
+      sessions: sessions.length > MAX_SESSIONS ? sessions.slice(-MAX_SESSIONS) : sessions,
       lessons: {
         ...state.lessons,
         [action.lessonId]: {
@@ -405,10 +386,7 @@ function completeSession(
 /**
  * 把旧版本数据升级到当前版本。只增加字段，不删除任何已有记录。
  */
-export function migrateProgress(
-  data: ProgressState,
-  now: number = Date.now(),
-): ProgressState {
+export function migrateProgress(data: ProgressState, now: number = Date.now()): ProgressState {
   const mistakes: Record<string, MistakeEntry> = {};
   for (const [k, m] of Object.entries(data.mistakes ?? {})) {
     const old = m as Partial<MistakeEntry> & MistakeEntry;
@@ -432,6 +410,7 @@ export function migrateProgress(
     reviews: Array.isArray(data.reviews) ? data.reviews : [],
     settings: { ...createEmptyProgress().settings, ...(data.settings ?? {}) },
     hidden: Array.isArray(data.hidden) ? data.hidden : [],
+    diagnoses: Array.isArray(data.diagnoses) ? data.diagnoses : [],
     version: PROGRESS_VERSION,
   };
 }
@@ -439,21 +418,18 @@ export function migrateProgress(
 /**
  * 校验从存储中读出的数据。数据损坏时返回 null，由调用方决定如何处理。
  */
-export function parseProgress(
-  raw: string | null,
-  now: number = Date.now(),
-): ProgressState | null {
+export function parseProgress(raw: string | null, now: number = Date.now()): ProgressState | null {
   if (raw === null) return createEmptyProgress();
   try {
     const data = JSON.parse(raw) as Partial<ProgressState>;
     if (
-      typeof data !== "object" ||
+      typeof data !== 'object' ||
       data === null ||
-      typeof data.totalStars !== "number" ||
-      typeof data.lessons !== "object" ||
+      typeof data.totalStars !== 'number' ||
+      typeof data.lessons !== 'object' ||
       !Array.isArray(data.results) ||
       !Array.isArray(data.sessions) ||
-      typeof data.mistakes !== "object"
+      typeof data.mistakes !== 'object'
     ) {
       return null;
     }
