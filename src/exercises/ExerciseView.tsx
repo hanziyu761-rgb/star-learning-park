@@ -1,6 +1,10 @@
 import React from 'react';
 import type { Exercise } from '@/lesson/types';
 import { ChoiceExercise } from './ChoiceExercise';
+import { ClockSetExercise } from './ClockSetExercise';
+import { GridPlaceExercise, GridTapExercise } from './GridExercises';
+import { PatternFillExercise } from './PatternFillExercise';
+import { BinsExercise, RotateExercise, ShapePickExercise } from './ShapeExercises';
 import type { ExerciseProps } from './common';
 import { DragMatchExercise } from './DragMatchExercise';
 import { SortExercise } from './SortExercise';
@@ -18,5 +22,19 @@ export function ExerciseView(props: ExerciseProps<Exercise>) {
       return <DragMatchExercise {...props} exercise={exercise} />;
     case 'sort':
       return <SortExercise {...props} exercise={exercise} />;
+    case 'grid-place':
+      return <GridPlaceExercise {...props} exercise={exercise} />;
+    case 'grid-tap':
+      return <GridTapExercise {...props} exercise={exercise} />;
+    case 'shape-pick':
+      return <ShapePickExercise {...props} exercise={exercise} />;
+    case 'bins':
+      return <BinsExercise {...props} exercise={exercise} />;
+    case 'rotate':
+      return <RotateExercise {...props} exercise={exercise} />;
+    case 'clock-set':
+      return <ClockSetExercise {...props} exercise={exercise} />;
+    case 'pattern-fill':
+      return <PatternFillExercise {...props} exercise={exercise} />;
   }
 }

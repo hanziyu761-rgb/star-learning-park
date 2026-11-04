@@ -31,7 +31,16 @@ export interface Visual {
   emoji: string;
   /** 同一个图需要重复显示时的数量（例如 3 个苹果） */
   count?: number;
+  /** 代码绘制的图形或钟面；有 figure 时优先显示 figure */
+  figure?: Figure;
 }
+
+export type ShapeKind = 'circle' | 'triangle' | 'square' | 'rect' | 'rtri' | 'house';
+
+/** 代码绘制的原创图形 */
+export type Figure =
+  | { type: 'shape'; shape: ShapeKind; color: string; rotation?: number; size?: number }
+  | { type: 'clock'; hour: number; minute?: number; size?: number };
 
 export interface Prompt {
   text: DisplayText;
@@ -117,7 +126,94 @@ export interface SortExercise {
   wrongHint: Prompt;
 }
 
-export type Exercise = ChoiceExercise | TrueFalseExercise | DragMatchExercise | SortExercise;
+interface ExerciseBase {
+  id: string;
+  skill: string;
+  prompt: Prompt;
+  wrongHint: Prompt;
+  /** 答对后显示的讲解（可选） */
+  explanation?: string;
+}
+
+/** 位置：把会动的小动物拖到格子里的指定位置 */
+export interface GridPlaceExercise extends ExerciseBase {
+  kind: 'grid-place';
+  rows: number;
+  cols: number;
+  fixed: { row: number; col: number; emoji: string }[];
+  mover: string;
+  target: { row: number; col: number };
+}
+
+/** 位置 / 简单地图：点出指定位置的格子 */
+export interface GridTapExercise extends ExerciseBase {
+  kind: 'grid-tap';
+  rows: number;
+  cols: number;
+  cells: { row: number; col: number; emoji: string }[];
+  target: { row: number; col: number };
+}
+
+/** 图形：点出所有符合要求的图形 */
+export interface ShapePickExercise extends ExerciseBase {
+  kind: 'shape-pick';
+  figures: { id: string; visual: Visual }[];
+  answerIds: string[];
+}
+
+/** 分类：把物品拖进对应的区域 */
+export interface BinsExercise extends ExerciseBase {
+  kind: 'bins';
+  bins: { id: string; label: DisplayText; visual?: Visual }[];
+  items: { id: string; visual: Visual; bin: string }[];
+}
+
+/** 图形旋转：点一下转 90°，转到和影子一样再放进去 */
+export interface RotateExercise extends ExerciseBase {
+  kind: 'rotate';
+  shape: ShapeKind;
+  color: string;
+  start: number;
+  target: number;
+}
+
+/** 拨钟：拖动分针（时针随之转动），拨到指定整时 */
+export interface ClockSetExercise extends ExerciseBase {
+  kind: 'clock-set';
+  scene?: Visual;
+  targetHour: number;
+  /** 起始时间（从 0:00 起的分钟数） */
+  startMinutes: number;
+}
+
+/** 找规律：把正确的图形拖进空位 */
+export interface PatternExercise extends ExerciseBase {
+  kind: 'pattern-fill';
+  /** null 表示空位 */
+  sequence: (PatternToken | null)[];
+  palette: PatternToken[];
+  /** 每个空位的正确 token id（按空位顺序） */
+  answers: string[];
+}
+
+export interface PatternToken {
+  id: string;
+  visual?: Visual;
+  text?: string;
+}
+
+export type Exercise =
+  | ChoiceExercise
+  | TrueFalseExercise
+  | DragMatchExercise
+  | SortExercise
+  | GridPlaceExercise
+  | GridTapExercise
+  | ShapePickExercise
+  | BinsExercise
+  | RotateExercise
+  | ClockSetExercise
+  | PatternExercise;
 
 // ---------------- 课程环节 ----------------
 
@@ -134,7 +230,15 @@ export type LessonStep =
   /** 可视化演示：物品逐个出现并朗读数数 */
   | { kind: 'count-demo'; id: string; title: Prompt; emoji: string; count: number; numberWords: string[] }
   /** 动手操作：把物品拖进篮子 */
-  | { kind: 'drag-basket'; id: string; title: Prompt; emoji: string; total: number; target: number; doneSpeak: Speakable }
+  | {
+      kind: 'drag-basket';
+      id: string;
+      title: Prompt;
+      emoji: string;
+      total: number;
+      target: number;
+      doneSpeak: Speakable;
+    }
   /** 动手操作：两堆合起来（加法），孩子把左右两组都拖进篮子再选择答案 */
   | {
       kind: 'combine';

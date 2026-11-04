@@ -5,6 +5,8 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BANK_SOURCE, bankLessonId, booksFor, loadBook } from '@/content/bank';
 import { oralLessonId, topicsForGrade } from '@/content/oral';
+import { getKp } from '@/knowledge/graph';
+import { CONTENT_REVIEW, GRAPHICS_GENERATORS, GRAPHICS_KPS } from '@/knowledge/graphics';
 import { zh } from '@/content/zh';
 import { DisplayTextView } from '@/components/PinyinText';
 import { Stars, tapFeedback } from '@/components/ui';
@@ -55,6 +57,50 @@ export function OralSection({ state }: { state: ProgressState }) {
   );
 }
 
+/** 图形乐园：位置、图形、钟表、分类、找规律（V2.1 原创互动题，待教师审核） */
+export function GraphicsSection({ state }: { state: ProgressState }) {
+  const nav = useNav();
+  return (
+    <View style={styles.card} testID="graphics-section">
+      <View style={styles.titleRow}>
+        <DisplayTextView text={zh('图形乐园', 'tú xíng lè yuán')} size={24} />
+        <View style={[styles.gradePill, { backgroundColor: '#FFF1D6' }]}>
+          <Text style={styles.review}>{CONTENT_REVIEW}</Text>
+        </View>
+      </View>
+      <Text style={styles.meta}>拖一拖、点一点、拨一拨：位置、图形、钟表、分类、找规律（本项目原创题）</Text>
+      <View style={styles.grid}>
+        {GRAPHICS_KPS.map((kpId) => {
+          const k = getKp(kpId)!;
+          const id = `kp:${kpId}`;
+          const done = doneCount(state, id);
+          const total = GRAPHICS_GENERATORS[kpId].sigs.length;
+          return (
+            <Pressable
+              key={kpId}
+              testID={`graphics-${kpId}`}
+              accessibilityRole="button"
+              onPress={() => {
+                tapFeedback();
+                speak({ text: k.kidName, lang: 'zh-CN' });
+                nav.push({ name: 'practice', id });
+              }}
+              style={({ pressed }) => [styles.tile, styles.gTile, pressed && { transform: [{ scale: 0.96 }] }]}
+            >
+              <Text style={styles.tileEmoji}>{k.emoji}</Text>
+              <DisplayTextView text={zh(k.kidName, k.kidPy)} size={16} />
+              <Text style={styles.unitMeta}>
+                已练 {Math.min(done, total)}/{total}
+              </Text>
+              <Stars value={state.lessons[id]?.bestStars ?? 0} size={14} />
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export function BankSection({ subject, state }: { subject: Subject; state: ProgressState }) {
   const nav = useNav();
   const grade = state.settings.grade;
@@ -68,7 +114,11 @@ export function BankSection({ subject, state }: { subject: Subject; state: Progr
       <View style={styles.titleRow}>
         <DisplayTextView text={zh('题库闯关', 'tí kù chuǎng guān')} size={24} />
         <View style={[styles.gradePill, { backgroundColor: theme.soft }]}>
-          <DisplayTextView text={zh(`${GRADE_CN[grade]}年级`, `${GRADE_PY[grade]} nián jí`)} size={15} color={theme.color} />
+          <DisplayTextView
+            text={zh(`${GRADE_CN[grade]}年级`, `${GRADE_PY[grade]} nián jí`)}
+            size={15}
+            color={theme.color}
+          />
         </View>
       </View>
       {books.length === 0 ? (
@@ -93,7 +143,11 @@ export function BankSection({ subject, state }: { subject: Subject; state: Progr
                   accessibilityRole="button"
                   testID={`book-${b.id}`}
                 >
-                  <DisplayTextView text={zh(`${b.term}册`, b.term === '上' ? 'shàng cè' : 'xià cè')} size={20} color={theme.color} />
+                  <DisplayTextView
+                    text={zh(`${b.term}册`, b.term === '上' ? 'shàng cè' : 'xià cè')}
+                    size={20}
+                    color={theme.color}
+                  />
                   <Text style={styles.bookMeta}>
                     {b.units} 个单元 · {b.questions} 题
                   </Text>
@@ -154,6 +208,8 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   tileEmoji: { fontSize: 28 },
+  gTile: { backgroundColor: '#FFF6E0', flexBasis: '30%', minWidth: 140 },
+  review: { fontSize: 12, fontWeight: '800', color: '#B26A00' },
   bookRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -175,7 +231,16 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.line,
     paddingHorizontal: space.sm,
   },
-  unitNo: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.bg, textAlign: 'center', lineHeight: 28, fontWeight: '800', color: colors.text },
+  unitNo: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.bg,
+    textAlign: 'center',
+    lineHeight: 28,
+    fontWeight: '800',
+    color: colors.text,
+  },
   unitTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   unitMeta: { fontSize: 12, color: colors.textSoft },
   go: { fontSize: 18, fontWeight: '900' },

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { plainText, zh } from '@/content/zh';
+import { VisualView } from '@/components/Figure';
 import { DisplayTextView } from '@/components/PinyinText';
 import { SpeakerButton, tapFeedback } from '@/components/ui';
 import type { TrueFalseExercise as TrueFalseData } from '@/lesson/types';
@@ -30,7 +31,13 @@ export function TrueFalseExercise({ exercise, lang, onFeedback, onSolved }: Exer
       <PromptHeader prompt={exercise.prompt} />
       <View style={styles.statement}>
         {exercise.statement.visual ? (
-          <Text style={styles.emoji}>{exercise.statement.visual.emoji.repeat(exercise.statement.visual.count ?? 1)}</Text>
+          exercise.statement.visual.figure ? (
+            <VisualView visual={exercise.statement.visual} figureSize={80} />
+          ) : (
+            <Text style={styles.emoji}>
+              {exercise.statement.visual.emoji.repeat(exercise.statement.visual.count ?? 1)}
+            </Text>
+          )
         ) : null}
         <View style={styles.sentence}>
           <DisplayTextView text={exercise.statement.text} size={30} />
@@ -67,7 +74,14 @@ export function TrueFalseExercise({ exercise, lang, onFeedback, onSolved }: Exer
 
 const styles = StyleSheet.create({
   wrap: { gap: space.lg },
-  statement: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, alignItems: 'center', gap: space.md, ...shadow },
+  statement: {
+    backgroundColor: '#fff',
+    borderRadius: radius.lg,
+    padding: space.lg,
+    alignItems: 'center',
+    gap: space.md,
+    ...shadow,
+  },
   emoji: { fontSize: 80 },
   sentence: { flexDirection: 'row', alignItems: 'center', gap: space.md, flexWrap: 'wrap', justifyContent: 'center' },
   row: { flexDirection: 'row', gap: space.lg, justifyContent: 'center' },

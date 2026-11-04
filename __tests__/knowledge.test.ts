@@ -12,19 +12,44 @@ import { kpForRecord, LESSON_MAP, ORAL_MAP } from '@/knowledge/mapping';
 import { computeMastery, masteryOf, type Evidence } from '@/knowledge/mastery';
 import { frequentMistakeTypes, recommendKps } from '@/knowledge/recommend';
 import { createEmptyProgress, progressReducer, type ProgressAction } from '@/progress/model';
+import { GRAPHICS_GENERATORS } from '@/knowledge/graphics';
+import type { ChoiceExercise, Exercise } from '@/lesson/types';
 
 const T0 = new Date(2026, 10, 4, 9, 0, 0).getTime();
 const DAY = 24 * 3600_000;
+/** 计算类知识点的生成器只出选择题；收窄类型后再检查选项 */
+function choice(e: Exercise): ChoiceExercise {
+  if (e.kind !== 'choice') throw new Error(`期望选择题，实际是 ${e.kind}`);
+  return e;
+}
 const seeded = (seed: number) => {
   let s = seed;
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 };
 const run = (a: ProgressAction[]) => a.reduce(progressReducer, createEmptyProgress());
-const res = (exerciseId: string, ok: boolean, at: number, lessonId = `kp:${exerciseId.split(':')[1]}`): ProgressAction => ({
-  type: 'exercise/result', lessonId, exerciseId, subject: 'math', skill: exerciseId.split(':')[1], firstTryCorrect: ok, attempts: ok ? 1 : 2, now: at,
+const res = (
+  exerciseId: string,
+  ok: boolean,
+  at: number,
+  lessonId = `kp:${exerciseId.split(':')[1]}`,
+): ProgressAction => ({
+  type: 'exercise/result',
+  lessonId,
+  exerciseId,
+  subject: 'math',
+  skill: exerciseId.split(':')[1],
+  firstTryCorrect: ok,
+  attempts: ok ? 1 : 2,
+  now: at,
 });
 const ev = (pattern: string, startAt = T0, gap = 60_000): Evidence[] =>
-  [...pattern].map((c, i) => ({ at: startAt + i * gap, correct: c === '1', lessonId: 'x', exerciseId: `e${i}`, source: 'lesson' }));
+  [...pattern].map((c, i) => ({
+    at: startAt + i * gap,
+    correct: c === '1',
+    lessonId: 'x',
+    exerciseId: `e${i}`,
+    source: 'lesson',
+  }));
 
 describe('知识图谱', () => {
   it('编号唯一、先修都存在、没有环、先修排在前面', () => {
@@ -32,7 +57,8 @@ describe('知识图谱', () => {
     expect(new Set(ids).size).toBe(ids.length);
     for (const k of KNOWLEDGE_POINTS) for (const p of k.prerequisites) expect(getKp(p.id)).toBeDefined();
     const order = topoOrder();
-    for (const k of KNOWLEDGE_POINTS) for (const p of k.prerequisites) expect(order.indexOf(p.id)).toBeLessThan(order.indexOf(k.id));
+    for (const k of KNOWLEDGE_POINTS)
+      for (const p of k.prerequisites) expect(order.indexOf(p.id)).toBeLessThan(order.indexOf(k.id));
   });
 
   it('10 以内加法的前置知识包含：数字认读、数量对应（数数）、数的组成', () => {
@@ -61,7 +87,8 @@ describe('题目生成器（原创测试数据）', () => {
   it('标为可练习的知识点都有生成器；每题正确答案在选项中且计算正确', () => {
     for (const k of practicable) {
       expect(hasGenerator(k.id)).toBe(true);
-      for (const e of kpRound(k.id, 20, seeded(7))) {
+      if (k.id in GRAPHICS_GENERATORS) continue; // 图形类互动题另有专门测试（graphics.test.ts）
+      for (const e of kpRound(k.id, 20, seeded(7)).map(choice)) {
         expect(e.options.map((o) => o.id)).toContain(e.answerId);
         expect(new Set(e.options.map((o) => o.id)).size).toBe(e.options.length);
         expect(exerciseFromKpId(e.id)).toEqual(e); // 由 id 可还原
@@ -79,8 +106,8 @@ describe('题目生成器（原创测试数据）', () => {
       expect(a < 10 && b < 10 && a + b > 10).toBe(true);
       const [c, d] = kpRound('m1.borrow20', 1, rand)[0].id.split(':')[2].split('-').map(Number);
       expect(c > 10 && c % 10 < d && c - d < 10).toBe(true);
-      expect(Number(kpRound('m1.add10', 1, rand)[0].answerId)).toBeLessThanOrEqual(10);
-      expect(Number(kpRound('m1.sub5', 1, rand)[0].answerId)).toBeGreaterThanOrEqual(0);
+      expect(Number(choice(kpRound('m1.add10', 1, rand)[0]).answerId)).toBeLessThanOrEqual(10);
+      expect(Number(choice(kpRound('m1.sub5', 1, rand)[0]).answerId)).toBeGreaterThanOrEqual(0);
     }
   });
 
@@ -88,7 +115,7 @@ describe('题目生成器（原创测试数据）', () => {
     for (const sig of ['fly-in:3:4', 'fly-away:9:2', 'eat:5:1', 'join:2:6']) {
       expect(() => kpExercise('m1.wordprob10', sig)).not.toThrow();
     }
-    expect(kpExercise('m1.wordprob10', 'eat:5:1').answerId).toBe('4');
+    expect(choice(kpExercise('m1.wordprob10', 'eat:5:1')).answerId).toBe('4');
   });
 });
 
@@ -113,17 +140,20 @@ describe('课程与知识点映射', () => {
     let mapped = 0;
     for (const entry of BANK_INDEX.filter((b) => b.subject === 'math' && b.grade === 1)) {
       const book = loadBook(entry.id)!;
-      for (const u of book.units) for (const q of u.questions) {
-        total++;
-        const kp = kpForRecord(bankLessonId(u.id), q.id, `bank:math:${q.kp}`);
-        if (kp) {
-          mapped++;
-          counts[kp] = (counts[kp] ?? 0) + 1;
+      for (const u of book.units)
+        for (const q of u.questions) {
+          total++;
+          const kp = kpForRecord(bankLessonId(u.id), q.id, `bank:math:${q.kp}`);
+          if (kp) {
+            mapped++;
+            counts[kp] = (counts[kp] ?? 0) + 1;
+          }
         }
-      }
     }
     expect(mapped / total).toBeGreaterThan(0.7);
-    const table = KNOWLEDGE_POINTS.map((k) => `${k.id}\t${k.name}\t题库 ${counts[k.id] ?? 0}\t生成器 ${hasGenerator(k.id) ? '有' : '无'}`);
+    const table = KNOWLEDGE_POINTS.map(
+      (k) => `${k.id}\t${k.name}\t题库 ${counts[k.id] ?? 0}\t生成器 ${hasGenerator(k.id) ? '有' : '无'}`,
+    );
     // eslint-disable-next-line no-console
     console.log(`题库映射 ${mapped}/${total}\n${table.join('\n')}`);
   });
@@ -163,9 +193,36 @@ describe('掌握度', () => {
     expect(before['m1.add5'].state).toBe('not-started');
     const s = run([
       { type: 'lesson/start', lessonId: lesson.id, subject: 'math', now: T0, resume: false },
-      { type: 'exercise/result', lessonId: lesson.id, exerciseId: 's3-combine', subject: 'math', skill: 'math.add', firstTryCorrect: true, attempts: 1, now: T0 + 1 },
-      { type: 'exercise/result', lessonId: lesson.id, exerciseId: 'add-1-4', subject: 'math', skill: 'math.add', firstTryCorrect: true, attempts: 1, now: T0 + 2 },
-      { type: 'exercise/result', lessonId: lesson.id, exerciseId: 'tf-2-2', subject: 'math', skill: 'math.add', firstTryCorrect: false, attempts: 2, now: T0 + 3 },
+      {
+        type: 'exercise/result',
+        lessonId: lesson.id,
+        exerciseId: 's3-combine',
+        subject: 'math',
+        skill: 'math.add',
+        firstTryCorrect: true,
+        attempts: 1,
+        now: T0 + 1,
+      },
+      {
+        type: 'exercise/result',
+        lessonId: lesson.id,
+        exerciseId: 'add-1-4',
+        subject: 'math',
+        skill: 'math.add',
+        firstTryCorrect: true,
+        attempts: 1,
+        now: T0 + 2,
+      },
+      {
+        type: 'exercise/result',
+        lessonId: lesson.id,
+        exerciseId: 'tf-2-2',
+        subject: 'math',
+        skill: 'math.add',
+        firstTryCorrect: false,
+        attempts: 2,
+        now: T0 + 3,
+      },
       { type: 'lesson/complete', lessonId: lesson.id, subject: 'math', now: T0 + 4 },
     ]);
     const after = computeMastery(s, T0 + 5);
@@ -176,8 +233,11 @@ describe('掌握度', () => {
 
   it('有到期错题时降为需要复习', () => {
     const s = run([
-      res('kp:m1.add10:1+2', true, T0), res('kp:m1.add10:2+2', true, T0 + 1), res('kp:m1.add10:3+2', true, T0 + 2),
-      res('kp:m1.add10:4+2', false, T0 + 3), res('kp:m1.add10:5+2', true, T0 + 4),
+      res('kp:m1.add10:1+2', true, T0),
+      res('kp:m1.add10:2+2', true, T0 + 1),
+      res('kp:m1.add10:3+2', true, T0 + 2),
+      res('kp:m1.add10:4+2', false, T0 + 3),
+      res('kp:m1.add10:5+2', true, T0 + 4),
     ]);
     expect(computeMastery(s, T0 + 5)['m1.add10'].state).toBe('emerging'); // 今天刚错的题不重复扣分
     const m = computeMastery(s, T0 + DAY)['m1.add10'];
@@ -264,7 +324,9 @@ describe('前置知识诊断', () => {
 describe('推荐', () => {
   it('反复出错 → 推荐“找原因”；可学的新知识需要先修已掌握', () => {
     const s = run([
-      res('kp:m1.add10:1+2', false, T0), res('kp:m1.add10:2+2', false, T0 + 1), res('kp:m1.add10:3+2', true, T0 + 2),
+      res('kp:m1.add10:1+2', false, T0),
+      res('kp:m1.add10:2+2', false, T0 + 1),
+      res('kp:m1.add10:3+2', true, T0 + 2),
       res('kp:m1.add10:4+2', false, T0 + 3),
     ]);
     const m = computeMastery(s, T0 + 10);
@@ -278,11 +340,19 @@ describe('推荐', () => {
 
   it('3 天内诊断过的知识点不重复推荐诊断；诊断出的根因推荐复习', () => {
     let s = run([
-      res('kp:m1.add10:1+2', false, T0), res('kp:m1.add10:2+2', false, T0 + 1), res('kp:m1.add10:3+2', false, T0 + 2),
+      res('kp:m1.add10:1+2', false, T0),
+      res('kp:m1.add10:2+2', false, T0 + 1),
+      res('kp:m1.add10:3+2', false, T0 + 2),
     ]);
     s = progressReducer(s, {
       type: 'diagnosis/complete',
-      record: { at: T0 + 3, target: 'm1.add10', verdicts: { 'm1.add10': 'weak', 'm1.compose10': 'weak' }, roots: ['m1.compose10'], questionCount: 6 },
+      record: {
+        at: T0 + 3,
+        target: 'm1.add10',
+        verdicts: { 'm1.add10': 'weak', 'm1.compose10': 'weak' },
+        roots: ['m1.compose10'],
+        questionCount: 6,
+      },
     });
     expect(s.totalStars).toBe(1);
     const recs = recommendKps(s, computeMastery(s, T0 + 10), T0 + 10, 10);
@@ -317,10 +387,20 @@ describe('诊断结论与掌握度、推荐的联动', () => {
 
 describe('补好根因后回到目标知识点', () => {
   it('根因已掌握 → 推荐回到原知识点复习', () => {
-    let s = run([res('kp:m1.add10:1+2', false, T0), res('kp:m1.add10:2+2', false, T0 + 1), res('kp:m1.add10:3+2', false, T0 + 2)]);
+    let s = run([
+      res('kp:m1.add10:1+2', false, T0),
+      res('kp:m1.add10:2+2', false, T0 + 1),
+      res('kp:m1.add10:3+2', false, T0 + 2),
+    ]);
     s = progressReducer(s, {
       type: 'diagnosis/complete',
-      record: { at: T0 + 3, target: 'm1.add10', verdicts: { 'm1.add10': 'weak', 'm1.compose10': 'weak' }, roots: ['m1.compose10'], questionCount: 6 },
+      record: {
+        at: T0 + 3,
+        target: 'm1.add10',
+        verdicts: { 'm1.add10': 'weak', 'm1.compose10': 'weak' },
+        roots: ['m1.compose10'],
+        questionCount: 6,
+      },
     });
     for (let i = 0; i < 4; i++) s = progressReducer(s, res(`kp:m1.compose10:7:${i + 1}`, true, T0 + 10 + i) as never);
     const recs = recommendKps(s, computeMastery(s, T0 + 20), T0 + 20, 10);

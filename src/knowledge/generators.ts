@@ -4,7 +4,8 @@
  * 答案全部由程序计算。
  */
 import { zh } from '@/content/zh';
-import type { ChoiceExercise, Prompt } from '@/lesson/types';
+import type { ChoiceExercise, Exercise, Prompt } from '@/lesson/types';
+import { GRAPHICS_GENERATORS, pickSig } from './graphics';
 
 type Rand = () => number;
 const r = (rand: Rand, lo: number, hi: number) => lo + Math.floor(rand() * (hi - lo + 1));
@@ -104,10 +105,42 @@ function composeGen(lo: number, hi: number): Gen {
 }
 
 const STORIES = [
-  { id: 'fly-in', op: '+', emoji: '🐦', zhText: (a: number, b: number) => [`树上有${a}只小鸟，又飞来${b}只，一共有几只？`, 'shù shàng yǒu zhī xiǎo niǎo yòu fēi lái zhī yí gòng yǒu jǐ zhī'] },
-  { id: 'fly-away', op: '-', emoji: '🐦', zhText: (a: number, b: number) => [`树上有${a}只小鸟，飞走了${b}只，还剩几只？`, 'shù shàng yǒu zhī xiǎo niǎo fēi zǒu le zhī hái shèng jǐ zhī'] },
-  { id: 'eat', op: '-', emoji: '🍎', zhText: (a: number, b: number) => [`盘子里有${a}个苹果，吃了${b}个，还剩几个？`, 'pán zi lǐ yǒu gè píng guǒ chī le gè hái shèng jǐ gè'] },
-  { id: 'join', op: '+', emoji: '🐟', zhText: (a: number, b: number) => [`左边有${a}条鱼，右边有${b}条鱼，一共有几条？`, 'zuǒ biān yǒu tiáo yú yòu biān yǒu tiáo yú yí gòng yǒu jǐ tiáo'] },
+  {
+    id: 'fly-in',
+    op: '+',
+    emoji: '🐦',
+    zhText: (a: number, b: number) => [
+      `树上有${a}只小鸟，又飞来${b}只，一共有几只？`,
+      'shù shàng yǒu zhī xiǎo niǎo yòu fēi lái zhī yí gòng yǒu jǐ zhī',
+    ],
+  },
+  {
+    id: 'fly-away',
+    op: '-',
+    emoji: '🐦',
+    zhText: (a: number, b: number) => [
+      `树上有${a}只小鸟，飞走了${b}只，还剩几只？`,
+      'shù shàng yǒu zhī xiǎo niǎo fēi zǒu le zhī hái shèng jǐ zhī',
+    ],
+  },
+  {
+    id: 'eat',
+    op: '-',
+    emoji: '🍎',
+    zhText: (a: number, b: number) => [
+      `盘子里有${a}个苹果，吃了${b}个，还剩几个？`,
+      'pán zi lǐ yǒu gè píng guǒ chī le gè hái shèng jǐ gè',
+    ],
+  },
+  {
+    id: 'join',
+    op: '+',
+    emoji: '🐟',
+    zhText: (a: number, b: number) => [
+      `左边有${a}条鱼，右边有${b}条鱼，一共有几条？`,
+      'zuǒ biān yǒu tiáo yú yòu biān yǒu tiáo yú yí gòng yǒu jǐ tiáo',
+    ],
+  },
 ] as const;
 
 const GENERATORS: Record<string, Gen> = {
@@ -120,7 +153,10 @@ const GENERATORS: Record<string, Gen> = {
     build: (sig) => {
       const n = Number(sig);
       return {
-        prompt: { text: zh(`${n}个苹果都吃完了，还剩几个？`, 'gè píng guǒ dōu chī wán le hái shèng jǐ gè'), speak: say(`${n}个苹果都吃完了，还剩几个？`) },
+        prompt: {
+          text: zh(`${n}个苹果都吃完了，还剩几个？`, 'gè píng guǒ dōu chī wán le hái shèng jǐ gè'),
+          speak: say(`${n}个苹果都吃完了，还剩几个？`),
+        },
         stem: { text: `${n} − ${n} = ?` },
         options: numOptions(0, [1, 2, n]),
         answerId: '0',
@@ -220,13 +256,15 @@ const GENERATORS: Record<string, Gen> = {
 };
 
 export function hasGenerator(kpId: string): boolean {
-  return kpId in GENERATORS;
+  return kpId in GENERATORS || kpId in GRAPHICS_GENERATORS;
 }
 
 export const kpExerciseId = (kpId: string, sig: string) => `kp:${kpId}:${sig}`;
 
-/** 由知识点和签名生成题目 */
-export function kpExercise(kpId: string, sig: string): ChoiceExercise {
+/** 由知识点和签名生成题目（计算类为选择题；图形/规律类为各种互动题） */
+export function kpExercise(kpId: string, sig: string): Exercise {
+  const full = GRAPHICS_GENERATORS[kpId];
+  if (full) return { ...full.build(sig), id: kpExerciseId(kpId, sig), skill: kpId } as Exercise;
   const g = GENERATORS[kpId];
   if (!g) throw new Error(`知识点 ${kpId} 没有题目生成器`);
   const built = g.build(sig);
@@ -239,23 +277,29 @@ export function kpExercise(kpId: string, sig: string): ChoiceExercise {
   };
 }
 
-/** 生成若干道不重复的题 */
-export function kpRound(kpId: string, count: number, rand: Rand = Math.random, avoid: Set<string> = new Set()): ChoiceExercise[] {
-  const g = GENERATORS[kpId];
-  if (!g) return [];
+/** 生成若干道不重复的题（题库不够时题数可能少于 count） */
+export function kpRound(
+  kpId: string,
+  count: number,
+  rand: Rand = Math.random,
+  avoid: Set<string> = new Set(),
+): Exercise[] {
+  const full = GRAPHICS_GENERATORS[kpId];
+  const make = full ? (rd: Rand) => pickSig(full, rd) : GENERATORS[kpId]?.make;
+  if (!make) return [];
   const sigs = new Set<string>();
   let guard = 0;
   while (sigs.size < count && guard++ < 300) {
-    const s = g.make(rand);
+    const s = make(rand);
     if (!avoid.has(kpExerciseId(kpId, s)) || guard > 150) sigs.add(s);
   }
   return [...sigs].map((s) => kpExercise(kpId, s));
 }
 
 /** 从题目 id（kp:知识点:签名）还原 */
-export function exerciseFromKpId(exerciseId: string): ChoiceExercise | null {
+export function exerciseFromKpId(exerciseId: string): Exercise | null {
   const m = exerciseId.match(/^kp:(m\d\.[\w]+):(.+)$/);
-  if (!m || !GENERATORS[m[1]]) return null;
+  if (!m || !hasGenerator(m[1])) return null;
   try {
     return kpExercise(m[1], m[2]);
   } catch {

@@ -4,6 +4,8 @@
  * 两者不一致且属于规范读法的（轻声、“一/不”变调等），必须在 ACCEPTED 中写明理由。
  */
 import { pinyin } from 'pinyin-pro';
+import { kpExercise } from '@/knowledge/generators';
+import { GRAPHICS_GENERATORS } from '@/knowledge/graphics';
 import { LESSONS, SKILL_LABELS } from '@/content';
 import { zh } from '@/content/zh';
 import type { Exercise, Lesson, ZhText } from '@/lesson/types';
@@ -29,6 +31,12 @@ const ACCEPTED: Record<string, string> = {
   '识:shi:shí': '“知识”“认识”中“识”读轻声',
   '找:zhao:zhǎo': '“找找”重叠时第二个字读轻声',
   '一:yi:yī': '“练一练、分一分”等动词重叠中间的“一”读轻声',
+  '候:hou:hòu': '“时候”中“候”读轻声（《现代汉语词典》注 shí hou）',
+  '去:qu:qù': '“放进去”中趋向补语“去”读轻声',
+  '只:zhǐ:zhī': '副词“只看”中“只”读 zhǐ（词库误判为量词 zhī）',
+  '转:zhuàn:zhuǎn': '“转一转、转到”指图形绕着中心旋转，读 zhuàn',
+  '上:shang:shàng': '“早上、晚上、身上”中“上”读轻声',
+  '看:kan:kàn': '“看看”重叠时第二个字读轻声',
 };
 
 function isZhText(v: unknown): v is ZhText {
@@ -124,6 +132,26 @@ describe('课程内容', () => {
             problems.push(`${lesson.id}「${chars}」第${i + 1}字：填写 ${py}，词库 ${ref[i]}`);
           }
         });
+      }
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it('图形类互动题（含模板拼接的题目）拼音与词库一致', () => {
+    const problems: string[] = [];
+    for (const [kpId, g] of Object.entries(GRAPHICS_GENERATORS)) {
+      for (const sig of g.sigs) {
+        for (const text of collectZhTexts(kpExercise(kpId, sig))) {
+          const chars = text.map((x) => x.char).join('');
+          const ref = pinyin(chars, { type: 'array', toneType: 'symbol', nonZh: 'removed' });
+          const ours = text.filter((x) => x.py).map((x) => x.py!);
+          expect(ours.length).toBe(ref.length);
+          ours.forEach((py, i) => {
+            const han = text.filter((x) => x.py)[i].char;
+            if (py !== ref[i] && !ACCEPTED[`${han}:${py}:${ref[i]}`])
+              problems.push(`${kpId}:${sig}「${chars}」第${i + 1}字：填写 ${py}，词库 ${ref[i]}`);
+          });
+        }
       }
     }
     expect(problems).toEqual([]);

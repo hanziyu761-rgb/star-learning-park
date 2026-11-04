@@ -48,7 +48,7 @@ src/ai/             AI 老师客户端（只连自家服务，无密钥）
 server/ai-worker/   AI 老师服务（Cloudflare Worker + DeepSeek）
 src/content/        课程数据（只写数据，不写界面）；zh.ts 拼音工具；index.ts 课程目录与知识点名称
 src/lesson/         课程数据类型、课程播放器、各类环节（演示、拖动、跟读、对话、绘本）、反馈语
-src/exercises/      可复用练习组件：选择、正误判断、拖动配对、排序
+src/exercises/      可复用练习组件：选择、正误判断、拖动配对、排序；V2.1 图形互动：拖到方格、地图点选、点选图形、分类篮、旋转、拨钟、找规律
 src/drag/           拖动与放置区（gesture-handler + reanimated）
 src/progress/       学习记录：数据模型（纯函数）、本地存储、统计、React Context
 src/speech/         发音（expo-speech，设备系统语音引擎）

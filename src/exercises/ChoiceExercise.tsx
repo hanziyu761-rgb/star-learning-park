@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { VisualView } from '@/components/Figure';
 import { DisplayTextView } from '@/components/PinyinText';
 import { SpeakerButton, tapFeedback } from '@/components/ui';
 import type { ChoiceExercise as ChoiceExerciseData } from '@/lesson/types';
@@ -43,7 +44,9 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
 
       {exercise.stem ? (
         <View style={styles.stem}>
-          {exercise.stem.visual ? (
+          {exercise.stem.visual?.figure ? (
+            <VisualView visual={exercise.stem.visual} figureSize={170} />
+          ) : exercise.stem.visual ? (
             <Text style={styles.stemEmoji} accessibilityLabel={`${exercise.stem.visual.count ?? 1} 个`}>
               {exercise.stem.visual.emoji.repeat(exercise.stem.visual.count ?? 1)}
             </Text>
@@ -71,9 +74,15 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
               ]}
             >
               {opt.visual ? (
-                <Text style={styles.optEmoji}>{opt.visual.emoji.repeat(opt.visual.count ?? 1)}</Text>
+                opt.visual.figure ? (
+                  <VisualView visual={opt.visual} figureSize={96} />
+                ) : (
+                  <Text style={styles.optEmoji}>{opt.visual.emoji.repeat(opt.visual.count ?? 1)}</Text>
+                )
               ) : null}
-              {opt.text ? <DisplayTextView text={opt.text} size={opt.visual ? 24 : 40} hidePinyin={exercise.hidePinyin} /> : null}
+              {opt.text ? (
+                <DisplayTextView text={opt.text} size={opt.visual ? 24 : 40} hidePinyin={exercise.hidePinyin} />
+              ) : null}
               {isWrong ? <Text style={styles.mark}>✗</Text> : null}
               {isRight ? <Text style={[styles.mark, { color: colors.correct }]}>✓</Text> : null}
             </Pressable>

@@ -18,7 +18,7 @@ import { kpRound } from '@/knowledge/generators';
 import { getKp } from '@/knowledge/graph';
 import { computeMastery } from '@/knowledge/mastery';
 import type { FeedbackMessage } from '@/lesson/feedback';
-import type { ChoiceExercise } from '@/lesson/types';
+import type { Exercise } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { speak, stopSpeaking } from '@/speech/speech';
@@ -46,7 +46,7 @@ function DiagnoseGame({ target }: { target: string }) {
   const [mastery] = useState(() => computeMastery(state, Date.now()));
   const [started, setStarted] = useState(false);
   const [session, setSession] = useState<DiagSession>(() => startDiagnosis(target));
-  const [exercise, setExercise] = useState<ChoiceExercise | null>(null);
+  const [exercise, setExercise] = useState<Exercise | null>(null);
   const [lastOutcome, setLastOutcome] = useState<boolean | null>(null);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
   const [summary, setSummary] = useState<DiagSummary | null>(null);
