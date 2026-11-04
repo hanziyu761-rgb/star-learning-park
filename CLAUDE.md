@@ -26,6 +26,10 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 
 网页端到端验收（需要 Python + Playwright）：先 `npx expo export --platform web`，在 dist 目录起静态服务（端口 8081），再运行 `python tools/e2e/acceptance.py` 与 `python tools/e2e/full_lessons.py`。
 
+## 单文件 HTML 版
+
+`npm run build:html` 生成 `star-learning-park.html`。改动页面后要同时验证 APP 版和 HTML 版。
+
 ## 依赖安装
 
 - 优先 `npx expo install <包名>`（自动选择与 SDK 匹配的版本）。
@@ -34,7 +38,9 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 ## 代码结构
 
 ```
-src/app/            路由页面（Expo Router）：首页、学科页、课程页、家长中心
+src/app/            Expo Router 路由（只做参数读取，转给 src/screens）
+src/screens/        页面：首页、学科页、课程页、家长中心（跳转只用 useNav()，不要直接用 router）
+src/nav/            跳转抽象；src/single/ 单文件 HTML 版入口（内存页面栈）
 src/content/        课程数据（只写数据，不写界面）；zh.ts 拼音工具；index.ts 课程目录与知识点名称
 src/lesson/         课程数据类型、课程播放器、各类环节（演示、拖动、跟读、对话、绘本）、反馈语
 src/exercises/      可复用练习组件：选择、正误判断、拖动配对、排序

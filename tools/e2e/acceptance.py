@@ -2,10 +2,10 @@
 端到端验收脚本（网页版，手机尺寸 360x640）。
 真实点击、真实鼠标拖动，并记录语音合成调用。
 """
-import re, sys, time, json
+import os, re, sys, time, json
 from playwright.sync_api import sync_playwright, expect
 
-BASE = "http://localhost:8081"
+BASE = os.environ.get("BASE", "http://localhost:8081")
 import os
 OUT = os.environ.get("OUT", "shots")
 os.makedirs(OUT, exist_ok=True)

@@ -1,0 +1,33 @@
+/**
+ * 页面跳转抽象：页面组件只调用 useNav()，不直接依赖具体路由库。
+ * - APP（安卓/iOS/网站）：由 Expo Router 实现（见 src/app/_layout.tsx）。
+ * - 单文件 HTML 版：由内存页面栈实现（见 src/single/App.tsx），因为 file:// 打开的网页不能改地址栏路径。
+ */
+import React, { createContext, useContext } from 'react';
+import type { Subject } from '@/lesson/types';
+
+export type Route =
+  | { name: 'home' }
+  | { name: 'subject'; subject: Subject }
+  | { name: 'lesson'; id: string; resume?: boolean }
+  | { name: 'parent' };
+
+export interface Nav {
+  push: (route: Route) => void;
+  /** 返回上一页；没有上一页时回首页 */
+  back: () => void;
+  /** 回到首页（清空中间页面） */
+  home: () => void;
+}
+
+const NavContext = createContext<Nav | null>(null);
+
+export function NavProvider({ nav, children }: { nav: Nav; children: React.ReactNode }) {
+  return <NavContext.Provider value={nav}>{children}</NavContext.Provider>;
+}
+
+export function useNav(): Nav {
+  const nav = useContext(NavContext);
+  if (!nav) throw new Error('useNav 必须在 NavProvider 内使用');
+  return nav;
+}

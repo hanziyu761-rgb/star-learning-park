@@ -1,5 +1,9 @@
 # 更新记录
 
+## V1.0.1 — 2026-11-04
+- 新增：单文件 HTML 版（`npm run build:html` → `star-learning-park.html`），双击即可打开，功能与 APP 相同
+- 调整：页面组件移到 `src/screens`，通过 `useNav()` 跳转；APP 用 Expo Router，HTML 版用内存页面栈（file:// 打开时不能改地址栏路径）
+
 ## V1.0.0 — 2026-11-04
 首个可运行版本（MVP）。
 - 新增：儿童首页（问候朗读、星星、继续学习、三科入口、今日任务、进度、家长入口）

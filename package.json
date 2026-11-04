@@ -43,7 +43,8 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "build:html": "node tools/single-html/build.js"
   },
   "private": true,
   "jest": {

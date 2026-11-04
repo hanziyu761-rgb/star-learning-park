@@ -25,6 +25,17 @@ npx expo start
 npx expo start --web
 ```
 
+## 单文件 HTML 版（不用安装）
+
+```powershell
+npm run build:html
+```
+
+生成 `star-learning-park.html`，所有代码都在这一个文件里：
+- 电脑上双击即可用 Chrome / Edge 打开；手机上可以用浏览器打开，或上传到 Cloudflare Pages 等静态网站后用链接访问。
+- 学习记录保存在该浏览器里（换浏览器或清除浏览器数据会丢失）。
+- 发音使用浏览器的语音功能，建议用 Chrome、Edge 或手机自带浏览器的较新版本。
+
 ## 打包安卓安装包（APK）
 
 需要一个免费的 Expo 账号（https://expo.dev/signup）。构建在 Expo 云端完成，电脑不需要安装 Android Studio。

@@ -44,3 +44,5 @@ yarn-error.*
 *.apk
 *.aab
 dist-android/
+dist-single/
+star-learning-park.html
