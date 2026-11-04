@@ -67,7 +67,8 @@ export function Notice({ text, tone = 'info' }: { text: string; tone?: 'info' | 
 const styles = StyleSheet.create({
   root: { flex: 1, paddingHorizontal: space.lg },
   center: { alignItems: 'center', justifyContent: 'center', gap: space.lg },
-  content: { paddingHorizontal: space.lg, gap: space.lg },
+  // 平板上内容限制最大宽度并居中
+  content: { paddingHorizontal: space.lg, gap: space.lg, width: '100%', maxWidth: 720, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   back: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   backText: { fontSize: 28, fontWeight: '900', color: colors.text },

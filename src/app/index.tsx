@@ -35,7 +35,7 @@ export default function Home() {
       <View style={styles.top}>
         <Mascot size={84} />
         <View style={{ flex: 1, alignItems: 'flex-start' }}>
-          <DisplayTextView text={zh('你好，小朋友！', 'nǐ hǎo xiǎo péng you')} size={20} />
+          <DisplayTextView text={zh('你好！', 'nǐ hǎo')} size={26} />
           <Text style={styles.appName}>星星学习乐园</Text>
         </View>
         <StarBadge count={state.totalStars} testID="total-stars" />

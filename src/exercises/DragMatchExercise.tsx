@@ -49,7 +49,13 @@ export function DragMatchExercise({ exercise, lang, onFeedback, onSolved }: Exer
           {exercise.pairs.map((p) => {
             const done = placed.includes(p.id);
             return (
-              <DropZone key={p.id} id={`target-${p.id}`} style={styles.targetWrap} testID={`target-${p.id}`}>
+              <DropZone
+                key={p.id}
+                id={`target-${p.id}`}
+                // 所有目标排成一行，保证小屏手机上拖动时目标都在屏幕内
+                style={[styles.targetWrap, { flexBasis: `${Math.floor(100 / exercise.pairs.length) - 3}%` }]}
+                testID={`target-${p.id}`}
+              >
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => {
@@ -60,7 +66,9 @@ export function DragMatchExercise({ exercise, lang, onFeedback, onSolved }: Exer
                   style={[styles.target, done && styles.targetDone, selected && !done && styles.targetReady]}
                 >
                   {p.target.visual ? (
-                    <Text style={styles.emoji}>{p.target.visual.emoji.repeat(p.target.visual.count ?? 1)}</Text>
+                    <Text style={[styles.emoji, (p.target.visual.count ?? 1) > 2 && styles.manyEmoji]}>
+                      {p.target.visual.emoji.repeat(p.target.visual.count ?? 1)}
+                    </Text>
                   ) : null}
                   {p.target.text ? <DisplayTextView text={p.target.text} size={22} /> : null}
                   {done ? (
@@ -118,8 +126,8 @@ const styles = StyleSheet.create({
     minHeight: MIN_TOUCH * 1.5,
   },
   item: {
-    minWidth: 84,
-    minHeight: 84,
+    minWidth: 72,
+    minHeight: 72,
     backgroundColor: '#FFF3C4',
     borderRadius: radius.md,
     borderWidth: 3,
@@ -130,10 +138,10 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   itemSelected: { borderColor: colors.parent, borderWidth: 5, transform: [{ scale: 1.08 }] },
-  targets: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md },
-  targetWrap: { flexBasis: '42%', flexGrow: 1 },
+  targets: { flexDirection: 'row', justifyContent: 'center', gap: space.sm },
+  targetWrap: { flexGrow: 1 },
   target: {
-    minHeight: 150,
+    minHeight: 120,
     backgroundColor: '#fff',
     borderRadius: radius.lg,
     borderWidth: 3,
@@ -146,8 +154,9 @@ const styles = StyleSheet.create({
   },
   targetReady: { borderColor: colors.parent },
   targetDone: { borderStyle: 'solid', borderColor: colors.correct, backgroundColor: colors.correctSoft },
-  slot: { width: 60, height: 40, borderRadius: 10, backgroundColor: '#F6EEDC' },
+  slot: { width: 40, height: 32, borderRadius: 10, backgroundColor: '#F6EEDC' },
   placedItem: { flexDirection: 'row', alignItems: 'center' },
-  emoji: { fontSize: 40, textAlign: 'center' },
+  emoji: { fontSize: 34, textAlign: 'center' },
   smallEmoji: { fontSize: 28 },
+  manyEmoji: { fontSize: 20, lineHeight: 26 },
 });

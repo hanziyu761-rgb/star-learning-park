@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   dots: { flex: 1, flexDirection: 'row', gap: 4, alignItems: 'center' },
   dot: { flex: 1, height: 12, borderRadius: radius.round },
   stepNo: { fontSize: 16, fontWeight: '800', color: colors.textSoft, minWidth: 40, textAlign: 'right' },
-  content: { padding: space.lg, paddingBottom: space.xxl },
+  content: { padding: space.lg, paddingBottom: space.xxl, width: '100%', maxWidth: 720, alignSelf: 'center' },
   bottom: { paddingHorizontal: space.lg, paddingTop: space.sm, gap: space.sm, backgroundColor: 'rgba(255,255,255,0.7)' },
   summary: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingHorizontal: space.xl },
   summaryCard: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, alignSelf: 'stretch', gap: space.sm },
