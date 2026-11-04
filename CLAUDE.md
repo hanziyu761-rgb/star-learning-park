@@ -5,6 +5,8 @@
 
 ## 必须遵守
 
+0. **第三方内容许可**：cn-math-taxonomy 为 CC BY-NC 4.0，未取得授权前不得复制其数据或代码；ChinaStudyFree、EduAgent 为 MIT，使用时保留声明（THIRD_PARTY_NOTICES.md）。
+
 1. **不做假功能**：没有真实实现的能力（语音识别、发音评分、AI 对话等）必须明确标注为“后续版本”，不能用随机分数或固定回复冒充。
 2. **不造假数据**：家长中心、首页统计只能来自真实学习记录（`src/progress`）。
 3. **内容准确**：
@@ -41,6 +43,9 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 src/app/            Expo Router 路由（只做参数读取，转给 src/screens）
 src/screens/        页面：首页、学科页、课程页、家长中心（跳转只用 useNav()，不要直接用 router）
 src/nav/            跳转抽象；src/single/ 单文件 HTML 版入口（内存页面栈）
+src/knowledge/      一年级数学知识图谱（原创）、映射、题目生成器、掌握度、诊断、推荐
+src/ai/             AI 老师客户端（只连自家服务，无密钥）
+server/ai-worker/   AI 老师服务（Cloudflare Worker + DeepSeek）
 src/content/        课程数据（只写数据，不写界面）；zh.ts 拼音工具；index.ts 课程目录与知识点名称
 src/lesson/         课程数据类型、课程播放器、各类环节（演示、拖动、跟读、对话、绘本）、反馈语
 src/exercises/      可复用练习组件：选择、正误判断、拖动配对、排序

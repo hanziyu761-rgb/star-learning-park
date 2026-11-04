@@ -3,7 +3,7 @@
  * 每条推荐都带“理由”，可追溯到知识点和具体练习记录。
  */
 import type { ProgressState } from '@/progress/model';
-import { getKp, KNOWLEDGE_POINTS } from './graph';
+import { ancestors, getKp, KNOWLEDGE_POINTS } from './graph';
 import { hasGenerator } from './generators';
 import { isMastered, type KpMastery } from './mastery';
 import { isStruggling } from './diagnose';
@@ -17,7 +17,12 @@ export type KpRec =
 
 const DAY = 24 * 3600 * 1000;
 
-export function recommendKps(state: ProgressState, mastery: Record<string, KpMastery>, now: number, limit = 6): KpRec[] {
+export function recommendKps(
+  state: ProgressState,
+  mastery: Record<string, KpMastery>,
+  now: number,
+  limit = 6,
+): KpRec[] {
   const out: KpRec[] = [];
   const used = new Set<string>();
   const add = (r: KpRec) => {
@@ -32,7 +37,11 @@ export function recommendKps(state: ProgressState, mastery: Record<string, KpMas
   for (const k of ordered) {
     const m = mastery[k.id];
     if (isStruggling(m) && hasGenerator(k.id) && !recentDiag(k.id)) {
-      add({ kind: 'diagnose', kpId: k.id, reason: `最近 ${m.recentTotal} 题只对了 ${m.recentCorrect} 题，先找找是哪一步没弄懂` });
+      add({
+        kind: 'diagnose',
+        kpId: k.id,
+        reason: `最近 ${m.recentTotal} 题只对了 ${m.recentCorrect} 题，先找找是哪一步没弄懂`,
+      });
     }
   }
   // 2. 需要复习
@@ -43,27 +52,48 @@ export function recommendKps(state: ProgressState, mastery: Record<string, KpMas
   // 3. 诊断出的薄弱根因（最近一次诊断）
   const lastDiag = [...state.diagnoses].reverse()[0];
   for (const kpId of lastDiag?.roots ?? []) {
-    if (!isMastered(mastery[kpId]?.state ?? 'not-started')) add({ kind: 'review', kpId, reason: `上次找原因时发现：${getKp(kpId)?.name} 还不太熟` });
+    if (!isMastered(mastery[kpId]?.state ?? 'not-started'))
+      add({ kind: 'review', kpId, reason: `上次找原因时发现：${getKp(kpId)?.name} 还不太熟` });
+  }
+  // 根因都已补上 → 回到原来的知识点再练
+  if (lastDiag && lastDiag.roots.length && !isMastered(mastery[lastDiag.target]?.state ?? 'not-started')) {
+    if (lastDiag.roots.every((r) => isMastered(mastery[r]?.state ?? 'not-started'))) {
+      add({
+        kind: 'review',
+        kpId: lastDiag.target,
+        reason: `需要先补的「${lastDiag.roots.map((r) => getKp(r)?.name).join('、')}」已经练好，回来再练一次`,
+      });
+    }
   }
   // 4. 初步掌握 → 多练巩固
   for (const k of ordered) {
     const m = mastery[k.id];
-    if (m.state === 'emerging' && hasGenerator(k.id)) add({ kind: 'consolidate', kpId: k.id, reason: '已经初步掌握，换一天再练几题会更牢固' });
+    if (m.state === 'emerging' && hasGenerator(k.id))
+      add({ kind: 'consolidate', kpId: k.id, reason: '已经初步掌握，换一天再练几题会更牢固' });
   }
-  // 5. 可以学的新知识：hard 先修都已掌握
+  // 5. 可以学的新知识：hard 先修都已掌握；后续知识已经会了的（说明它也会）不推荐
+  const masteredIds = ordered.filter((k) => isMastered(mastery[k.id].state)).map((k) => k.id);
+  const impliedKnown = new Set(masteredIds.flatMap((id) => ancestors(id, true)));
   for (const k of ordered) {
     const m = mastery[k.id];
-    if (m.state !== 'not-started' || !hasGenerator(k.id)) continue;
+    if (m.state !== 'not-started' || !hasGenerator(k.id) || impliedKnown.has(k.id)) continue;
     const pres = k.prerequisites.filter((p) => p.strength === 'hard');
     if (pres.every((p) => isMastered(mastery[p.id]?.state ?? 'not-started'))) {
-      add({ kind: 'new', kpId: k.id, reason: pres.length ? `需要的本领（${pres.map((p) => getKp(p.id)?.name).join('、')}）已经掌握` : '这是起点知识' });
+      add({
+        kind: 'new',
+        kpId: k.id,
+        reason: pres.length ? `需要的本领（${pres.map((p) => getKp(p.id)?.name).join('、')}）已经掌握` : '这是起点知识',
+      });
     }
   }
   return out.slice(0, limit);
 }
 
 /** 家长端：经常做错的题型（按练习形式和知识点统计第一次答错次数） */
-export function frequentMistakeTypes(state: ProgressState, limit = 5): { label: string; wrong: number; total: number }[] {
+export function frequentMistakeTypes(
+  state: ProgressState,
+  limit = 5,
+): { label: string; wrong: number; total: number }[] {
   const add = (key: string, correct: boolean) => {
     const s = (stats[key] ??= { wrong: 0, total: 0 });
     s.total++;

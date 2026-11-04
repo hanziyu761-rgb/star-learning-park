@@ -299,3 +299,32 @@ describe('推荐', () => {
     expect(frequentMistakeTypes(s)[0]).toEqual({ label: '用加减法解决简单问题 · 看图解决问题', wrong: 2, total: 3 });
   });
 });
+
+describe('诊断结论与掌握度、推荐的联动', () => {
+  it('找原因时判为掌握的知识点记为初步掌握；它的先修不再作为“新知识”推荐', () => {
+    let s = run([res('kp:m1.add5:1+2', true, T0), res('kp:m1.add5:2+2', true, T0 + 1)]);
+    s = progressReducer(s, {
+      type: 'diagnosis/complete',
+      record: { at: T0 + 2, target: 'm1.add10', verdicts: { 'm1.add5': 'mastered' }, roots: [], questionCount: 2 },
+    });
+    const m = computeMastery(s, T0 + 3);
+    expect(m['m1.add5'].state).toBe('emerging');
+    expect(m['m1.add5'].reasons).toContain('找原因时连续答对，判为初步掌握');
+    const recs = recommendKps(s, m, T0 + 3, 20);
+    expect(recs.some((r) => r.kind === 'new' && r.kpId === 'm1.count5')).toBe(false);
+  });
+});
+
+describe('补好根因后回到目标知识点', () => {
+  it('根因已掌握 → 推荐回到原知识点复习', () => {
+    let s = run([res('kp:m1.add10:1+2', false, T0), res('kp:m1.add10:2+2', false, T0 + 1), res('kp:m1.add10:3+2', false, T0 + 2)]);
+    s = progressReducer(s, {
+      type: 'diagnosis/complete',
+      record: { at: T0 + 3, target: 'm1.add10', verdicts: { 'm1.add10': 'weak', 'm1.compose10': 'weak' }, roots: ['m1.compose10'], questionCount: 6 },
+    });
+    for (let i = 0; i < 4; i++) s = progressReducer(s, res(`kp:m1.compose10:7:${i + 1}`, true, T0 + 10 + i) as never);
+    const recs = recommendKps(s, computeMastery(s, T0 + 20), T0 + 20, 10);
+    expect(recs.find((r) => r.kpId === 'm1.add10')).toMatchObject({ kind: 'review' });
+    expect(recs.find((r) => r.kpId === 'm1.add10')!.reason).toContain('已经练好');
+  });
+});

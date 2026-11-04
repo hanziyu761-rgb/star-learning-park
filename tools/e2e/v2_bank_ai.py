@@ -152,7 +152,7 @@ with sync_playwright() as p:
     expect(tid(page, "ai-check-result")).to_contain_text("连不上")
     ok("AI 服务不可用时给出友好提示，不影响其它功能")
 
-    page.reload(); page.wait_for_selector('[data-testid="home"]')
+    page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
     expect(tid(page, "teacher-entry")).to_be_visible()
     ok("重新打开后 AI 开关等设置保留")
     print(json.dumps({"errors": errors}, ensure_ascii=False))

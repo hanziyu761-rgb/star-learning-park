@@ -9,6 +9,7 @@
  *   4. 最近 5 次答对率 ≥ 80%、累计 ≥ 5 次、在 ≥ 2 天练过 → 较稳定掌握（但 21 天没练：需要复习）
  *   5. 其余（答对率 ≥ 60%）                            → 初步掌握（但 7 天没练：需要复习）
  *   6. 若有以前留下、今天到期的错题，“初步掌握 / 较稳定掌握”降为需要复习
+ *   7. 14 天内“找原因”时连续答对（判为掌握），但练习次数还少的，记为初步掌握
  */
 import type { ProgressState } from '@/progress/model';
 import { dayKey, isDue } from '@/progress/srs';
@@ -115,7 +116,24 @@ export function computeMastery(state: ProgressState, now: number): Record<string
     const kp = kpForRecord(m.lessonId, m.exerciseId, m.skill);
     if (kp) dueKps.add(kp);
   }
-  return Object.fromEntries(KNOWLEDGE_POINTS.map((k) => [k.id, masteryOf(k.id, ev[k.id] ?? [], now, dueKps.has(k.id))]));
+  // 最近一次找原因中判为“掌握”的知识点（14 天内）
+  const diagMastered = new Set<string>();
+  for (const d of state.diagnoses) {
+    if (now - d.at > 14 * DAY) continue;
+    for (const [kp, v] of Object.entries(d.verdicts)) {
+      if (v === 'mastered') diagMastered.add(kp);
+      else diagMastered.delete(kp);
+    }
+  }
+  return Object.fromEntries(
+    KNOWLEDGE_POINTS.map((k) => {
+      const m = masteryOf(k.id, ev[k.id] ?? [], now, dueKps.has(k.id));
+      if (diagMastered.has(k.id) && m.attempts < 3 && (m.state === 'learning' || m.state === 'not-started')) {
+        return [k.id, { ...m, state: 'emerging' as const, reasons: [...m.reasons, '找原因时连续答对，判为初步掌握'] }];
+      }
+      return [k.id, m];
+    }),
+  );
 }
 
 export function countByState(m: Record<string, KpMastery>): Record<MasteryState, number> {
