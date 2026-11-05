@@ -1,6 +1,8 @@
 import React from 'react';
 import type { Exercise } from '@/lesson/types';
 import { ChoiceExercise } from './ChoiceExercise';
+import { InputExercise } from './InputExercise';
+import { TraceExercise } from './TraceExercise';
 import { ClockSetExercise } from './ClockSetExercise';
 import { GridPlaceExercise, GridTapExercise } from './GridExercises';
 import { PatternFillExercise } from './PatternFillExercise';
@@ -14,6 +16,10 @@ import { TrueFalseExercise } from './TrueFalseExercise';
 export function ExerciseView(props: ExerciseProps<Exercise>) {
   const { exercise } = props;
   switch (exercise.kind) {
+    case 'input':
+      return <InputExercise {...props} exercise={exercise} />;
+    case 'trace':
+      return <TraceExercise {...props} exercise={exercise} />;
     case 'choice':
       return <ChoiceExercise {...props} exercise={exercise} />;
     case 'truefalse':

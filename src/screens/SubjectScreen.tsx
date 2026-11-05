@@ -8,7 +8,7 @@ import { BigButton, Stars } from '@/components/ui';
 import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
-import { BankSection, GraphicsSection, OralSection } from './PracticeSections';
+import { BankSection, GraphicsSection, OralSection, WriteSection } from './PracticeSections';
 import { EnglishTracks } from './EnglishTracks';
 import { colors, radius, shadow, space, subjectTheme } from '@/theme';
 
@@ -80,6 +80,7 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
         );
       })}
       {subject !== 'english' ? <Text style={styles.more}>更多精做课程正在制作中</Text> : null}
+      {subject === 'chinese' ? <WriteSection state={state} /> : null}
       {subject === 'math' ? <GraphicsSection state={state} /> : null}
       {subject === 'math' ? <OralSection state={state} /> : null}
       <BankSection subject={subject} state={state} />

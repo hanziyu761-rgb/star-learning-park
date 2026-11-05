@@ -24,6 +24,15 @@ const txt = (t: DisplayText | undefined) => (t === undefined ? '' : plainText(t)
 /** 把练习题整理成发给 AI 服务的文字 */
 export function describeExercise(e: Exercise): { question: string; options?: string[]; answer?: string } {
   switch (e.kind) {
+    case 'input': {
+      const stem = e.stem ? `${e.stem.visual ? vis(e.stem.visual) : ''}${txt(e.stem.text)}` : '';
+      return { question: `${txt(e.prompt.text)}${stem ? ` ${stem}` : ''}（自己填答案）`, answer: e.answer };
+    }
+    case 'trace':
+      return {
+        question: `按笔顺描写汉字“${e.char}”`,
+        answer: `笔顺：${e.strokes.map((s) => s.name).join('、')}`,
+      };
     case 'choice': {
       const opt = (o: (typeof e.options)[number]) => txt(o.text) || (o.visual ? vis(o.visual) : '');
       const stem = e.stem ? `${e.stem.visual ? vis(e.stem.visual) : ''}${txt(e.stem.text)}` : '';

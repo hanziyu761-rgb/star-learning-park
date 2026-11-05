@@ -38,7 +38,19 @@ def current_id(page, prefix):
     el = page.locator(f'[data-testid^="{prefix}"]').last
     return el.get_attribute("data-testid")[len(prefix):]
 
+
+def type_in(page, s):
+    """自己填数题：按数字键输入，再点“确定”"""
+    for ch in str(s).replace("……", "余"): tid(page, f"num-{ch}").click()
+    tid(page, "num-ok").click()
+
 def solve(page, ex_id, correct_first):
+    if ex_id.endswith(":in"):
+        ans = answer_of(ex_id[:-3])
+        if not correct_first:
+            type_in(page, f"{ans}1"); expect(tid(page, "feedback-wrong")).to_be_visible()
+        type_in(page, ans); expect(tid(page, "feedback-correct")).to_be_visible()
+        return
     ans = answer_of(ex_id)
     opts = [e.get_attribute("data-testid")[7:] for e in page.locator('[data-testid^="option-"]').all()]
     if not correct_first:

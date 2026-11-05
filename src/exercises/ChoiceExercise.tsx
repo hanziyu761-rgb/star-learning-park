@@ -11,6 +11,9 @@ import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 /**
  * 选择题：支持图片选择、数字选择、文字选择和听音选择（有 listen 字段时显示大喇叭）。
  */
+/** 第二次选错后选项暂停的时间 */
+export const COOLDOWN_MS = 1500;
+
 const textLength = (t: string | { char: string }[]) =>
   typeof t === 'string' ? (t.match(/[\p{L}\p{N}]/gu) ?? []).length : t.length;
 
@@ -24,6 +27,13 @@ function stemSize(t: string | { char: string }[]): number {
 export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: ExerciseProps<ChoiceExerciseData>) {
   const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved, exercise.explanation);
   const [wrongIds, setWrongIds] = useState<string[]>([]);
+  // 防止乱点：同一题选错第二次起，选项暂停 1.5 秒，先看提示再选（V2.9）
+  const [locked, setLocked] = useState(false);
+  useEffect(() => {
+    if (!locked) return;
+    const t = setTimeout(() => setLocked(false), COOLDOWN_MS);
+    return () => clearTimeout(t);
+  }, [locked]);
 
   // 听音题：先读题目，再自动播放一次要听的内容
   useEffect(() => {
@@ -32,11 +42,12 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
   }, []);
 
   const choose = (id: string) => {
-    if (solved || wrongIds.includes(id)) return;
+    if (solved || locked || wrongIds.includes(id)) return;
     tapFeedback();
     if (id === exercise.answerId) {
       correct();
     } else {
+      if (wrongIds.length >= 1) setLocked(true);
       setWrongIds((w) => [...w, id]);
       wrong(exercise.wrongHint);
     }
@@ -69,6 +80,11 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
         </View>
       ) : null}
 
+      {locked ? (
+        <Text style={styles.cooldown} testID="choice-cooldown">
+          先读一读提示，想一想再选 🤔
+        </Text>
+      ) : null}
       <View style={styles.options}>
         {exercise.options.map((opt) => {
           const long = longOptions;
@@ -79,7 +95,8 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
               key={opt.id}
               testID={`option-${opt.id}`}
               accessibilityRole="button"
-              accessibilityState={{ disabled: isWrong || solved }}
+              accessibilityState={{ disabled: isWrong || solved || locked }}
+              disabled={isWrong || solved || locked}
               onPress={() => choose(opt.id)}
               style={({ pressed }) => [
                 styles.option,
@@ -138,5 +155,6 @@ const styles = StyleSheet.create({
   optionRight: { borderColor: colors.correct, backgroundColor: colors.correctSoft },
   pressed: { transform: [{ scale: 0.96 }] },
   optEmoji: { fontSize: 52 },
+  cooldown: { textAlign: 'center', fontSize: 15, fontWeight: '700', color: colors.textSoft },
   mark: { position: 'absolute', top: 6, right: 12, fontSize: 26, fontWeight: '900', color: colors.wrong },
 });

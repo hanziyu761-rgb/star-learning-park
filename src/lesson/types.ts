@@ -213,7 +213,33 @@ export interface PatternToken {
   text?: string;
 }
 
+/** 自己作答：用数字键盘填答案（V2.9）。answer 例：12、3.5、3/4、7……2 */
+export interface InputExercise {
+  explanation?: string;
+  kind: 'input';
+  id: string;
+  skill: string;
+  prompt: Prompt;
+  stem?: { visual?: Visual; text?: DisplayText };
+  answer: string;
+  wrongHint: Prompt;
+}
+
+/** 描红写字：按笔顺一笔一笔描（V2.9）。strokes 为每一笔的折线，坐标 0～100（田字格） */
+export interface TraceExercise {
+  explanation?: string;
+  kind: 'trace';
+  id: string;
+  skill: string;
+  prompt: Prompt;
+  char: string;
+  strokes: { name: string; points: [number, number][] }[];
+  wrongHint: Prompt;
+}
+
 export type Exercise =
+  | InputExercise
+  | TraceExercise
   | ChoiceExercise
   | TrueFalseExercise
   | DragMatchExercise

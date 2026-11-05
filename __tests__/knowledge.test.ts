@@ -18,7 +18,15 @@ import type { ChoiceExercise, Exercise } from '@/lesson/types';
 const T0 = new Date(2026, 10, 4, 9, 0, 0).getTime();
 const DAY = 24 * 3600_000;
 /** 计算类知识点的生成器只出选择题；收窄类型后再检查选项 */
+/** 选择题；“自己填数”题（V2.9）换回同一道题的选择题形式核对，并检查填数答案与它一致 */
 function choice(e: Exercise): ChoiceExercise {
+  if (e.kind === 'input') {
+    const base = exerciseFromKpId(e.id.replace(/:in$/, ''));
+    if (!base || base.kind !== 'choice') throw new Error(`填数题找不到原题：${e.id}`);
+    const ans = base.options.find((o) => o.id === base.answerId)!.text;
+    expect(typeof ans === 'string' ? ans : '').toBe(e.answer);
+    return base;
+  }
   if (e.kind !== 'choice') throw new Error(`期望选择题，实际是 ${e.kind}`);
   return e;
 }

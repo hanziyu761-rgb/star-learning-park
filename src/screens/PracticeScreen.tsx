@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BANK_SOURCE, bankExercise, findUnit, pickRound } from '@/content/bank';
 import { ORAL_TOPICS, oralExercise, oralRound } from '@/content/oral';
 import { sourceName } from '@/content/resolve';
+import { isWriteLessonId, traceExercise, WRITE_SETS } from '@/content/writing';
 import { kpRound } from '@/knowledge/generators';
 import { zh } from '@/content/zh';
 import { FeedbackBar } from '@/components/FeedbackBar';
@@ -66,6 +67,12 @@ function buildRound(id: string, done: Set<string>, hidden: Set<string>): Round |
       ? { subject: getKp(kpId)?.subject ?? 'math', title: sourceName(id), isBank: false, exercises }
       : null;
   }
+  if (isWriteLessonId(id)) {
+    const set = WRITE_SETS[Number(id.slice(6)) - 1];
+    return set
+      ? { subject: 'chinese', title: sourceName(id), isBank: false, exercises: set.map((c) => traceExercise(c.char)) }
+      : null;
+  }
   if (id.startsWith('oral:')) {
     const topic = ORAL_TOPICS.find((t) => `oral:${t.id}` === id);
     if (!topic) return null;
@@ -73,7 +80,8 @@ function buildRound(id: string, done: Set<string>, hidden: Set<string>): Round |
       subject: 'math',
       title: sourceName(id),
       isBank: false,
-      exercises: oralRound(topic).map((expr) => oralExercise(topic.id, expr)),
+      // 每隔一道题自己填数（V2.9）
+      exercises: oralRound(topic).map((expr, i) => oralExercise(topic.id, i % 2 ? `${expr}#in` : expr)),
     };
   }
   return null;

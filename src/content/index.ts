@@ -39,6 +39,7 @@ export const SKILL_LABELS: Record<string, string> = {
   'en.phonics-read': '拼读：读单词',
   'en.phonics-build': '拼读：拼单词',
   'en.reading': '分级阅读：读懂小书',
+  'zh.write': '描红写字（笔顺）',
 };
 
 const ORAL_LABELS: Record<string, string> = {

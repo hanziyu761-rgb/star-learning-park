@@ -3,6 +3,7 @@
  * 每道题由“签名”（如 7+5、fly-in:4:3）唯一确定，复习时可由题目 id 还原。
  * 答案全部由程序计算。
  */
+import { asInput } from './inputs';
 import { zh } from '@/content/zh';
 import type { ChoiceExercise, Exercise, Prompt } from '@/lesson/types';
 import { bankExercise, findUnit } from '@/content/bank';
@@ -288,6 +289,13 @@ export const kpExerciseId = (kpId: string, sig: string) => `kp:${kpId}:${sig}`;
 
 /** 由知识点和签名生成题目（计算类为选择题；图形/规律类为各种互动题） */
 export function kpExercise(kpId: string, sig: string): Exercise {
+  // “:in” 结尾：同一道题改成自己填数（V2.9）
+  if (sig.endsWith(':in')) {
+    const base = kpExercise(kpId, sig.slice(0, -3));
+    const inp = asInput(base, kpExerciseId(kpId, sig));
+    if (!inp) throw new Error(`这道题不能改成填数：${sig}`);
+    return inp;
+  }
   if (sig.startsWith('b:')) return bankKpExercise(kpId, sig);
   const full = GRAPHICS_GENERATORS[kpId];
   if (full) return { ...full.build(sig), id: kpExerciseId(kpId, sig), skill: kpId } as Exercise;
@@ -324,7 +332,11 @@ export function kpRound(
     const s = make(rand);
     if (!avoid.has(kpExerciseId(kpId, s)) || guard > 150) sigs.add(s);
   }
-  return [...sigs].map((s) => kpExercise(kpId, s));
+  // 每隔一道题改成自己填数（答案是数的题才改）
+  return [...sigs].map((s, i) => {
+    const e = kpExercise(kpId, s);
+    return i % 2 === 1 && !s.startsWith('b:') && asInput(e) ? kpExercise(kpId, `${s}:in`) : e;
+  });
 }
 
 /** 从题目 id（kp:知识点:签名）还原 */

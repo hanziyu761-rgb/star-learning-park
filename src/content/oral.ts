@@ -2,7 +2,8 @@
  * 口算闯关：程序生成的计算题（原创，答案由程序计算，保证正确），题量不限。
  * 题目 id 就是算式本身（如 "7+5"），复习时可以由 id 还原题目。
  */
-import type { ChoiceExercise } from '@/lesson/types';
+import { asInput } from '@/knowledge/inputs';
+import type { ChoiceExercise, InputExercise } from '@/lesson/types';
 import { zh } from './zh';
 
 export interface OralTopic {
@@ -131,7 +132,9 @@ export function evalExpr(expr: string): number {
 
 const OP_SAY: Record<string, string> = { '+': '加', '-': '减', '×': '乘', '÷': '除以' };
 
-export function oralExercise(topicId: string, expr: string): ChoiceExercise {
+/** 口算题；题目 id 以 #in 结尾时改成自己填数（V2.9） */
+export function oralExercise(topicId: string, expr: string): ChoiceExercise | InputExercise {
+  if (expr.endsWith('#in')) return asInput(oralExercise(topicId, expr.slice(0, -3)), expr)!;
   const ans = evalExpr(expr);
   const set = new Set<number>([ans]);
   for (const d of [1, -1, 2, -2, 10, -10, 3]) {

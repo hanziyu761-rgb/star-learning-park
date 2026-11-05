@@ -72,6 +72,11 @@ def solve(page, ex_id, correct):
                 wrong = next(e.get_attribute("data-testid")[7:] for e in page.locator('[data-testid^="option-"]').all() if e.get_attribute("data-testid")[7:] != ans)
                 tid(page, f"option-{wrong}").click(); expect(tid(page, "feedback-wrong")).to_be_visible()
             tid(page, f"option-{ans}").click()
+    elif sig.endswith(":in"):
+        ans = calc_answer(kp, sig[:-3])
+        if not correct:
+            type_in(page, "9999"); expect(tid(page, "feedback-wrong")).to_be_visible()
+        type_in(page, ans)
     else:
         ans = calc_answer(kp, sig)
         if not correct:
@@ -79,6 +84,11 @@ def solve(page, ex_id, correct):
             tid(page, f"option-{wrong}").click(); expect(tid(page, "feedback-wrong")).to_be_visible()
         tid(page, f"option-{ans}").click()
     expect(tid(page, "feedback-correct")).to_be_visible()
+
+def type_in(page, s):
+    """自己填数题：按数字键输入，再点“确定”"""
+    for ch in str(s).replace("……", "余"): tid(page, f"num-{ch}").click()
+    tid(page, "num-ok").click()
 
 def current_id(page, prefix):
     return page.locator(f'[data-testid^="{prefix}"]').last.get_attribute("data-testid")[len(prefix):]

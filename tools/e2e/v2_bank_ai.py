@@ -87,7 +87,11 @@ with sync_playwright() as p:
     for i in range(10):
         stem = page.get_by_text(re.compile(r"^\d+ \+ \d+ = \?$")).first.inner_text()
         a, c = map(int, re.findall(r"\d+", stem))
-        tid(page, f"option-{a + c}").click()
+        if tid(page, "num-ok").count():  # 自己填数题（每隔一道）
+            for ch in str(a + c): tid(page, f"num-{ch}").click()
+            tid(page, "num-ok").click()
+        else:
+            tid(page, f"option-{a + c}").click()
         expect(tid(page, "feedback-correct")).to_be_visible()
         tid(page, "practice-next").click(); page.wait_for_timeout(150)
     page.wait_for_selector('[data-testid="practice-summary"]')
@@ -123,8 +127,10 @@ with sync_playwright() as p:
     # ---------- 屏蔽问题题目 ----------
     tid(page, "subject-math").click(); tid(page, f"unit-{unit['id']}").click()
     page.wait_for_selector('[data-testid="practice-screen"]')
+    # 等页面布局稳定后再量位置（之前偶发：量到的位置是滚动前的，长按落空）
+    tid(page, "report-question").scroll_into_view_if_needed(); page.wait_for_timeout(400)
     box = tid(page, "report-question").bounding_box()
-    page.mouse.move(box["x"] + 5, box["y"] + 5); page.mouse.down(); page.wait_for_timeout(1100); page.mouse.up()
+    page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2); page.mouse.down(); page.wait_for_timeout(1300); page.mouse.up()
     expect(page.get_by_text("已屏蔽这道题")).to_be_visible()
     ok("长按“这题有问题”屏蔽当前题目")
     page.locator('[data-testid="practice-screen"] [data-testid="back"]').click(); page.wait_for_selector('[data-testid="practice-screen"]', state="detached")

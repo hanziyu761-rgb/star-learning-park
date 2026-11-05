@@ -9,7 +9,7 @@
  */
 import { bankExercise, BANK_INDEX, editionText, loadBook, NEW_EDITION } from '@/content/bank';
 import { plainText, zh } from '@/content/zh';
-import { hasOriginalGenerator, kpRound } from '@/knowledge/generators';
+import { exerciseFromKpId, hasOriginalGenerator, kpRound } from '@/knowledge/generators';
 import { KNOWLEDGE_POINTS, kpSubject, type KpSubject } from '@/knowledge/graph';
 import type { DisplayText, Exercise, Visual } from '@/lesson/types';
 
@@ -194,7 +194,11 @@ export function examPool(c: ExamConfig, rand: () => number): ExamItem[] {
     if (kpSubject(k) !== c.subject || k.grade !== c.grade || k.term !== c.term || !hasOriginalGenerator(k.id)) continue;
     if (units && !(k.units ?? []).some((u) => units.has(u)) && !editionKpUnits(c).some(([u, kps]) => units.has(u) && kps.includes(k.id)))
       continue;
-    for (const e of kpRound(k.id, 8, rand)) add(toExamItem(e, 'original', k.id));
+    for (const e0 of kpRound(k.id, 8, rand)) {
+      // 试卷上用原来的题形（填数题在纸上就是计算题或选择题）
+      const e = e0.kind === 'input' ? (exerciseFromKpId(e0.id.replace(/:in$/, '')) ?? e0) : e0;
+      add(toExamItem(e, 'original', k.id));
+    }
   }
   // 题库题
   const book = loadBook(bookIdOf(c));

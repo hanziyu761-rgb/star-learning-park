@@ -1,6 +1,7 @@
 /**
  * 题库（ChinaStudyFree 导入）、口算生成、AI 客户端。
  */
+import type { ChoiceExercise } from '@/lesson/types';
 import { describeExercise } from '@/ai/describe';
 import { AiError, aiChat, aiHealth, aiHint } from '@/ai/client';
 import { BANK_INDEX, bankExercise, findBankExercise, loadBook, pickRound, withPinyin } from '@/content/bank';
@@ -141,11 +142,15 @@ describe('口算闯关', () => {
     const round = oralRound(t, 10, seeded(3));
     expect(new Set(round).size).toBe(10);
     for (const expr of round) {
-      const e = oralExercise(t.id, expr);
+      const e = oralExercise(t.id, expr) as ChoiceExercise;
       expect(e.answerId).toBe(String(evalExpr(expr)));
       expect(e.options.map((o) => o.id)).toContain(e.answerId);
+      // 同一道题的“自己填数”版本，答案相同
+      const inp = oralExercise(t.id, `${expr}#in`);
+      expect(inp.kind).toBe('input');
+      expect(inp.kind === 'input' && inp.answer).toBe(String(evalExpr(expr)));
     }
-    expect(findOralExercise('oral:add10', '3+4')?.exercise.answerId).toBe('7');
+    expect((findOralExercise('oral:add10', '3+4')?.exercise as ChoiceExercise).answerId).toBe('7');
   });
 });
 

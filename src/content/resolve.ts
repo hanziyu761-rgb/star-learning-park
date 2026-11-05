@@ -9,6 +9,7 @@ import { exerciseFromKpId } from '@/knowledge/generators';
 import { getKp } from '@/knowledge/graph';
 import { findOralExercise, ORAL_TOPICS } from './oral';
 import { plainText } from './zh';
+import { isWriteLessonId, traceExercise, WRITE_SETS } from './writing';
 
 export interface ResolvedExercise {
   exercise: Exercise;
@@ -28,6 +29,13 @@ export const resolveExercise: ExerciseResolver = (lessonId, exerciseId) => {
   const bank = findBankExercise(lessonId, exerciseId);
   if (bank)
     return { exercise: bank.exercise, subject: bank.book.subject, source: `${bank.book.title} · ${bank.unit.title}` };
+  if (isWriteLessonId(lessonId)) {
+    try {
+      return { exercise: traceExercise(exerciseId.replace(/^write-/, '')), subject: 'chinese', source: sourceName(lessonId) };
+    } catch {
+      return null;
+    }
+  }
   const oral = findOralExercise(lessonId, exerciseId);
   if (oral) return { exercise: oral.exercise, subject: 'math', source: `口算 · ${oral.topic.title}` };
   const lesson = getLesson(lessonId);
@@ -50,6 +58,10 @@ export function sourceName(lessonId: string): string {
     const k = getKp(lessonId.split(':')[1]);
     return k ? `${lessonId.startsWith('diag:') ? '找原因' : '知识点练习'} · ${k.name}` : lessonId;
   }
+  if (isWriteLessonId(lessonId)) {
+    const set = WRITE_SETS[Number(lessonId.slice(6)) - 1];
+    return set ? `描红写字 · ${set.map((c) => c.char).join(' ')}` : lessonId;
+  }
   if (lessonId.startsWith('oral:')) {
     const t = ORAL_TOPICS.find((x) => `oral:${x.id}` === lessonId);
     return t ? `口算 · ${t.title}` : lessonId;
@@ -60,12 +72,13 @@ export function sourceName(lessonId: string): string {
 
 /** 错题的题目文字（家长中心显示） */
 export function mistakeLabel(lessonId: string, exerciseId: string): string {
+  if (isWriteLessonId(lessonId)) return `描红：${exerciseId.replace(/^write-/, '')}`;
   if (!lessonId.startsWith('bank:') && !lessonId.startsWith('oral:')) return exerciseLabel(lessonId, exerciseId);
   const r = resolveExercise(lessonId, exerciseId);
   if (!r) return exerciseId;
   const e = r.exercise;
   const text = (t: string | { char: string }[]) => (typeof t === 'string' ? t : t.map((x) => x.char).join(''));
   if (e.kind === 'truefalse') return text(e.statement.text);
-  if (e.kind === 'choice' && e.stem?.text) return text(e.stem.text);
+  if ((e.kind === 'choice' || e.kind === 'input') && e.stem?.text) return text(e.stem.text);
   return text(e.prompt.text);
 }

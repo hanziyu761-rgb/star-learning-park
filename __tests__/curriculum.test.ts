@@ -21,10 +21,18 @@ const seeded = (seed: number) => {
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
 };
 const REVIEW_UNIT = /总复习|整理和复习|期末|Recycle|综合复习|复习与关联/;
-const choice = (e: Exercise): ChoiceExercise => {
-  if (e.kind !== 'choice') throw new Error(`期望选择题，实际 ${e.kind}`);
+/** 选择题；“自己填数”题（V2.9）换回同一道题的选择题形式核对，并检查填数答案与它一致 */
+function choice(e: Exercise): ChoiceExercise {
+  if (e.kind === 'input') {
+    const base = exerciseFromKpId(e.id.replace(/:in$/, ''));
+    if (!base || base.kind !== 'choice') throw new Error(`填数题找不到原题：${e.id}`);
+    const ans = base.options.find((o) => o.id === base.answerId)!.text;
+    expect(typeof ans === 'string' ? ans : '').toBe(e.answer);
+    return base;
+  }
+  if (e.kind !== 'choice') throw new Error(`期望选择题，实际是 ${e.kind}`);
   return e;
-};
+}
 const text = (t: unknown) =>
   typeof t === 'string' ? t : Array.isArray(t) ? (t as ZhText).map((x) => x.char).join('') : '';
 const nums = (s: string) => (s.match(/\d+(\.\d+)?/g) ?? []).map(Number);

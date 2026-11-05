@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BANK_SOURCE, bankLessonId, booksFor, editionText, loadBook, unitBadge } from '@/content/bank';
 import { oralLessonId, topicsForGrade } from '@/content/oral';
+import { WRITE_SETS, writeLessonId } from '@/content/writing';
 import { kpLabel, getKp } from '@/knowledge/graph';
 import { CONTENT_REVIEW, GRAPHICS_GENERATORS, GRAPHICS_KPS } from '@/knowledge/graphics';
 import { zh } from '@/content/zh';
@@ -29,7 +30,7 @@ export function OralSection({ state }: { state: ProgressState }) {
   return (
     <View style={styles.card} testID="oral-section">
       <DisplayTextView text={zh('口算闯关', 'kǒu suàn chuǎng guān')} size={24} />
-      <Text style={styles.meta}>每轮 10 题，题目由程序生成，答案保证正确</Text>
+      <Text style={styles.meta}>每轮 10 题，一半选一选、一半自己填数，题目由程序生成，答案保证正确</Text>
       <View style={styles.grid}>
         {topics.map((t) => {
           const id = oralLessonId(t.id);
@@ -48,6 +49,38 @@ export function OralSection({ state }: { state: ProgressState }) {
             >
               <Text style={styles.tileEmoji}>{t.emoji}</Text>
               <DisplayTextView text={zh(t.title, t.titlePy)} size={16} />
+              <Stars value={best} size={14} />
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+/** 描红写字：按笔顺一笔一笔描（V2.9，原创笔画数据，待教师审核） */
+export function WriteSection({ state }: { state: ProgressState }) {
+  const nav = useNav();
+  return (
+    <View style={styles.card} testID="write-section">
+      <DisplayTextView text={zh('描红写字', 'miáo hóng xiě zì')} size={24} />
+      <Text style={styles.meta}>每组 4 个字，从红点开始按笔顺描，程序检查笔顺和方向（不评判字的好看程度）</Text>
+      <View style={styles.grid}>
+        {WRITE_SETS.map((set, i) => {
+          const id = writeLessonId(i + 1);
+          const best = state.lessons[id]?.bestStars ?? 0;
+          return (
+            <Pressable
+              key={id}
+              testID={`write-set-${i + 1}`}
+              accessibilityRole="button"
+              onPress={() => {
+                tapFeedback();
+                nav.push({ name: 'practice', id });
+              }}
+              style={({ pressed }) => [styles.tile, pressed && { transform: [{ scale: 0.96 }] }]}
+            >
+              <Text style={styles.writeChars}>{set.map((c) => c.char).join(' ')}</Text>
               <Stars value={best} size={14} />
             </Pressable>
           );
@@ -208,6 +241,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   tileEmoji: { fontSize: 28 },
+  writeChars: { fontSize: 26, fontWeight: '900', color: colors.text, letterSpacing: 2 },
   gTile: { backgroundColor: '#FFF6E0', flexBasis: '30%', minWidth: 140 },
   review: { fontSize: 12, fontWeight: '800', color: '#B26A00' },
   bookRow: {

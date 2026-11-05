@@ -120,7 +120,11 @@ with sync_playwright() as p:
     for i in range(10):
         stem = page.get_by_text(re.compile(r"^\d+ \+ \d+ = \?$")).first.inner_text()
         a, c = map(int, re.findall(r"\d+", stem))
-        tid(page, f"option-{a + c}").click()
+        if tid(page, "num-ok").count():  # 自己填数题（每隔一道）
+            for ch in str(a + c): tid(page, f"num-{ch}").click()
+            tid(page, "num-ok").click()
+        else:
+            tid(page, f"option-{a + c}").click()
         expect(tid(page, "feedback-correct")).to_be_visible()
         if page.locator('[data-testid="strategy-ask"]').count():
             asked.append(i + 1)
