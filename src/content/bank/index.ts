@@ -7,6 +7,7 @@ import { zh } from '../zh';
 import indexData from './index.json';
 import { bookIdOfUnit, NEW_EDITION, regroup } from './edition';
 import { BANK_LOADERS } from './loaders';
+import { fixBankPinyin } from './pyfix';
 import type { BankBook, BankIndexEntry, BankQuestion, BankUnit } from './types';
 
 export type { BankBook, BankIndexEntry, BankQuestion, BankUnit } from './types';
@@ -65,7 +66,8 @@ export const bankSkill = (subject: Subject, kp: string) => `bank:${subject}:${kp
 /** 把自动拼音（空格分隔）与文字合成上注音文本；没有拼音时返回普通文字 */
 export function withPinyin(text: string, py?: string): string | ZhText {
   if (!py) return text;
-  const pys = py.split(' ');
+  // 自动拼音的多音字按词纠正（V2.12，见 pyfix.ts）
+  const { pys } = fixBankPinyin(text, py.split(' '));
   const segs: PinyinSeg[] = [];
   let i = 0;
   for (const ch of Array.from(text)) {

@@ -45,7 +45,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "check": "npm run typecheck && npm run lint && npm test",
-    "build:html": "node tools/single-html/build.js"
+    "build:html": "node tools/single-html/build.js",
+    "review:export": "jest --testMatch '<rootDir>/tools/review/*.review.ts' && python3 tools/review/make_xlsx.py"
   },
   "private": true,
   "jest": {

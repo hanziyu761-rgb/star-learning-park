@@ -46,3 +46,9 @@ yarn-error.*
 dist-android/
 dist-single/
 star-learning-park.html
+
+# 教师审核表导出（构建产物）
+review-out/
+# 端到端截图
+shots/
+shots-html/

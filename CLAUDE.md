@@ -28,6 +28,10 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 
 网页端到端验收（需要 Python + Playwright）：先 `npx expo export --platform web`，在 dist 目录起静态服务（端口 8081），再运行 `python tools/e2e/acceptance.py` 与 `python tools/e2e/full_lessons.py`。
 
+## 教师审核表
+
+`npm run review:export` 导出一年级内容审核表到 `review-out/`（构建产物，不提交）。题库自动核查在 `__tests__/bank-audit.test.ts`，不得为通过检查而放宽验算规则。
+
 ## 单文件 HTML 版
 
 `npm run build:html` 生成 `star-learning-park.html`。改动页面后要同时验证 APP 版和 HTML 版。
