@@ -287,6 +287,8 @@ export interface Lesson {
   id: string;
   subject: Subject;
   order: number;
+  /** 英语启蒙主线（V2.8）：交流 / 拼读 / 分级阅读 */
+  track?: 'talk' | 'phonics' | 'reading';
   title: DisplayText;
   /** 给家长看的课程说明 */
   parentSummary: string;

@@ -117,7 +117,7 @@ describe('学习建议', () => {
     // x2 不是可单独重做的题目（不存在于课程中），只有 compare-fish 进入复习
     expect(sug[1]).toEqual({ kind: 'review', count: 1 });
     expect(sug[2]).toMatchObject({ kind: 'weak', lessonId: math.id, skill: 'math.compare', accuracy: 0 });
-    expect(sug[3]).toEqual({ kind: 'new', lessonId: 'english-fruits' });
+    expect(sug[3]).toEqual({ kind: 'new', lessonId: 'en-talk-1' }); // V2.8：英语按三条主线排序，第一课是交流第 1 单元
   });
 
   it('课程知识点索引来自课程数据', () => {

@@ -9,6 +9,7 @@ import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { BankSection, GraphicsSection, OralSection } from './PracticeSections';
+import { EnglishTracks } from './EnglishTracks';
 import { colors, radius, shadow, space, subjectTheme } from '@/theme';
 
 const TITLES: Record<Subject, ReturnType<typeof zh>> = {
@@ -37,12 +38,14 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
   }
 
   const theme = subjectTheme[subject];
-  const lessons = lessonsFor(subject);
+  // 英语启蒙课按三条主线单独展示
+  const lessons = lessonsFor(subject).filter((l) => !l.track);
 
   return (
     <Screen bg={theme.soft} testID={`subject-screen-${subject}`}>
       <Header title={TITLES[subject]} onBack={goHome} />
-      {lessons.length === 0 ? <Notice text="这个学科还没有课程。" /> : null}
+      {subject === 'english' ? <EnglishTracks state={state} /> : null}
+      {lessons.length === 0 && subject !== 'english' ? <Notice text="这个学科还没有课程。" /> : null}
       {lessons.map((lesson) => {
         const p = state.lessons[lesson.id];
         const isActive = state.active?.lessonId === lesson.id;
@@ -76,7 +79,7 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
           </View>
         );
       })}
-      <Text style={styles.more}>更多精做课程正在制作中</Text>
+      {subject !== 'english' ? <Text style={styles.more}>更多精做课程正在制作中</Text> : null}
       {subject === 'math' ? <GraphicsSection state={state} /> : null}
       {subject === 'math' ? <OralSection state={state} /> : null}
       <BankSection subject={subject} state={state} />

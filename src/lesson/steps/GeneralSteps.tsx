@@ -198,8 +198,13 @@ export function PictureBookStep({ step, onDone }: StepProps<'picture-book'>) {
       <PromptHeader prompt={step.title} autoSpeak={false} />
       <Animated.View key={page} entering={FadeIn} style={styles.bookPage} testID={`book-page-${page}`}>
         <Text style={styles.hugeEmoji}>{p.visual.emoji.repeat(p.visual.count ?? 1)}</Text>
+        {p.text === '' ? (
+          <Text style={styles.wordlessHint} testID="wordless-page">
+            👀 Look and talk
+          </Text>
+        ) : null}
         <View style={styles.words}>
-          {p.text.split(' ').map((w, i) => (
+          {(p.text ? p.text.split(' ') : []).map((w, i) => (
             <Pressable
               key={i}
               accessibilityRole="button"
@@ -290,9 +295,24 @@ const styles = StyleSheet.create({
   bubbleActive: { borderColor: colors.star, backgroundColor: '#FFF8DC' },
   bubbleText: { fontSize: 24, fontWeight: '700', color: colors.text },
   tick: { position: 'absolute', top: 2, right: 6, color: colors.correct, fontWeight: '900' },
-  bookPage: { backgroundColor: '#FFFDF6', borderRadius: radius.lg, padding: space.xl, alignItems: 'center', gap: space.lg, ...shadow },
+  bookPage: {
+    backgroundColor: '#FFFDF6',
+    borderRadius: radius.lg,
+    padding: space.xl,
+    alignItems: 'center',
+    gap: space.lg,
+    ...shadow,
+  },
   words: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 6 },
-  word: { paddingHorizontal: 6, paddingVertical: 4, borderRadius: 8, backgroundColor: colors.bgSky, minHeight: 44, justifyContent: 'center' },
+  word: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: colors.bgSky,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
   wordText: { fontSize: 30, fontWeight: '800', color: colors.text },
+  wordlessHint: { fontSize: 18, fontWeight: '700', color: colors.textSoft },
   pager: { flexDirection: 'row', alignItems: 'center', gap: space.md },
 });

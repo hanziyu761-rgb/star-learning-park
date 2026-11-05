@@ -11,6 +11,8 @@ import { suggestNext, type Suggestion } from '@/progress/plan';
 import { AiCard, GradeCard, HiddenCard } from './ParentSettings';
 import { KnowledgeCard } from './ParentKnowledge';
 import { ThinkingCard } from './ParentThinking';
+import { trackProgress } from './EnglishTracks';
+import { STARTER_NOTE, TRACK_INFO } from '@/content/englishStarter';
 import { useProgress } from '@/progress/ProgressContext';
 import {
   activeDaysLast7,
@@ -102,6 +104,26 @@ function ParentDashboard() {
 
       <KnowledgeCard />
       <ThinkingCard />
+
+      <Card>
+        <SectionTitle>英语启蒙三条主线（一、二年级）</SectionTitle>
+        <Text style={styles.small}>{STARTER_NOTE}</Text>
+        {(['talk', 'phonics', 'reading'] as const).map((t) => {
+          const tp = trackProgress(state, t);
+          return (
+            <View key={t} style={styles.row} testID={`parent-track-${t}`}>
+              <Text style={styles.rowEmoji}>{TRACK_INFO[t].emoji}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>
+                  {TRACK_INFO[t].name}：已学 {tp.done}/{tp.total}
+                  {tp.next ? ` · 下一课 ${typeof tp.next.title === 'string' ? tp.next.title : ''}` : ' · 全部学完'}
+                </Text>
+                <Text style={styles.small}>配合 {TRACK_INFO[t].book}</Text>
+              </View>
+            </View>
+          );
+        })}
+      </Card>
 
       {SUBJECTS.map((s) => {
         const st = subjectStats(state, s);

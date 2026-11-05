@@ -18,8 +18,9 @@ const pictureOptions = fruits.map((f) => ({ id: f.id, visual: { emoji: f.emoji }
 export const englishFruitsLesson: Lesson = {
   id: 'english-fruits',
   subject: 'english',
-  order: 1,
-  title: 'Fruits',
+  order: 19,
+  track: 'talk',
+  title: '9. Fruits',
   parentSummary: '水果词汇 apple / banana / orange / grapes：听音辨图、跟读、首字母启蒙、简单对话和小绘本。',
   emoji: '🍎',
   estimatedMinutes: 15,

@@ -4,9 +4,10 @@
 import type { Lesson, Subject } from '@/lesson/types';
 import { chineseRiYueLesson } from './chinese';
 import { englishFruitsLesson } from './english';
+import { STARTER_LESSONS } from './englishStarter';
 import { mathAddLesson } from './math';
 
-export const LESSONS: Lesson[] = [mathAddLesson, chineseRiYueLesson, englishFruitsLesson];
+export const LESSONS: Lesson[] = [mathAddLesson, chineseRiYueLesson, englishFruitsLesson, ...STARTER_LESSONS];
 
 export function getLesson(id: string): Lesson | undefined {
   return LESSONS.find((l) => l.id === id);
@@ -32,6 +33,12 @@ export const SKILL_LABELS: Record<string, string> = {
   'en.vocab-picture': '看图认词',
   'en.phonics': '首字母启蒙',
   'en.dialogue': '对话听力',
+  'en.talk-words': '交流：认词',
+  'en.talk-qa': '交流：问答',
+  'en.phonics-sound': '拼读：找首音',
+  'en.phonics-read': '拼读：读单词',
+  'en.phonics-build': '拼读：拼单词',
+  'en.reading': '分级阅读：读懂小书',
 };
 
 const ORAL_LABELS: Record<string, string> = {
