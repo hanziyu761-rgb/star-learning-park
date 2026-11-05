@@ -11,6 +11,7 @@ import { suggestNext, type Suggestion } from '@/progress/plan';
 import { AiCard, GradeCard, HiddenCard } from './ParentSettings';
 import { KnowledgeCard } from './ParentKnowledge';
 import { ThinkingCard } from './ParentThinking';
+import { VoiceCheckCard } from './VoiceCheckCard';
 import { trackProgress } from './EnglishTracks';
 import { STARTER_NOTE, TRACK_INFO } from '@/content/englishStarter';
 import { useProgress } from '@/progress/ProgressContext';
@@ -210,6 +211,7 @@ function ParentDashboard() {
       </Card>
 
       <GradeCard />
+      <VoiceCheckCard />
       <AiCard />
       <HiddenCard />
 

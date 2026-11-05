@@ -73,3 +73,29 @@ export function stopSpeaking(): void {
 
 export const zhSpeak = (text: string): Speakable => ({ text, lang: 'zh-CN' });
 export const enSpeak = (text: string): Speakable => ({ text, lang: 'en-US' });
+
+/** 声音检查（V2.15）：本机有没有中文、英语的语音。部分安卓手机检测不准，所以还要配合“试听”按钮 */
+export interface VoiceCheck {
+  total: number;
+  zh: boolean;
+  en: boolean;
+}
+
+export function summarizeVoices(voices: { language?: string }[]): VoiceCheck {
+  const langs = voices.map((v) => (v.language ?? '').toLowerCase().replace('_', '-'));
+  return {
+    total: voices.length,
+    zh: langs.some((l) => l.startsWith('zh') || l.startsWith('cmn')),
+    en: langs.some((l) => l.startsWith('en')),
+  };
+}
+
+export async function checkVoices(): Promise<VoiceCheck> {
+  try {
+    // 有的浏览器、手机一直不返回语音列表：最多等 3 秒，按“没检测到”处理（仍可点试听确认）
+    const timeout = new Promise<{ language?: string }[]>((resolve) => setTimeout(() => resolve([]), 3000));
+    return summarizeVoices(await Promise.race([Speech.getAvailableVoicesAsync(), timeout]));
+  } catch {
+    return { total: 0, zh: false, en: false };
+  }
+}
