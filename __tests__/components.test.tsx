@@ -10,13 +10,22 @@ import { PinyinText } from '@/components/PinyinText';
 import { ChoiceExercise } from '@/exercises/ChoiceExercise';
 import { SortExercise } from '@/exercises/SortExercise';
 import { TrueFalseExercise } from '@/exercises/TrueFalseExercise';
-import type { ChoiceExercise as ChoiceData, SortExercise as SortData, TrueFalseExercise as TFData } from '@/lesson/types';
+import type {
+  ChoiceExercise as ChoiceData,
+  SortExercise as SortData,
+  TrueFalseExercise as TFData,
+} from '@/lesson/types';
 import { ProgressProvider, useProgress } from '@/progress/ProgressContext';
 import { flushProgressWrites } from '@/progress/storage';
 
-const choice = (mathAddLesson.steps.find((s) => s.kind === 'exercise' && s.exercise.id === 'count-strawberry') as {
-  exercise: ChoiceData;
-}).exercise;
+// 这里测手机语音：不带预先录好的录音（录音播放见 clips.test.ts）
+jest.mock('@/speech/voiceClips', () => ({ CLIP_VOICES: {}, CLIPS: { f: {}, m: {}, c: {} } }));
+
+const choice = (
+  mathAddLesson.steps.find((s) => s.kind === 'exercise' && s.exercise.id === 'count-strawberry') as {
+    exercise: ChoiceData;
+  }
+).exercise;
 
 describe('上注音组件', () => {
   it('每个汉字上方显示对应拼音，可隐藏拼音', async () => {

@@ -2,7 +2,7 @@
   "expo": {
     "name": "星星学习乐园",
     "slug": "star-learning-park",
-    "version": "2.15.1",
+    "version": "2.16.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -19,11 +19,12 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.starlearningpark.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.SYSTEM_ALERT_WINDOW"
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {

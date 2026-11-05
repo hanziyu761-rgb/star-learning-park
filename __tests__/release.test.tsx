@@ -9,6 +9,9 @@ import { VoiceCheckCard } from '@/screens/VoiceCheckCard';
 import { summarizeVoices } from '@/speech/speech';
 import { APP_VERSION } from '@/version';
 
+// 这里测手机语音：不带预先录好的录音（录音播放见 clips.test.ts）
+jest.mock('@/speech/voiceClips', () => ({ CLIP_VOICES: {}, CLIPS: { f: {}, m: {}, c: {} } }));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const app = require('../app.json');
 // eslint-disable-next-line @typescript-eslint/no-require-imports

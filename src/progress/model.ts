@@ -66,8 +66,8 @@ export interface Settings {
   aiBaseUrl: string;
   /** 每日挑战难度跟着孩子调整（V2.11，默认开启；旧数据读入时补默认值） */
   adaptiveChallenge: boolean;
-  /** 朗读声音（V2.16）：女声 / 男声；家长可指定手机里的某个中文、英语声音（空 = 自动挑选）；语速 */
-  voiceGender: 'female' | 'male';
+  /** 朗读声音（V2.16）：女声 / 男声 / 童声；家长可指定手机里的某个中文、英语声音（空 = 自动挑选）；语速 */
+  voiceGender: 'female' | 'male' | 'child';
   voiceZh: string;
   voiceEn: string;
   speechRate: 'slow' | 'normal';

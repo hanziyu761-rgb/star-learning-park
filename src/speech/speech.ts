@@ -5,11 +5,13 @@
  * - 第二阶段计划为核心词汇替换成真人录音（见 docs/DEVELOPMENT_PLAN.md）。
  */
 import * as Speech from 'expo-speech';
+import { playClip, stopClip } from './clips';
 import type { Speakable } from '@/lesson/types';
 
 /* ───── 朗读声音（V2.16）：女声 / 男声、指定声音、语速，对小朋友更友好 ───── */
 export interface VoicePrefs {
-  gender: 'female' | 'male';
+  /** 童声：中文用预先录好的童声录音；手机语音用女声调高音调 */
+  gender: 'female' | 'male' | 'child';
   /** 指定的中文、英语声音（手机语音引擎里的声音编号；空 = 用默认声音） */
   zh: string;
   en: string;
@@ -29,6 +31,7 @@ const RATE: Record<VoicePrefs['rate'], Record<Speakable['lang'], number>> = {
 /** 音调：女声稍亮一点显得亲切；男声用自然音调（没有男声音色的手机上稍低一点） */
 export function pitchFor(p: VoicePrefs, lang: Speakable['lang']): number {
   const picked = lang === 'zh-CN' ? p.zh : p.en;
+  if (p.gender === 'child') return 1.3;
   if (p.gender === 'female') return 1.12;
   return picked ? 1.0 : 0.82;
 }
@@ -59,16 +62,21 @@ export function onSpeakingChange(listener: Listener): () => void {
 export function speak(item: Speakable, onDone?: () => void, override?: { voice?: string }): void {
   const id = ++speakingId;
   Speech.stop();
+  stopClip();
   notify(true);
   const finish = () => {
     if (id === speakingId) notify(false);
     onDone?.();
   };
+  // 有预先录好的录音就放录音（慢一点 = 原速，正常 = 稍快播放）
+  if (!override?.voice && playClip(item, prefs.gender, prefs.rate === 'slow' ? 1 : 1.12, finish)) return;
   try {
     Speech.speak(item.text, {
       ...speechOptions(item),
       // 试听某个声音时临时指定
-      ...(override?.voice ? { voice: override.voice, pitch: prefs.gender === 'female' ? 1.12 : 1.0 } : {}),
+      ...(override?.voice
+        ? { voice: override.voice, pitch: prefs.gender === 'male' ? 1.0 : prefs.gender === 'child' ? 1.3 : 1.12 }
+        : {}),
       onDone: finish,
       onStopped: () => {
         if (id === speakingId) notify(false);
@@ -98,6 +106,7 @@ export function speakSequence(items: Speakable[], onDone?: () => void): void {
 export function stopSpeaking(): void {
   speakingId++;
   Speech.stop();
+  stopClip();
   notify(false);
 }
 

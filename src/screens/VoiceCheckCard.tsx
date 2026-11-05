@@ -16,6 +16,11 @@ const SAMPLE = {
   'en-US': 'Hello! Let’s learn together.',
 } as const;
 const GENDER_CN = { female: '女声', male: '男声', unknown: '未知' } as const;
+const GENDER_NOTE = {
+  female: '亲切的老师声音',
+  male: '年轻的男老师声音',
+  child: '像小伙伴一样的童声（中文课程用童声录音；英语用女声）',
+} as const;
 
 export function VoiceCheckCard() {
   const { state, dispatch } = useProgress();
@@ -32,10 +37,12 @@ export function VoiceCheckCard() {
   const check = voices ? summarizeVoices(voices.map((v) => ({ language: v.lang }))) : null;
   const mark = (ok: boolean) => (ok ? '✅ 有' : '⚠️ 没检测到');
 
-  const chooseGender = (gender: 'female' | 'male') => {
+  const chooseGender = (gender: 'female' | 'male' | 'child') => {
     const vs = voices ?? [];
-    const zh = pickVoice(vs, 'zh-CN', gender);
-    const en = pickVoice(vs, 'en-US', gender);
+    // 童声：手机语音用女声调高音调
+    const g = gender === 'child' ? 'female' : gender;
+    const zh = pickVoice(vs, 'zh-CN', g);
+    const en = pickVoice(vs, 'en-US', g);
     set({ voiceGender: gender, voiceZh: zh, voiceEn: en });
     // 用新的设置马上读一句（等设置生效后再读）
     setTimeout(() => speak({ text: SAMPLE['zh-CN'], lang: 'zh-CN' }), 50);
@@ -55,7 +62,7 @@ export function VoiceCheckCard() {
 
         <Text style={styles.label}>声音</Text>
         <View style={styles.row}>
-          {(['female', 'male'] as const).map((g) => (
+          {(['female', 'male', 'child'] as const).map((g) => (
             <Pressable
               key={g}
               testID={`voice-gender-${g}`}
@@ -65,11 +72,14 @@ export function VoiceCheckCard() {
               style={[styles.chip, s.voiceGender === g && styles.chipOn]}
             >
               <Text style={[styles.chipText, s.voiceGender === g && styles.chipTextOn]}>
-                {g === 'female' ? '👩 女声' : '👨 男声'}
+                {g === 'female' ? '👩 女声' : g === 'male' ? '👨 男声' : '🧒 童声'}
               </Text>
             </Pressable>
           ))}
         </View>
+        <Text style={styles.note} testID="voice-gender-note">
+          {GENDER_NOTE[s.voiceGender]}。课程、讲解、短文用预先录好的声音；题库等随机出的题用手机语音。
+        </Text>
         <Text style={styles.label}>语速</Text>
         <View style={styles.row}>
           {(['slow', 'normal'] as const).map((r) => (

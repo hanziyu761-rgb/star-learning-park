@@ -18,6 +18,9 @@ import {
   type VoicePrefs,
 } from '@/speech/speech';
 
+// 这里测手机语音：不带预先录好的录音（录音播放见 clips.test.ts）
+jest.mock('@/speech/voiceClips', () => ({ CLIP_VOICES: {}, CLIPS: { f: {}, m: {}, c: {} } }));
+
 const RAW = [
   { identifier: 'cmn-cn-x-ccc-local', name: 'cmn-cn-x-ccc-local', language: 'cmn-CN' },
   { identifier: 'cmn-cn-x-ccd-network', name: 'cmn-cn-x-ccd-network', language: 'cmn-CN' },
@@ -101,6 +104,9 @@ describe('声音设置卡片', () => {
         expect.objectContaining({ voice: 'zh-CN-SMTm00' }),
       ),
     );
+    // 童声：手机语音部分用女声
+    await fireEvent.press(screen.getByTestId('voice-gender-child'));
+    await waitFor(() => expect(screen.getByTestId('voice-gender-note')).toHaveTextContent(/童声/));
     // 试听第 1 个英语声音
     await fireEvent.press(screen.getByTestId('voice-try-en-US-0'));
     expect(Speech.speak).toHaveBeenLastCalledWith(

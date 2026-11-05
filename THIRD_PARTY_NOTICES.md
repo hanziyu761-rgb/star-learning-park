@@ -21,3 +21,10 @@ MIT License 全文：
 - 仓库：https://github.com/StudentTraineeCenter/edu-agent （分析版本 77c9ee5）
 - 许可证：MIT License, Copyright (c) 2025 Student Trainee Center
 - 使用内容：`src/progress/plan.ts` 借鉴其学习计划规则（按知识点统计正确率，低于 70% 判为薄弱）；未复制代码。
+
+## Kokoro-82M（预先录制的朗读声音，V2.16）
+- 模型：https://huggingface.co/hexgrad/Kokoro-82M （v1.0，ONNX 版来自 https://github.com/thewh1teagle/kokoro-onnx 发布的模型文件）
+- 许可证：Apache License 2.0（允许商用）
+- 使用内容：在开发环境用 `tools/voice/generate.py` 把课程、讲解、短文等固定朗读内容生成音频，放在 `assets/voice/`；APP 内不包含模型本身。
+  使用的声音：中文女声 zf_xiaoxiao、中文男声 zm_yunxi、中文童声 zm_yunxia、英语女声 af_heart、英语男声 am_puck。
+- 生成工具（只在开发环境使用，不随 APP 发布）：kokoro-onnx（MIT）、misaki（Apache-2.0，中文拼音转音标）、jieba（MIT）、pypinyin（MIT）、cn2an（MIT）。
