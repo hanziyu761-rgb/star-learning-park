@@ -6,8 +6,9 @@ import React from 'react';
 import { LESSONS } from '@/content';
 import { PASSAGES, READING_LESSONS } from '@/content/chineseReading';
 import { TeachPanel } from '@/components/TeachPanel';
+import { plainText } from '@/content/zh';
 import { kpsFor } from '@/knowledge/graph';
-import { KP_TEACH } from '@/knowledge/teach';
+import { KP_TEACH, KP_TEACH_G1 } from '@/knowledge/teach';
 
 describe('知识点小讲解', () => {
   it('一年级每个数学知识点都有 2 页讲解，每页有图示和一句话', () => {
@@ -16,11 +17,47 @@ describe('知识点小讲解', () => {
       expect(KP_TEACH[id]?.length).toBe(2);
       for (const s of KP_TEACH[id]) {
         expect(s.show.length).toBeGreaterThan(0);
-        expect(s.text.length).toBeGreaterThan(4);
-        expect(s.speak).toBe(s.text.map((x) => x.char).join(''));
+        expect(typeof s.text).not.toBe('string');
+        expect(s.speak).toBe(plainText(s.text));
       }
     }
-    for (const id of Object.keys(KP_TEACH)) expect(ids).toContain(id);
+    for (const id of Object.keys(KP_TEACH_G1)) expect(ids).toContain(id);
+  });
+
+  it('二～六年级：数学每个知识点 2 页，语文、英语每个单元 1 页；二年级注拼音，三年级起不注', () => {
+    for (const g of [2, 3, 4, 5, 6]) {
+      for (const k of kpsFor('math', g)) expect(KP_TEACH[k.id]).toHaveLength(2);
+      for (const k of kpsFor('chinese', g)) expect(KP_TEACH[k.id]).toHaveLength(1);
+      for (const k of kpsFor('english', g)) expect(KP_TEACH[k.id]).toHaveLength(1);
+      for (const s of ['math', 'chinese'] as const)
+        for (const k of kpsFor(s, g))
+          for (const sl of KP_TEACH[k.id]) {
+            expect(typeof sl.text === 'string').toBe(g >= 3);
+            expect(sl.speak).toBe(plainText(sl.text));
+          }
+    }
+    // 英语讲解：显示并朗读英语句子，中文写意思
+    for (const g of [3, 4, 5, 6])
+      for (const k of kpsFor('english', g)) {
+        const [sl] = KP_TEACH[k.id];
+        expect(sl.lang).toBe('en-US');
+        expect(sl.show).toMatch(/^[A-Z]/);
+        expect(sl.speak).not.toMatch(/[\u4e00-\u9fff]/);
+        expect(String(sl.text)).toMatch(/[\u4e00-\u9fff]/);
+      }
+    // 没有对不上知识点的讲解
+    const all = new Set(
+      [1, 2, 3, 4, 5, 6].flatMap((g) =>
+        (['math', 'chinese', 'english'] as const).flatMap((s) => kpsFor(s, g).map((k) => k.id)),
+      ),
+    );
+    for (const id of Object.keys(KP_TEACH)) expect(all.has(id)).toBe(true);
+  });
+
+  it('三年级起的讲解面板不注拼音（标题、按钮也是普通文字）', async () => {
+    await render(<TeachPanel slides={KP_TEACH['m4.laws']} color="#f80" onDone={() => {}} />);
+    expect(screen.getByText('先学一学')).toBeTruthy();
+    expect(screen.getByText('我会了，直接练习')).toBeTruthy();
   });
 
   it('讲解面板：下一页 → 开始练习；也可以直接跳过', async () => {

@@ -1,20 +1,17 @@
 /**
- * 一年级数学知识点的小讲解（V2.10，本项目原创）：练习前先看两页，“先教后练”。
+ * 知识点小讲解（V2.10 一年级数学；V2.13 扩展到二～六年级，本项目原创）：练习前先看两页，“先教后练”。
  * 每页一个图示（表情符号或算式）+ 一句话讲方法，可以点喇叭听。待教师审核。
  */
 import { zh } from '@/content/zh';
-import type { ZhText } from '@/lesson/types';
+import { LANG_TEACH } from './teachLang';
+import { MATH_TEACH_UPPER } from './teachMath';
+import type { TeachSlide } from './teachTypes';
 
-export interface TeachSlide {
-  /** 图示：表情符号或算式 */
-  show: string;
-  text: ZhText;
-  speak: string;
-}
+export type { TeachSlide } from './teachTypes';
 
 const S = (show: string, chars: string, py: string): TeachSlide => ({ show, text: zh(chars, py), speak: chars });
 
-export const KP_TEACH: Record<string, TeachSlide[]> = {
+export const KP_TEACH_G1: Record<string, TeachSlide[]> = {
   'm1.count5': [
     S('🍎🍎🍎', '一个一个地数：1、2、3，一共有3个。', 'yí gè yí gè de shǔ yí gòng yǒu gè'),
     S('👆', '手指点一个，嘴里数一个，不漏也不重复。', 'shǒu zhǐ diǎn yí gè zuǐ lǐ shǔ yí gè bú lòu yě bù chóng fù'),
@@ -145,3 +142,6 @@ export const KP_TEACH: Record<string, TeachSlide[]> = {
     ),
   ],
 };
+
+/** 全部知识点讲解：一年级数学（V2.10）+ 二～六年级数学、二～六年级语文、三～六年级英语（V2.13） */
+export const KP_TEACH: Record<string, TeachSlide[]> = { ...KP_TEACH_G1, ...MATH_TEACH_UPPER, ...LANG_TEACH };

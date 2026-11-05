@@ -112,6 +112,16 @@ def parent(page):
     for d in str(a * c): tid(page, f"key-{d}").click()
     tid(page, "key-确定").click(); page.wait_for_selector('[data-testid="knowledge-card"]')
 
+TONE = re.compile(r"[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]")
+SEEN_TEACH = {}
+
+def teach_then_skip(page, key):
+    """V2.13：第一次练某个知识点先出现讲解；记录讲解内容，再点“我会了，直接练习”"""
+    page.wait_for_selector('[data-testid="teach-panel"]')
+    SEEN_TEACH[key] = tid(page, "teach-panel").inner_text()
+    page.locator('[data-testid="teach-skip"]').first.click()
+    page.wait_for_selector('[data-testid="teach-panel"]', state="detached")
+
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get("CHROME") or None, args=["--no-sandbox"])
     ctx = b.new_context(viewport={"width": 390, "height": 820}, device_scale_factor=2)
@@ -157,6 +167,9 @@ with sync_playwright() as p:
     tid(page, "kp-m4.div2d").scroll_into_view_if_needed(); tid(page, "kp-m4.div2d").click()
     page.wait_for_selector('[data-testid="kp-card"]')
     tid(page, "kp-practice").click(); page.wait_for_selector('[data-testid="practice-screen"]')
+    teach_then_skip(page, "m4.div2d")
+    assert "试商" in SEEN_TEACH["m4.div2d"] and not TONE.search(SEEN_TEACH["m4.div2d"]), SEEN_TEACH["m4.div2d"]
+    ok("四年级“除数是两位数的除法”：练习前先出现讲解（试商方法），三年级起不注拼音，可以跳过")
     seen = practice_round(page, lambda i: i % 4 == 0)
     assert all(s.startswith("kp:m4.div2d:") and "÷" in s for s in seen), seen[:3]
     page.screenshot(path=f"{OUT}/c-04-practice-summary.png")
@@ -195,6 +208,7 @@ with sync_playwright() as p:
         page.wait_for_selector('[data-testid="kp-card"]')
         expect(tid(page, "kp-card")).to_contain_text("题库")
         tid(page, "kp-practice").click(); page.wait_for_selector('[data-testid="practice-screen"]')
+        teach_then_skip(page, kp)
         page.screenshot(path=f"{OUT}/c-07-{subj}-practice.png")
         seen = practice_round(page, lambda i: True)
         assert all(s.startswith(f"kp:{kp}:b:") for s in seen), seen[:2]
@@ -206,7 +220,9 @@ with sync_playwright() as p:
         state_txt = tid(page, f"kp-{kp}").inner_text()
         assert "⚪" not in state_txt, state_txt
         page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
-    ok("语文、英语知识点做题后小地图状态从“还没学”变化")
+    assert "提问" in SEEN_TEACH["c4.a2"], SEEN_TEACH["c4.a2"]
+    assert "What time is it?" in SEEN_TEACH["e4.b2"], SEEN_TEACH["e4.b2"]
+    ok("语文、英语知识点做题后小地图状态从“还没学”变化；练习前分别出现语文“学习方法”（提问策略）和英语“重点句型”讲解")
 
     # 5. 家长中心
     parent(page)

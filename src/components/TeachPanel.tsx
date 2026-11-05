@@ -14,24 +14,28 @@ export function TeachPanel({ slides, color, onDone }: { slides: TeachSlide[]; co
   const [i, setI] = useState(0);
   const s = slides[i];
   const last = i === slides.length - 1;
+  // 三年级起的讲解不注拼音，按钮和标题也不注
+  const plain = typeof s.text === 'string';
   useEffect(() => {
-    speak({ text: s.speak, lang: 'zh-CN' });
+    speak({ text: s.speak, lang: s.lang ?? 'zh-CN' });
   }, [i]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <View style={styles.wrap} testID="teach-panel">
-      <DisplayTextView text={zh('先学一学', 'xiān xué yi xué')} size={24} color={color} />
+      <DisplayTextView text={plain ? '先学一学' : zh('先学一学', 'xiān xué yi xué')} size={24} color={color} />
       <View style={styles.card} testID={`teach-slide-${i}`}>
         <Text style={styles.show}>{s.show}</Text>
         <DisplayTextView text={s.text} size={24} />
-        <SpeakerButton item={{ text: s.speak, lang: 'zh-CN' }} size={52} />
+        <SpeakerButton item={{ text: s.speak, lang: s.lang ?? 'zh-CN' }} size={52} />
       </View>
       <Text style={styles.page}>
         {i + 1} / {slides.length}
       </Text>
       <BigButton
         emoji={last ? '✏️' : '▶️'}
-        label={last ? zh('开始练习', 'kāi shǐ liàn xí') : zh('下一页', 'xià yí yè')}
+        label={
+          last ? (plain ? '开始练习' : zh('开始练习', 'kāi shǐ liàn xí')) : plain ? '下一页' : zh('下一页', 'xià yí yè')
+        }
         color={color}
         onPress={() => (last ? onDone() : setI(i + 1))}
         testID={last ? 'teach-start' : 'teach-next'}
@@ -39,7 +43,7 @@ export function TeachPanel({ slides, color, onDone }: { slides: TeachSlide[]; co
       <BigButton
         size="md"
         emoji="⏭️"
-        label={zh('我会了，直接练习', 'wǒ huì le zhí jiē liàn xí')}
+        label={plain ? '我会了，直接练习' : zh('我会了，直接练习', 'wǒ huì le zhí jiē liàn xí')}
         color={colors.textSoft}
         onPress={onDone}
         testID="teach-skip"
