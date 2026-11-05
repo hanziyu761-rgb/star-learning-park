@@ -52,3 +52,7 @@ review-out/
 # 端到端截图
 shots/
 shots-html/
+
+# 录音生成的中间文件
+tools/voice/out/
+__pycache__/

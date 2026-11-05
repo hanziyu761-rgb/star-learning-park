@@ -16,3 +16,22 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'light', Medium: 'medium' },
   NotificationFeedbackType: { Success: 'success', Error: 'error' },
 }));
+
+jest.mock('expo-audio', () => {
+  const players = [];
+  const createAudioPlayer = jest.fn((src) => {
+    const listeners = [];
+    const p = {
+      src,
+      play: jest.fn(),
+      pause: jest.fn(),
+      remove: jest.fn(),
+      setPlaybackRate: jest.fn(),
+      addListener: jest.fn((ev, fn) => listeners.push(fn)),
+      finish: () => listeners.forEach((fn) => fn({ didJustFinish: true })),
+    };
+    players.push(p);
+    return p;
+  });
+  return { createAudioPlayer, __players: players };
+});
