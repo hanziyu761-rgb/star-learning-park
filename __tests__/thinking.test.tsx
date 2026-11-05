@@ -26,6 +26,7 @@ import {
   challengeId,
   dailyChallenge,
   CHALLENGE_BY_TYPE,
+  gensFor,
   recommendedSubject,
   seeded,
   subjectOfType,
@@ -194,8 +195,8 @@ describe('挑战题', () => {
   it('数学 7 类题 × 两个难度 × 各 120 道：答案独立核对正确；选项不重复；可由题目 id 还原同一道题', () => {
     const rand = seeded(42);
     let n = 0;
-    for (const g of CHALLENGES_BY_SUBJECT.math)
-      for (const level of [1, 2] as const)
+    for (const level of [1, 2] as const)
+      for (const g of gensFor('math', level))
         for (let k = 0; k < 120; k++) {
           const sig = g.sig(rand, level);
           const e = g.build(sig) as ChoiceExercise;
@@ -358,14 +359,14 @@ describe('语文、英语挑战题', () => {
   });
 
   it('英语题：题目指令是英文，中文只在小提示里；语文题都有拼音', () => {
-    for (const g of CHALLENGES_BY_SUBJECT.english) {
+    for (const g of gensFor('english', 1)) {
       const e = g.build(g.sig(seeded(3), 1));
       expect(typeof e.prompt.text).toBe('string');
       expect(/\p{Script=Han}/u.test(String(e.prompt.text))).toBe(false);
       expect(e.prompt.speak.lang).toBe('en-US');
       expect(e.prompt.hintZh).toBeTruthy();
     }
-    for (const g of CHALLENGES_BY_SUBJECT.chinese) {
+    for (const g of gensFor('chinese', 1)) {
       const e = g.build(g.sig(seeded(3), 1));
       expect(Array.isArray(e.prompt.text)).toBe(true);
     }

@@ -6,7 +6,7 @@
 import { pinyin } from 'pinyin-pro';
 import { kpExercise } from '@/knowledge/generators';
 import { GRAPHICS_GENERATORS } from '@/knowledge/graphics';
-import { CHALLENGES, seeded } from '@/thinking/registry';
+import { gensFor, seeded } from '@/thinking/registry';
 import { LESSONS, SKILL_LABELS } from '@/content';
 import { zh } from '@/content/zh';
 import type { Exercise, Lesson, ZhText } from '@/lesson/types';
@@ -166,8 +166,9 @@ describe('课程内容', () => {
   it('思维挑战题（模板拼接的题目）拼音与词库一致', () => {
     const problems: string[] = [];
     const rand = seeded(20261105);
-    for (const g of CHALLENGES)
-      for (const level of [1, 2] as const)
+    // 一、二年级的题注拼音（三年级起不注拼音）
+    for (const level of [1, 2] as const)
+      for (const g of [...gensFor('math', level), ...gensFor('chinese', level), ...gensFor('english', level)])
         for (let k = 0; k < 40; k++) {
           const sig = g.sig(rand, level);
           for (const text of collectZhTexts(g.build(sig))) {

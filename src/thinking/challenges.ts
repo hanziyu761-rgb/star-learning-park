@@ -40,15 +40,33 @@ export type ChallengeType =
   | 'enGuess'
   | 'enOdd'
   | 'enPattern'
-  | 'enSentence';
+  | 'enSentence'
+  // 三～六年级（V2.7）
+  | 'logic'
+  | 'magic'
+  | 'numOdd'
+  | 'chicken'
+  | 'tree'
+  | 'age'
+  | 'zhIdiom'
+  | 'zhConnect'
+  | 'zhSentence'
+  | 'enRead'
+  | 'enLogic';
+
+/** 难度档：1 = 一年级，2 = 二年级，3 = 三、四年级，4 = 五、六年级 */
+export type Level = 1 | 2 | 3 | 4;
+export const levelOfGrade = (grade: number): Level => (grade <= 1 ? 1 : grade === 2 ? 2 : grade <= 4 ? 3 : 4);
 
 export interface ChallengeGen {
   type: ChallengeType;
   subject: Subject;
   name: string;
   dims: ThinkDim[];
-  /** level 1：一年级；2：二年级及以上（数更大、格子更多） */
-  sig: (rand: Rand, level: 1 | 2) => string;
+  /** 适用的难度档（不填 = 所有年级） */
+  levels?: Level[];
+  /** 按难度档出题：数更大、格子更多、内容更长 */
+  sig: (rand: Rand, level: Level) => string;
   build: (sig: string) => ChallengeBody;
 }
 
@@ -133,12 +151,46 @@ const balance: ChallengeGen = {
     const a = int(rand, 0, WEIGHTS.length - 3);
     const b = int(rand, a + 1, WEIGHTS.length - 2);
     const c = int(rand, b + 1, WEIGHTS.length - 1);
-    const max = level === 1 ? 3 : 4;
+    const max = level === 1 ? 3 : level === 4 ? 5 : 4;
+    if (level >= 3) {
+      // 三、四年级起：三步换算（四种东西）
+      const [x, y, z, w] = shuffle([...WEIGHTS.keys()], rand)
+        .slice(0, 4)
+        .sort((m, n) => m - n);
+      return `balance:${x}:${y}:${z}:${int(rand, 2, max)}:${int(rand, 2, max)}:${w}:${int(rand, 2, 3)}`;
+    }
     return `balance:${a}:${b}:${c}:${int(rand, 2, max)}:${int(rand, 2, max)}`;
   },
   build: (sig) => {
-    const [, a, b, c, k1, k2] = sig.split(':').map(Number);
+    const [, a, b, c, k1, k2, d, k3] = sig.split(':').map(Number);
     const [A, B, C] = [WEIGHTS[a], WEIGHTS[b], WEIGHTS[c]];
+    if (d !== undefined && !Number.isNaN(d)) {
+      const D = WEIGHTS[d];
+      const ans3 = k1 * k2 * k3;
+      return {
+        kind: 'choice',
+        prompt: { text: `1个${D.zh}和几个${A.zh}一样重？`, speak: say(`1个${D.zh}和几个${A.zh}一样重？`) },
+        stem: {
+          visual: puzzle(
+            {
+              kind: 'balance',
+              rows: [
+                { left: B.e, leftCount: 1, right: A.e, rightCount: k1 },
+                { left: C.e, leftCount: 1, right: B.e, rightCount: k2 },
+                { left: D.e, leftCount: 1, right: C.e, rightCount: k3 },
+              ],
+            },
+            `天平：1个${B.zh}=${k1}个${A.zh}；1个${C.zh}=${k2}个${B.zh}；1个${D.zh}=${k3}个${C.zh}`,
+          ),
+        },
+        ...numberChoice(sig, ans3, [k1 * k2 + k3, k1 + k2 + k3, k2 * k3]),
+        wrongHint: {
+          text: `从下往上一步步换：1个${D.zh}能换几个${C.zh}？再换成${B.zh}，最后换成${A.zh}。`,
+          speak: say(`从下往上一步步换。`),
+        },
+        explanation: `1个${D.zh} = ${k3}个${C.zh} = ${k3}×${k2} = ${k2 * k3}个${B.zh} = ${k2 * k3}×${k1} = ${ans3}个${A.zh}。`,
+      };
+    }
     const ans = k1 * k2;
     return {
       kind: 'choice',
@@ -180,7 +232,7 @@ const queue: ChallengeGen = {
   name: '排队问题',
   dims: ['reason'],
   sig: (rand, level) => {
-    const max = level === 1 ? 5 : 9;
+    const max = [5, 9, 15, 30][level - 1];
     return `queue:${pick(rand, ['fb', 'pos'])}:${int(rand, 1, max)}:${int(rand, 1, max)}:${int(rand, 0, ANIMALS.length - 1)}`;
   },
   build: (sig) => {
@@ -269,7 +321,7 @@ const sudoku: ChallengeGen = {
       const extra = shuffle(
         [...Array(n * n).keys()].filter((i) => i !== target),
         rand,
-      ).slice(0, level === 1 ? 3 : 6);
+      ).slice(0, [3, 6, 7, 8][level - 1]);
       const g = full.map((v, i) => (i === target || extra.includes(i) ? 0 : v));
       const sols = sudokuSolutions(n, g);
       // 问号处的答案必须唯一；同时问号所在的行和列都不能只差它一个（要多想一步）
@@ -328,7 +380,9 @@ const rects: ChallengeGen = {
   dims: ['observe', 'spatial'],
   sig: (rand, level) => {
     if (level === 1) return pick(rand, ['rects:1:2:0', 'rects:1:3:0', 'rects:2:2:1']);
-    return pick(rand, ['rects:1:3:0', 'rects:1:4:0', 'rects:2:2:1', 'rects:2:3:1']);
+    if (level === 2) return pick(rand, ['rects:1:3:0', 'rects:1:4:0', 'rects:2:2:1', 'rects:2:3:1']);
+    if (level === 3) return pick(rand, ['rects:1:5:0', 'rects:2:2:0', 'rects:2:3:1', 'rects:2:4:1']);
+    return pick(rand, ['rects:1:6:0', 'rects:2:3:0', 'rects:3:3:1', 'rects:3:4:1']);
   },
   build: (sig) => {
     const [, r, c, sq] = sig.split(':').map(Number);
@@ -342,7 +396,11 @@ const rects: ChallengeGen = {
       stem: {
         visual: puzzle(
           { kind: 'rects', rows: r, cols: c, square },
-          square ? `${r}行${c}列的小正方形拼成的图形` : `${c}个小长方形排成一排拼成的图形`,
+          square
+            ? `${r}行${c}列的小正方形拼成的图形`
+            : r === 1
+              ? `${c}个小长方形排成一排拼成的图形`
+              : `${r}行${c}列的小长方形拼成的大长方形`,
         ),
       },
       ...numberChoice(sig, ans, [r * c, r * c + 1]),
@@ -352,7 +410,9 @@ const rects: ChallengeGen = {
       ),
       explanation: square
         ? `单个的小正方形 ${r * c} 个，大一些的正方形 ${ans - r * c} 个，一共 ${ans} 个。`
-        : `单个的 ${c} 个，两个合起来的 ${c - 1} 个${c >= 3 ? `，三个合起来的 ${c - 2} 个` : ''}${c >= 4 ? '，四个合起来的 1 个' : ''}，一共 ${ans} 个。`,
+        : r > 1
+          ? `横着看有 ${(c * (c + 1)) / 2} 种取法，竖着看有 ${(r * (r + 1)) / 2} 种取法，${(c * (c + 1)) / 2} × ${(r * (r + 1)) / 2} = ${ans} 个。`
+          : `单个的 ${c} 个，两个合起来的 ${c - 1} 个${c >= 3 ? `，三个合起来的 ${c - 2} 个` : ''}${c >= 4 ? '，四个合起来的 1 个' : ''}，一共 ${ans} 个。`,
     };
   },
 };
@@ -360,10 +420,28 @@ const rects: ChallengeGen = {
 /* ───────── 5. 数字找规律 ───────── */
 
 export function seqTerms(kind: string, start: number, step: number): number[] {
-  const t = [start];
+  const t = [kind === 'square' ? start * start : start];
   for (let i = 1; i < 5; i++) {
     const prev = t[i - 1];
-    t.push(kind === 'add' ? prev + step : kind === 'sub' ? prev - step : prev + i);
+    t.push(
+      kind === 'add'
+        ? prev + step
+        : kind === 'sub'
+          ? prev - step
+          : kind === 'mul'
+            ? prev * step
+            : kind === 'square'
+              ? (start + i) * (start + i)
+              : kind === 'fib'
+                ? i === 1
+                  ? step
+                  : prev + t[i - 2]
+                : kind === 'alt'
+                  ? i % 2
+                    ? prev + step
+                    : prev - 1
+                  : prev + i,
+    );
   }
   return t;
 }
@@ -374,6 +452,18 @@ const seq: ChallengeGen = {
   name: '数字找规律',
   dims: ['observe', 'reason'],
   sig: (rand, level) => {
+    if (level >= 3) {
+      const kind = pick(rand, level === 3 ? ['add', 'sub', 'mul', 'square'] : ['mul', 'square', 'fib', 'alt', 'grow']);
+      if (kind === 'mul') return `seq:mul:${int(rand, 1, 4)}:${int(rand, 2, 3)}`;
+      if (kind === 'square') return `seq:square:${int(rand, 1, 4)}:0`;
+      if (kind === 'fib') return `seq:fib:${int(rand, 1, 3)}:${int(rand, 1, 4)}`;
+      if (kind === 'alt') return `seq:alt:${int(rand, 2, 10)}:${int(rand, 3, 6)}`;
+      if (kind === 'sub') {
+        const step = int(rand, 6, 15);
+        return `seq:sub:${int(rand, 4 * step + 1, 4 * step + 50)}:${step}`;
+      }
+      return `seq:${kind}:${int(rand, 10, 60)}:${int(rand, 6, 15)}`;
+    }
     const kind = pick(rand, level === 1 ? ['add', 'sub', 'add', 'grow'] : ['add', 'sub', 'grow']);
     const step = kind === 'grow' ? 0 : int(rand, 2, level === 1 ? 3 : 5);
     const start =
@@ -389,16 +479,29 @@ const seq: ChallengeGen = {
       prompt: P('找规律，问号处是几？', 'zhǎo guī lǜ wèn hào chù shì jǐ'),
       stem: { text: `${t.slice(0, 4).join('，')}，❓` },
       ...numberChoice(sig, ans, [t[3] + (t[3] - t[2]) + 1, t[3]]),
-      wrongHint: P(
-        '看看每两个相邻的数，后一个比前一个多几或少几？',
-        'kàn kan měi liǎng gè xiāng lín de shù hòu yí gè bǐ qián yí gè duō jǐ huò shǎo jǐ',
-      ),
+      wrongHint: ['mul', 'square', 'fib', 'alt'].includes(kind)
+        ? {
+            text: '看看相邻两个数是什么关系：加？减？乘？还是和前面两个数都有关？',
+            speak: say('看看相邻两个数是什么关系。'),
+          }
+        : P(
+            '看看每两个相邻的数，后一个比前一个多几或少几？',
+            'kàn kan měi liǎng gè xiāng lín de shù hòu yí gè bǐ qián yí gè duō jǐ huò shǎo jǐ',
+          ),
       explanation:
         kind === 'add'
           ? `每次多 ${d}：${t.join('，')}。`
           : kind === 'sub'
             ? `每次少 ${d}：${t.join('，')}。`
-            : `每次多的数也在变大：+1、+2、+3、+4，所以是 ${t.join('，')}。`,
+            : kind === 'mul'
+              ? `每次乘 ${d}：${t.join('，')}。`
+              : kind === 'square'
+                ? `依次是 ${t.map((v) => `${Math.round(Math.sqrt(v))}×${Math.round(Math.sqrt(v))}`).join('、')}：${t.join('，')}。`
+                : kind === 'fib'
+                  ? `从第三个数起，每个数等于前两个数的和：${t.join('，')}。`
+                  : kind === 'alt'
+                    ? `加 ${d}、减 1 交替进行：${t.join('，')}。`
+                    : `每次多的数也在变大：+1、+2、+3、+4，所以是 ${t.join('，')}。`,
     };
   },
 };
@@ -413,6 +516,7 @@ const pattern: ChallengeGen = {
   subject: 'math',
   name: '图案找规律',
   dims: ['observe'],
+  levels: [1, 2],
   sig: (rand, level) => {
     const kind = pick(rand, level === 1 ? ['AB', 'AAB', 'ABB', 'ABC'] : ['AAB', 'ABB', 'ABC']);
     const icons = shuffle([...PATTERN_ICONS.keys()], rand).slice(0, 3);
@@ -453,6 +557,7 @@ const odd: ChallengeGen = {
   subject: 'math',
   name: '找不同类',
   dims: ['classify'],
+  levels: [1, 2],
   sig: (rand) => {
     const a = int(rand, 0, CATS.length - 1);
     let b = int(rand, 0, CATS.length - 2);

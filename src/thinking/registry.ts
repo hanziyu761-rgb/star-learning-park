@@ -1,28 +1,65 @@
 /**
- * 每日挑战总表（V2.6：数学、语文、英语）。
+ * 每日挑战总表（V2.6：数学、语文、英语；V2.7：按年级分四档——一年级、二年级、三四年级、五六年级）。
  * 每天推荐一科：周一、周四数学，周二、周五语文，周三、周六英语，周日数学；孩子也可以自己换一科。
  * 同一科里题型按天轮换；题目由日期决定，同一天打开几次都是同一道。
  */
-import type { Subject } from '@/lesson/types';
+import type { DisplayText, Subject } from '@/lesson/types';
+import { plainText } from '@/content/zh';
 import {
   challengeId,
   hash,
+  levelOfGrade,
   MATH_CHALLENGES,
   seeded,
   type ChallengeExercise,
   type ChallengeGen,
   type ChallengeType,
+  type Level,
 } from './challenges';
-import { CHINESE_CHALLENGES, ENGLISH_CHALLENGES } from './challengesLang';
+import {
+  CHINESE_UPPER,
+  ENGLISH_UPPER,
+  enGuessAll,
+  enOddAll,
+  enPatternAll,
+  enSentenceAll,
+  MATH_UPPER,
+  zhInferAll,
+  zhRiddleAll,
+  zhStoryAll,
+  zhWordsLow,
+} from './challengesUpper';
 
-export { challengeId, seeded } from './challenges';
+export { challengeId, levelOfGrade, seeded } from './challenges';
 
 export const CHALLENGES_BY_SUBJECT: Record<Subject, ChallengeGen[]> = {
-  math: MATH_CHALLENGES,
-  chinese: CHINESE_CHALLENGES,
-  english: ENGLISH_CHALLENGES,
+  math: [...MATH_CHALLENGES, ...MATH_UPPER],
+  chinese: [zhRiddleAll, zhStoryAll, zhInferAll, zhWordsLow, ...CHINESE_UPPER],
+  english: [enGuessAll, enOddAll, enPatternAll, enSentenceAll, ...ENGLISH_UPPER],
 };
-export const CHALLENGES: ChallengeGen[] = [...MATH_CHALLENGES, ...CHINESE_CHALLENGES, ...ENGLISH_CHALLENGES];
+export const CHALLENGES: ChallengeGen[] = Object.values(CHALLENGES_BY_SUBJECT).flat();
+
+/** 某一档难度可以出的题型 */
+export const gensFor = (subject: Subject, level: Level) =>
+  CHALLENGES_BY_SUBJECT[subject].filter((g) => !g.levels || g.levels.includes(level));
+
+/** 三年级起不注拼音（与教材一致）：把带拼音的文字换成普通文字 */
+export function withoutPinyin(e: ChallengeExercise): ChallengeExercise {
+  const t = (x: DisplayText | undefined) => (x === undefined || typeof x === 'string' ? x : plainText(x));
+  const out = {
+    ...e,
+    prompt: { ...e.prompt, text: t(e.prompt.text)! },
+    wrongHint: { ...e.wrongHint, text: t(e.wrongHint.text)! },
+  };
+  if (out.kind === 'choice') {
+    return {
+      ...out,
+      stem: out.stem ? { ...out.stem, text: t(out.stem.text) } : undefined,
+      options: out.options.map((o) => ({ ...o, text: t(o.text) })),
+    };
+  }
+  return { ...out, items: out.items.map((it) => ({ ...it, text: t(it.text)! })) };
+}
 export const CHALLENGE_BY_TYPE = Object.fromEntries(CHALLENGES.map((g) => [g.type, g])) as Record<
   ChallengeType,
   ChallengeGen
@@ -56,11 +93,15 @@ export const recommendedSubject = (day: string): Subject => WEEKDAY_SUBJECT[new 
  */
 export function dailyChallenge(day: string, grade: number, extra = 0, subject?: Subject): ChallengeExercise {
   const subj = subject ?? recommendedSubject(day);
-  const gens = CHALLENGES_BY_SUBJECT[subj];
-  const level: 1 | 2 = grade <= 1 ? 1 : 2;
+  const level = levelOfGrade(grade);
+  const gens = gensFor(subj, level);
   const d = dayNumber(day);
-  const gen = gens[(((d + extra * 3) % gens.length) + gens.length) % gens.length];
+  // “再玩一道”每次跳过几种题型；步长与题型数互质，连着玩就能轮到每一种
+  const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
+  const step = [3, 5, 7, 1].find((k) => gcd(k, gens.length) === 1)!;
+  const gen = gens[(((d + extra * step) % gens.length) + gens.length) % gens.length];
   const seedKey = subj === 'math' ? `${day}#${extra}#${grade}` : `${day}#${extra}#${grade}#${subj}`;
   const sig = gen.sig(seeded(hash(seedKey)), level);
-  return challengeFromId(challengeId(sig))!;
+  const ex = challengeFromId(challengeId(sig))!;
+  return level >= 3 ? withoutPinyin(ex) : ex;
 }

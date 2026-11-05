@@ -28,7 +28,7 @@ export const THINK_DIMS: { id: ThinkDim; name: string; kid: ZhText; emoji: strin
     name: '推理',
     kid: zh('推理', 'tuī lǐ'),
     emoji: '🧠',
-    desc: '天平、排队、填格子、排故事、读短文找线索，由已知一步步推出答案',
+    desc: '天平、排队、填格子、逻辑推理、排故事、读短文找线索，由已知一步步推出答案',
   },
   { id: 'spatial', name: '空间想象', kid: zh('空间', 'kōng jiān'), emoji: '🧊', desc: '在图形里看出大大小小的图形' },
   {

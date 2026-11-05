@@ -873,3 +873,5 @@ export const ENGLISH_CHALLENGES: ChallengeGen[] = [enGuess, enOdd, enPattern, en
 
 /** 供测试核对（独立数据访问） */
 export const LANG_DATA = { RIDDLES, STORIES, INFERS, WORDS, GUESS, EN_CATS, SENTENCES };
+
+export { zhRiddle, zhStory, zhInfer, zhWords, enGuess, enOdd, enPattern, enSentence };

@@ -11,6 +11,16 @@ import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 /**
  * 选择题：支持图片选择、数字选择、文字选择和听音选择（有 listen 字段时显示大喇叭）。
  */
+const textLength = (t: string | { char: string }[]) =>
+  typeof t === 'string' ? (t.match(/[\p{L}\p{N}]/gu) ?? []).length : t.length;
+
+/** 题干文字较长（短文、线索）时字小一些 */
+function stemSize(t: string | { char: string }[]): number {
+  // 只数文字和数字（表情符号不算），图案题保持大字
+  const n = typeof t === 'string' ? (t.match(/[\p{L}\p{N}]/gu) ?? []).length : t.length;
+  return n > 40 ? 20 : n > 16 ? 24 : 34;
+}
+
 export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: ExerciseProps<ChoiceExerciseData>) {
   const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved, exercise.explanation);
   const [wrongIds, setWrongIds] = useState<string[]>([]);
@@ -32,6 +42,8 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
     }
   };
 
+  // 选项是句子（病句、阅读题等）时，一个选项占一行、字小一些
+  const longOptions = exercise.options.some((o) => o.text !== undefined && textLength(o.text) > 6);
   return (
     <View style={styles.wrap}>
       <PromptHeader prompt={exercise.prompt} autoSpeak={!exercise.listen} />
@@ -51,12 +63,15 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
               {exercise.stem.visual.emoji.repeat(exercise.stem.visual.count ?? 1)}
             </Text>
           ) : null}
-          {exercise.stem.text ? <DisplayTextView text={exercise.stem.text} size={34} /> : null}
+          {exercise.stem.text ? (
+            <DisplayTextView text={exercise.stem.text} size={stemSize(exercise.stem.text)} />
+          ) : null}
         </View>
       ) : null}
 
       <View style={styles.options}>
         {exercise.options.map((opt) => {
+          const long = longOptions;
           const isWrong = wrongIds.includes(opt.id);
           const isRight = solved && opt.id === exercise.answerId;
           return (
@@ -68,6 +83,7 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
               onPress={() => choose(opt.id)}
               style={({ pressed }) => [
                 styles.option,
+                long && styles.optionLong,
                 isWrong && styles.optionWrong,
                 isRight && styles.optionRight,
                 pressed && !solved && styles.pressed,
@@ -81,7 +97,11 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
                 )
               ) : null}
               {opt.text ? (
-                <DisplayTextView text={opt.text} size={opt.visual ? 24 : 40} hidePinyin={exercise.hidePinyin} />
+                <DisplayTextView
+                  text={opt.text}
+                  size={long ? 20 : opt.visual ? 24 : 40}
+                  hidePinyin={exercise.hidePinyin}
+                />
               ) : null}
               {isWrong ? <Text style={styles.mark}>✗</Text> : null}
               {isRight ? <Text style={[styles.mark, { color: colors.correct }]}>✓</Text> : null}
@@ -113,6 +133,7 @@ const styles = StyleSheet.create({
     padding: space.sm,
     ...shadow,
   },
+  optionLong: { flexBasis: '100%', minHeight: MIN_TOUCH, paddingHorizontal: space.md },
   optionWrong: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft, opacity: 0.6 },
   optionRight: { borderColor: colors.correct, backgroundColor: colors.correctSoft },
   pressed: { transform: [{ scale: 0.96 }] },
