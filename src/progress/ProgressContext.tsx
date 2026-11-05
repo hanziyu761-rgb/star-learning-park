@@ -1,3 +1,4 @@
+import { setVoicePrefs } from '@/speech/speech';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createEmptyProgress, progressReducer, type ProgressAction, type ProgressState } from './model';
 import { loadProgress, saveProgress } from './storage';
@@ -36,6 +37,12 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
     };
   }, []);
+
+  // 朗读声音跟着家长的设置走（V2.16）
+  const s = state.settings;
+  useEffect(() => {
+    setVoicePrefs({ gender: s.voiceGender, zh: s.voiceZh, en: s.voiceEn, rate: s.speechRate });
+  }, [s.voiceGender, s.voiceZh, s.voiceEn, s.speechRate]);
 
   const dispatch = useCallback((action: ProgressAction) => {
     if (!loaded.current) return; // 读取完成之前不允许写入，防止覆盖已有进度

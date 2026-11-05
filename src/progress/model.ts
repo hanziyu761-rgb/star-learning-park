@@ -66,6 +66,11 @@ export interface Settings {
   aiBaseUrl: string;
   /** 每日挑战难度跟着孩子调整（V2.11，默认开启；旧数据读入时补默认值） */
   adaptiveChallenge: boolean;
+  /** 朗读声音（V2.16）：女声 / 男声；家长可指定手机里的某个中文、英语声音（空 = 自动挑选）；语速 */
+  voiceGender: 'female' | 'male';
+  voiceZh: string;
+  voiceEn: string;
+  speechRate: 'slow' | 'normal';
 }
 
 export interface ExerciseResult {
@@ -167,7 +172,16 @@ export function createEmptyProgress(): ProgressState {
     sessions: [],
     active: null,
     reviews: [],
-    settings: { grade: 1, aiEnabled: false, aiBaseUrl: '', adaptiveChallenge: true },
+    settings: {
+      grade: 1,
+      aiEnabled: false,
+      aiBaseUrl: '',
+      adaptiveChallenge: true,
+      voiceGender: 'female',
+      voiceZh: '',
+      voiceEn: '',
+      speechRate: 'slow',
+    },
     hidden: [],
     diagnoses: [],
     strategies: [],

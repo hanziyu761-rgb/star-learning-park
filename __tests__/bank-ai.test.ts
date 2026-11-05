@@ -172,7 +172,7 @@ describe('练习记录与设置', () => {
       { type: 'bank/hide', questionId: 'abc' },
       { type: 'bank/hide', questionId: 'abc' },
     ]);
-    expect(s.settings).toEqual({ grade: 3, aiEnabled: true, aiBaseUrl: '', adaptiveChallenge: true });
+    expect(s.settings).toEqual({ grade: 3, aiEnabled: true, aiBaseUrl: '', adaptiveChallenge: true, voiceGender: 'female', voiceZh: '', voiceEn: '', speechRate: 'slow' });
     expect(s.hidden).toEqual(['abc']);
     s = progressReducer(s, { type: 'bank/unhide-all' });
     expect(s.hidden).toEqual([]);

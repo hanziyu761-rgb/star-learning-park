@@ -95,14 +95,13 @@ export function suggestNext(
     if (last) push({ kind: 'practice', lessonId: last.lessonId, skill: w.skill, accuracy: w.accuracy });
   }
   // 4. 还没学过的课（按学科轮流，每科按顺序）
-  const notDone = lessons
-    .filter((l) => !(state.lessons[l.id]?.completedCount ?? 0))
-    .sort((a, b) => a.order - b.order);
+  const notDone = lessons.filter((l) => !(state.lessons[l.id]?.completedCount ?? 0)).sort((a, b) => a.order - b.order);
   for (const l of notDone) push({ kind: 'new', lessonId: l.id });
   // 5. 还能拿更多星星的课
   for (const l of lessons) {
     const p = state.lessons[l.id];
-    if (p && p.completedCount > 0 && p.bestStars < 3) push({ kind: 'more-stars', lessonId: l.id, bestStars: p.bestStars });
+    if (p && p.completedCount > 0 && p.bestStars < 3)
+      push({ kind: 'more-stars', lessonId: l.id, bestStars: p.bestStars });
   }
   return out.slice(0, limit);
 }

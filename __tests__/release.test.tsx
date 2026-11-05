@@ -4,6 +4,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import * as Speech from 'expo-speech';
 import React from 'react';
+import { ProgressProvider } from '@/progress/ProgressContext';
 import { VoiceCheckCard } from '@/screens/VoiceCheckCard';
 import { summarizeVoices } from '@/speech/speech';
 import { APP_VERSION } from '@/version';
@@ -44,22 +45,36 @@ describe('声音检查', () => {
   });
 
   it('没检测到语音时显示设置方法；试听按钮用中文、英语朗读；显示版本号', async () => {
-    await render(<VoiceCheckCard />);
+    await render(
+      <ProgressProvider>
+        <VoiceCheckCard />
+      </ProgressProvider>,
+    );
     await waitFor(() => expect(screen.getByTestId('voice-tip')).toBeTruthy());
     expect(screen.getByTestId('voice-result').props.children).toContain('没检测到');
     await fireEvent.press(screen.getByTestId('voice-test-zh'));
-    expect(Speech.speak).toHaveBeenLastCalledWith('你好，我是星星宝。', expect.objectContaining({ language: 'zh-CN' }));
+    expect(Speech.speak).toHaveBeenLastCalledWith(
+      '小朋友你好，我们一起来学习吧！',
+      expect.objectContaining({ language: 'zh-CN' }),
+    );
     await fireEvent.press(screen.getByTestId('voice-test-en'));
     expect(Speech.speak).toHaveBeenLastCalledWith(
-      'Hello! Nice to meet you.',
+      'Hello! Let’s learn together.',
       expect.objectContaining({ language: 'en-US' }),
     );
     expect(screen.getByTestId('app-version').props.children).toContain(APP_VERSION);
   });
 
   it('两种语音都有时不显示设置提示', async () => {
-    (Speech.getAvailableVoicesAsync as jest.Mock).mockResolvedValueOnce([{ language: 'zh-CN' }, { language: 'en-US' }]);
-    await render(<VoiceCheckCard />);
+    (Speech.getAvailableVoicesAsync as jest.Mock).mockResolvedValueOnce([
+      { identifier: 'a', name: 'a', language: 'zh-CN' },
+      { identifier: 'b', name: 'b', language: 'en-US' },
+    ]);
+    await render(
+      <ProgressProvider>
+        <VoiceCheckCard />
+      </ProgressProvider>,
+    );
     await waitFor(() => expect(screen.getByTestId('voice-result').props.children).toContain('✅ 有'));
     expect(screen.queryByTestId('voice-tip')).toBeNull();
   });

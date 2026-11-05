@@ -33,10 +33,7 @@ export function subjectStats(state: ProgressState, subject: Subject): SubjectSta
   const sessions = state.sessions.filter((s) => s.subject === subject);
   const correct = results.filter((r) => r.firstTryCorrect).length;
   const lessons = Object.values(state.lessons).filter((l) => l.subject === subject);
-  const last = lessons.reduce<number | null>(
-    (m, l) => (m === null || l.lastStudiedAt > m ? l.lastStudiedAt : m),
-    null,
-  );
+  const last = lessons.reduce<number | null>((m, l) => (m === null || l.lastStudiedAt > m ? l.lastStudiedAt : m), null);
   return {
     subject,
     completedLessons: lessons.filter((l) => l.completedCount > 0).length,
@@ -86,15 +83,11 @@ export function recentSessions(state: ProgressState, limit = 10): SessionRecord[
 export function isSameLocalDay(a: number, b: number): boolean {
   const x = new Date(a);
   const y = new Date(b);
-  return (
-    x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth() && x.getDate() === y.getDate()
-  );
+  return x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth() && x.getDate() === y.getDate();
 }
 
 export function studySecOnDay(state: ProgressState, day: number): number {
-  return state.sessions
-    .filter((s) => isSameLocalDay(s.endedAt, day))
-    .reduce((sum, s) => sum + s.durationSec, 0);
+  return state.sessions.filter((s) => isSameLocalDay(s.endedAt, day)).reduce((sum, s) => sum + s.durationSec, 0);
 }
 
 /** 最近 7 天（含今天）有完成课程的天数 */

@@ -38,7 +38,7 @@ with sync_playwright() as p:
     expect(tid(page, "app-version")).to_contain_text("2.15.1")
     tid(page, "voice-test-zh").click(); tid(page, "voice-test-en").click(); page.wait_for_timeout(300)
     spoken = page.evaluate("window.__spoken")
-    assert ["你好，我是星星宝。", "zh-CN"] in spoken and ["Hello! Nice to meet you.", "en-US"] in spoken, spoken
+    assert ["小朋友你好，我们一起来学习吧！", "zh-CN"] in spoken and ["Hello! Let’s learn together.", "en-US"] in spoken, spoken
     page.screenshot(path=f"{OUT}/rc-01-voice-check.png")
     ok(f"家长中心“声音检查”：{result}；试听按钮分别用中文、英语朗读；显示版本 2.15.1")
     real = [e for e in errors if "React DevTools" not in e]
