@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { DisplayTextView } from '@/components/PinyinText';
 import { tapFeedback } from '@/components/ui';
+import { plainText } from '@/content/zh';
 import type { SortExercise as SortData } from '@/lesson/types';
 import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
@@ -11,6 +12,11 @@ export function SortExercise({ exercise, lang, onFeedback, onSolved }: ExerciseP
   const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved, exercise.explanation);
   const [picked, setPicked] = useState<string[]>([]);
   const [shake, setShake] = useState<string | null>(null);
+  // 排句子（中文句子较长）：答案格和选项都占一整行，字小一些，避免超出屏幕
+  const long = exercise.items.some((it) => {
+    const t = plainText(it.text);
+    return /\p{Script=Han}/u.test(t) && t.length > 4;
+  });
 
   const tap = (id: string) => {
     if (solved || picked.includes(id)) return;
@@ -34,8 +40,12 @@ export function SortExercise({ exercise, lang, onFeedback, onSolved }: ExerciseP
         {exercise.order.map((_, i) => {
           const item = exercise.items.find((it) => it.id === picked[i]);
           return (
-            <View key={i} style={[styles.slot, item && styles.slotFilled]}>
-              {item ? <DisplayTextView text={item.text} size={30} color={colors.correct} /> : <Text style={styles.slotNo}>{i + 1}</Text>}
+            <View key={i} style={[styles.slot, long && styles.slotLong, item && styles.slotFilled]}>
+              {item ? (
+                <DisplayTextView text={item.text} size={long ? 20 : 30} color={colors.correct} />
+              ) : (
+                <Text style={styles.slotNo}>{i + 1}</Text>
+              )}
             </View>
           );
         })}
@@ -49,10 +59,15 @@ export function SortExercise({ exercise, lang, onFeedback, onSolved }: ExerciseP
               testID={`sort-${it.id}`}
               accessibilityRole="button"
               onPress={() => tap(it.id)}
-              style={[styles.item, used && styles.itemUsed, shake === it.id && styles.itemWrong]}
+              style={[
+                styles.item,
+                long && styles.itemLong,
+                used && styles.itemUsed,
+                shake === it.id && styles.itemWrong,
+              ]}
             >
               {it.visual ? <Text style={{ fontSize: 34 }}>{it.visual.emoji.repeat(it.visual.count ?? 1)}</Text> : null}
-              <DisplayTextView text={it.text} size={34} color={used ? colors.disabled : colors.text} />
+              <DisplayTextView text={it.text} size={long ? 24 : 34} color={used ? colors.disabled : colors.text} />
             </Pressable>
           );
         })}
@@ -75,6 +90,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  slotLong: { width: '100%', height: undefined, minHeight: 56, paddingHorizontal: space.sm, paddingVertical: 4 },
   slotFilled: { borderStyle: 'solid', borderColor: colors.correct, backgroundColor: colors.correctSoft },
   slotNo: { fontSize: 18, color: colors.textSoft },
   items: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md },
@@ -90,6 +106,7 @@ const styles = StyleSheet.create({
     borderColor: colors.star,
     ...shadow,
   },
+  itemLong: { width: '100%' },
   itemUsed: { opacity: 0.35 },
   itemWrong: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft },
 });

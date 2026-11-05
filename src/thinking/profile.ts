@@ -6,7 +6,9 @@ import { getKp } from '@/knowledge/graph';
 import type { ProgressState } from '@/progress/model';
 import { dayKey } from '@/progress/srs';
 import type { ThinkDim } from './dims';
+import { subjectOfType } from './registry';
 import { STRATEGIES } from './strategies';
+import type { Subject } from '@/lesson/types';
 
 /** 少于这么多条记录时只显示数字，不给建议 */
 export const MIN_SAMPLES = 5;
@@ -29,8 +31,16 @@ export interface StrategyStat {
   advice: string | null;
 }
 
+export interface SubjectStat {
+  subject: Subject;
+  tried: number;
+  firstTryCorrect: number;
+}
+
 export interface ThinkingProfile {
   dims: DimStat[];
+  /** 按学科统计挑战（V2.6） */
+  subjects: SubjectStat[];
   strategies: StrategyStat[];
   challengeDays: number;
   /** 连续完成每日挑战的天数（到今天或昨天为止） */
@@ -44,6 +54,11 @@ export function thinkingProfile(state: ProgressState, now: number = Date.now()):
   const dims: DimStat[] = ORDER.map((dim) => {
     const rs = state.challenges.filter((c) => c.dims.includes(dim));
     return { dim, tried: rs.length, firstTryCorrect: rs.filter((r) => r.firstTryCorrect).length };
+  });
+
+  const subjects: SubjectStat[] = (['math', 'chinese', 'english'] as Subject[]).map((subject) => {
+    const rs = state.challenges.filter((c) => (c.subject ?? subjectOfType(c.type)) === subject);
+    return { subject, tried: rs.length, firstTryCorrect: rs.filter((r) => r.firstTryCorrect).length };
   });
 
   const byKp = new Map<string, Map<string, number>>();
@@ -86,5 +101,5 @@ export function thinkingProfile(state: ProgressState, now: number = Date.now()):
     streak++;
     t -= 86_400_000;
   }
-  return { dims, strategies, challengeDays: days.size, streak, doneToday: days.has(today) };
+  return { dims, subjects, strategies, challengeDays: days.size, streak, doneToday: days.has(today) };
 }

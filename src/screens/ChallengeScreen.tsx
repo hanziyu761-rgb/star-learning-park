@@ -5,7 +5,7 @@
  * - 做完后可以“再玩一道”（不再给星星，但记入思维记录）。
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedbackBar } from '@/components/FeedbackBar';
 import { Mascot } from '@/components/Mascot';
@@ -21,11 +21,17 @@ import { challengeStars } from '@/progress/model';
 import { useProgress } from '@/progress/ProgressContext';
 import { dayKey } from '@/progress/srs';
 import { speak, stopSpeaking } from '@/speech/speech';
-import { CHALLENGE_BY_TYPE, dailyChallenge } from '@/thinking/challenges';
+import { CHALLENGE_BY_TYPE, dailyChallenge, recommendedSubject } from '@/thinking/registry';
+import type { Subject } from '@/lesson/types';
 import { THINK_DIMS } from '@/thinking/dims';
 import { colors, radius, space } from '@/theme';
 
 const COLOR = '#E07A2E';
+const SUBJECTS: { id: Subject; label: ReturnType<typeof zh> }[] = [
+  { id: 'math', label: zh('数学', 'shù xué') },
+  { id: 'chinese', label: zh('语文', 'yǔ wén') },
+  { id: 'english', label: zh('英语', 'yīng yǔ') },
+];
 const SOFT = '#FFF1E3';
 
 export default function ChallengeScreen() {
@@ -45,17 +51,22 @@ function ChallengeSession() {
   const [extra, setExtra] = useState<number | null>(() => (dailyDone ? null : 0));
   const [solved, setSolved] = useState<{ correct: boolean; stars: number } | null>(null);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
+  const recommended = recommendedSubject(today);
+  const [subject, setSubject] = useState<Subject>(recommended);
 
   useEffect(() => () => stopSpeaking(), []);
 
   const ex = useMemo(
-    () => (extra === null ? null : dailyChallenge(today, state.settings.grade, extra)),
-    [extra, today, state.settings.grade],
+    () => (extra === null ? null : dailyChallenge(today, state.settings.grade, extra, subject)),
+    [extra, today, state.settings.grade, subject],
   );
+
+  // 这道题出现时今天是否还没做过每日挑战（做过的话这道是“再玩一道”，不计星星）
+  const isDaily = useMemo(() => !dailyDone, [ex?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSolved = (o: ExerciseOutcome) => {
     if (!ex) return;
-    const daily = extra === 0 && !dailyDone;
+    const daily = isDaily && !dailyDone;
     const record = {
       at: Date.now(),
       day: today,
@@ -65,6 +76,7 @@ function ChallengeSession() {
       firstTryCorrect: o.firstTryCorrect,
       attempts: o.attempts,
       daily,
+      subject,
     };
     dispatch({ type: 'challenge/complete', record });
     setSolved({ correct: o.firstTryCorrect, stars: challengeStars(record) });
@@ -85,6 +97,28 @@ function ChallengeSession() {
         <Header title={zh('每日挑战', 'měi rì tiǎo zhàn')} onBack={nav.back} />
       </View>
       <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.subjects}>
+          {SUBJECTS.map((x) => (
+            <Pressable
+              key={x.id}
+              testID={`challenge-subject-${x.id}`}
+              accessibilityRole="button"
+              onPress={() => {
+                if (x.id === subject) return;
+                stopSpeaking();
+                setFeedback(null);
+                setSolved(null);
+                setSubject(x.id);
+              }}
+              style={[styles.subject, subject === x.id && styles.subjectOn]}
+            >
+              <DisplayTextView text={x.label} size={18} color={subject === x.id ? '#fff' : COLOR} />
+              {x.id === recommended ? (
+                <Text style={[styles.rec, subject === x.id && { color: '#fff' }]}>今天推荐</Text>
+              ) : null}
+            </Pressable>
+          ))}
+        </View>
         {ex === null ? (
           <View style={styles.doneCard} testID="challenge-done-today">
             <Mascot size={110} mood="cheer" />
@@ -112,13 +146,13 @@ function ChallengeSession() {
                   {THINK_DIMS.find((x) => x.id === d)!.emoji} {THINK_DIMS.find((x) => x.id === d)!.name}
                 </Text>
               ))}
-              {extra ? <Text style={styles.tag}>再玩一道 · 不计星星</Text> : null}
+              {!isDaily ? <Text style={styles.tag}>再玩一道 · 不计星星</Text> : null}
             </View>
             <View testID={`challenge-exercise-${ex.id}`}>
               <ExerciseView
                 key={ex.id}
                 exercise={ex}
-                lang={langForSubject('math')}
+                lang={langForSubject(subject)}
                 onFeedback={setFeedback}
                 onSolved={onSolved}
               />
@@ -178,6 +212,20 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: SOFT },
   headerWrap: { paddingHorizontal: space.lg },
   content: { padding: space.lg, gap: space.md, width: '100%', maxWidth: 720, alignSelf: 'center' },
+  subjects: { flexDirection: 'row', gap: space.sm },
+  subject: {
+    flex: 1,
+    minHeight: 56,
+    borderRadius: radius.md,
+    borderWidth: 2,
+    borderColor: COLOR,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  subjectOn: { backgroundColor: COLOR },
+  rec: { fontSize: 11, color: COLOR, fontWeight: '700' },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs, alignItems: 'center' },
   typeName: { fontSize: 18, fontWeight: '900', color: COLOR, marginRight: space.xs },
   tag: {

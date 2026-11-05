@@ -9,20 +9,26 @@ import type { ZhText } from '@/lesson/types';
 export type ThinkDim = 'observe' | 'classify' | 'reason' | 'spatial' | 'strategy';
 
 export const THINK_DIMS: { id: ThinkDim; name: string; kid: ZhText; emoji: string; desc: string }[] = [
-  { id: 'observe', name: '观察发现', kid: zh('观察', 'guān chá'), emoji: '🔍', desc: '找规律、数图形，看出藏着的变化' },
+  {
+    id: 'observe',
+    name: '观察发现',
+    kid: zh('观察', 'guān chá'),
+    emoji: '🔍',
+    desc: '找规律、数图形、看字的部件，看出藏着的变化',
+  },
   {
     id: 'classify',
     name: '比较分类',
     kid: zh('分类', 'fēn lèi'),
     emoji: '🧺',
-    desc: '比较几样东西，找出和其他不是一类的那一个',
+    desc: '比较几样东西或几个词，找出和其他不是一类的那一个',
   },
   {
     id: 'reason',
     name: '推理',
     kid: zh('推理', 'tuī lǐ'),
     emoji: '🧠',
-    desc: '天平、排队、填格子，由已知条件一步步推出答案',
+    desc: '天平、排队、填格子、排故事、读短文找线索，由已知一步步推出答案',
   },
   { id: 'spatial', name: '空间想象', kid: zh('空间', 'kōng jiān'), emoji: '🧊', desc: '在图形里看出大大小小的图形' },
   {

@@ -12,6 +12,8 @@ import { useProgress } from '@/progress/ProgressContext';
 import { resolveExercise } from '@/content/resolve';
 import { reviewQueue } from '@/progress/plan';
 import { thinkingProfile } from '@/thinking/profile';
+import { recommendedSubject } from '@/thinking/registry';
+import { dayKey } from '@/progress/srs';
 import { computeMastery } from '@/knowledge/mastery';
 import { recommendKps } from '@/knowledge/recommend';
 import { completedSubjectToday, isSameLocalDay, SUBJECTS } from '@/progress/stats';
@@ -167,7 +169,7 @@ export default function HomeScreen() {
           <Text style={styles.continueSub} testID="challenge-status">
             {thinking.doneToday
               ? `今天完成了${thinking.streak > 1 ? ` · 连续 ${thinking.streak} 天` : ''}`
-              : '动动脑筋 · 每天一道思维题'}
+              : `动动脑筋 · 今天推荐${{ math: '数学', chinese: '语文', english: '英语' }[recommendedSubject(dayKey(now))]}`}
           </Text>
         </View>
         {thinking.doneToday ? <Text style={styles.play}>✅</Text> : <Text style={styles.play}>▶️</Text>}

@@ -43,6 +43,8 @@ export interface ChallengeRecord {
   attempts: number;
   /** 当天第一道是每日挑战（得星星）；之后的是“再玩一道” */
   daily: boolean;
+  /** 学科（V2.6 起记录；V2.5 的记录没有，按题型判断） */
+  subject?: Subject;
 }
 
 export interface DiagnosisRecord {

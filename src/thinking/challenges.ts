@@ -7,16 +7,44 @@
  * 状态：待教师审核。
  */
 import { zh } from '@/content/zh';
-import type { ChoiceExercise, ChoiceOption, Figure, Prompt, PuzzleFigure, Visual } from '@/lesson/types';
+import type {
+  ChoiceExercise,
+  ChoiceOption,
+  Figure,
+  Prompt,
+  PuzzleFigure,
+  SortExercise,
+  Subject,
+  Visual,
+} from '@/lesson/types';
 import type { ThinkDim } from './dims';
 
-type Rand = () => number;
-export type ChallengeBody = Omit<ChoiceExercise, 'id' | 'skill'>;
+export type Rand = () => number;
+export type ChallengeBody = Omit<ChoiceExercise, 'id' | 'skill'> | Omit<SortExercise, 'id' | 'skill'>;
+export type ChallengeExercise = (ChoiceExercise | SortExercise) & { type: ChallengeType };
 
-export type ChallengeType = 'balance' | 'queue' | 'sudoku' | 'rects' | 'seq' | 'pattern' | 'odd';
+export type ChallengeType =
+  | 'balance'
+  | 'queue'
+  | 'sudoku'
+  | 'rects'
+  | 'seq'
+  | 'pattern'
+  | 'odd'
+  // 语文（V2.6）
+  | 'zhRiddle'
+  | 'zhStory'
+  | 'zhInfer'
+  | 'zhWords'
+  // 英语（V2.6）
+  | 'enGuess'
+  | 'enOdd'
+  | 'enPattern'
+  | 'enSentence';
 
 export interface ChallengeGen {
   type: ChallengeType;
+  subject: Subject;
   name: string;
   dims: ThinkDim[];
   /** level 1：一年级；2：二年级及以上（数更大、格子更多） */
@@ -41,9 +69,9 @@ export function hash(s: string): number {
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
   return h >>> 0;
 }
-const int = (rand: Rand, lo: number, hi: number) => lo + Math.floor(rand() * (hi - lo + 1));
-const pick = <T>(rand: Rand, a: readonly T[]): T => a[Math.floor(rand() * a.length)];
-function shuffle<T>(a: T[], rand: Rand): T[] {
+export const int = (rand: Rand, lo: number, hi: number) => lo + Math.floor(rand() * (hi - lo + 1));
+export const pick = <T>(rand: Rand, a: readonly T[]): T => a[Math.floor(rand() * a.length)];
+export function shuffle<T>(a: T[], rand: Rand): T[] {
   const b = [...a];
   for (let i = b.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
@@ -51,15 +79,15 @@ function shuffle<T>(a: T[], rand: Rand): T[] {
   }
   return b;
 }
-const say = (chars: string) => ({ text: chars, lang: 'zh-CN' as const });
-const P = (chars: string, py: string): Prompt => ({ text: zh(chars, py), speak: say(chars) });
+export const say = (chars: string) => ({ text: chars, lang: 'zh-CN' as const });
+export const P = (chars: string, py: string): Prompt => ({ text: zh(chars, py), speak: say(chars) });
 const puzzle = (p: PuzzleFigure, alt: string): Visual => ({
   emoji: '',
   figure: { type: 'puzzle', puzzle: p, alt } as Figure,
 });
 
 /** 数字选项：正确答案 + 干扰项，顺序由签名决定（同一道题每次一样） */
-function numberChoice(
+export function numberChoice(
   sig: string,
   answer: number,
   distractors: number[],
@@ -71,7 +99,11 @@ function numberChoice(
   const options = shuffle(set, rand).map((n) => ({ id: String(n), text: String(n), speak: say(String(n)) }));
   return { options, answerId: String(answer) };
 }
-function emojiChoice(sig: string, answer: string, others: string[]): { options: ChoiceOption[]; answerId: string } {
+export function emojiChoice(
+  sig: string,
+  answer: string,
+  others: string[],
+): { options: ChoiceOption[]; answerId: string } {
   const rand = seeded(hash(sig));
   const all = shuffle([answer, ...others.filter((o) => o !== answer)], rand);
   return {
@@ -94,6 +126,7 @@ const WEIGHTS = [
 
 const balance: ChallengeGen = {
   type: 'balance',
+  subject: 'math',
   name: '天平推理',
   dims: ['reason'],
   sig: (rand, level) => {
@@ -143,6 +176,7 @@ const ANIMALS = [
 
 const queue: ChallengeGen = {
   type: 'queue',
+  subject: 'math',
   name: '排队问题',
   dims: ['reason'],
   sig: (rand, level) => {
@@ -217,6 +251,7 @@ export function sudokuSolutions(n: number, grid: number[]): number[][] {
 
 const sudoku: ChallengeGen = {
   type: 'sudoku',
+  subject: 'math',
   name: '填格子',
   dims: ['reason', 'observe'],
   sig: (rand, level) => {
@@ -288,6 +323,7 @@ export function countRects(rows: number, cols: number, square: boolean): number 
 
 const rects: ChallengeGen = {
   type: 'rects',
+  subject: 'math',
   name: '数图形',
   dims: ['observe', 'spatial'],
   sig: (rand, level) => {
@@ -334,6 +370,7 @@ export function seqTerms(kind: string, start: number, step: number): number[] {
 
 const seq: ChallengeGen = {
   type: 'seq',
+  subject: 'math',
   name: '数字找规律',
   dims: ['observe', 'reason'],
   sig: (rand, level) => {
@@ -373,6 +410,7 @@ const PATTERNS: Record<string, number[]> = { AB: [0, 1], AAB: [0, 0, 1], ABB: [0
 
 const pattern: ChallengeGen = {
   type: 'pattern',
+  subject: 'math',
   name: '图案找规律',
   dims: ['observe'],
   sig: (rand, level) => {
@@ -412,6 +450,7 @@ const CATS = [
 
 const odd: ChallengeGen = {
   type: 'odd',
+  subject: 'math',
   name: '找不同类',
   dims: ['classify'],
   sig: (rand) => {
@@ -438,37 +477,7 @@ const odd: ChallengeGen = {
 
 /* ───────── 汇总 ───────── */
 
-export const CHALLENGES: ChallengeGen[] = [balance, queue, sudoku, rects, seq, pattern, odd];
-export const CHALLENGE_BY_TYPE = Object.fromEntries(CHALLENGES.map((g) => [g.type, g])) as Record<
-  ChallengeType,
-  ChallengeGen
->;
+/** 数学思维题（V2.5）；语文、英语见 challengesLang.ts，总表见 registry.ts */
+export const MATH_CHALLENGES: ChallengeGen[] = [balance, queue, sudoku, rects, seq, pattern, odd];
 
 export const challengeId = (sig: string) => `ch:${sig}`;
-
-/** 由题目 id 还原题目（复盘、家长查看用） */
-export function challengeFromId(id: string): (ChoiceExercise & { type: ChallengeType }) | null {
-  if (!id.startsWith('ch:')) return null;
-  const sig = id.slice(3);
-  const gen = CHALLENGE_BY_TYPE[sig.split(':')[0] as ChallengeType];
-  if (!gen) return null;
-  try {
-    return { ...gen.build(sig), id, skill: `thinking:${gen.type}`, type: gen.type };
-  } catch {
-    return null;
-  }
-}
-
-const dayNumber = (day: string) => Math.floor(Date.parse(`${day}T00:00:00Z`) / 86_400_000);
-
-/**
- * 某一天的每日挑战：题型按天轮换（7 天一轮），题目由日期决定（同一天打开几次都是同一道）。
- * extra > 0 为“再玩一道”的第几道。
- */
-export function dailyChallenge(day: string, grade: number, extra = 0): ChoiceExercise & { type: ChallengeType } {
-  const level: 1 | 2 = grade <= 1 ? 1 : 2;
-  const d = dayNumber(day);
-  const gen = CHALLENGES[(((d + extra * 3) % CHALLENGES.length) + CHALLENGES.length) % CHALLENGES.length];
-  const sig = gen.sig(seeded(hash(`${day}#${extra}#${grade}`)), level);
-  return challengeFromId(challengeId(sig))!;
-}

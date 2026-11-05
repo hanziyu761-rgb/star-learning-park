@@ -11,6 +11,8 @@ import { MIN_SAMPLES, thinkingProfile } from '@/thinking/profile';
 import { STRATEGIES } from '@/thinking/strategies';
 import { colors, radius, space } from '@/theme';
 
+const SUBJECT_CN = { math: '数学', chinese: '语文', english: '英语' } as const;
+
 export function ThinkingCard() {
   const { state } = useProgress();
   const [now] = useState(() => Date.now());
@@ -22,7 +24,7 @@ export function ThinkingCard() {
       <View testID="pt-section">
         <SectionTitle>🧠 思维能力</SectionTitle>
         <Text style={styles.note}>
-          统计孩子做“每日挑战”和练习中选“是怎么想的”的真实记录，不是心理或智力测评。题目为原创，待教师审核。
+          统计孩子做“每日挑战”（数学、语文、英语）和数学练习中选“是怎么想的”的真实记录，不是心理或智力测评。题目为原创，待教师审核。
         </Text>
         {empty ? (
           <Text style={styles.empty} testID="pt-empty">
@@ -33,6 +35,12 @@ export function ThinkingCard() {
             <Text style={styles.line} testID="pt-days">
               每日挑战：做过 {p.challengeDays} 天{p.streak > 1 ? `，已连续 ${p.streak} 天` : ''}
               {p.doneToday ? '（今天已完成）' : ''}
+            </Text>
+            <Text style={styles.dimStat} testID="pt-subjects">
+              按学科：
+              {p.subjects
+                .map((x) => `${SUBJECT_CN[x.subject]} ${x.tried} 道（一次答对 ${x.firstTryCorrect}）`)
+                .join('，')}
             </Text>
             {p.dims.map((d) => {
               const info = THINK_DIMS.find((x) => x.id === d.dim)!;

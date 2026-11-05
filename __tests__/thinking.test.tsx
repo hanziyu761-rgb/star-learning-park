@@ -17,14 +17,20 @@ import {
 import { ProgressProvider } from '@/progress/ProgressContext';
 import { dayKey } from '@/progress/srs';
 import ChallengeScreen from '@/screens/ChallengeScreen';
+import { type ChallengeType } from '@/thinking/challenges';
+import { LANG_DATA } from '@/thinking/challengesLang';
 import {
   CHALLENGES,
+  CHALLENGES_BY_SUBJECT,
   challengeFromId,
   challengeId,
   dailyChallenge,
+  CHALLENGE_BY_TYPE,
+  recommendedSubject,
   seeded,
-  type ChallengeType,
-} from '@/thinking/challenges';
+  subjectOfType,
+} from '@/thinking/registry';
+import { plainText } from '@/content/zh';
 import { MIN_SAMPLES, thinkingProfile } from '@/thinking/profile';
 import { shouldAskStrategy, STRATEGIES, STRATEGY_SETS, strategyOptions } from '@/thinking/strategies';
 
@@ -185,14 +191,14 @@ function verify(type: ChallengeType, sig: string, e: ChoiceExercise) {
 }
 
 describe('挑战题', () => {
-  it('7 类题 × 两个难度 × 各 120 道：答案独立核对正确；选项不重复；可由题目 id 还原同一道题', () => {
+  it('数学 7 类题 × 两个难度 × 各 120 道：答案独立核对正确；选项不重复；可由题目 id 还原同一道题', () => {
     const rand = seeded(42);
     let n = 0;
-    for (const g of CHALLENGES)
+    for (const g of CHALLENGES_BY_SUBJECT.math)
       for (const level of [1, 2] as const)
         for (let k = 0; k < 120; k++) {
           const sig = g.sig(rand, level);
-          const e = g.build(sig);
+          const e = g.build(sig) as ChoiceExercise;
           expect(e.options.length).toBeGreaterThanOrEqual(3);
           const keys = e.options.map((o) => o.text ?? o.visual?.emoji);
           expect(new Set(keys).size).toBe(keys.length);
@@ -200,7 +206,7 @@ describe('挑战题', () => {
           verify(g.type, sig, e as ChoiceExercise);
           const back = challengeFromId(challengeId(sig))!;
           expect(back.type).toBe(g.type);
-          expect(back.options).toEqual(e.options);
+          expect((back as ChoiceExercise).options).toEqual(e.options);
           expect(back.wrongHint.text.length).toBeGreaterThan(0);
           n++;
         }
@@ -217,14 +223,152 @@ describe('挑战题', () => {
       expect(Number(answerOf(q.build(q.sig(r, 1)) as ChoiceExercise).text)).toBeLessThanOrEqual(11);
   });
 
-  it('每日挑战：同一天同一道；连续 7 天 7 种题型；“再玩一道”是另一道', () => {
-    const a = dailyChallenge('2026-11-05', 1);
-    expect(dailyChallenge('2026-11-05', 1).id).toBe(a.id);
+  it('每日挑战：同一天同一道；数学连续 7 天 7 种题型；“再玩一道”是另一道', () => {
+    const a = dailyChallenge('2026-11-05', 1, 0, 'math');
+    expect(dailyChallenge('2026-11-05', 1, 0, 'math').id).toBe(a.id);
     const types = new Set(
-      Array.from({ length: 7 }, (_, i) => dailyChallenge(`2026-11-${String(5 + i).padStart(2, '0')}`, 1).type),
+      Array.from(
+        { length: 7 },
+        (_, i) => dailyChallenge(`2026-11-${String(5 + i).padStart(2, '0')}`, 1, 0, 'math').type,
+      ),
     );
     expect(types.size).toBe(7);
-    expect(dailyChallenge('2026-11-05', 1, 1).id).not.toBe(a.id);
+    expect(dailyChallenge('2026-11-05', 1, 1, 'math').id).not.toBe(a.id);
+  });
+
+  it('三科轮换：周一、周四数学，周二、周五语文，周三、周六英语，周日数学；推荐学科的题属于该科', () => {
+    // 2026-11-02 是星期一
+    const week = Array.from({ length: 7 }, (_, i) => `2026-11-${String(2 + i).padStart(2, '0')}`);
+    expect(week.map(recommendedSubject)).toEqual(['math', 'chinese', 'english', 'math', 'chinese', 'english', 'math']);
+    for (const d of week) expect(subjectOfType(dailyChallenge(d, 1).type)).toBe(recommendedSubject(d));
+    // 语文、英语各自 4 种题型都会轮到
+    for (const subj of ['chinese', 'english'] as const) {
+      const types = new Set(
+        Array.from(
+          { length: 8 },
+          (_, i) => dailyChallenge(`2026-12-${String(1 + i).padStart(2, '0')}`, 1, 0, subj).type,
+        ),
+      );
+      expect(types.size).toBe(4);
+    }
+  });
+});
+
+describe('语文、英语挑战题', () => {
+  const all = (type: string) => {
+    const g = CHALLENGES.find((x) => x.type === type)!;
+    const n = {
+      zhRiddle: LANG_DATA.RIDDLES,
+      zhStory: LANG_DATA.STORIES,
+      zhInfer: LANG_DATA.INFERS,
+      zhWords: LANG_DATA.WORDS,
+      enGuess: LANG_DATA.GUESS,
+      enSentence: LANG_DATA.SENTENCES,
+    }[type]!.length;
+    return Array.from({ length: n }, (_, i) => ({ sig: `${type}:${i}`, e: g.build(`${type}:${i}`) }));
+  };
+  const txt = (t: unknown) => (typeof t === 'string' ? t : plainText(t as never));
+
+  it('题量：语文拼字 12、排故事 8、读一读 8、词语 15；英语猜一猜 12、连词成句 10', () => {
+    expect(
+      [
+        LANG_DATA.RIDDLES,
+        LANG_DATA.STORIES,
+        LANG_DATA.INFERS,
+        LANG_DATA.WORDS,
+        LANG_DATA.GUESS,
+        LANG_DATA.SENTENCES,
+      ].map((x) => x.length),
+    ).toEqual([12, 8, 8, 15, 12, 10]);
+    expect(CHALLENGES_BY_SUBJECT.chinese.every((g) => g.subject === 'chinese')).toBe(true);
+    expect(CHALLENGES_BY_SUBJECT.english.every((g) => g.subject === 'english')).toBe(true);
+  });
+
+  it('拼字：正确选项就是部件拼成的字；三个选项都不重复', () => {
+    for (const [i, { e }] of all('zhRiddle').entries()) {
+      const c = e as ChoiceExercise;
+      const r = LANG_DATA.RIDDLES[i];
+      expect(txt(answerOf(c).text)).toBe(r.ans[0]);
+      const opts = c.options.map((o) => txt(o.text));
+      expect(new Set(opts).size).toBe(4);
+      for (const p of r.parts) expect(txt(c.prompt.text)).toContain(p[0]);
+    }
+  });
+
+  it('排故事、连词成句：显示顺序被打乱，正确顺序是原来的先后', () => {
+    for (const { e } of [...all('zhStory'), ...all('enSentence')]) {
+      const sExe = e as unknown as { items: { id: string; text: unknown }[]; order: string[]; kind: string };
+      expect(sExe.kind).toBe('sort');
+      expect(sExe.order).toEqual(sExe.items.map((_, k) => String(k)));
+      expect(sExe.items.map((it) => it.id)).not.toEqual(sExe.order);
+    }
+    // 英语句子按正确顺序拼起来是完整的句子
+    for (const [i, { e }] of all('enSentence').entries()) {
+      const sExe = e as unknown as { items: { id: string; text: string }[]; order: string[] };
+      const byId = Object.fromEntries(sExe.items.map((it) => [it.id, it.text]));
+      expect(sExe.order.map((id) => byId[id]).join(' ')).toBe(LANG_DATA.SENTENCES[i].words.join(' '));
+      expect(/^[A-Z].*[.!?]$/.test(sExe.order.map((id) => byId[id]).join(' '))).toBe(true);
+    }
+  });
+
+  it('读一读、词语、猜一猜：正确答案就是数据里的答案；选项不重复', () => {
+    for (const type of ['zhInfer', 'zhWords', 'enGuess']) {
+      for (const [i, { e }] of all(type).entries()) {
+        const c = e as ChoiceExercise;
+        const data = (type === 'zhInfer' ? LANG_DATA.INFERS : type === 'zhWords' ? LANG_DATA.WORDS : LANG_DATA.GUESS)[
+          i
+        ] as { ans: unknown };
+        const want = Array.isArray(data.ans) ? data.ans[0] : (data.ans as { w: string }).w;
+        expect(txt(answerOf(c).text)).toBe(want);
+        const opts = c.options.map((o) => txt(o.text));
+        expect(new Set(opts).size).toBe(opts.length);
+      }
+    }
+  });
+
+  it('英语找不同类：其他三个同一类，答案是另一类；找规律接龙：答案符合规律', () => {
+    const rand = seeded(9);
+    const odd = CHALLENGES.find((g) => g.type === 'enOdd')!;
+    const catOf = (w: string) => LANG_DATA.EN_CATS.findIndex((c) => c.items.some((x) => x.w === w));
+    for (let k = 0; k < 200; k++) {
+      const c = odd.build(odd.sig(rand, 1)) as ChoiceExercise;
+      const others = c.options.filter((o) => o.id !== c.answerId).map((o) => catOf(String(o.text)));
+      expect(new Set(others).size).toBe(1);
+      expect(catOf(String(answerOf(c).text))).not.toBe(others[0]);
+    }
+    const pat = CHALLENGES.find((g) => g.type === 'enPattern')!;
+    const NUM = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+    for (let k = 0; k < 200; k++) {
+      const sig = pat.sig(rand, 1);
+      const c = pat.build(sig) as ChoiceExercise;
+      const words = String(c.stem!.text)
+        .replace('❓', '')
+        .trim()
+        .split(/\s+/)
+        .filter((w) => /^[a-z]+$/.test(w));
+      const ans = String(answerOf(c).text);
+      if (sig.split(':')[1] === 'num') {
+        expect(NUM.indexOf(ans)).toBe(NUM.indexOf(words[3]) + 1);
+      } else {
+        const unit = sig.split(':')[1] === 'colorAB' ? 2 : 3;
+        expect(ans).toBe(words[7 - unit]);
+      }
+      expect(c.options.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('英语题：题目指令是英文，中文只在小提示里；语文题都有拼音', () => {
+    for (const g of CHALLENGES_BY_SUBJECT.english) {
+      const e = g.build(g.sig(seeded(3), 1));
+      expect(typeof e.prompt.text).toBe('string');
+      expect(/\p{Script=Han}/u.test(String(e.prompt.text))).toBe(false);
+      expect(e.prompt.speak.lang).toBe('en-US');
+      expect(e.prompt.hintZh).toBeTruthy();
+    }
+    for (const g of CHALLENGES_BY_SUBJECT.chinese) {
+      const e = g.build(g.sig(seeded(3), 1));
+      expect(Array.isArray(e.prompt.text)).toBe(true);
+    }
   });
 });
 
@@ -294,6 +438,20 @@ describe('家长中心统计', () => {
     expect(p.streak).toBe(3);
     expect(p.doneToday).toBe(true);
     expect(p.challengeDays).toBe(4);
+    // 按学科：没有 subject 字段的旧记录按题型归到数学
+    expect(p.subjects.find((x) => x.subject === 'math')!.tried).toBe(4);
+    const withZh = {
+      ...s,
+      challenges: [
+        ...s.challenges,
+        { ...ch(0, 'zhStory', ['reason'], true), daily: false, subject: 'chinese' as const },
+      ],
+    };
+    expect(thinkingProfile(withZh, now).subjects.find((x) => x.subject === 'chinese')).toEqual({
+      subject: 'chinese',
+      tried: 1,
+      firstTryCorrect: 1,
+    });
   });
 });
 
@@ -317,8 +475,18 @@ describe('每日挑战页面', () => {
       </GestureHandlerRootView>,
     );
     await screen.findByTestId('challenge-screen');
-    const ex = dailyChallenge(dayKey(Date.now()), 1);
-    expect(screen.getByTestId('challenge-type').props.children).toBe(CHALLENGES.find((g) => g.type === ex.type)!.name);
+    const day = dayKey(Date.now());
+    // 默认是今天推荐的学科
+    const rec = dailyChallenge(day, 1);
+    expect(screen.getByTestId('challenge-type').props.children).toBe(CHALLENGE_BY_TYPE[rec.type].name);
+    // 换成语文、英语、数学，都显示对应学科的题
+    for (const subj of ['chinese', 'english', 'math'] as const) {
+      await fireEvent.press(screen.getByTestId(`challenge-subject-${subj}`));
+      const e = dailyChallenge(day, 1, 0, subj);
+      expect(subjectOfType(e.type)).toBe(subj);
+      expect(screen.getByTestId('challenge-type').props.children).toBe(CHALLENGE_BY_TYPE[e.type].name);
+    }
+    const ex = dailyChallenge(day, 1, 0, 'math') as ChoiceExercise;
     await fireEvent.press(screen.getByTestId(`option-${ex.answerId}`));
     expect(await screen.findByTestId('challenge-result')).toBeTruthy();
     expect(screen.getByTestId('challenge-stars').props.children.join('')).toContain('⭐⭐');

@@ -6,7 +6,7 @@
 import { pinyin } from 'pinyin-pro';
 import { kpExercise } from '@/knowledge/generators';
 import { GRAPHICS_GENERATORS } from '@/knowledge/graphics';
-import { CHALLENGES, seeded } from '@/thinking/challenges';
+import { CHALLENGES, seeded } from '@/thinking/registry';
 import { LESSONS, SKILL_LABELS } from '@/content';
 import { zh } from '@/content/zh';
 import type { Exercise, Lesson, ZhText } from '@/lesson/types';
@@ -39,6 +39,10 @@ const ACCEPTED: Record<string, string> = {
   '上:shang:shàng': '“早上、晚上、身上”中“上”读轻声',
   '看:kan:kàn': '“看看”重叠时第二个字读轻声',
   '地:de:dì': '“不停地重复”中“地”是结构助词，读轻声 de',
+  '长:zhǎng:cháng': '“长得高、长得好”中“长”指生长，读 zhǎng',
+  '思:si:sī': '“意思”中“思”读轻声（《现代汉语词典》注 yì si）',
+  '谢:xie:xiè': '“谢谢”第二个字读轻声',
+  '背:bēi:bèi': '“背着书包”中“背”是动词（用背驮），读 bēi',
 };
 
 function isZhText(v: unknown): v is ZhText {
