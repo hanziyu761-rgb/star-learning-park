@@ -5,9 +5,10 @@ import type { Lesson, Subject } from '@/lesson/types';
 import { chineseRiYueLesson } from './chinese';
 import { englishFruitsLesson } from './english';
 import { STARTER_LESSONS } from './englishStarter';
+import { READING_LESSONS } from './chineseReading';
 import { mathAddLesson } from './math';
 
-export const LESSONS: Lesson[] = [mathAddLesson, chineseRiYueLesson, englishFruitsLesson, ...STARTER_LESSONS];
+export const LESSONS: Lesson[] = [mathAddLesson, chineseRiYueLesson, englishFruitsLesson, ...STARTER_LESSONS, ...READING_LESSONS];
 
 export function getLesson(id: string): Lesson | undefined {
   return LESSONS.find((l) => l.id === id);
@@ -40,6 +41,7 @@ export const SKILL_LABELS: Record<string, string> = {
   'en.phonics-build': '拼读：拼单词',
   'en.reading': '分级阅读：读懂小书',
   'zh.write': '描红写字（笔顺）',
+  'zh.reading': '阅读小屋：读懂短文',
 };
 
 const ORAL_LABELS: Record<string, string> = {

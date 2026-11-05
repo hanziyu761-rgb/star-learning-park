@@ -225,7 +225,7 @@ def goto_math(page):
 
 def run_round(page, kp, wrong_pattern, use_drag_pattern, stats, shots):
     tid(page, f"graphics-{kp}").scroll_into_view_if_needed()
-    tid(page, f"graphics-{kp}").click(); page.wait_for_selector('[data-testid="practice-screen"]')
+    tid(page, f"graphics-{kp}").click(); page.wait_for_selector('[data-testid="practice-screen"]'); skip_teach(page)
     seen = []; notes = set(); prev = None
     for i in range(20):
         page.wait_for_timeout(150)
@@ -246,6 +246,13 @@ def run_round(page, kp, wrong_pattern, use_drag_pattern, stats, shots):
     tid(page, "practice-home").click(); page.wait_for_selector('[data-testid="home"]')
     tid(page, "subject-math").click(); page.wait_for_selector('[data-testid="graphics-section"]')
     return seen, notes, score
+
+def skip_teach(page):
+    """V2.10：第一次练某个知识点会先出现小讲解，这里点“我会了，直接练习”"""
+    page.wait_for_timeout(200)
+    if page.locator('[data-testid="teach-panel"]').count():
+        page.locator('[data-testid="teach-skip"]').first.click()
+        page.wait_for_selector('[data-testid="teach-panel"]', state="detached")
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get("CHROME") or None, args=["--no-sandbox"])
@@ -355,7 +362,7 @@ with sync_playwright() as p:
     tp.goto(BASE); tp.wait_for_selector('[data-testid="home"]')
     tid(tp, "subject-math").click(); tp.wait_for_selector('[data-testid="graphics-section"]')
     for kp in ["m1.clock", "m1.classify", "m1.position"]:
-        tid(tp, f"graphics-{kp}").click(); tp.wait_for_selector('[data-testid="practice-screen"]'); tp.wait_for_timeout(300)
+        tid(tp, f"graphics-{kp}").click(); tp.wait_for_selector('[data-testid="practice-screen"]'); skip_teach(tp)
         tp.screenshot(path=f"{OUT}/g-tablet-{kp}.png")
         tp.locator('[data-testid="practice-screen"] [data-testid="back"]').first.click()
         tp.wait_for_selector('[data-testid="graphics-section"]')

@@ -3,7 +3,7 @@
  * 这样直接双击打开 .html 文件（file://）也能正常使用。页面组件与 APP 完全相同。
  */
 import { StatusBar } from 'expo-status-bar';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -50,12 +50,14 @@ function renderRoute(route: Route) {
 }
 
 export default function SingleApp() {
-  const [stack, setStack] = useState<Route[]>([{ name: 'home' }]);
+  // 每次进入页面给一个新编号：同一个页面“返回再进入”（例如“再来一轮”）也会重新开始
+  const serial = useRef(0);
+  const [stack, setStack] = useState<{ route: Route; key: number }[]>([{ route: { name: 'home' }, key: 0 }]);
   const nav = useMemo<Nav>(
     () => ({
-      push: (r) => setStack((s) => [...s, r]),
+      push: (r) => setStack((s) => [...s, { route: r, key: ++serial.current }]),
       back: () => setStack((s) => (s.length > 1 ? s.slice(0, -1) : s)),
-      home: () => setStack([{ name: 'home' }]),
+      home: () => setStack([{ route: { name: 'home' }, key: ++serial.current }]),
     }),
     [],
   );
@@ -66,8 +68,8 @@ export default function SingleApp() {
         <ProgressProvider>
           <NavProvider nav={nav}>
             <StatusBar style="dark" />
-            <View key={stack.length + top.name} style={{ flex: 1, backgroundColor: colors.bg }}>
-              {renderRoute(top)}
+            <View key={top.key} style={{ flex: 1, backgroundColor: colors.bg }}>
+              {renderRoute(top.route)}
             </View>
           </NavProvider>
         </ProgressProvider>

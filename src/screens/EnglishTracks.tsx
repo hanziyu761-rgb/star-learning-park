@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { lessonsFor } from '@/content';
 import { STARTER_NOTE, TRACK_INFO, type EnglishTrack } from '@/content/englishStarter';
 import { Stars, tapFeedback } from '@/components/ui';
+import { DisplayTextView } from '@/components/PinyinText';
 import { useNav } from '@/nav/Nav';
 import type { ProgressState } from '@/progress/model';
 import { colors, radius, shadow, space, subjectTheme } from '@/theme';
@@ -101,3 +102,47 @@ const styles = StyleSheet.create({
   rowTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   go: { fontSize: 15, fontWeight: '800' },
 });
+
+/** 语文“阅读小屋”（V2.10）：原创带拼音短文，一行一篇 */
+export function ReadingHouse({ state }: { state: ProgressState }) {
+  const nav = useNav();
+  const theme = subjectTheme.chinese;
+  const lessons = lessonsFor('chinese').filter((l) => l.track === 'zhread');
+  const done = lessons.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
+  return (
+    <View style={styles.card} testID="reading-house">
+      <View style={styles.head}>
+        <Text style={styles.headEmoji}>🏡</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>阅读小屋</Text>
+          <Text style={styles.sub}>原创短文，全文注音；先听或自己读，再回答问题</Text>
+        </View>
+        <Text style={[styles.count, { color: theme.color }]} testID="reading-progress">
+          {done}/{lessons.length}
+        </Text>
+      </View>
+      {lessons.map((l) => {
+        const p = state.lessons[l.id];
+        return (
+          <Pressable
+            key={l.id}
+            testID={`start-${l.id}`}
+            accessibilityRole="button"
+            onPress={() => {
+              tapFeedback();
+              nav.push({ name: 'lesson', id: l.id });
+            }}
+            style={styles.row}
+          >
+            <Text style={styles.rowEmoji}>{p?.completedCount ? '✅' : l.emoji}</Text>
+            <View style={{ flex: 1 }}>
+              <DisplayTextView text={l.title} size={18} />
+              <Stars value={p?.bestStars ?? 0} size={16} />
+            </View>
+            <Text style={[styles.go, { color: theme.color }]}>{p?.completedCount ? '再读' : '读一读'} ▶</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}

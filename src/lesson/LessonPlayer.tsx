@@ -15,7 +15,7 @@ import { formatDuration } from '@/progress/stats';
 import { speak, stopSpeaking } from '@/speech/speech';
 import { colors, radius, space, subjectTheme } from '@/theme';
 import { langForSubject, type FeedbackMessage } from './feedback';
-import { DialogueStep, PictureBookStep, RepeatStep, TeachCardsStep } from './steps/GeneralSteps';
+import { DialogueStep, PictureBookStep, ReadPassageStep, RepeatStep, TeachCardsStep } from './steps/GeneralSteps';
 import { CombineStep, CountDemoStep, DragBasketStep, OpenBuildStep } from './steps/MathSteps';
 import type { Lesson, LessonStep } from './types';
 
@@ -35,9 +35,7 @@ export function LessonPlayer({ lesson, resume, onExit, onHome }: Props) {
   const lang = langForSubject(lesson.subject);
 
   const initialIndex =
-    resume && state.active?.lessonId === lesson.id
-      ? Math.min(state.active.stepIndex, lesson.steps.length - 1)
-      : 0;
+    resume && state.active?.lessonId === lesson.id ? Math.min(state.active.stepIndex, lesson.steps.length - 1) : 0;
   const [index, setIndex] = useState(initialIndex);
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
@@ -115,10 +113,7 @@ export function LessonPlayer({ lesson, resume, onExit, onHome }: Props) {
           {lesson.steps.map((s, i) => (
             <View
               key={s.id}
-              style={[
-                styles.dot,
-                { backgroundColor: i < index ? theme.color : i === index ? colors.star : '#fff' },
-              ]}
+              style={[styles.dot, { backgroundColor: i < index ? theme.color : i === index ? colors.star : '#fff' }]}
             />
           ))}
         </View>
@@ -142,7 +137,16 @@ export function LessonPlayer({ lesson, resume, onExit, onHome }: Props) {
         <FeedbackBar message={feedback} />
         <BigButton
           emoji={index >= lesson.steps.length - 1 ? '🏁' : '▶️'}
-          label={lang === 'en' ? (index >= lesson.steps.length - 1 ? 'Finish' : 'Next') : zh(index >= lesson.steps.length - 1 ? '完成' : '继续', index >= lesson.steps.length - 1 ? 'wán chéng' : 'jì xù')}
+          label={
+            lang === 'en'
+              ? index >= lesson.steps.length - 1
+                ? 'Finish'
+                : 'Next'
+              : zh(
+                  index >= lesson.steps.length - 1 ? '完成' : '继续',
+                  index >= lesson.steps.length - 1 ? 'wán chéng' : 'jì xù',
+                )
+          }
           color={theme.color}
           size="md"
           disabled={!done}
@@ -182,6 +186,8 @@ function StepView({
       return <DialogueStep step={step} onFeedback={onFeedback} onDone={onDone} />;
     case 'picture-book':
       return <PictureBookStep step={step} onFeedback={onFeedback} onDone={onDone} />;
+    case 'read-passage':
+      return <ReadPassageStep step={step} onFeedback={onFeedback} onDone={onDone} />;
     case 'exercise':
       return <ExerciseView exercise={step.exercise} lang={lang} onFeedback={onFeedback} onSolved={onDone} />;
   }
@@ -204,7 +210,13 @@ function LessonSummary({ lesson, onHome }: { lesson: Lesson; onHome: () => void 
   }, []);
 
   return (
-    <View style={[styles.summary, { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xl, backgroundColor: theme.soft }]} testID="lesson-summary">
+    <View
+      style={[
+        styles.summary,
+        { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xl, backgroundColor: theme.soft },
+      ]}
+      testID="lesson-summary"
+    >
       <Animated.View entering={ZoomIn.springify()}>
         <Mascot size={140} mood="cheer" />
       </Animated.View>
@@ -223,7 +235,14 @@ function LessonSummary({ lesson, onHome }: { lesson: Lesson; onHome: () => void 
           </View>
         </>
       ) : null}
-      <BigButton emoji="🏠" label={zh('回首页', 'huí shǒu yè')} color={theme.color} onPress={onHome} style={{ alignSelf: 'stretch' }} testID="summary-home" />
+      <BigButton
+        emoji="🏠"
+        label={zh('回首页', 'huí shǒu yè')}
+        color={theme.color}
+        onPress={onHome}
+        style={{ alignSelf: 'stretch' }}
+        testID="summary-home"
+      />
     </View>
   );
 }
@@ -244,8 +263,19 @@ const styles = StyleSheet.create({
   dot: { flex: 1, height: 12, borderRadius: radius.round },
   stepNo: { fontSize: 16, fontWeight: '800', color: colors.textSoft, minWidth: 40, textAlign: 'right' },
   content: { padding: space.lg, paddingBottom: space.xxl, width: '100%', maxWidth: 720, alignSelf: 'center' },
-  bottom: { paddingHorizontal: space.lg, paddingTop: space.sm, gap: space.sm, backgroundColor: 'rgba(255,255,255,0.7)' },
+  bottom: {
+    paddingHorizontal: space.lg,
+    paddingTop: space.sm,
+    gap: space.sm,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+  },
   summary: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingHorizontal: space.xl },
-  summaryCard: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, alignSelf: 'stretch', gap: space.sm },
+  summaryCard: {
+    backgroundColor: '#fff',
+    borderRadius: radius.lg,
+    padding: space.lg,
+    alignSelf: 'stretch',
+    gap: space.sm,
+  },
   summaryText: { fontSize: 20, fontWeight: '700', color: colors.text, textAlign: 'center' },
 });

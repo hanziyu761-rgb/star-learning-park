@@ -59,6 +59,13 @@ def solve(page, ex_id, correct_first):
     tid(page, f"option-{ans}").click()
     expect(tid(page, "feedback-correct")).to_be_visible()
 
+def skip_teach(page):
+    """V2.10：第一次练某个知识点会先出现小讲解，这里点“我会了，直接练习”"""
+    page.wait_for_timeout(200)
+    if page.locator('[data-testid="teach-panel"]').count():
+        page.locator('[data-testid="teach-skip"]').first.click()
+        page.wait_for_selector('[data-testid="teach-panel"]', state="detached")
+
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get("CHROME") or None, args=["--no-sandbox"])
     ctx = b.new_context(viewport={"width": 390, "height": 780}, device_scale_factor=2)
@@ -77,7 +84,7 @@ with sync_playwright() as p:
     # 2. 知识点练习：10 以内加法，故意大多数第一次答错（模拟不熟练）
     tid(page, "kp-m1.add10").click(); page.wait_for_selector('[data-testid="kp-card"]')
     expect(tid(page, "kp-diagnose")).to_have_count(0)
-    tid(page, "kp-practice").click(); page.wait_for_selector('[data-testid="practice-screen"]')
+    tid(page, "kp-practice").click(); page.wait_for_selector('[data-testid="practice-screen"]'); skip_teach(page)
     for i in range(10):
         page.wait_for_timeout(150)
         solve(page, current_id(page, "practice-exercise-"), correct_first=(i % 4 == 0))
@@ -112,7 +119,7 @@ with sync_playwright() as p:
     ok(f"找原因：共 {len(asked)} 题，依次检查 {' → '.join(dict.fromkeys(asked))}；找到根因“10 的分与合”")
 
     # 5. 去练根因
-    tid(page, "diagnose-practice").click(); page.wait_for_selector('[data-testid="practice-screen"]')
+    tid(page, "diagnose-practice").click(); page.wait_for_selector('[data-testid="practice-screen"]'); skip_teach(page)
     first = current_id(page, "practice-exercise-")
     assert first.startswith("kp:m1.compose10:"), first
     ok("从诊断结果直接进入“10 的分与合”练习")

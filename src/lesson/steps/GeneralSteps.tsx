@@ -316,3 +316,39 @@ const styles = StyleSheet.create({
   wordlessHint: { fontSize: 18, fontWeight: '700', color: colors.textSoft },
   pager: { flexDirection: 'row', alignItems: 'center', gap: space.md },
 });
+
+// ---------------- 中文短文阅读（V2.10） ----------------
+
+export function ReadPassageStep({ step, onDone }: StepProps<'read-passage'>) {
+  useEffect(() => {
+    onDone();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <View style={styles.wrap}>
+      <PromptHeader prompt={step.title} />
+      <View style={readStyles.page} testID="read-passage">
+        <Text style={readStyles.emoji}>{step.visual.emoji}</Text>
+        {step.paragraphs.map((p, i) => (
+          <View key={i} style={readStyles.para}>
+            <DisplayTextView text={p} size={24} />
+          </View>
+        ))}
+        <SpeakerButton item={step.speak} size={56} testID="read-listen" />
+      </View>
+    </View>
+  );
+}
+
+const readStyles = StyleSheet.create({
+  page: {
+    backgroundColor: '#FFFDF5',
+    borderRadius: radius.lg,
+    padding: space.lg,
+    gap: space.sm,
+    alignItems: 'center',
+    ...shadow,
+  },
+  emoji: { fontSize: 56 },
+  para: { alignSelf: 'stretch', alignItems: 'flex-start' },
+});

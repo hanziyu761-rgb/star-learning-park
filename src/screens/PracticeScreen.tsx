@@ -26,6 +26,8 @@ import { getKp } from '@/knowledge/graph';
 import { kpForRecord } from '@/knowledge/mapping';
 import { shouldAskStrategy } from '@/thinking/strategies';
 import { StrategyAsk } from '@/thinking/StrategyAsk';
+import { KP_TEACH } from '@/knowledge/teach';
+import { TeachPanel } from '@/components/TeachPanel';
 import { langForSubject, type FeedbackMessage } from '@/lesson/feedback';
 import type { Exercise, Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
@@ -104,6 +106,10 @@ function PracticeSession({ id }: { id: string }) {
   /** 本轮一次答对的题数；第 1、4、7… 道一次答对的题问“你是怎么想的” */
   const [correctCount, setCorrectCount] = useState(0);
   const [askKp, setAskKp] = useState<string | null>(null);
+  // 先教后练：知识点练习有小讲解；第一次练这个知识点时先看讲解（V2.10）
+  const teachKp = id.startsWith('kp:') ? id.slice(3) : null;
+  const slides = teachKp ? KP_TEACH[teachKp] : undefined;
+  const [teaching, setTeaching] = useState(() => !!slides && !state.results.some((r) => r.lessonId === id));
 
   useEffect(() => () => stopSpeaking(), []);
 
@@ -229,53 +235,71 @@ function PracticeSession({ id }: { id: string }) {
         />
       </View>
       <ScrollView contentContainerStyle={styles.content}>
-        {skipped.includes(index) ? (
-          <Notice text="这道题已屏蔽，点“继续”做下一题。" />
+        {teaching && slides ? (
+          <TeachPanel slides={slides} color={theme.color} onDone={() => setTeaching(false)} />
         ) : (
-          <View testID={`practice-exercise-${ex.id}`}>
-            <ExerciseView
-              key={`ex-${index}-${ex.id}`}
+          <>
+            {slides && index === 0 && !done ? (
+              <Pressable
+                onPress={() => setTeaching(true)}
+                accessibilityRole="button"
+                testID="teach-open"
+                style={styles.teachOpen}
+              >
+                <Text style={styles.teachOpenText}>📖 先看讲解</Text>
+              </Pressable>
+            ) : null}
+            {skipped.includes(index) ? (
+              <Notice text="这道题已屏蔽，点“继续”做下一题。" />
+            ) : (
+              <View testID={`practice-exercise-${ex.id}`}>
+                <ExerciseView
+                  key={`ex-${index}-${ex.id}`}
+                  exercise={ex}
+                  lang={langForSubject(round.subject)}
+                  onFeedback={setFeedback}
+                  onSolved={onSolved}
+                />
+              </View>
+            )}
+            {askKp && done ? <StrategyAsk key={`st-${index}`} kp={askKp} lessonId={id} exerciseId={ex.id} /> : null}
+            <AskTeacher
+              key={`ai-${index}-${ex.id}`}
               exercise={ex}
-              lang={langForSubject(round.subject)}
-              onFeedback={setFeedback}
-              onSolved={onSolved}
+              subject={round.subject}
+              solved={done && !skipped.includes(index)}
             />
-          </View>
+            {round.isBank ? (
+              <View style={styles.sourceRow}>
+                <Text style={styles.source}>{BANK_SOURCE}</Text>
+                <Pressable
+                  onLongPress={hideCurrent}
+                  delayLongPress={800}
+                  accessibilityRole="button"
+                  testID="report-question"
+                  hitSlop={8}
+                >
+                  <Text style={styles.report}>🚩 长按：这题有问题</Text>
+                </Pressable>
+              </View>
+            ) : null}
+          </>
         )}
-        {askKp && done ? <StrategyAsk key={`st-${index}`} kp={askKp} lessonId={id} exerciseId={ex.id} /> : null}
-        <AskTeacher
-          key={`ai-${index}-${ex.id}`}
-          exercise={ex}
-          subject={round.subject}
-          solved={done && !skipped.includes(index)}
-        />
-        {round.isBank ? (
-          <View style={styles.sourceRow}>
-            <Text style={styles.source}>{BANK_SOURCE}</Text>
-            <Pressable
-              onLongPress={hideCurrent}
-              delayLongPress={800}
-              accessibilityRole="button"
-              testID="report-question"
-              hitSlop={8}
-            >
-              <Text style={styles.report}>🚩 长按：这题有问题</Text>
-            </Pressable>
-          </View>
-        ) : null}
       </ScrollView>
-      <View style={[styles.bottom, { paddingBottom: insets.bottom + space.md }]}>
-        <FeedbackBar message={feedback} />
-        <BigButton
-          size="md"
-          emoji={last ? '🏁' : '▶️'}
-          label={last ? zh('完成', 'wán chéng') : zh('继续', 'jì xù')}
-          color={theme.color}
-          disabled={!done}
-          onPress={next}
-          testID="practice-next"
-        />
-      </View>
+      {teaching && slides ? null : (
+        <View style={[styles.bottom, { paddingBottom: insets.bottom + space.md }]}>
+          <FeedbackBar message={feedback} />
+          <BigButton
+            size="md"
+            emoji={last ? '🏁' : '▶️'}
+            label={last ? zh('完成', 'wán chéng') : zh('继续', 'jì xù')}
+            color={theme.color}
+            disabled={!done}
+            onPress={next}
+            testID="practice-next"
+          />
+        </View>
+      )}
     </View>
   );
 }
@@ -300,6 +324,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: space.lg,
   },
+  teachOpen: { alignSelf: 'flex-end', paddingHorizontal: space.sm, paddingVertical: 4 },
+  teachOpenText: { fontSize: 14, fontWeight: '700', color: colors.parent },
   sourceRow: { alignItems: 'center', gap: 4, marginTop: space.sm },
   source: { fontSize: 12, color: colors.textSoft, textAlign: 'center' },
   report: { fontSize: 13, color: colors.textSoft, padding: 4 },

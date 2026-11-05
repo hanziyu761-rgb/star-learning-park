@@ -306,6 +306,8 @@ export type LessonStep =
   | { kind: 'repeat'; id: string; title: Prompt; items: TeachCard[] }
   /** 情境对话 */
   | { kind: 'dialogue'; id: string; title: Prompt; lines: { speaker: string; text: string; speak: Speakable }[] }
+  /** 中文短文阅读（V2.10）：一段带拼音的短文，可以听整篇 */
+  | { kind: 'read-passage'; id: string; title: Prompt; visual: Visual; paragraphs: ZhText[]; speak: Speakable }
   /** 互动绘本：每页一张图和一句话，点单词可听读 */
   | { kind: 'picture-book'; id: string; title: Prompt; pages: { visual: Visual; text: string; speak: Speakable }[] };
 
@@ -314,7 +316,7 @@ export interface Lesson {
   subject: Subject;
   order: number;
   /** 英语启蒙主线（V2.8）：交流 / 拼读 / 分级阅读 */
-  track?: 'talk' | 'phonics' | 'reading';
+  track?: 'talk' | 'phonics' | 'reading' | 'zhread';
   title: DisplayText;
   /** 给家长看的课程说明 */
   parentSummary: string;

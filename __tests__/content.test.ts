@@ -10,12 +10,15 @@ import { gensFor, seeded } from '@/thinking/registry';
 import { LESSONS, SKILL_LABELS } from '@/content';
 import { zh } from '@/content/zh';
 import type { Exercise, Lesson, ZhText } from '@/lesson/types';
+import { KP_TEACH } from '@/knowledge/teach';
 
 /**
  * 已人工确认的读法差异（词库对多音字、轻声、变调判断有误）。
  * 键为“汉字:我们的拼音:词库拼音”，只放行这个具体组合，其它错误仍会被发现。
  */
 const ACCEPTED: Record<string, string> = {
+  '子:zi:zǐ': '“稻子”的“子”读轻声',
+  '不:bù:bú': '“不重复”的“不”在二声“重”前不变调，读 bù',
   '数:shǔ:shù': '“数一数、数苹果”中“数”是动词，读 shǔ',
   '着:zhe:zhāo': '“接着”中“着”是助词，读轻声 zhe',
   '得:de:dé': '“说得对、算得对”中“得”是结构助词，读轻声 de',
@@ -184,6 +187,24 @@ describe('课程内容', () => {
           }
         }
     expect([...new Set(problems)]).toEqual([]);
+  });
+
+  it('知识点小讲解（V2.10）拼音与词库一致', () => {
+    const problems: string[] = [];
+    for (const [kpId, slides] of Object.entries(KP_TEACH)) {
+      for (const text of collectZhTexts(slides)) {
+        const chars = text.map((x) => x.char).join('');
+        const ref = pinyin(chars, { type: 'array', toneType: 'symbol', nonZh: 'removed' });
+        const ours = text.filter((x) => x.py).map((x) => x.py!);
+        expect(ours.length).toBe(ref.length);
+        ours.forEach((py, i) => {
+          const han = text.filter((x) => x.py)[i].char;
+          if (py !== ref[i] && !ACCEPTED[`${han}:${py}:${ref[i]}`])
+            problems.push(`${kpId}「${chars}」第${i + 1}字：填写 ${py}，词库 ${ref[i]}`);
+        });
+      }
+    }
+    expect(problems).toEqual([]);
   });
 
   it('每节课的步骤 id 唯一，练习 id 唯一，知识点都有名称', () => {

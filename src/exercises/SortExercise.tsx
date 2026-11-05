@@ -12,10 +12,10 @@ export function SortExercise({ exercise, lang, onFeedback, onSolved }: ExerciseP
   const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved, exercise.explanation);
   const [picked, setPicked] = useState<string[]>([]);
   const [shake, setShake] = useState<string | null>(null);
-  // 排句子（中文句子较长）：答案格和选项都占一整行，字小一些，避免超出屏幕
+  // 排句子或短语（中文 4 个字以上）：答案格和选项都占一整行，字小一些，避免超出屏幕
   const long = exercise.items.some((it) => {
     const t = plainText(it.text);
-    return /\p{Script=Han}/u.test(t) && t.length > 4;
+    return /\p{Script=Han}/u.test(t) && t.length > 3;
   });
 
   const tap = (id: string) => {
