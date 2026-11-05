@@ -196,7 +196,8 @@ describe('挑战题', () => {
     const rand = seeded(42);
     let n = 0;
     for (const level of [1, 2] as const)
-      for (const g of gensFor('math', level))
+      // V2.11 的一题多解、小侦探找错在 thinking-adaptive.test.tsx 单独核对
+      for (const g of gensFor('math', level).filter((x) => !['multiway', 'detective'].includes(x.type)))
         for (let k = 0; k < 120; k++) {
           const sig = g.sig(rand, level);
           const e = g.build(sig) as ChoiceExercise;

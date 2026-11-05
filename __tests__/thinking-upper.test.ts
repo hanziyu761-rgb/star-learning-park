@@ -40,9 +40,9 @@ describe('分档', () => {
     expect([1, 2, 3, 4, 5, 6].map(levelOfGrade)).toEqual([1, 2, 3, 3, 4, 4]);
   });
 
-  it('每档的题型：数学 7 / 7 / 8 / 11，语文 4 / 4 / 6 / 6，英语 4 / 4 / 6 / 6', () => {
+  it('每档的题型：数学 9 / 9 / 10 / 13（V2.11 每档加一题多解、小侦探找错），语文 4 / 4 / 6 / 6，英语 4 / 4 / 6 / 6', () => {
     const count = (s: 'math' | 'chinese' | 'english') => ([1, 2, 3, 4] as Level[]).map((l) => gensFor(s, l).length);
-    expect(count('math')).toEqual([7, 7, 8, 11]);
+    expect(count('math')).toEqual([9, 9, 10, 13]);
     expect(count('chinese')).toEqual([4, 4, 6, 6]);
     expect(count('english')).toEqual([4, 4, 6, 6]);
     expect(gensFor('math', 4).map((g) => g.type)).toEqual(
@@ -92,6 +92,9 @@ describe('每道题结构合法', () => {
             expect(new Set(keys).size).toBe(keys.length);
             expect(e.options.length).toBeGreaterThanOrEqual(3);
             expect(e.options.some((o) => o.id === e.answerId)).toBe(true);
+          } else if (e.kind === 'multi') {
+            expect(e.answerIds.length).toBeGreaterThanOrEqual(2);
+            expect(e.answerIds.every((id) => e.options.some((o) => o.id === id))).toBe(true);
           } else {
             expect(e.order).toEqual(e.items.map((_, k) => String(k)));
             expect(e.items.map((it) => it.id)).not.toEqual(e.order);

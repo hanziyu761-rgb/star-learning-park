@@ -45,6 +45,8 @@ export interface ChallengeRecord {
   daily: boolean;
   /** 学科（V2.6 起记录；V2.5 的记录没有，按题型判断） */
   subject?: Subject;
+  /** 这道题的难度档 1～4（V2.11 起记录，难度跟着孩子调整） */
+  level?: number;
 }
 
 export interface DiagnosisRecord {
@@ -62,6 +64,8 @@ export interface Settings {
   aiEnabled: boolean;
   /** AI 服务地址（家长填写或构建时预设），不含任何密钥 */
   aiBaseUrl: string;
+  /** 每日挑战难度跟着孩子调整（V2.11，默认开启；旧数据读入时补默认值） */
+  adaptiveChallenge: boolean;
 }
 
 export interface ExerciseResult {
@@ -163,7 +167,7 @@ export function createEmptyProgress(): ProgressState {
     sessions: [],
     active: null,
     reviews: [],
-    settings: { grade: 1, aiEnabled: false, aiBaseUrl: '' },
+    settings: { grade: 1, aiEnabled: false, aiBaseUrl: '', adaptiveChallenge: true },
     hidden: [],
     diagnoses: [],
     strategies: [],

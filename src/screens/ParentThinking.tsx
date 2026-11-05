@@ -3,9 +3,10 @@
  * 来自真实记录：每日挑战的作答、练习中答对后孩子自己选的思路。是做题情况统计，不是心理或智力测评。
  */
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 import { Card, SectionTitle } from '@/components/ui';
 import { useProgress } from '@/progress/ProgressContext';
+import { challengeLevel, LEVEL_NAME } from '@/thinking/adaptive';
 import { THINK_DIMS } from '@/thinking/dims';
 import { MIN_SAMPLES, thinkingProfile } from '@/thinking/profile';
 import { STRATEGIES } from '@/thinking/strategies';
@@ -14,7 +15,7 @@ import { colors, radius, space } from '@/theme';
 const SUBJECT_CN = { math: '数学', chinese: '语文', english: '英语' } as const;
 
 export function ThinkingCard() {
-  const { state } = useProgress();
+  const { state, dispatch } = useProgress();
   const [now] = useState(() => Date.now());
   const p = thinkingProfile(state, now);
   const empty = p.challengeDays === 0 && p.strategies.length === 0;
@@ -25,6 +26,26 @@ export function ThinkingCard() {
         <SectionTitle>🧠 思维能力</SectionTitle>
         <Text style={styles.note}>
           统计孩子做“每日挑战”（数学、语文、英语）和数学练习中选“是怎么想的”的真实记录，不是心理或智力测评。题目为原创，待教师审核。
+        </Text>
+        <View style={styles.adaptRow}>
+          <Text style={[styles.dimName, { flex: 1 }]}>挑战难度跟着孩子调整</Text>
+          <Switch
+            value={state.settings.adaptiveChallenge !== false}
+            onValueChange={(v) => dispatch({ type: 'settings/set', settings: { adaptiveChallenge: v } })}
+            testID="pt-adaptive-switch"
+          />
+        </View>
+        <Text style={styles.dimStat} testID="pt-levels">
+          {state.settings.adaptiveChallenge === false
+            ? `已关闭：三科都按家长设的${state.settings.grade}年级出题。`
+            : (['math', 'chinese', 'english'] as const)
+                .map((s) => {
+                  const a = challengeLevel(state, s);
+                  const arrow = a.change === 'up' ? '（难一档）' : a.change === 'down' ? '（容易一档）' : '';
+                  return `${SUBJECT_CN[s]}：${LEVEL_NAME[a.level]}${arrow}`;
+                })
+                .join('；') +
+              '。这一科最近 5 道一次答对 4 道以上就难一档，最多答对 1 道就容易一档，只在年级上下一档内调整。'}
         </Text>
         {empty ? (
           <Text style={styles.empty} testID="pt-empty">
@@ -42,6 +63,7 @@ export function ThinkingCard() {
                 .map((x) => `${SUBJECT_CN[x.subject]} ${x.tried} 道（一次答对 ${x.firstTryCorrect}）`)
                 .join('，')}
             </Text>
+
             {p.dims.map((d) => {
               const info = THINK_DIMS.find((x) => x.id === d.dim)!;
               return (
@@ -85,6 +107,7 @@ export function ThinkingCard() {
 }
 
 const styles = StyleSheet.create({
+  adaptRow: { flexDirection: 'row', alignItems: 'center', marginTop: space.sm },
   note: { fontSize: 13, color: colors.textSoft, marginTop: space.xs, lineHeight: 19 },
   empty: { fontSize: 15, color: colors.text, marginTop: space.sm, lineHeight: 22 },
   line: { fontSize: 15, color: colors.text, marginTop: space.sm, fontWeight: '700' },

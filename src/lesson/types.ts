@@ -95,6 +95,19 @@ export interface ChoiceExercise {
   wrongHint: Prompt;
 }
 
+/** 多选题（V2.11 一题多解）：答案不止一个，全部选出后按“选好了” */
+export interface MultiExercise {
+  explanation?: string;
+  kind: 'multi';
+  id: string;
+  skill: string;
+  prompt: Prompt;
+  stem?: { text?: DisplayText };
+  options: ChoiceOption[];
+  answerIds: string[];
+  wrongHint: Prompt;
+}
+
 export interface TrueFalseExercise {
   /** 答对后显示的讲解（可选） */
   explanation?: string;
@@ -241,6 +254,7 @@ export type Exercise =
   | InputExercise
   | TraceExercise
   | ChoiceExercise
+  | MultiExercise
   | TrueFalseExercise
   | DragMatchExercise
   | SortExercise

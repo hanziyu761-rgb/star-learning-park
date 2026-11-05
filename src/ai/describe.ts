@@ -43,6 +43,17 @@ export function describeExercise(e: Exercise): { question: string; options?: str
         answer: opt(e.options.find((o) => o.id === e.answerId)!),
       };
     }
+    case 'multi': {
+      const opt = (o: (typeof e.options)[number]) => txt(o.text);
+      return {
+        question: `${txt(e.prompt.text)}（多选，答案不止一个）`,
+        options: e.options.map(opt),
+        answer: e.options
+          .filter((o) => e.answerIds.includes(o.id))
+          .map(opt)
+          .join('、'),
+      };
+    }
     case 'truefalse':
       return { question: `判断对错：${txt(e.statement.text)}`, answer: e.answer ? '对' : '错' };
     case 'sort': {

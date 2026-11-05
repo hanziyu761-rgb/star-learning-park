@@ -11,6 +11,7 @@ import type {
   ChoiceExercise,
   ChoiceOption,
   Figure,
+  MultiExercise,
   Prompt,
   PuzzleFigure,
   SortExercise,
@@ -20,8 +21,9 @@ import type {
 import type { ThinkDim } from './dims';
 
 export type Rand = () => number;
-export type ChallengeBody = Omit<ChoiceExercise, 'id' | 'skill'> | Omit<SortExercise, 'id' | 'skill'>;
-export type ChallengeExercise = (ChoiceExercise | SortExercise) & { type: ChallengeType };
+export type ChallengeBody =
+  Omit<ChoiceExercise, 'id' | 'skill'> | Omit<SortExercise, 'id' | 'skill'> | Omit<MultiExercise, 'id' | 'skill'>;
+export type ChallengeExercise = (ChoiceExercise | SortExercise | MultiExercise) & { type: ChallengeType };
 
 export type ChallengeType =
   | 'balance'
@@ -52,7 +54,10 @@ export type ChallengeType =
   | 'zhConnect'
   | 'zhSentence'
   | 'enRead'
-  | 'enLogic';
+  | 'enLogic'
+  // V2.11
+  | 'multiway'
+  | 'detective';
 
 /** 难度档：1 = 一年级，2 = 二年级，3 = 三、四年级，4 = 五、六年级 */
 export type Level = 1 | 2 | 3 | 4;

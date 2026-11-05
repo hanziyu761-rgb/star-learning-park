@@ -32,7 +32,6 @@ export const BANK_INDEX: BankIndexEntry[] = (indexData as BankIndexEntry[]).map(
 });
 export const BANK_SOURCE = 'ChinaStudyFree 题库（AI 生成，已自动质检，未逐题人工审核）';
 
-
 export function booksFor(subject: Subject, grade: number): BankIndexEntry[] {
   return BANK_INDEX.filter((b) => b.subject === subject && b.grade === grade);
 }
@@ -146,7 +145,7 @@ export function pickRound(
   const rand = opts.rand ?? Math.random;
   const count = opts.count ?? 10;
   const pool = unit.questions.filter((q) => !opts.hidden.has(q.id));
-  const shuffle = <T,>(a: T[]) => {
+  const shuffle = <T>(a: T[]) => {
     const b = [...a];
     for (let i = b.length - 1; i > 0; i--) {
       const j = Math.floor(rand() * (i + 1));

@@ -2,6 +2,7 @@ import React from 'react';
 import type { Exercise } from '@/lesson/types';
 import { ChoiceExercise } from './ChoiceExercise';
 import { InputExercise } from './InputExercise';
+import { MultiExercise } from './MultiExercise';
 import { TraceExercise } from './TraceExercise';
 import { ClockSetExercise } from './ClockSetExercise';
 import { GridPlaceExercise, GridTapExercise } from './GridExercises';
@@ -22,6 +23,8 @@ export function ExerciseView(props: ExerciseProps<Exercise>) {
       return <TraceExercise {...props} exercise={exercise} />;
     case 'choice':
       return <ChoiceExercise {...props} exercise={exercise} />;
+    case 'multi':
+      return <MultiExercise {...props} exercise={exercise} />;
     case 'truefalse':
       return <TrueFalseExercise {...props} exercise={exercise} />;
     case 'drag-match':

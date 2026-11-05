@@ -29,11 +29,12 @@ import {
   zhStoryAll,
   zhWordsLow,
 } from './challengesUpper';
+import { MATH_MULTI } from './challengesMulti';
 
 export { challengeId, levelOfGrade, seeded } from './challenges';
 
 export const CHALLENGES_BY_SUBJECT: Record<Subject, ChallengeGen[]> = {
-  math: [...MATH_CHALLENGES, ...MATH_UPPER],
+  math: [...MATH_CHALLENGES, ...MATH_MULTI, ...MATH_UPPER],
   chinese: [zhRiddleAll, zhStoryAll, zhInferAll, zhWordsLow, ...CHINESE_UPPER],
   english: [enGuessAll, enOddAll, enPatternAll, enSentenceAll, ...ENGLISH_UPPER],
 };
@@ -51,7 +52,7 @@ export function withoutPinyin(e: ChallengeExercise): ChallengeExercise {
     prompt: { ...e.prompt, text: t(e.prompt.text)! },
     wrongHint: { ...e.wrongHint, text: t(e.wrongHint.text)! },
   };
-  if (out.kind === 'choice') {
+  if (out.kind === 'choice' || out.kind === 'multi') {
     return {
       ...out,
       stem: out.stem ? { ...out.stem, text: t(out.stem.text) } : undefined,
@@ -89,18 +90,27 @@ export const recommendedSubject = (day: string): Subject => WEEKDAY_SUBJECT[new 
 
 /**
  * 某一天某一科的挑战；extra > 0 为“再玩一道”的第几道。
- * 学科不填时用当天推荐的学科。
+ * 学科不填时用当天推荐的学科。二档及以下注拼音，三档起不注。
  */
-export function dailyChallenge(day: string, grade: number, extra = 0, subject?: Subject): ChallengeExercise {
+export function dailyChallenge(
+  day: string,
+  grade: number,
+  extra = 0,
+  subject?: Subject,
+  /** 难度档（V2.11 跟着孩子调整）；不填按年级 */
+  levelOverride?: Level,
+): ChallengeExercise {
   const subj = subject ?? recommendedSubject(day);
-  const level = levelOfGrade(grade);
+  const level = levelOverride ?? levelOfGrade(grade);
   const gens = gensFor(subj, level);
   const d = dayNumber(day);
   // “再玩一道”每次跳过几种题型；步长与题型数互质，连着玩就能轮到每一种
   const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
   const step = [3, 5, 7, 1].find((k) => gcd(k, gens.length) === 1)!;
   const gen = gens[(((d + extra * step) % gens.length) + gens.length) % gens.length];
-  const seedKey = subj === 'math' ? `${day}#${extra}#${grade}` : `${day}#${extra}#${grade}#${subj}`;
+  const base = subj === 'math' ? `${day}#${extra}#${grade}` : `${day}#${extra}#${grade}#${subj}`;
+  // 难度档不是按年级来的（调整过）时换一个种子，避免与原档同一道题
+  const seedKey = level === levelOfGrade(grade) ? base : `${base}#L${level}`;
   const sig = gen.sig(seeded(hash(seedKey)), level);
   const ex = challengeFromId(challengeId(sig))!;
   return level >= 3 ? withoutPinyin(ex) : ex;

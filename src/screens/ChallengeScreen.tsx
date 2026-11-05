@@ -23,6 +23,7 @@ import { dayKey } from '@/progress/srs';
 import { speak, stopSpeaking } from '@/speech/speech';
 import { CHALLENGE_BY_TYPE, dailyChallenge, recommendedSubject } from '@/thinking/registry';
 import type { Subject } from '@/lesson/types';
+import { challengeLevel, LEVEL_NAME } from '@/thinking/adaptive';
 import { THINK_DIMS } from '@/thinking/dims';
 import { colors, radius, space } from '@/theme';
 
@@ -56,9 +57,14 @@ function ChallengeSession() {
 
   useEffect(() => () => stopSpeaking(), []);
 
+  // 难度跟着孩子走（V2.11）：出题时按这一科最近的作答定难度档；做完这道题不会让眼前的题变掉
+  const adapt = useMemo(
+    () => challengeLevel(state, subject),
+    [extra, state.settings.grade, subject], // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const ex = useMemo(
-    () => (extra === null ? null : dailyChallenge(today, state.settings.grade, extra, subject)),
-    [extra, today, state.settings.grade, subject],
+    () => (extra === null ? null : dailyChallenge(today, state.settings.grade, extra, subject, adapt.level)),
+    [extra, today, state.settings.grade, subject, adapt.level],
   );
 
   // 这道题出现时今天是否还没做过每日挑战（做过的话这道是“再玩一道”，不计星星）
@@ -77,6 +83,7 @@ function ChallengeSession() {
       attempts: o.attempts,
       daily,
       subject,
+      level: adapt.level,
     };
     dispatch({ type: 'challenge/complete', record });
     setSolved({ correct: o.firstTryCorrect, stars: challengeStars(record) });
@@ -147,6 +154,10 @@ function ChallengeSession() {
                 </Text>
               ))}
               {!isDaily ? <Text style={styles.tag}>再玩一道 · 不计星星</Text> : null}
+              <Text style={styles.tag} testID="challenge-level">
+                {LEVEL_NAME[adapt.level]}
+                {adapt.change === 'up' ? ' ⬆ 最近答得好，难一点' : adapt.change === 'down' ? ' ⬇ 先练简单一点的' : ''}
+              </Text>
             </View>
             <View testID={`challenge-exercise-${ex.id}`}>
               <ExerciseView
