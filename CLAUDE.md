@@ -30,7 +30,7 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 
 ## 教师审核表
 
-`npm run review:export` 导出一年级内容审核表到 `review-out/`（构建产物，不提交）。题库自动核查在 `__tests__/bank-audit.test.ts`，不得为通过检查而放宽验算规则。
+`npm run review:export` 导出一～六年级内容审核表（每个年级一份 Excel）到 `review-out/`（构建产物，不提交）。题库自动核查在 `__tests__/bank-audit.test.ts`，不得为通过检查而放宽验算规则。
 
 ## 单文件 HTML 版
 

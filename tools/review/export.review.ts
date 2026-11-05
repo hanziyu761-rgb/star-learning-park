@@ -1,23 +1,23 @@
 /**
- * 一年级教师审核表导出（V2.12）：把 APP 里一年级会出现的题目、讲解、短文整理成表格数据，交给一线老师逐条审核。
+ * 教师审核表导出（V2.12 一年级；V2.15 一～六年级各一份）：把 APP 里每个年级会出现的题目、讲解、短文整理成表格，交给一线老师逐条审核。
  * 运行：npm run review:export  （先用 Jest 运行环境导出 JSON，再由 tools/review/make_xlsx.py 生成 Excel）
- * 输出：review-out/grade1-review.json、review-out/一年级教师审核表.xlsx（构建产物，不提交）
+ * 输出：review-out/grade{1-6}-review.json、review-out/{一～六}年级教师审核表.xlsx（构建产物，不提交）
  */
 import fs from 'fs';
 import path from 'path';
 import { describeExercise } from '@/ai/describe';
 import { LESSONS } from '@/content';
-import { loadBook } from '@/content/bank';
+import { BANK_INDEX, loadBook } from '@/content/bank';
 import { auditBook, auditCoverage } from '@/content/bank/audit';
 import { fixBankPinyin, polyphonesOf } from '@/content/bank/pyfix';
 import { ORAL_TOPICS, oralRound } from '@/content/oral';
-import { WRITE_CHARS } from '@/content/writing';
+import { WRITE_CHARS, WRITE_CHARS_G2 } from '@/content/writing';
 import { plainText } from '@/content/zh';
-import { kpRound } from '@/knowledge/generators';
+import { hasOriginalGenerator, kpRound } from '@/knowledge/generators';
 import { kpsFor } from '@/knowledge/graph';
 import { KP_TEACH } from '@/knowledge/teach';
 import type { DisplayText, Exercise } from '@/lesson/types';
-import { seeded } from '@/thinking/challenges';
+import { levelOfGrade, seeded } from '@/thinking/challenges';
 import { gensFor } from '@/thinking/registry';
 
 interface Row {
@@ -75,11 +75,15 @@ function exRow(id: string, cat: string, subject: string, where: string, e: Exerc
 
 const OUT = path.join(process.cwd(), 'review-out');
 
-it('导出一年级教师审核表数据', () => {
+const CN = ['', '一', '二', '三', '四', '五', '六'];
+
+function exportGrade(grade: number) {
   const rows: Row[] = [];
+  const level = levelOfGrade(grade);
 
   // 1. 课程（含英语启蒙三条主线、语文阅读小屋）
-  for (const l of LESSONS) {
+  // 一年级：所有不分年级的课程（启蒙课、英语三条主线）和一年级阅读小屋；二年级起：本年级阅读小屋
+  for (const l of LESSONS.filter((x) => (x.grade ?? 1) === grade)) {
     for (const s of l.steps) {
       if (s.kind === 'read-passage')
         rows.push({
@@ -93,7 +97,7 @@ it('导出一年级教师审核表数据', () => {
           答案: '',
           讲解: '',
           来源: `${SOURCE[l.source]}；${l.sourceNote}`,
-          自动核查: '拼音已逐字核对词库',
+          自动核查: grade <= 2 ? '拼音已逐字核对词库' : '不注拼音',
         });
       if (s.kind === 'exercise')
         rows.push(
@@ -104,41 +108,47 @@ it('导出一年级教师审核表数据', () => {
             t(l.title),
             s.exercise,
             `${SOURCE[l.source]}；${l.sourceNote}`,
-            '拼音已逐字核对词库',
+            grade <= 2 ? '拼音已逐字核对词库' : '不注拼音',
           ),
         );
     }
   }
 
   // 2. 知识点小讲解
-  for (const k of kpsFor('math', 1))
-    (KP_TEACH[k.id] ?? []).forEach((sl, i) =>
-      rows.push({
-        编号: `teach/${k.id}/${i + 1}`,
-        分类: '知识点小讲解',
-        学科: '数学',
-        位置: k.name,
-        题型: '讲解',
-        题目: `${sl.show.replace(/\n/g, '  ')} —— ${t(sl.text)}`,
-        选项: '',
-        答案: '',
-        讲解: '',
-        来源: '原创',
-        自动核查: '拼音已逐字核对词库',
-      }),
-    );
+  for (const subj of ['math', 'chinese', 'english'] as const)
+    for (const k of kpsFor(subj, grade))
+      (KP_TEACH[k.id] ?? []).forEach((sl, i) =>
+        rows.push({
+          编号: `teach/${k.id}/${i + 1}`,
+          分类: '知识点小讲解',
+          学科: SUBJ[subj],
+          位置: k.name,
+          题型: '讲解',
+          题目: `${sl.show.replace(/\n/g, '  ')} —— ${t(sl.text)}`,
+          选项: '',
+          答案: '',
+          讲解: '',
+          来源: '原创',
+          自动核查:
+            typeof sl.text === 'string'
+              ? sl.lang === 'en-US'
+                ? '英语句型为自编通用表达'
+                : '不注拼音'
+              : '拼音已逐字核对词库',
+        }),
+      );
 
   // 3. 知识点练习（程序出题，答案由程序计算）：每个知识点抽 6 道
-  for (const k of kpsFor('math', 1)) {
-    const rand = seeded(1000 + k.order);
+  for (const k of kpsFor('math', grade).filter((x) => hasOriginalGenerator(x.id))) {
+    const rand = seeded(1000 + grade * 100 + k.order);
     for (const e of kpRound(k.id, 6, rand))
       rows.push(
         exRow(e.id, '知识点练习（程序出题）', '数学', k.name, e, '原创生成器', '答案由程序计算并有单元测试核对'),
       );
   }
 
-  // 4. 口算闯关（一年级）
-  for (const topic of ORAL_TOPICS.filter((x) => x.grade === 1))
+  // 4. 口算闯关
+  for (const topic of ORAL_TOPICS.filter((x) => x.grade === grade))
     rows.push({
       编号: `oral/${topic.id}`,
       分类: '口算闯关',
@@ -153,8 +163,8 @@ it('导出一年级教师审核表数据', () => {
       自动核查: '答案由程序计算',
     });
 
-  // 5. 描红写字
-  for (const c of WRITE_CHARS)
+  // 5. 描红写字（一、二年级）
+  for (const c of grade === 1 ? WRITE_CHARS : grade === 2 ? WRITE_CHARS_G2 : [])
     rows.push({
       编号: `write/${c.char}`,
       分类: '描红写字',
@@ -169,21 +179,19 @@ it('导出一年级教师审核表数据', () => {
       自动核查: '笔画数与常考笔顺有单元测试',
     });
 
-  // 6. 每日挑战（一年级难度）：每种题型抽 4 道
-  const rand = seeded(20261105);
+  // 6. 每日挑战（本年级难度）：每种题型抽 4 道
+  const rand = seeded(20261105 + grade);
   for (const subj of ['math', 'chinese', 'english'] as const)
-    for (const g of gensFor(subj, 1))
+    for (const g of gensFor(subj, level))
       for (let k = 0; k < 4; k++) {
-        const sig = g.sig(rand, 1);
+        const sig = g.sig(rand, level);
         const e = { ...g.build(sig), id: `ch:${sig}`, skill: `thinking:${g.type}` } as Exercise;
-        rows.push(
-          exRow(e.id, '每日挑战（一年级难度）', SUBJ[subj], g.name, e, '原创生成器', '答案由程序计算并有单元测试核对'),
-        );
+        rows.push(exRow(e.id, '每日挑战', SUBJ[subj], g.name, e, '原创生成器', '答案由程序计算并有单元测试核对'));
       }
 
-  // 7. 题库（一年级上、下册，按新版教材单元）
+  // 7. 题库（本年级上、下册；一年级按新版教材单元）
   const bankStats: Record<string, unknown>[] = [];
-  for (const id of ['math-g1a', 'math-g1b', 'chinese-g1a', 'chinese-g1b']) {
+  for (const id of BANK_INDEX.filter((b) => b.grade === grade).map((b) => b.id)) {
     const book = loadBook(id)!;
     const issues = auditBook(book);
     const issueOf = new Map(issues.map((i) => [i.id, i.detail]));
@@ -246,8 +254,29 @@ it('导出一年级教师审核表数据', () => {
   });
   fs.mkdirSync(OUT, { recursive: true });
   fs.writeFileSync(
-    path.join(OUT, 'grade1-review.json'),
-    JSON.stringify({ generatedAt: new Date().toISOString(), rows: unique, bankStats, duplicates: dup }, null, 1),
+    path.join(OUT, `grade${grade}-review.json`),
+    JSON.stringify(
+      {
+        grade,
+        gradeName: `${CN[grade]}年级`,
+        generatedAt: new Date().toISOString(),
+        rows: unique,
+        bankStats,
+        duplicates: dup,
+      },
+      null,
+      1,
+    ),
   );
-  expect(unique.length).toBeGreaterThan(1000);
+  return unique;
+}
+
+it('导出一～六年级教师审核表数据', () => {
+  for (const g of [1, 2, 3, 4, 5, 6]) {
+    const rows = exportGrade(g);
+    expect(rows.length).toBeGreaterThan(1000);
+    // 每个年级都有讲解、题库、每日挑战
+    for (const cat of ['知识点小讲解', '题库（AI 生成）', '每日挑战'])
+      expect(rows.some((r) => r.分类 === cat)).toBe(true);
+  }
 });
