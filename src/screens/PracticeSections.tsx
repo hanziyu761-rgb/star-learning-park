@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BANK_SOURCE, bankLessonId, booksFor, editionText, loadBook, unitBadge } from '@/content/bank';
 import { oralLessonId, topicsForGrade } from '@/content/oral';
-import { WRITE_SETS, writeLessonId } from '@/content/writing';
+import { ALL_WRITE_SETS, writeLessonId, writeSetGrade } from '@/content/writing';
 import { kpLabel, getKp } from '@/knowledge/graph';
 import { CONTENT_REVIEW, GRAPHICS_GENERATORS, GRAPHICS_KPS } from '@/knowledge/graphics';
 import { zh } from '@/content/zh';
@@ -48,7 +48,7 @@ export function OralSection({ state }: { state: ProgressState }) {
               style={({ pressed }) => [styles.tile, pressed && { transform: [{ scale: 0.96 }] }]}
             >
               <Text style={styles.tileEmoji}>{t.emoji}</Text>
-              <DisplayTextView text={zh(t.title, t.titlePy)} size={16} />
+              <DisplayTextView text={t.titlePy ? zh(t.title, t.titlePy) : t.title} size={16} />
               <Stars value={best} size={14} />
             </Pressable>
           );
@@ -66,7 +66,9 @@ export function WriteSection({ state }: { state: ProgressState }) {
       <DisplayTextView text={zh('描红写字', 'miáo hóng xiě zì')} size={24} />
       <Text style={styles.meta}>每组 4 个字，从红点开始按笔顺描，程序检查笔顺和方向（不评判字的好看程度）</Text>
       <View style={styles.grid}>
-        {WRITE_SETS.map((set, i) => {
+        {ALL_WRITE_SETS.map((set, i) => {
+          // 一年级只显示一年级的 4 组；二年级起 8 组都显示（V2.14）
+          if (writeSetGrade(i + 1) > Math.max(1, Math.min(state.settings.grade, 2))) return null;
           const id = writeLessonId(i + 1);
           const best = state.lessons[id]?.bestStars ?? 0;
           return (
@@ -81,6 +83,7 @@ export function WriteSection({ state }: { state: ProgressState }) {
               style={({ pressed }) => [styles.tile, pressed && { transform: [{ scale: 0.96 }] }]}
             >
               <Text style={styles.writeChars}>{set.map((c) => c.char).join(' ')}</Text>
+              <Text style={styles.meta}>{writeSetGrade(i + 1) === 1 ? '一年级' : '二年级'}</Text>
               <Stars value={best} size={14} />
             </Pressable>
           );

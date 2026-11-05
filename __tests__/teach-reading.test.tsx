@@ -4,7 +4,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
 import { LESSONS } from '@/content';
-import { PASSAGES, READING_LESSONS } from '@/content/chineseReading';
+import { PASSAGES, plainOf, READING_LESSONS } from '@/content/chineseReading';
+import { PASSAGES_UPPER } from '@/content/chineseReadingUpper';
 import { TeachPanel } from '@/components/TeachPanel';
 import { plainText } from '@/content/zh';
 import { kpsFor } from '@/knowledge/graph';
@@ -75,8 +76,16 @@ describe('知识点小讲解', () => {
 });
 
 describe('阅读小屋', () => {
-  it('6 篇原创短文已加入课程目录，标注原创、待审核', () => {
-    expect(READING_LESSONS).toHaveLength(6);
+  const all = [
+    { grade: 1, ps: PASSAGES },
+    ...Object.entries(PASSAGES_UPPER).map(([g, ps]) => ({ grade: Number(g), ps })),
+  ];
+
+  it('一～六年级共 26 篇原创短文已加入课程目录，标注原创、待审核、年级', () => {
+    expect(READING_LESSONS).toHaveLength(26);
+    for (const g of [1, 2, 3, 4, 5, 6])
+      expect(READING_LESSONS.filter((l) => (l.grade ?? 1) === g)).toHaveLength(g === 1 ? 6 : 4);
+    expect(new Set(READING_LESSONS.map((l) => l.id)).size).toBe(26);
     for (const l of READING_LESSONS) {
       expect(LESSONS).toContain(l);
       expect(l).toMatchObject({ subject: 'chinese', track: 'zhread', source: 'original' });
@@ -85,25 +94,42 @@ describe('阅读小屋', () => {
     }
   });
 
-  it('每篇读完后 2 道题，答案都能在短文里找到依据', () => {
-    for (const p of PASSAGES) {
-      const text = p.paras.map((x) => x[0]).join('');
-      expect(p.questions).toHaveLength(2);
-      for (const q of p.questions) {
-        if (q.kind === 'choice') {
-          // 问“没有什么”的题，正确答案不在文中、干扰项在文中；其余题正确答案在文中
-          const negative = q.q[0].includes('没有');
-          expect(text.includes(q.ans[0])).toBe(!negative);
-          if (negative) for (const o of q.others) expect(text).toContain(o[0]);
-        } else if (q.kind === 'order') {
-          const pos = q.steps.map((s) => text.indexOf(s[0]));
-          expect(pos.every((x) => x >= 0)).toBe(true);
-          expect([...pos].sort((a, b) => a - b)).toEqual(pos);
-        } else {
-          expect(text.includes(q.q[0].replace(/[。，]/g, ''))).toBe(q.answer);
+  it('一、二年级全文注拼音；三年级起不注拼音、篇幅更长、每篇 3 道题', () => {
+    for (const { grade, ps } of all)
+      for (const p of ps) {
+        const pinyin = p.paras.every((x) => typeof x !== 'string');
+        expect(pinyin).toBe(grade <= 2);
+        expect(p.questions).toHaveLength(grade <= 2 ? 2 : 3);
+        if (grade >= 3) expect(p.paras.map(plainOf).join('').length).toBeGreaterThan(grade * 18);
+      }
+  });
+
+  it('每道题的答案都能在短文里找到依据', () => {
+    for (const { ps } of all)
+      for (const p of ps) {
+        const text = p.paras.map(plainOf).join('');
+        for (const q of p.questions) {
+          if (q.kind === 'order') {
+            const pos = q.steps.map((s) => text.indexOf(plainOf(s)));
+            expect(pos.every((x) => x >= 0)).toBe(true);
+            expect([...pos].sort((a, b) => a - b)).toEqual(pos);
+            continue;
+          }
+          // 概括、推断题：标出的原文依据必须真的在短文里
+          if (q.evidence) {
+            expect(text).toContain(q.evidence);
+            continue;
+          }
+          if (q.kind === 'choice') {
+            // 问“没有什么”的题，正确答案不在文中、干扰项在文中；其余题正确答案在文中
+            const negative = plainOf(q.q).includes('没有');
+            expect(text.includes(plainOf(q.ans))).toBe(!negative);
+            if (negative) for (const o of q.others) expect(text).toContain(plainOf(o));
+          } else {
+            expect(text.includes(plainOf(q.q).replace(/[。，]/g, ''))).toBe(q.answer);
+          }
         }
       }
-    }
   });
 
   it('选择题正确答案位置不总是第一个；排序题打乱了顺序', () => {

@@ -331,7 +331,7 @@ export function ReadPassageStep({ step, onDone }: StepProps<'read-passage'>) {
         <Text style={readStyles.emoji}>{step.visual.emoji}</Text>
         {step.paragraphs.map((p, i) => (
           <View key={i} style={readStyles.para}>
-            <DisplayTextView text={p} size={24} />
+            <DisplayTextView text={p} size={typeof p === 'string' ? 20 : 24} />
           </View>
         ))}
         <SpeakerButton item={step.speak} size={56} testID="read-listen" />

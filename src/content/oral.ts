@@ -10,7 +10,8 @@ export interface OralTopic {
   id: string;
   grade: number;
   title: string;
-  titlePy: string;
+  /** 三年级起的主题不注拼音（不填） */
+  titlePy?: string;
   emoji: string;
   make: (rand: () => number) => string;
 }
@@ -103,6 +104,101 @@ export const ORAL_TOPICS: OralTopic[] = [
       return `${b * r(rand, 1, 9)}÷${b}`;
     },
   },
+  // ───── 三～六年级（V2.14） ─────
+  {
+    id: 'mul10',
+    grade: 3,
+    title: '整十整百乘一位数',
+    emoji: '✖️',
+    make: (rand) => `${r(rand, 2, 9) * (rand() < 0.5 ? 10 : 100)}×${r(rand, 2, 9)}`,
+  },
+  {
+    id: 'div10',
+    grade: 3,
+    title: '整十整百除以一位数',
+    emoji: '➗',
+    make: (rand) => {
+      const b = r(rand, 2, 9);
+      const q = r(rand, 1, 9) * (rand() < 0.6 ? 10 : 100);
+      return `${b * q}÷${b}`;
+    },
+  },
+  {
+    id: 'mul2d10',
+    grade: 4,
+    title: '两位数乘整十数',
+    emoji: '✖️',
+    make: (rand) => `${r(rand, 11, 39)}×${r(rand, 2, 9) * 10}`,
+  },
+  {
+    id: 'decaddsub',
+    grade: 4,
+    title: '一位小数加减法',
+    emoji: '🔢',
+    make: (rand) => {
+      const a = r(rand, 11, 99);
+      const b = r(rand, 11, 99);
+      const d = (n: number) => (n / 10).toFixed(1);
+      return rand() < 0.5 ? `${d(a)}+${d(b)}` : `${d(Math.max(a, b))}-${d(Math.min(a, b))}`;
+    },
+  },
+  {
+    id: 'decmul',
+    grade: 5,
+    title: '小数乘整数',
+    emoji: '✖️',
+    make: (rand) => `${(r(rand, 1, 25) / 10).toFixed(1)}×${r(rand, 2, 9)}`,
+  },
+  {
+    id: 'decdiv',
+    grade: 5,
+    title: '小数除以整数',
+    emoji: '➗',
+    make: (rand) => {
+      const b = r(rand, 2, 9);
+      return `${((b * r(rand, 1, 9)) / 10).toFixed(1)}÷${b}`;
+    },
+  },
+  {
+    id: 'fracadd',
+    grade: 5,
+    title: '同分母分数加减',
+    emoji: '🍕',
+    make: (rand) => {
+      const d = r(rand, 5, 12);
+      const a = r(rand, 1, d - 2);
+      const b = r(rand, 1, d - 1 - a);
+      return rand() < 0.5 ? `${a}/${d}+${b}/${d}` : `${a + b}/${d}-${b}/${d}`;
+    },
+  },
+  {
+    id: 'fracmul',
+    grade: 6,
+    title: '分数乘法',
+    emoji: '🍰',
+    make: (rand) => {
+      if (rand() < 0.5) {
+        const d = r(rand, 3, 12);
+        return `${r(rand, 1, d - 1)}/${d}×${r(rand, 2, 6)}`;
+      }
+      const b = r(rand, 2, 9);
+      const d = r(rand, 2, 9);
+      return `${r(rand, 1, b - 1)}/${b}×${r(rand, 1, d - 1)}/${d}`;
+    },
+  },
+  {
+    id: 'fracdiv',
+    grade: 6,
+    title: '分数除法',
+    emoji: '🔄',
+    make: (rand) => {
+      const b = r(rand, 2, 9);
+      const d = r(rand, 2, 9);
+      return rand() < 0.5
+        ? `${r(rand, 1, b - 1)}/${b}÷${r(rand, 2, 5)}`
+        : `${r(rand, 1, b - 1)}/${b}÷${r(rand, 1, d - 1)}/${d}`;
+    },
+  },
 ];
 
 export function topicsForGrade(grade: number): OralTopic[] {
@@ -113,21 +209,89 @@ export function topicsForGrade(grade: number): OralTopic[] {
 export const oralLessonId = (topicId: string) => `oral:${topicId}`;
 export const isOralLessonId = (id: string) => id.startsWith('oral:');
 
-export function evalExpr(expr: string): number {
-  const m = expr.match(/^(\d+)([+\-×÷])(\d+)$/);
+/* 精确计算：整数、一位小数、分数都换成分数算，避免小数误差 */
+type Frac = [number, number];
+const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : Math.abs(a));
+const norm = ([n, d]: Frac): Frac => {
+  const g = gcd(n, d) || 1;
+  return d < 0 ? [-n / g, -d / g] : [n / g, d / g];
+};
+function parseNum(t: string): Frac {
+  const f = t.match(/^(\d+)\/(\d+)$/);
+  if (f) return norm([Number(f[1]), Number(f[2])]);
+  const [i, dec = ''] = t.split('.');
+  return norm([Number(i + dec), 10 ** dec.length]);
+}
+const OPERAND = String.raw`(\d+(?:\.\d+)?|\d+\/\d+)`;
+const EXPR = new RegExp(`^${OPERAND}([+\\-×÷])${OPERAND}$`);
+
+function calcFrac(expr: string): Frac {
+  const m = expr.match(EXPR);
   if (!m) throw new Error(`算式格式错误：${expr}`);
-  const a = Number(m[1]);
-  const b = Number(m[3]);
+  const [a, b] = [parseNum(m[1]), parseNum(m[3])];
   switch (m[2]) {
     case '+':
-      return a + b;
+      return norm([a[0] * b[1] + b[0] * a[1], a[1] * b[1]]);
     case '-':
-      return a - b;
+      return norm([a[0] * b[1] - b[0] * a[1], a[1] * b[1]]);
     case '×':
-      return a * b;
+      return norm([a[0] * b[0], a[1] * b[1]]);
     default:
-      return a / b;
+      return norm([a[0] * b[1], a[1] * b[0]]);
   }
+}
+
+export function evalExpr(expr: string): number {
+  const [n, d] = calcFrac(expr);
+  return n / d;
+}
+
+/** 得数的写法：有分数参与写成最简分数（整数就写整数）；否则写整数或小数 */
+export function oralAnswer(expr: string): string {
+  const [n, d] = calcFrac(expr);
+  if (d === 1) return String(n);
+  if (expr.includes('/')) return `${n}/${d}`;
+  // 小数：分母只含 2、5 才是有限小数（本项目的题都是）
+  let k = 0;
+  while ((d * 10 ** k) % 1 === 0 && 10 ** k % d !== 0 && k < 6) k++;
+  return (n / d).toFixed(k);
+}
+
+/** 干扰项：整数和小数差一点或小数点错位；分数分子差一点或分母算错 */
+function distractors(expr: string, ans: string): string[] {
+  const out: string[] = [];
+  if (ans.includes('/')) {
+    const [n, d] = ans.split('/').map(Number);
+    for (const [a, b] of [
+      [n + 1, d],
+      [n - 1, d],
+      [n, d + 1],
+      [n * 2, d],
+      [n + 2, d],
+      [n, d - 1],
+    ] as Frac[]) {
+      if (a <= 0 || b <= 1) continue;
+      const [x, y] = norm([a, b]);
+      const t = y === 1 ? String(x) : `${x}/${y}`;
+      if (t !== ans && !out.includes(t)) out.push(t);
+    }
+    return out;
+  }
+  const v = Number(ans);
+  const dec = ans.includes('.') ? ans.split('.')[1].length : 0;
+  // 整十整百的得数：常见错误是少写或多写一个 0
+  const zeros = !dec && v >= 100 && v % 10 === 0;
+  const steps = dec
+    ? [10 ** -dec, -(10 ** -dec), v * 9, -v * 0.9, 1, -1]
+    : zeros
+      ? [v * 9, -v * 0.9, 10, -10, 1]
+      : [1, -1, 2, -2, 10, -10, 3];
+  for (const s of steps) {
+    const w = Number((v + s).toFixed(dec + (dec && Math.abs(s) >= Math.abs(v) ? 1 : 0)));
+    const t = String(w);
+    if (w >= 0 && t !== ans && !out.includes(t)) out.push(t);
+  }
+  return out;
 }
 
 const OP_SAY: Record<string, string> = { '+': '加', '-': '减', '×': '乘', '÷': '除以' };
@@ -135,26 +299,36 @@ const OP_SAY: Record<string, string> = { '+': '加', '-': '减', '×': '乘', '�
 /** 口算题；题目 id 以 #in 结尾时改成自己填数（V2.9） */
 export function oralExercise(topicId: string, expr: string): ChoiceExercise | InputExercise {
   if (expr.endsWith('#in')) return asInput(oralExercise(topicId, expr.slice(0, -3)), expr)!;
-  const ans = evalExpr(expr);
-  const set = new Set<number>([ans]);
-  for (const d of [1, -1, 2, -2, 10, -10, 3]) {
-    if (set.size >= 4) break;
-    if (ans + d >= 0) set.add(ans + d);
-  }
-  const options = [...set].sort((a, b) => a - b);
-  const m = expr.match(/^(\d+)([+\-×÷])(\d+)$/)!;
-  const display = expr.replace('-', ' − ').replace('+', ' + ').replace('×', ' × ').replace('÷', ' ÷ ');
+  const ans = oralAnswer(expr);
+  const set = [ans, ...distractors(expr, ans)].slice(0, 4);
+  const options = set.sort((a, b) => evalNum(a) - evalNum(b));
+  const m = expr.match(EXPR)!;
+  const display = `${m[1]} ${m[2] === '-' ? '−' : m[2]} ${m[3]}`;
+  const sayNum = (t: string) => t.replace(/^(\d+)\/(\d+)$/, '$2分之$1').replace('.', '点');
+  // 三年级起不注拼音
+  const plain = (ORAL_TOPICS.find((t) => t.id === topicId)?.grade ?? 1) >= 3;
   return {
     kind: 'choice',
     id: expr,
     skill: `oral.${topicId}`,
-    prompt: { text: zh('算一算', 'suàn yi suàn'), speak: { text: `${m[1]}${OP_SAY[m[2]]}${m[3]}等于几？`, lang: 'zh-CN' } },
+    prompt: {
+      text: plain ? '算一算' : zh('算一算', 'suàn yi suàn'),
+      speak: { text: `${sayNum(m[1])}${OP_SAY[m[2]]}${sayNum(m[3])}等于多少？`, lang: 'zh-CN' },
+    },
     stem: { text: `${display} = ?` },
-    options: options.map((n) => ({ id: String(n), text: String(n) })),
-    answerId: String(ans),
-    wrongHint: { text: zh('再算一算', 'zài suàn yi suàn'), speak: { text: '再算一算', lang: 'zh-CN' } },
+    options: options.map((n) => ({ id: n, text: n })),
+    answerId: ans,
+    wrongHint: {
+      text: plain ? '再算一算' : zh('再算一算', 'zài suàn yi suàn'),
+      speak: { text: '再算一算', lang: 'zh-CN' },
+    },
   };
 }
+
+const evalNum = (t: string) => {
+  const [n, d] = parseNum(t);
+  return n / d;
+};
 
 /** 生成一轮口算题（不重复） */
 export function oralRound(topic: OralTopic, count = 10, rand: () => number = Math.random): string[] {

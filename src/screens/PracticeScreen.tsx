@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BANK_SOURCE, bankExercise, findUnit, pickRound } from '@/content/bank';
 import { ORAL_TOPICS, oralExercise, oralRound } from '@/content/oral';
 import { sourceName } from '@/content/resolve';
-import { isWriteLessonId, traceExercise, WRITE_SETS } from '@/content/writing';
+import { ALL_WRITE_SETS, isWriteLessonId, traceExercise } from '@/content/writing';
 import { kpRound } from '@/knowledge/generators';
 import { zh } from '@/content/zh';
 import { FeedbackBar } from '@/components/FeedbackBar';
@@ -70,7 +70,7 @@ function buildRound(id: string, done: Set<string>, hidden: Set<string>): Round |
       : null;
   }
   if (isWriteLessonId(id)) {
-    const set = WRITE_SETS[Number(id.slice(6)) - 1];
+    const set = ALL_WRITE_SETS[Number(id.slice(6)) - 1];
     return set
       ? { subject: 'chinese', title: sourceName(id), isBank: false, exercises: set.map((c) => traceExercise(c.char)) }
       : null;

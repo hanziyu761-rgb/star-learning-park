@@ -9,7 +9,7 @@ import { exerciseFromKpId } from '@/knowledge/generators';
 import { getKp } from '@/knowledge/graph';
 import { findOralExercise, ORAL_TOPICS } from './oral';
 import { plainText } from './zh';
-import { isWriteLessonId, traceExercise, WRITE_SETS } from './writing';
+import { ALL_WRITE_SETS, isWriteLessonId, traceExercise } from './writing';
 
 export interface ResolvedExercise {
   exercise: Exercise;
@@ -31,7 +31,11 @@ export const resolveExercise: ExerciseResolver = (lessonId, exerciseId) => {
     return { exercise: bank.exercise, subject: bank.book.subject, source: `${bank.book.title} · ${bank.unit.title}` };
   if (isWriteLessonId(lessonId)) {
     try {
-      return { exercise: traceExercise(exerciseId.replace(/^write-/, '')), subject: 'chinese', source: sourceName(lessonId) };
+      return {
+        exercise: traceExercise(exerciseId.replace(/^write-/, '')),
+        subject: 'chinese',
+        source: sourceName(lessonId),
+      };
     } catch {
       return null;
     }
@@ -59,7 +63,7 @@ export function sourceName(lessonId: string): string {
     return k ? `${lessonId.startsWith('diag:') ? '找原因' : '知识点练习'} · ${k.name}` : lessonId;
   }
   if (isWriteLessonId(lessonId)) {
-    const set = WRITE_SETS[Number(lessonId.slice(6)) - 1];
+    const set = ALL_WRITE_SETS[Number(lessonId.slice(6)) - 1];
     return set ? `描红写字 · ${set.map((c) => c.char).join(' ')}` : lessonId;
   }
   if (lessonId.startsWith('oral:')) {

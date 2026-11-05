@@ -17,6 +17,8 @@ import { KP_TEACH } from '@/knowledge/teach';
  * 键为“汉字:我们的拼音:词库拼音”，只放行这个具体组合，其它错误仍会被发现。
  */
 const ACCEPTED: Record<string, string> = {
+  '食:shi:shí': '“粮食”的“食”读轻声',
+  '种:zhòng:zhǒng': '“种玉米、种下”中“种”是动词，读 zhòng',
   '西:xi:xī': '“东西”指物品时“西”读轻声',
   '说:shuo:shuō': '“说说”重叠时第二个字读轻声',
   '事:shi:shì': '“故事”的“事”按小学教材读轻声',

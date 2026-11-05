@@ -3,15 +3,23 @@
  */
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
-import { oralExercise } from '@/content/oral';
+import { ORAL_TOPICS, oralExercise, topicsForGrade } from '@/content/oral';
 import { resolveExercise } from '@/content/resolve';
-import { traceExercise, WRITE_CHARS, WRITE_SETS } from '@/content/writing';
+import {
+  ALL_WRITE_SETS,
+  traceExercise,
+  WRITE_CHARS,
+  WRITE_CHARS_G2,
+  WRITE_SETS,
+  writeSetGrade,
+} from '@/content/writing';
 import { zh } from '@/content/zh';
 import { ChoiceExercise } from '@/exercises/ChoiceExercise';
 import { InputExercise, inputMatches, keysFor } from '@/exercises/InputExercise';
 import { checkStroke, TraceExercise } from '@/exercises/TraceExercise';
 import { exerciseFromKpId, kpRound } from '@/knowledge/generators';
 import { asInput } from '@/knowledge/inputs';
+import { seeded } from '@/thinking/challenges';
 import type { ChoiceExercise as ChoiceData, InputExercise as InputData } from '@/lesson/types';
 
 jest.mock('react-native-gesture-handler', () => {
@@ -252,11 +260,125 @@ describe('描红写字', () => {
     expect(WRITE_SETS.map((s) => s.length)).toEqual([4, 4, 4, 4]);
   });
 
+  it('二年级 16 个字（V2.14）：笔画数、笔顺、坐标；4 个一组，接在一年级 4 组后面', () => {
+    const count: Record<string, number> = {
+      工: 3,
+      士: 3,
+      千: 3,
+      午: 4,
+      正: 5,
+      古: 5,
+      门: 3,
+      广: 3,
+      文: 4,
+      方: 4,
+      万: 3,
+      力: 2,
+      川: 3,
+      斤: 4,
+      片: 4,
+      用: 5,
+    };
+    expect(WRITE_CHARS_G2.map((c) => c.char).sort()).toEqual(Object.keys(count).sort());
+    for (const c of WRITE_CHARS_G2) {
+      expect(c.strokes).toHaveLength(count[c.char]);
+      for (const [name, pts] of c.strokes) {
+        expect(['横', '竖', '撇', '捺', '点', '横折', '竖折', '横折钩']).toContain(name);
+        if (name === '横折') expect(pts).toHaveLength(3);
+        if (name === '横折钩') expect(pts).toHaveLength(4);
+        for (const [x, y] of pts) expect(x >= 0 && x <= 100 && y >= 0 && y <= 100).toBe(true);
+      }
+    }
+    const order = (ch: string) =>
+      WRITE_CHARS_G2.find((c) => c.char === ch)!
+        .strokes.map((s) => s[0])
+        .join('');
+    // 常考笔顺：正（横竖横竖横）、方（点横横折钩撇）、万（横横折钩撇）、门（点竖横折钩）、片（撇竖横横折）
+    expect(order('正')).toBe('横竖横竖横');
+    expect(order('方')).toBe('点横横折钩撇');
+    expect(order('万')).toBe('横横折钩撇');
+    expect(order('门')).toBe('点竖横折钩');
+    expect(order('片')).toBe('撇竖横横折');
+    expect(order('力')).toBe('横折钩撇');
+    expect(ALL_WRITE_SETS.map((s) => s.length)).toEqual([4, 4, 4, 4, 4, 4, 4, 4]);
+    expect([1, 4, 5, 8].map(writeSetGrade)).toEqual([1, 1, 2, 2]);
+    expect(resolveExercise('write:6', 'write-方')?.exercise.kind).toBe('trace');
+    // 横折钩：顺着写对，只写到拐弯处不算
+    const fang = traceExercise('方').strokes[2];
+    expect(checkStroke(fang.points, fang.points)).toBe('ok');
+    expect(checkStroke(fang.points.slice(0, 2), fang.points)).not.toBe('ok');
+  });
+
   it('描红题可以从记录还原（今日复习）；界面显示当前是第几笔', async () => {
     const r = resolveExercise('write:3', 'write-日');
     expect(r?.exercise.kind).toBe('trace');
     expect(r?.subject).toBe('chinese');
     await render(<TraceExercise exercise={traceExercise('口')} lang="zh" onFeedback={() => {}} onSolved={() => {}} />);
     expect(screen.getByTestId('trace-step')).toBeTruthy();
+  });
+});
+
+describe('口算闯关三～六年级（V2.14）', () => {
+  const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
+  /** 独立核对：把得数和算式都化成分数比较 */
+  const frac = (t: string): [number, number] => {
+    const f = t.match(/^(\d+)\/(\d+)$/);
+    if (f) return [Number(f[1]), Number(f[2])];
+    const [i, d = ''] = t.split('.');
+    return [Number(i + d), 10 ** d.length];
+  };
+  const value = (expr: string) => {
+    const m = expr.match(/^([\d./]+)([+\-×÷])([\d./]+)$/)!;
+    const [a, b] = [frac(m[1]), frac(m[3])];
+    const [n, d] =
+      m[2] === '+'
+        ? [a[0] * b[1] + b[0] * a[1], a[1] * b[1]]
+        : m[2] === '-'
+          ? [a[0] * b[1] - b[0] * a[1], a[1] * b[1]]
+          : m[2] === '×'
+            ? [a[0] * b[0], a[1] * b[1]]
+            : [a[0] * b[1], a[1] * b[0]];
+    return [n, d] as [number, number];
+  };
+
+  it('每个年级都有口算主题；高年级也能复习低年级', () => {
+    for (const g of [3, 4, 5, 6]) {
+      const own = ORAL_TOPICS.filter((t) => t.grade === g);
+      expect(own.length).toBeGreaterThanOrEqual(2);
+      for (const t of own) expect(topicsForGrade(g)).toContain(t);
+    }
+    expect(topicsForGrade(2).some((t) => t.grade >= 3)).toBe(false);
+  });
+
+  it('各主题 300 道：得数正确（分数为最简分数）、正确答案在选项中、选项不重复且不为负；填数版本答案相同', () => {
+    const rand = seeded(9);
+    for (const t of ORAL_TOPICS.filter((x) => x.grade >= 3))
+      for (let k = 0; k < 300; k++) {
+        const expr = t.make(rand);
+        const e = oralExercise(t.id, expr) as ChoiceData;
+        const [n, d] = value(expr);
+        expect(n).toBeGreaterThanOrEqual(0);
+        const [an, ad] = frac(e.answerId);
+        expect(an * d).toBe(n * ad);
+        if (e.answerId.includes('/')) expect(gcd(an, ad)).toBe(1);
+        if (expr.includes('/')) expect(e.answerId.includes('.')).toBe(false);
+        expect(e.options.map((o) => o.id)).toContain(e.answerId);
+        expect(e.options.length).toBeGreaterThanOrEqual(3);
+        expect(new Set(e.options.map((o) => o.id)).size).toBe(e.options.length);
+        for (const o of e.options) expect(o.id.startsWith('-')).toBe(false);
+        const inp = oralExercise(t.id, `${expr}#in`) as InputData;
+        expect(inp.kind).toBe('input');
+        expect(inputMatches(e.answerId, inp.answer)).toBe(true);
+        // 三年级起题目不注拼音
+        expect(typeof e.prompt.text).toBe('string');
+      }
+  });
+
+  it('整十整百的干扰项是“多一个 0、少一个 0”；分数朗读为“几分之几”', () => {
+    const e = oralExercise('mul10', '700×3') as ChoiceData;
+    expect(e.options.map((o) => o.id)).toEqual(expect.arrayContaining(['210', '2100', '21000']));
+    expect((oralExercise('fracmul', '2/9×3') as ChoiceData).answerId).toBe('2/3');
+    expect(oralExercise('fracmul', '2/9×3').prompt.speak.text).toContain('9分之2');
+    expect((oralExercise('decaddsub', '0.6+0.7') as ChoiceData).answerId).toBe('1.3');
   });
 });
