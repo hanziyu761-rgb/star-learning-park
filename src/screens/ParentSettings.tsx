@@ -8,6 +8,7 @@ import { skillLabel } from '@/content';
 import { mistakeLabel } from '@/content/resolve';
 import { Card, SectionTitle } from '@/components/ui';
 import { useProgress } from '@/progress/ProgressContext';
+import { getAsr } from '@/speech/asr';
 import { openMistakes, weakSkills } from '@/progress/stats';
 import { colors, radius, space } from '@/theme';
 
@@ -41,7 +42,9 @@ export function GradeCard() {
 
 export function AiCard() {
   const { state, dispatch } = useProgress();
-  const { aiEnabled, aiBaseUrl, grade } = state.settings;
+  const { aiEnabled, aiBaseUrl, grade, voiceInput } = state.settings;
+  const asr = getAsr();
+  const [micNote, setMicNote] = useState('');
   const [url, setUrl] = useState(aiBaseUrl || DEFAULT_AI_BASE_URL);
   const [check, setCheck] = useState<{ loading: boolean; text?: string; ok?: boolean }>({ loading: false });
   const [report, setReport] = useState<{ loading: boolean; text?: string; error?: boolean }>({ loading: false });
@@ -106,6 +109,33 @@ export function AiCard() {
           testID="ai-switch"
         />
       </View>
+      {asr ? (
+        <View testID="voice-input-setting">
+          <View style={styles.row}>
+            <Text style={[styles.label, { flex: 1 }]}>允许孩子说话提问</Text>
+            <Switch
+              value={voiceInput}
+              onValueChange={async (v) => {
+                setMicNote('');
+                if (v) {
+                  const p = await asr.requestPermission().catch(() => ({ granted: false }));
+                  if (!p.granted) {
+                    setMicNote('没有得到麦克风权限。可以在手机“设置 → 应用 → 星星学习乐园 → 权限”里允许麦克风后再打开。');
+                    return;
+                  }
+                }
+                dispatch({ type: 'settings/set', settings: { voiceInput: v } });
+              }}
+              testID="voice-input-switch"
+            />
+          </View>
+          <Text style={styles.small}>
+            打开后，“问问星星宝”里会出现“点我说话”按钮。声音在手机里直接识别成文字（离线，不录音保存、不上传），只把识别出的文字发给
+            AI 老师。目前只能识别普通话，英语单词识别不好。
+          </Text>
+          {micNote ? <Text style={[styles.small, { color: colors.wrong }]}>{micNote}</Text> : null}
+        </View>
+      ) : null}
       <Text style={styles.label}>AI 服务地址</Text>
       <TextInput
         value={url}

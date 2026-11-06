@@ -72,7 +72,7 @@ describe('v1 → v2 数据迁移（旧进度不丢失）', () => {
   it('保留全部旧记录，未掌握的错题今天可复习，已掌握的保持掌握', () => {
     const s = parseProgress(JSON.stringify(v1), T0)!;
     expect(s.version).toBe(PROGRESS_VERSION);
-    expect(s.settings).toEqual({ grade: 1, aiEnabled: false, aiBaseUrl: '', adaptiveChallenge: true, voiceGender: 'female', voiceZh: '', voiceEn: '', speechRate: 'slow' });
+    expect(s.settings).toEqual({ grade: 1, aiEnabled: false, aiBaseUrl: '', adaptiveChallenge: true, voiceGender: 'female', voiceZh: '', voiceEn: '', speechRate: 'slow', voiceInput: false });
     expect(s.diagnoses).toEqual([]);
     expect(s.hidden).toEqual([]);
     expect(s.totalStars).toBe(5);

@@ -1,0 +1,29 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.offlineasr'
+version = '1.0.0'
+
+android {
+  namespace "expo.modules.offlineasr"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+  // 模型文件已经压缩过，打包时不要再压缩（加载更快）
+  androidResources {
+    noCompress += ['onnx']
+  }
+}
+
+// sherpa-onnx 安卓库（Apache-2.0）放在本模块自带的本地 Maven 仓库里（由 tools/asr/fetch.sh 下载，不提交到 Git）。
+// APP 工程也要能找到这个仓库：见 plugins/with-offline-asr.js
+repositories {
+  maven { url "$projectDir/maven" }
+}
+
+dependencies {
+  implementation 'com.k2fsa.sherpa.onnx:sherpa-onnx:1.12.21@aar'
+}

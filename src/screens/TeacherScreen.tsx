@@ -1,7 +1,6 @@
 /**
  * 问问星星宝：AI 老师对话。
- * 孩子主要点“快捷问题”，也可以由家长帮忙输入；回复会自动朗读。
- * 语音输入（说话提问）需要原生语音识别，尚未实现。
+ * 孩子可以点“快捷问题”、点话筒说话提问（V2.17，安卓 APP，家长开启后才有；离线识别，声音不离开手机），也可以由家长帮忙输入；回复会自动朗读。
  */
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -16,6 +15,7 @@ import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { SUBJECTS } from '@/progress/stats';
+import { useVoiceInput, VOICE_PROBLEM_TEXT } from '@/speech/asr';
 import { speak, stopSpeaking } from '@/speech/speech';
 import { colors, MIN_TOUCH, radius, space, subjectTheme } from '@/theme';
 
@@ -35,7 +35,7 @@ function TeacherChat() {
   const nav = useNav();
   const insets = useSafeAreaInsets();
   const { state } = useProgress();
-  const { aiEnabled, aiBaseUrl, grade } = state.settings;
+  const { aiEnabled, aiBaseUrl, grade, voiceInput } = state.settings;
   const [subject, setSubject] = useState<Subject>('math');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -66,6 +66,10 @@ function TeacherChat() {
       setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 100);
     }
   };
+
+  const voice = useVoiceInput((text) => send(text));
+  const showMic = voice.available && voiceInput;
+  const listening = voice.state === 'listening' || voice.state === 'starting' || voice.state === 'thinking';
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + space.sm, paddingBottom: insets.bottom + space.sm }]} testID="teacher-screen">
@@ -113,13 +117,50 @@ function TeacherChat() {
               </View>
             ) : null}
           </ScrollView>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quick}>
+          {/* 横向滚动条不要撑满剩余高度（V2.17 修正：之前按钮被拉成又高又大的椭圆） */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.quickBar}
+            contentContainerStyle={styles.quick}
+          >
             {QUICK[subject].map((q) => (
               <Pressable key={q} onPress={() => send(q)} style={styles.chip} accessibilityRole="button" testID="quick-question">
                 <Text style={styles.chipText}>{q}</Text>
               </Pressable>
             ))}
           </ScrollView>
+          {showMic ? (
+            <View style={styles.pad} testID="voice-input">
+              {listening ? (
+                <View style={styles.listenBox} testID="voice-listening">
+                  <Text style={styles.listenTitle}>{voice.state === 'starting' ? '准备好了就说吧……' : voice.state === 'thinking' ? '星星宝在想……' : '🎤 我在听，请说……'}</Text>
+                  <Text style={styles.listenText} testID="voice-partial">{voice.partial || ' '}</Text>
+                </View>
+              ) : null}
+              {voice.problem ? (
+                <Text style={styles.voiceTip} testID="voice-problem">
+                  {VOICE_PROBLEM_TEXT[voice.problem]}
+                </Text>
+              ) : null}
+              <Pressable
+                onPress={() => {
+                  if (voice.state === 'listening') voice.stop();
+                  else if (voice.state === 'idle' && !loading) {
+                    stopSpeaking();
+                    voice.start();
+                  }
+                }}
+                disabled={loading || voice.state === 'starting' || voice.state === 'thinking'}
+                style={[styles.micBtn, listening && styles.micOn, loading && { opacity: 0.5 }]}
+                accessibilityRole="button"
+                accessibilityLabel={voice.state === 'listening' ? '说完了' : '点我说话'}
+                testID="voice-mic"
+              >
+                <Text style={styles.micText}>{voice.state === 'listening' ? '✋ 说完了' : '🎤 点我说话'}</Text>
+              </Pressable>
+            </View>
+          ) : null}
           <View style={[styles.inputRow, styles.pad]}>
             <TextInput
               value={input}
@@ -153,7 +194,8 @@ const styles = StyleSheet.create({
   mine: { alignSelf: 'flex-end', backgroundColor: colors.star },
   theirs: { alignSelf: 'flex-start', backgroundColor: '#fff' },
   msgText: { flexShrink: 1, fontSize: 18, lineHeight: 26, color: colors.text },
-  quick: { paddingHorizontal: space.lg, gap: space.sm, paddingVertical: space.sm },
+  quickBar: { flexGrow: 0, flexShrink: 0 },
+  quick: { paddingHorizontal: space.lg, gap: space.sm, paddingVertical: space.sm, alignItems: 'center' },
   chip: {
     minHeight: MIN_TOUCH - 8,
     paddingHorizontal: space.lg,
@@ -162,6 +204,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  micBtn: {
+    minHeight: 64,
+    borderRadius: radius.round,
+    backgroundColor: '#FF8A3D',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: space.sm,
+  },
+  micOn: { backgroundColor: '#E0453A' },
+  micText: { color: '#fff', fontSize: 22, fontWeight: '900' },
+  listenBox: { backgroundColor: '#fff', borderRadius: radius.md, padding: space.md, marginBottom: space.sm, gap: 4 },
+  listenTitle: { fontSize: 16, fontWeight: '800', color: colors.parent },
+  listenText: { fontSize: 20, color: colors.text, minHeight: 28 },
+  voiceTip: { fontSize: 14, color: colors.wrong, marginBottom: space.xs, lineHeight: 20 },
   inputRow: { flexDirection: 'row', gap: space.sm, alignItems: 'center' },
   input: { flex: 1, minHeight: 48, backgroundColor: '#fff', borderRadius: radius.md, paddingHorizontal: space.md, fontSize: 16 },
   sendBtn: { minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.md, backgroundColor: colors.parent, justifyContent: 'center' },

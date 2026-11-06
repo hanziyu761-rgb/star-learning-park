@@ -71,6 +71,8 @@ export interface Settings {
   voiceZh: string;
   voiceEn: string;
   speechRate: 'slow' | 'normal';
+  /** 说话提问（V2.17）：家长同意后才打开麦克风，默认关闭；离线识别，声音不离开手机 */
+  voiceInput: boolean;
 }
 
 export interface ExerciseResult {
@@ -181,6 +183,7 @@ export function createEmptyProgress(): ProgressState {
       voiceZh: '',
       voiceEn: '',
       speechRate: 'slow',
+      voiceInput: false,
     },
     hidden: [],
     diagnoses: [],

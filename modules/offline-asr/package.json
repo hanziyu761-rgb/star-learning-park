@@ -1,0 +1,6 @@
+{
+  "name": "offline-asr",
+  "version": "1.0.0",
+  "private": true,
+  "description": "星星学习乐园：离线语音识别（sherpa-onnx，Apache-2.0），声音只在手机里处理"
+}

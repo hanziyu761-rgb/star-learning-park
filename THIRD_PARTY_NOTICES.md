@@ -28,3 +28,11 @@ MIT License 全文：
 - 使用内容：在开发环境用 `tools/voice/generate.py` 把课程、讲解、短文等固定朗读内容生成音频，放在 `assets/voice/`；APP 内不包含模型本身。
   使用的声音：中文女声 zf_xiaoxiao、中文男声 zm_yunxi、中文童声 zm_yunxia、英语女声 af_heart、英语男声 am_puck。
 - 生成工具（只在开发环境使用，不随 APP 发布）：kokoro-onnx（MIT）、misaki（Apache-2.0，中文拼音转音标）、jieba（MIT）、pypinyin（MIT）、cn2an（MIT）。
+
+## sherpa-onnx 与中文语音识别模型（说话提问，V2.17）
+- 识别引擎：sherpa-onnx 1.12.21 安卓库 https://github.com/k2-fsa/sherpa-onnx （Apache License 2.0，允许商用；库内含 onnxruntime，MIT License）
+  下载地址：https://huggingface.co/csukuangfj/sherpa-onnx-libs （android/aar/sherpa-onnx-1.12.21.aar）
+- 识别模型：streaming-zipformer-small-ctc-zh-int8-2025-04-01（新一代 Kaldi / icefall 训练，Apache License 2.0）
+  https://huggingface.co/csukuangfj/sherpa-onnx-streaming-zipformer-small-ctc-zh-int8-2025-04-01 （PyTorch 原版 https://huggingface.co/csukuangfj/icefall-streaming-zipformer-small-ctc-zh-2025-04-01 标注 apache-2.0）
+- 使用方式：随安卓 APP 打包（`modules/offline-asr`），在手机里离线识别；录音只在内存中处理，不保存、不上传。库和模型由 `tools/asr/fetch.sh` 下载并核对 SHA-256，不提交到 Git。
+- 未使用：识别更准的 paraformer-zh-small（来源 ModelScope 达摩院模型，许可证说明不一致，未确认可商用前不使用）。

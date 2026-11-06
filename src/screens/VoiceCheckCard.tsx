@@ -2,7 +2,7 @@
  * 家长中心 · 声音设置（V2.15 声音检查；V2.16 女声 / 男声、语速、挑选手机里的声音）。
  * APP 用手机自带的“文字转语音”朗读。不同手机的声音不一样：这里列出这台手机的中文、英语声音，家长试听后选孩子喜欢的。
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card, SectionTitle } from '@/components/ui';
 import { useProgress } from '@/progress/ProgressContext';
@@ -26,13 +26,20 @@ export function VoiceCheckCard() {
   const { state, dispatch } = useProgress();
   const s = state.settings;
   const [voices, setVoices] = useState<VoiceInfo[] | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     let alive = true;
     getVoices().then((v) => alive && setVoices(v));
     return () => {
       alive = false;
+      if (timer.current) clearTimeout(timer.current); // 离开页面时不再朗读
     };
   }, []);
+  /** 等设置生效后再读一句示例 */
+  const sampleLater = () => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => speak({ text: SAMPLE['zh-CN'], lang: 'zh-CN' }), 50);
+  };
   const set = (patch: Partial<Settings>) => dispatch({ type: 'settings/set', settings: patch });
   const check = voices ? summarizeVoices(voices.map((v) => ({ language: v.lang }))) : null;
   const mark = (ok: boolean) => (ok ? '✅ 有' : '⚠️ 没检测到');
@@ -44,8 +51,8 @@ export function VoiceCheckCard() {
     const zh = pickVoice(vs, 'zh-CN', g);
     const en = pickVoice(vs, 'en-US', g);
     set({ voiceGender: gender, voiceZh: zh, voiceEn: en });
-    // 用新的设置马上读一句（等设置生效后再读）
-    setTimeout(() => speak({ text: SAMPLE['zh-CN'], lang: 'zh-CN' }), 50);
+    // 用新的设置马上读一句
+    sampleLater();
   };
 
   const list = (lang: VoiceInfo['lang']) => (voices ?? []).filter((v) => v.lang === lang);
@@ -90,7 +97,7 @@ export function VoiceCheckCard() {
               accessibilityState={{ selected: s.speechRate === r }}
               onPress={() => {
                 set({ speechRate: r });
-                setTimeout(() => speak({ text: SAMPLE['zh-CN'], lang: 'zh-CN' }), 50);
+                sampleLater();
               }}
               style={[styles.chip, s.speechRate === r && styles.chipOn]}
             >

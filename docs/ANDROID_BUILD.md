@@ -15,11 +15,13 @@
 需要在 claude.ai「设置 → 功能 → 额外允许的域名」放行：`dl.google.com`、`maven.google.com`、`repo.maven.apache.org`、`services.gradle.org`、`plugins.gradle.org`、`plugins-artifacts.gradle.org`、`repo.reactnative.dev`。
 
 - 安卓 SDK：platform 37.0、build-tools 37.0.0、NDK 27.1.12297006；JDK 17（apt 安装）
+- （V2.17 起）先运行 `bash tools/asr/fetch.sh` 下载离线语音识别的库和模型（约 64MB，不提交到 Git）
 - `npx expo prebuild --platform android --clean` 后，`./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a`（约 32 分钟，2 核）
 - Maven Central 偶尔返回 429（请求太多）：用本机缓存代理自动重试（Gradle init 脚本把 Maven Central 和插件仓库指向 127.0.0.1）
 - 产物为测试签名（Android Debug 证书）的 APK，约 49 MB，只适合内部试用；上架需正式签名
 
 ## 方法二：Expo 云打包（在自己电脑上）
+- （V2.17 起）云打包前也要先运行 `bash tools/asr/fetch.sh`；`.easignore` 已设置为会把下载的库和模型一起上传。
 
 1. 注册 https://expo.dev 账号；安装 Node.js（LTS 版）。
 2. 解压源代码包，在文件夹里打开命令行，依次输入：

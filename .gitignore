@@ -56,3 +56,8 @@ shots-html/
 # 录音生成的中间文件
 tools/voice/out/
 __pycache__/
+
+# 离线语音识别：库和模型由 tools/asr/fetch.sh 下载
+modules/offline-asr/android/maven/
+modules/offline-asr/android/src/main/assets/asr/
+modules/*/android/build/

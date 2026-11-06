@@ -1,0 +1,60 @@
+# Expo 云打包上传时的忽略规则：与 .gitignore 相同，但要带上 tools/asr/fetch.sh 下载的离线识别库和模型
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
+
+# 打包产物
+*.apk
+*.aab
+dist-android/
+dist-single/
+star-learning-park.html
+
+# 教师审核表导出（构建产物）
+review-out/
+# 端到端截图
+shots/
+shots-html/
+
+# 录音生成的中间文件
+tools/voice/out/
+__pycache__/
+
