@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { getLesson, lessonsFor, LESSONS } from '@/content';
 import { plainText, zh } from '@/content/zh';
 import { Mascot } from '@/components/Mascot';
@@ -26,7 +26,12 @@ const SUBJECT_LABEL: Record<Subject, { text: ReturnType<typeof zh>; say: string 
   english: { text: zh('英语', 'yīng yǔ'), say: '英语' },
 };
 
+/** 首页问候语（V2.20.1）：点问候语或小喇叭朗读 */
+const GREETING = { text: '你好，欢迎来到林亨学习乐园！今天想学什么？点一点下面的大按钮吧。', lang: 'zh-CN' } as const;
+
 export default function HomeScreen() {
+  // 特别窄的手机（宽度 < 350）问候语字小一点，免得“！”单独掉到下一行
+  const narrow = useWindowDimensions().width < 350;
   const nav = useNav();
   const { status, state, loadProblem, saveFailed } = useProgress();
   // 打开首页时的时间，用于判断“今天”的任务
@@ -50,21 +55,30 @@ export default function HomeScreen() {
 
   return (
     <Screen testID="home">
-      {/* 顶部：吉祥物、问候、星星 */}
+      {/* 顶部：吉祥物、问候、星星；点问候语或小喇叭都会读出来 */}
       <View style={styles.top}>
-        <Mascot size={84} />
-        <View style={{ flex: 1, alignItems: 'flex-start' }}>
-          <DisplayTextView text={zh('你好！', 'nǐ hǎo')} size={26} />
-          <Text style={styles.appName}>林亨学习乐园</Text>
-        </View>
+        <Mascot size={narrow ? 60 : 72} />
+        <Pressable
+          style={{ flex: 1, alignItems: 'flex-start' }}
+          onPress={() => speak(GREETING)}
+          accessibilityRole="button"
+          accessibilityLabel={GREETING.text}
+          testID="home-greeting"
+        >
+          <DisplayTextView text={zh('你好，', 'nǐ hǎo')} size={narrow ? 22 : 26} />
+        </Pressable>
+        <SpeakerButton item={GREETING} size={narrow ? 40 : 46} color={colors.parent} testID="home-greeting-speak" />
         <StarBadge count={state.totalStars} testID="total-stars" />
       </View>
-      <View style={{ alignItems: 'flex-start' }}>
-        <SpeakerButton
-          item={{ text: '你好，小朋友！今天想学什么？点一点下面的大按钮吧。', lang: 'zh-CN' }}
-          size={52}
-          color={colors.parent}
-        />
+      <View style={styles.welcomeRow}>
+        <Pressable
+          style={{ flex: 1, alignItems: 'flex-start' }}
+          onPress={() => speak(GREETING)}
+          accessibilityRole="button"
+          testID="home-welcome"
+        >
+          <DisplayTextView text={zh('欢迎来到林亨学习乐园！', 'huān yíng lái dào lín hēng xué xí lè yuán')} size={narrow ? 19 : 22} />
+        </Pressable>
       </View>
 
       {loadProblem ? (
@@ -301,7 +315,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  appName: { fontSize: 15, color: colors.textSoft, fontWeight: '700', marginTop: 2 },
+  welcomeRow: { alignItems: 'flex-start' },
   continue: {
     flexDirection: 'row',
     alignItems: 'center',
