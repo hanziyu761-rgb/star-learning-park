@@ -189,3 +189,15 @@ describe('语音合成 /api/tts（CosyVoice）', () => {
     assert.equal((await post('/api/tts', { text: '没有地址的一句' }, empty.env)).status, 502);
   });
 });
+
+describe('语音合成返回 http 地址', () => {
+  it('百炼返回 http:// 的对象存储地址时改成 https://', async () => {
+    const env = {
+      DASHSCOPE_API_KEY: 'k',
+      __fetch: async () =>
+        new Response(JSON.stringify({ output: { audio: { data: '', url: 'http://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/prod/a.mp3?Expires=1' } } }), { status: 200 }),
+    };
+    const d = await (await post('/api/tts', { text: 'http 地址的一句' }, env)).json();
+    assert.equal(d.url, 'https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/prod/a.mp3?Expires=1');
+  });
+});

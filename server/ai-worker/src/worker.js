@@ -161,10 +161,14 @@ export async function handleTts(body, env) {
     throw err;
   }
   const data = await res.json();
-  const url = data?.output?.audio?.url;
+  // 百炼返回的音频地址是 http://（阿里云对象存储），安卓正式版不允许播放 http，改成 https（对象存储两种都支持）
+  const raw = data?.output?.audio?.url;
+  const url = typeof raw === 'string' ? raw.replace(/^http:\/\//, 'https://') : raw;
   if (typeof url !== 'string' || !/^https:\/\//.test(url)) {
     const err = new Error('TTS 没有返回音频地址');
     err.status = 502;
+    // 只带回结构（长字符串截断），方便对照文档排查
+    err.detail = `TTS 没有返回音频地址：${JSON.stringify(data, (k, v) => (typeof v === 'string' && v.length > 60 ? `${v.slice(0, 60)}…(${v.length})` : v)).slice(0, 400)}`;
     throw err;
   }
   if (ttsCache.size > 500) ttsCache.clear();
