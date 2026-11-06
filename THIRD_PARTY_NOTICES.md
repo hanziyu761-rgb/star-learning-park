@@ -36,3 +36,9 @@ MIT License 全文：
   https://huggingface.co/csukuangfj/sherpa-onnx-streaming-zipformer-small-ctc-zh-int8-2025-04-01 （PyTorch 原版 https://huggingface.co/csukuangfj/icefall-streaming-zipformer-small-ctc-zh-2025-04-01 标注 apache-2.0）
 - 使用方式：随安卓 APP 打包（`modules/offline-asr`），在手机里离线识别；录音只在内存中处理，不保存、不上传。库和模型由 `tools/asr/fetch.sh` 下载并核对 SHA-256，不提交到 Git。
 - 未使用：识别更准的 paraformer-zh-small（来源 ModelScope 达摩院模型，许可证说明不一致，未确认可商用前不使用）。
+
+## CMU 发音词典 CMUdict（单词卡音标，V2.18）
+- 来源：Carnegie Mellon University Pronouncing Dictionary（通过 Python 包 cmudict 1.1.3 获取）
+- 许可证：BSD 2-Clause 风格许可，Copyright (C) 1993-2015 Carnegie Mellon University. All rights reserved.
+- 使用方式：开发时用 `tools/words/phonetics.py` 查词典，把美式读音（ARPAbet）转换成国际音标，生成 `src/words/data/ipa.gen.ts`；APP 内只包含转换后的单词音标，不包含整本词典。
+- 许可要求保留版权声明：Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. THIS SOFTWARE IS PROVIDED BY CARNEGIE MELLON UNIVERSITY "AS IS" AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.

@@ -143,7 +143,7 @@ h2 small { font-size: 10pt; font-weight: normal; margin-left: 2mm; }
 <p class="sub">${esc(exam.subtitle)} · ${esc(exam.scopeText)} · 满分 ${exam.total} 分</p>
 <div class="info"><span>学校：________</span><span>班级：______</span><span>姓名：________</span><span>得分：______</span></div>
 ${sections}
-<div class="foot">试卷编号 ${esc(exam.code)}${opts.date ? ` · 生成于 ${esc(opts.date)}` : ''} · 星星学习乐园自动生成。${esc(exam.sourceNote)}</div>
+<div class="foot">试卷编号 ${esc(exam.code)}${opts.date ? ` · 生成于 ${esc(opts.date)}` : ''} · 林亨学习乐园自动生成。${esc(exam.sourceNote)}</div>
 ${answers}
 </body></html>`;
 }

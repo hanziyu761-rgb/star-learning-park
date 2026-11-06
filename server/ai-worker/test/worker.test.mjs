@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'node:test';
-import worker, { _resetRateLimit, cleanOutput, DISTRESS_REPLY, FALLBACK_REPLY, scrubPersonalInfo } from '../src/worker.js';
+import worker, { _resetRateLimit, _resetTtsCache, cleanOutput, DISTRESS_REPLY, FALLBACK_REPLY, scrubPersonalInfo } from '../src/worker.js';
 
 /** 模拟 DeepSeek：记录请求，返回指定内容 */
 function mockEnv(reply, { status = 200 } = {}) {
@@ -21,12 +21,15 @@ function mockEnv(reply, { status = 200 } = {}) {
 const post = (path, body, env, headers = {}) =>
   worker.fetch(new Request(`http://x${path}`, { method: 'POST', body: JSON.stringify(body), headers }), env);
 
-beforeEach(() => _resetRateLimit());
+beforeEach(() => {
+  _resetRateLimit();
+  _resetTtsCache();
+});
 
 describe('健康检查与配置', () => {
   it('未配置密钥时 health 显示 llm=false，业务接口返回 501', async () => {
     const h = await (await worker.fetch(new Request('http://x/api/health'), {})).json();
-    assert.deepEqual(h, { ok: true, llm: false, model: 'deepseek-flash' });
+    assert.deepEqual(h, { ok: true, llm: false, model: 'deepseek-flash', tts: false });
     const r = await post('/api/tutor/chat', { messages: [{ role: 'user', content: '你好' }] }, {});
     assert.equal(r.status, 501);
     assert.equal((await r.json()).code, 'LLM_NOT_CONFIGURED');
@@ -134,5 +137,55 @@ describe('家长学习分析', () => {
     const j = await (await post('/api/tutor/report', { grade: 1 }, env)).json();
     assert.match(j.text, /没有明显的薄弱知识点/);
     assert.equal(calls.length, 0);
+  });
+});
+
+describe('语音合成 /api/tts（CosyVoice）', () => {
+  const ttsEnv = (resp, status = 200) => {
+    const calls = [];
+    return {
+      calls,
+      env: {
+        DASHSCOPE_API_KEY: 'ds-key',
+        __fetch: async (url, init) => {
+          calls.push({ url, init, body: JSON.parse(init.body) });
+          if (status !== 200) return new Response('bad', { status });
+          return new Response(JSON.stringify(resp), { status: 200 });
+        },
+      },
+    };
+  };
+  it('未配置百炼密钥：health 显示 tts=false，接口返回 501', async () => {
+    const r = await post('/api/tts', { text: '你好' }, {});
+    assert.equal(r.status, 501);
+    assert.equal((await r.json()).code, 'TTS_NOT_CONFIGURED');
+  });
+  it('按百炼文档调用：cosyvoice-v3-flash、input 里放 text/voice/format/rate，返回音频地址；同一句话不重复合成', async () => {
+    const { env, calls } = ttsEnv({ output: { audio: { url: 'https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/a.mp3' } } });
+    const r = await post('/api/tts', { text: '小朋友你好**', voice: 'longniuniu_v3', rate: 'slow' }, env);
+    assert.equal(r.status, 200);
+    const d = await r.json();
+    assert.equal(d.url, 'https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/a.mp3');
+    assert.equal(calls[0].url, 'https://dashscope.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer');
+    assert.equal(calls[0].init.headers.Authorization, 'Bearer ds-key');
+    assert.deepEqual(calls[0].body, { model: 'cosyvoice-v3-flash', input: { text: '小朋友你好', voice: 'longniuniu_v3', format: 'mp3', sample_rate: 24000, rate: 0.9 } });
+    const r2 = await post('/api/tts', { text: '小朋友你好**', voice: 'longniuniu_v3', rate: 'slow' }, env);
+    assert.equal((await r2.json()).cached, true);
+    assert.equal(calls.length, 1);
+  });
+  it('不在名单里的音色换成默认童声；地址可用 DASHSCOPE_TTS_URL 修改；服务出错返回 502', async () => {
+    const { env, calls } = ttsEnv({ output: { audio: { url: 'https://x.example/a.mp3' } } });
+    env.DASHSCOPE_TTS_URL = 'https://ws.cn-beijing.maas.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer';
+    await post('/api/tts', { text: '你好', voice: 'someone_else' }, env);
+    assert.equal(calls[0].body.input.voice, 'longhuhu_v3');
+    assert.equal(calls[0].url, env.DASHSCOPE_TTS_URL);
+    const bad = ttsEnv({}, 401);
+    const r = await post('/api/tts', { text: '出错的一句' }, bad.env);
+    assert.equal(r.status, 502);
+    const bj = await r.json();
+    assert.equal(bj.code, 'TTS_ERROR');
+    assert.deepEqual(bj.upstream, { status: 401, detail: 'bad' });
+    const empty = ttsEnv({ output: { audio: { url: '' } } });
+    assert.equal((await post('/api/tts', { text: '没有地址的一句' }, empty.env)).status, 502);
   });
 });

@@ -20,6 +20,7 @@ import DiagnoseScreen from '@/screens/DiagnoseScreen';
 import SubjectScreen from '@/screens/SubjectScreen';
 import ExamScreen from '@/screens/ExamScreen';
 import ChallengeScreen from '@/screens/ChallengeScreen';
+import WordCardsScreen from '@/screens/WordCardsScreen';
 import { colors } from '@/theme';
 
 function renderRoute(route: Route) {
@@ -46,6 +47,8 @@ function renderRoute(route: Route) {
       return <ExamScreen />;
     case 'challenge':
       return <ChallengeScreen />;
+    case 'words':
+      return <WordCardsScreen />;
   }
 }
 

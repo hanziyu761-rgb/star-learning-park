@@ -11,12 +11,15 @@ import { LESSONS, SKILL_LABELS } from '@/content';
 import { zh } from '@/content/zh';
 import type { Exercise, Lesson, ZhText } from '@/lesson/types';
 import { KP_TEACH } from '@/knowledge/teach';
+import { ALL_CARDS } from '@/words/catalog';
 
 /**
  * 已人工确认的读法差异（词库对多音字、轻声、变调判断有误）。
  * 键为“汉字:我们的拼音:词库拼音”，只放行这个具体组合，其它错误仍会被发现。
  */
 const ACCEPTED: Record<string, string> = {
+  '头:tou:tóu': '“罐头”中“头”读轻声（《现代汉语词典》guàn·tou）',
+  '指:zhi:zhǐ': '“戒指”中“指”读轻声（《现代汉语词典》jiè·zhi）',
   '食:shi:shí': '“粮食”的“食”读轻声',
   '种:zhòng:zhǒng': '“种玉米、种下”中“种”是动词，读 zhòng',
   '西:xi:xī': '“东西”指物品时“西”读轻声',
@@ -210,6 +213,21 @@ describe('课程内容', () => {
             problems.push(`${kpId}「${chars}」第${i + 1}字：填写 ${py}，词库 ${ref[i]}`);
         });
       }
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it('单词卡（V2.18）启蒙单词的中文拼音与词库一致', () => {
+    const problems: string[] = [];
+    for (const c of ALL_CARDS.filter((x) => x.py)) {
+      const chars = [...c.zh];
+      const ref = pinyin(c.zh, { type: 'array', toneType: 'symbol', nonZh: 'removed' });
+      const ours = c.py!.split(' ');
+      expect(ours.length).toBe(chars.length);
+      ours.forEach((py, i) => {
+        if (py !== ref[i] && !ACCEPTED[`${chars[i]}:${py}:${ref[i]}`])
+          problems.push(`${c.w}「${c.zh}」第${i + 1}字：填写 ${py}，词库 ${ref[i]}`);
+      });
     }
     expect(problems).toEqual([]);
   });

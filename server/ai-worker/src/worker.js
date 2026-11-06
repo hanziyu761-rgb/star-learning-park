@@ -10,6 +10,7 @@
  *   POST /api/tutor/hint           做题提示（不给答案）/ 答对后讲解
  *   POST /api/tutor/chat           问问星星宝（学习问答、英语陪练）
  *   POST /api/tutor/report         给家长的错题分析与学习建议
+ *   POST /api/tts                  把星星宝要说的话合成为自然的语音（阿里云百炼 CosyVoice，V2.18；密钥 DASHSCOPE_API_KEY）
  *
  * 参考：ChinaStudyFree apps/server（MIT）的 OpenAI 兼容调用与未配置时返回 501 的降级方式。
  */
@@ -119,6 +120,59 @@ async function callLLM(env, messages, { maxTokens = 300, temperature = 0.6 } = {
   const choice = data?.choices?.[0];
   if (choice?.finish_reason === 'content_filter') return FALLBACK_REPLY;
   return choice?.message?.content ?? '';
+}
+
+// ---------------- 语音合成（阿里云百炼 CosyVoice，非实时 HTTP 接口） ----------------
+
+export const DEFAULT_TTS_MODEL = 'cosyvoice-v3-flash';
+const DEFAULT_TTS_URL = 'https://dashscope.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer';
+/** 允许的音色（APP 只能从这里选）：童声女孩、童声男孩、亲切女声、阳光男声 */
+export const TTS_VOICES = ['longhuhu_v3', 'longniuniu_v3', 'longxing_v3', 'longanyang'];
+const TTS_MAX = 300;
+const ttsCache = new Map(); // 同一句话 23 小时内不重复合成（音频地址 24 小时有效）
+
+export class TTSNotConfigured extends Error {}
+
+export async function handleTts(body, env) {
+  if (!env.DASHSCOPE_API_KEY) throw new TTSNotConfigured('DASHSCOPE_API_KEY 未配置');
+  const text = String(body.text ?? '')
+    .replace(/[*#>`_~]/g, '')
+    .trim()
+    .slice(0, TTS_MAX);
+  if (!text) throw new BadRequest('缺少 text');
+  const voice = TTS_VOICES.includes(body.voice) ? body.voice : TTS_VOICES[0];
+  const rate = body.rate === 'slow' ? 0.9 : 1.0;
+  const key = `${voice}|${rate}|${text}`;
+  const hit = ttsCache.get(key);
+  if (hit && hit.until > Date.now()) return { url: hit.url, cached: true };
+  const fetchImpl = env.__fetch ?? fetch;
+  const res = await fetchImpl(env.DASHSCOPE_TTS_URL || DEFAULT_TTS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.DASHSCOPE_API_KEY}` },
+    body: JSON.stringify({
+      model: env.TTS_MODEL || DEFAULT_TTS_MODEL,
+      input: { text, voice, format: 'mp3', sample_rate: 24000, rate },
+    }),
+  });
+  if (!res.ok) {
+    const err = new Error(`TTS ${res.status}`);
+    err.status = res.status;
+    err.detail = (await res.text().catch(() => '')).slice(0, 200);
+    throw err;
+  }
+  const data = await res.json();
+  const url = data?.output?.audio?.url;
+  if (typeof url !== 'string' || !/^https:\/\//.test(url)) {
+    const err = new Error('TTS 没有返回音频地址');
+    err.status = 502;
+    throw err;
+  }
+  if (ttsCache.size > 500) ttsCache.clear();
+  ttsCache.set(key, { url, until: Date.now() + 23 * 3600 * 1000 });
+  return { url };
+}
+export function _resetTtsCache() {
+  ttsCache.clear();
 }
 
 // ---------------- 频率限制（每个 Worker 实例内存级，尽力而为） ----------------
@@ -240,14 +294,14 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS } });
 }
 
-const ROUTES = { '/api/tutor/hint': handleHint, '/api/tutor/chat': handleChat, '/api/tutor/report': handleReport };
+const ROUTES = { '/api/tutor/hint': handleHint, '/api/tutor/chat': handleChat, '/api/tutor/report': handleReport, '/api/tts': handleTts };
 
 export default {
   async fetch(request, env = {}) {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
     if (url.pathname === '/api/health' && request.method === 'GET') {
-      return json({ ok: true, llm: !!env.DEEPSEEK_API_KEY, model: env.DEEPSEEK_MODEL || DEFAULT_MODEL });
+      return json({ ok: true, llm: !!env.DEEPSEEK_API_KEY, model: env.DEEPSEEK_MODEL || DEFAULT_MODEL, tts: !!env.DASHSCOPE_API_KEY });
     }
     const handler = ROUTES[url.pathname];
     if (!handler || request.method !== 'POST') return json({ ok: false, error: '接口不存在', code: 'NOT_FOUND' }, 404);
@@ -272,6 +326,12 @@ export default {
     } catch (e) {
       if (e instanceof BadRequest) return json({ ok: false, error: e.message, code: 'BAD_REQUEST' }, 400);
       if (e instanceof LLMNotConfigured) return json({ ok: false, error: 'AI 服务未配置', code: 'LLM_NOT_CONFIGURED' }, 501);
+      if (e instanceof TTSNotConfigured) return json({ ok: false, error: '语音合成未配置', code: 'TTS_NOT_CONFIGURED' }, 501);
+      if (url.pathname === '/api/tts') {
+        console.log(JSON.stringify({ route: url.pathname, ms: Date.now() - started, ok: false, status: e.status ?? 500, detail: e.detail }));
+        // 把百炼返回的错误原因（错误码和说明，不含密钥）带回去，方便家长或开发者排查
+        return json({ ok: false, error: '语音合成暂时不可用', code: 'TTS_ERROR', upstream: { status: e.status ?? 500, detail: e.detail ?? e.message } }, 502);
+      }
       console.log(JSON.stringify({ route: url.pathname, ms: Date.now() - started, ok: false, status: e.status ?? 500 }));
       const code = e.status === 402 ? 'LLM_NO_BALANCE' : e.status === 401 ? 'LLM_BAD_KEY' : e.status === 429 ? 'LLM_BUSY' : 'LLM_ERROR';
       return json({ ok: false, error: 'AI 老师暂时不可用', code }, 502);

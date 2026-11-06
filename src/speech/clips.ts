@@ -26,8 +26,17 @@ export function findClip(item: Speakable, gender: 'female' | 'male' | 'child'): 
 }
 
 let player: AudioPlayer | null = null;
+let webAudio: { pause(): void } | null = null;
 
 export function stopClip() {
+  if (webAudio) {
+    try {
+      webAudio.pause();
+    } catch {
+      // 忽略
+    }
+    webAudio = null;
+  }
   if (!player) return;
   try {
     player.pause();
@@ -63,6 +72,52 @@ export function playClip(
       if (s.didJustFinish) finish();
     });
     if (rate !== 1) p.setPlaybackRate(rate);
+    p.play();
+    return true;
+  } catch {
+    stopClip();
+    return false;
+  }
+}
+
+/** 播放网络上的音频（星星宝的云端语音，V2.18）。成功开始播放返回 true */
+export function playUri(uri: string, onDone: () => void, onFail: () => void): boolean {
+  stopClip();
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    onDone();
+  };
+  try {
+    if (Platform.OS === 'web') {
+      const AudioCtor = (globalThis as { Audio?: new (src: string) => HTMLAudioElement }).Audio;
+      if (!AudioCtor) return false;
+      const a = new AudioCtor(uri);
+      webAudio = a;
+      a.onended = finish;
+      a.onerror = () => {
+        if (!finished) {
+          finished = true;
+          onFail();
+        }
+      };
+      a.play().catch(() => {
+        if (!finished) {
+          finished = true;
+          onFail();
+        }
+      });
+      return true;
+    }
+    const p = createAudioPlayer({ uri });
+    player = p;
+    p.addListener('playbackStatusUpdate', (s) => {
+      if (s.didJustFinish) {
+        if (player === p) stopClip();
+        finish();
+      }
+    });
     p.play();
     return true;
   } catch {

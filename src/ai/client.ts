@@ -71,7 +71,7 @@ async function call<T>(cfg: AiConfig, path: string, body?: unknown, timeoutMs = 
   return data as T;
 }
 
-export async function aiHealth(cfg: AiConfig): Promise<{ llm: boolean; model: string }> {
+export async function aiHealth(cfg: AiConfig): Promise<{ llm: boolean; model: string; tts?: boolean }> {
   return call(cfg, '/api/health', undefined, 8000);
 }
 
@@ -104,4 +104,18 @@ export async function aiReport(
   req: { grade: number; weakSkills: { label: string; accuracy: number; total: number }[]; mistakes: string[] },
 ): Promise<string> {
   return (await call<{ text: string }>(cfg, '/api/tutor/report', req, 30000)).text;
+}
+
+/** 星星宝的音色（阿里云百炼 CosyVoice）：跟着家长选的女声 / 男声 / 童声 */
+export const AI_VOICE = { child: 'longhuhu_v3', female: 'longxing_v3', male: 'longanyang' } as const;
+
+const ttsCache = new Map<string, { url: string; until: number }>();
+/** 把星星宝要说的话合成为语音，返回音频地址（24 小时有效）；同一句话 23 小时内不重复请求 */
+export async function aiTts(cfg: AiConfig, text: string, voice: string, rate: 'slow' | 'normal'): Promise<string> {
+  const key = `${voice}|${rate}|${text}`;
+  const hit = ttsCache.get(key);
+  if (hit && hit.until > Date.now()) return hit.url;
+  const { url } = await call<{ url: string }>(cfg, '/api/tts', { text: text.slice(0, 300), voice, rate }, 15000);
+  ttsCache.set(key, { url, until: Date.now() + 23 * 3600 * 1000 });
+  return url;
 }

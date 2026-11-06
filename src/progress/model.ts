@@ -16,8 +16,9 @@ import { dayKey, isGraduated, newSrs, reviewSrs, type SrsState } from './srs';
  * v3 — 新增设置 settings（年级、AI 老师开关）和家长屏蔽的题库题目 hidden
  * v4 — 新增前置知识诊断记录 diagnoses；练习结果来源增加 diagnose
  * v5 — 新增思维训练：答对后“你是怎么想的”的思路选择 strategies、每日挑战记录 challenges
+ * v6 — 新增英语单词卡生词本 wordbook（V2.18）
  */
-export const PROGRESS_VERSION = 5;
+export const PROGRESS_VERSION = 6;
 
 /** 答对后孩子选的解题思路（没有对错之分） */
 export interface StrategyRecord {
@@ -73,6 +74,8 @@ export interface Settings {
   speechRate: 'slow' | 'normal';
   /** 说话提问（V2.17）：家长同意后才打开麦克风，默认关闭；离线识别，声音不离开手机 */
   voiceInput: boolean;
+  /** 星星宝用云端自然语音朗读（V2.18，阿里云百炼 CosyVoice，需服务端配置密钥；默认开启，失败时用手机语音） */
+  aiCloudVoice: boolean;
 }
 
 export interface ExerciseResult {
@@ -157,7 +160,16 @@ export interface ProgressState {
   strategies: StrategyRecord[];
   /** 每日挑战记录（v5） */
   challenges: ChallengeRecord[];
+  /** 英语单词卡生词本（v6）：按单词记；streak 为听写连续拼对次数，满 3 次自动移出 */
+  wordbook: WordbookEntry[];
 }
+
+export interface WordbookEntry {
+  w: string;
+  streak: number;
+  addedAt: number;
+}
+export const WORDBOOK_CLEAR_STREAK = 3;
 
 export const MAX_RESULTS = 2000;
 export const MAX_SESSIONS = 500;
@@ -184,11 +196,13 @@ export function createEmptyProgress(): ProgressState {
       voiceEn: '',
       speechRate: 'slow',
       voiceInput: false,
+      aiCloudVoice: true,
     },
     hidden: [],
     diagnoses: [],
     strategies: [],
     challenges: [],
+    wordbook: [],
   };
 }
 
@@ -222,6 +236,10 @@ export type ProgressAction =
       now: number;
     }
   | { type: 'settings/set'; settings: Partial<Settings> }
+  /** 生词本：收藏（红心）、移除、听写结果（拼对连续 3 次移出；拼错自动加入并清零） */
+  | { type: 'wordbook/add'; w: string; now: number }
+  | { type: 'wordbook/remove'; w: string }
+  | { type: 'wordbook/dictation'; w: string; correct: boolean; now: number }
   | { type: 'bank/hide'; questionId: string }
   | { type: 'bank/unhide-all' }
   /** 完成一次前置知识诊断：保存结论，奖励 1 颗星 */
@@ -381,6 +399,28 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
       return { ...state, strategies: strategies.length > MAX_RESULTS ? strategies.slice(-MAX_RESULTS) : strategies };
     }
 
+    case 'wordbook/add':
+      return state.wordbook.some((e) => e.w === action.w)
+        ? state
+        : { ...state, wordbook: [...state.wordbook, { w: action.w, streak: 0, addedAt: action.now }] };
+    case 'wordbook/remove':
+      return { ...state, wordbook: state.wordbook.filter((e) => e.w !== action.w) };
+    case 'wordbook/dictation': {
+      const has = state.wordbook.find((e) => e.w === action.w);
+      if (!action.correct)
+        return has
+          ? { ...state, wordbook: state.wordbook.map((e) => (e.w === action.w ? { ...e, streak: 0 } : e)) }
+          : { ...state, wordbook: [...state.wordbook, { w: action.w, streak: 0, addedAt: action.now }] };
+      if (!has) return state;
+      const streak = has.streak + 1;
+      return {
+        ...state,
+        wordbook:
+          streak >= WORDBOOK_CLEAR_STREAK
+            ? state.wordbook.filter((e) => e.w !== action.w)
+            : state.wordbook.map((e) => (e.w === action.w ? { ...e, streak } : e)),
+      };
+    }
     case 'challenge/complete': {
       const r = action.record;
       const daily = r.daily && !state.challenges.some((c) => c.daily && c.day === r.day);
@@ -496,6 +536,9 @@ export function migrateProgress(data: ProgressState, now: number = Date.now()): 
     diagnoses: Array.isArray(data.diagnoses) ? data.diagnoses : [],
     strategies: Array.isArray(data.strategies) ? data.strategies : [],
     challenges: Array.isArray(data.challenges) ? data.challenges : [],
+    wordbook: Array.isArray(data.wordbook)
+      ? data.wordbook.filter((e) => e && typeof e.w === 'string').map((e) => ({ w: e.w, streak: Number(e.streak) || 0, addedAt: Number(e.addedAt) || 0 }))
+      : [],
     version: PROGRESS_VERSION,
   };
 }

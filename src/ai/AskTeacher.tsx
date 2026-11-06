@@ -33,7 +33,7 @@ export function AskTeacher({ exercise, subject, solved }: { exercise: Exercise; 
         { subject, grade, mode, ...d, knowledgePoint: skillLabel(exercise.skill) },
       );
       setReply({ text, error: false });
-      speak({ text, lang: 'zh-CN' });
+      speak({ text, lang: 'zh-CN', cloud: true });
     } catch (e) {
       const text = e instanceof AiError ? e.message : AI_ERROR_TEXT.SERVER;
       setReply({ text, error: true });
@@ -59,7 +59,7 @@ export function AskTeacher({ exercise, subject, solved }: { exercise: Exercise; 
       {reply ? (
         <View style={[styles.bubble, reply.error && styles.bubbleError]} testID="ai-reply">
           <Text style={styles.reply}>{reply.text}</Text>
-          {!reply.error ? <SpeakerButton item={{ text: reply.text, lang: 'zh-CN' }} size={40} color={colors.parent} /> : null}
+          {!reply.error ? <SpeakerButton item={{ text: reply.text, lang: 'zh-CN', cloud: true }} size={40} color={colors.parent} /> : null}
         </View>
       ) : null}
     </View>

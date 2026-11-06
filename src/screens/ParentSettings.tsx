@@ -9,6 +9,7 @@ import { mistakeLabel } from '@/content/resolve';
 import { Card, SectionTitle } from '@/components/ui';
 import { useProgress } from '@/progress/ProgressContext';
 import { getAsr } from '@/speech/asr';
+import { speak } from '@/speech/speech';
 import { openMistakes, weakSkills } from '@/progress/stats';
 import { colors, radius, space } from '@/theme';
 
@@ -42,7 +43,7 @@ export function GradeCard() {
 
 export function AiCard() {
   const { state, dispatch } = useProgress();
-  const { aiEnabled, aiBaseUrl, grade, voiceInput } = state.settings;
+  const { aiEnabled, aiBaseUrl, grade, voiceInput, aiCloudVoice } = state.settings;
   const asr = getAsr();
   const [micNote, setMicNote] = useState('');
   const [url, setUrl] = useState(aiBaseUrl || DEFAULT_AI_BASE_URL);
@@ -60,7 +61,11 @@ export function AiCard() {
       const h = await aiHealth(cfg);
       setCheck(
         h.llm
-          ? { loading: false, ok: true, text: `连接成功：服务正常，模型 ${h.model}` }
+          ? {
+              loading: false,
+              ok: true,
+              text: `连接成功：服务正常，模型 ${h.model}。${h.tts ? '自然语音已开通。' : '自然语音还没开通（服务端没有配置阿里云百炼密钥），星星宝先用手机语音朗读。'}`,
+            }
           : { loading: false, ok: false, text: '服务能连上，但服务端还没有配置 DeepSeek 密钥。' },
       );
     } catch (e) {
@@ -120,7 +125,7 @@ export function AiCard() {
                 if (v) {
                   const p = await asr.requestPermission().catch(() => ({ granted: false }));
                   if (!p.granted) {
-                    setMicNote('没有得到麦克风权限。可以在手机“设置 → 应用 → 星星学习乐园 → 权限”里允许麦克风后再打开。');
+                    setMicNote('没有得到麦克风权限。可以在手机“设置 → 应用 → 林亨学习乐园 → 权限”里允许麦克风后再打开。');
                     return;
                   }
                 }
@@ -155,6 +160,27 @@ export function AiCard() {
           {check.text}
         </Text>
       ) : null}
+
+      <View style={styles.row}>
+        <Text style={[styles.label, { flex: 1 }]}>星星宝用自然语音</Text>
+        <Switch
+          value={aiCloudVoice}
+          onValueChange={(v) => dispatch({ type: 'settings/set', settings: { aiCloudVoice: v } })}
+          testID="ai-voice-switch"
+        />
+      </View>
+      <Text style={styles.small}>
+        打开后，星星宝的回答用阿里云 CosyVoice 合成的自然语音朗读（只发送星星宝要说的文字，按字数计费，服务端需配置百炼密钥）；声音跟着上面“声音设置”的女声 / 男声 / 童声走。连不上时自动改用手机语音。
+      </Text>
+      <Pressable
+        onPress={() => speak({ text: '小朋友你好，我是星星宝！有不会的题就来问我吧。', lang: 'zh-CN', cloud: true })}
+        disabled={!aiEnabled}
+        style={[styles.btn, !aiEnabled && { backgroundColor: colors.disabled }]}
+        accessibilityRole="button"
+        testID="ai-voice-try"
+      >
+        <Text style={styles.btnText}>试听星星宝的声音</Text>
+      </Pressable>
 
       <View style={styles.divider} />
       <Text style={styles.label}>AI 学习分析</Text>

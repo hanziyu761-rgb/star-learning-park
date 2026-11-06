@@ -56,7 +56,7 @@ function TeacherChat() {
     try {
       const reply = await aiChat({ enabled: aiEnabled, baseUrl: aiBaseUrl }, { subject, grade, messages: next });
       setMessages([...next, { role: 'assistant', content: reply }]);
-      speak({ text: reply, lang: subject === 'english' && /^[\x00-\x7F\s]+$/.test(reply) ? 'en-US' : 'zh-CN' });
+      speak({ text: reply, lang: subject === 'english' && /^[\x00-\x7F\s]+$/.test(reply) ? 'en-US' : 'zh-CN', cloud: true });
     } catch (e) {
       const msg = e instanceof AiError ? e.message : AI_ERROR_TEXT.SERVER;
       setError(msg);
@@ -107,7 +107,7 @@ function TeacherChat() {
             {messages.map((m, i) => (
               <View key={i} style={[styles.msg, m.role === 'user' ? styles.mine : styles.theirs]} testID={`msg-${m.role}`}>
                 <Text style={styles.msgText}>{m.content}</Text>
-                {m.role === 'assistant' ? <SpeakerButton item={{ text: m.content, lang: 'zh-CN' }} size={36} color={colors.parent} /> : null}
+                {m.role === 'assistant' ? <SpeakerButton item={{ text: m.content, lang: 'zh-CN', cloud: true }} size={36} color={colors.parent} /> : null}
               </View>
             ))}
             {loading ? <ActivityIndicator color={colors.parent} style={{ margin: space.md }} /> : null}

@@ -127,7 +127,7 @@ export function useVoiceInput(onText: (text: string) => void) {
 }
 
 export const VOICE_PROBLEM_TEXT: Record<Exclude<VoiceProblem, null>, string> = {
-  'no-permission': '需要打开麦克风才能说话提问。请爸爸妈妈在手机“设置 → 应用 → 星星学习乐园 → 权限”里允许麦克风。',
+  'no-permission': '需要打开麦克风才能说话提问。请爸爸妈妈在手机“设置 → 应用 → 林亨学习乐园 → 权限”里允许麦克风。',
   'no-speech': '星星宝没听清，靠近一点，再说一次吧。',
   error: '话筒出了点问题，可以再试一次，或者请爸爸妈妈帮忙打字。',
 };

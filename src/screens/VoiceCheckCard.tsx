@@ -182,7 +182,7 @@ export function VoiceCheckCard() {
           </Text>
         ) : null}
         <Text style={styles.version} testID="app-version">
-          星星学习乐园 版本 {APP_VERSION}
+          林亨学习乐园 版本 {APP_VERSION}
         </Text>
       </View>
     </Card>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { lessonsFor } from '@/content';
 import { zh } from '@/content/zh';
 import { DisplayTextView } from '@/components/PinyinText';
@@ -44,6 +44,16 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
   return (
     <Screen bg={theme.soft} testID={`subject-screen-${subject}`}>
       <Header title={TITLES[subject]} onBack={goHome} />
+      {subject === 'english' ? (
+        <Pressable onPress={() => nav.push({ name: 'words' })} style={styles.wordEntry} accessibilityRole="button" testID="words-entry">
+          <Text style={styles.wordEmoji}>🃏</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.wordTitle}>单词卡 Word Cards</Text>
+            <Text style={styles.wordSub}>翻卡片记单词 · 生词本 · 听写（启蒙 + 三～六年级）</Text>
+          </View>
+          <Text style={styles.wordGo}>›</Text>
+        </Pressable>
+      ) : null}
       {subject === 'english' ? <EnglishTracks state={state} /> : null}
       {lessons.length === 0 && subject !== 'english' ? <Notice text="这个学科还没有课程。" /> : null}
       {lessons.map((lesson) => {
@@ -90,6 +100,19 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
 }
 
 const styles = StyleSheet.create({
+  wordEntry: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    backgroundColor: '#1E4D3A',
+    borderRadius: radius.lg,
+    padding: space.md,
+    minHeight: 84,
+  },
+  wordEmoji: { fontSize: 40 },
+  wordTitle: { fontSize: 22, fontWeight: '900', color: '#fff' },
+  wordSub: { fontSize: 13, color: '#D6E6DC', marginTop: 2 },
+  wordGo: { fontSize: 36, color: '#F2C14E', fontWeight: '900' },
   card: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, gap: space.md, ...shadow },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   emoji: { fontSize: 56 },

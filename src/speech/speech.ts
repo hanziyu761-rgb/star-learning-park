@@ -5,7 +5,7 @@
  * - 第二阶段计划为核心词汇替换成真人录音（见 docs/DEVELOPMENT_PLAN.md）。
  */
 import * as Speech from 'expo-speech';
-import { playClip, stopClip } from './clips';
+import { playClip, playUri, stopClip } from './clips';
 import type { Speakable } from '@/lesson/types';
 
 /* ───── 朗读声音（V2.16）：女声 / 男声、指定声音、语速，对小朋友更友好 ───── */
@@ -58,6 +58,14 @@ export function onSpeakingChange(listener: Listener): () => void {
   return () => listeners.delete(listener);
 }
 
+/* ───── 云端自然语音（V2.18）：只用于 AI 当场生成的话；没开启、没网或出错时改用手机语音 ───── */
+type CloudVoice = (item: Speakable) => Promise<string>;
+let cloudVoice: CloudVoice | null = null;
+export function setCloudVoice(f: CloudVoice | null) {
+  cloudVoice = f;
+}
+export const hasCloudVoice = () => cloudVoice !== null;
+
 /** 打断当前朗读，立即朗读新内容 */
 export function speak(item: Speakable, onDone?: () => void, override?: { voice?: string }): void {
   const id = ++speakingId;
@@ -68,8 +76,25 @@ export function speak(item: Speakable, onDone?: () => void, override?: { voice?:
     if (id === speakingId) notify(false);
     onDone?.();
   };
+  const phone = () => phoneSpeak(item, id, finish, override);
+  if (item.cloud && cloudVoice && !override?.voice) {
+    cloudVoice(item).then(
+      (uri) => {
+        if (id !== speakingId) return; // 已经被新的朗读打断
+        if (!playUri(uri, finish, () => id === speakingId && phone())) phone();
+      },
+      () => {
+        if (id === speakingId) phone();
+      },
+    );
+    return;
+  }
   // 有预先录好的录音就放录音（慢一点 = 原速，正常 = 稍快播放）
   if (!override?.voice && playClip(item, prefs.gender, prefs.rate === 'slow' ? 1 : 1.12, finish)) return;
+  phone();
+}
+
+function phoneSpeak(item: Speakable, id: number, finish: () => void, override?: { voice?: string }) {
   try {
     Speech.speak(item.text, {
       ...speechOptions(item),

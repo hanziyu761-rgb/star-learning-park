@@ -276,7 +276,7 @@ export function buildExam(c: ExamConfig): Exam {
     total: 100,
     sections,
     sourceNote: hasOriginal
-      ? '题目来源：星星学习乐园原创题（答案由程序计算）+ ChinaStudyFree 题库（MIT，AI 生成，已自动质检，未逐题人工审核）。'
+      ? '题目来源：林亨学习乐园原创题（答案由程序计算）+ ChinaStudyFree 题库（MIT，AI 生成，已自动质检，未逐题人工审核）。'
       : '题目来源：ChinaStudyFree 题库（MIT，AI 生成，已自动质检，未逐题人工审核）。',
   };
 }

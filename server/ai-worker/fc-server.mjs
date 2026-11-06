@@ -5,6 +5,7 @@
  *   启动命令：node fc-server.mjs
  *   监听端口：FC_SERVER_PORT 或 PORT，默认 9000（函数计算 Web 函数的默认端口）
  *   环境变量：DEEPSEEK_API_KEY（必填，只在服务器上配置，不要写进代码）
+ *             DASHSCOPE_API_KEY（可选，阿里云百炼密钥：星星宝用 CosyVoice 自然语音朗读）
  *             DEEPSEEK_MODEL（可选，默认 deepseek-flash）、RATE_LIMIT_PER_MINUTE（可选，默认 20）
  */
 import http from 'node:http';
@@ -15,6 +16,9 @@ const env = {
   DEEPSEEK_MODEL: process.env.DEEPSEEK_MODEL,
   RATE_LIMIT_PER_MINUTE: process.env.RATE_LIMIT_PER_MINUTE,
   DEEPSEEK_BASE_URL: process.env.DEEPSEEK_BASE_URL, // 可选：仅测试或代理时使用
+  DASHSCOPE_API_KEY: process.env.DASHSCOPE_API_KEY, // 可选：阿里云百炼密钥，用于星星宝的自然语音（V2.18）
+  DASHSCOPE_TTS_URL: process.env.DASHSCOPE_TTS_URL,
+  TTS_MODEL: process.env.TTS_MODEL,
 };
 
 const port = Number(process.env.FC_SERVER_PORT || process.env.PORT || 9000);

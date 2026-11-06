@@ -12,6 +12,8 @@ export type SpeechLang = 'zh-CN' | 'en-US';
 export interface Speakable {
   text: string;
   lang: SpeechLang;
+  /** AI 当场生成的话（V2.18）：家长开启后用云端自然语音朗读，失败时改用手机语音 */
+  cloud?: boolean;
 }
 
 /** 一个汉字及其拼音；标点等不注音的字符 py 为空 */

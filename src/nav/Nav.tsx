@@ -23,7 +23,9 @@ export type Route =
   /** 家长中心：试卷生成 */
   | { name: 'exam' }
   /** 每日挑战（思维题） */
-  | { name: 'challenge' };
+  | { name: 'challenge' }
+  /** 英语单词卡（V2.18） */
+  | { name: 'words' };
 
 export interface Nav {
   push: (route: Route) => void;

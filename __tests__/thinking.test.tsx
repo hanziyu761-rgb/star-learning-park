@@ -55,7 +55,7 @@ describe('学习记录 v5', () => {
     delete v4.strategies;
     delete v4.challenges;
     const s = parseProgress(JSON.stringify(v4))!;
-    expect(s.version).toBe(5);
+    expect(s.version).toBe(6); // V2.18 起为 v6（新增生词本）
     expect(s.totalStars).toBe(7);
     expect(s.strategies).toEqual([]);
     expect(s.challenges).toEqual([]);

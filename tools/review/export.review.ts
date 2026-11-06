@@ -19,6 +19,7 @@ import { KP_TEACH } from '@/knowledge/teach';
 import type { DisplayText, Exercise } from '@/lesson/types';
 import { levelOfGrade, seeded } from '@/thinking/challenges';
 import { gensFor } from '@/thinking/registry';
+import { WORD_UNITS } from '@/words/catalog';
 
 interface Row {
   编号: string;
@@ -189,7 +190,24 @@ function exportGrade(grade: number) {
         rows.push(exRow(e.id, '每日挑战', SUBJ[subj], g.name, e, '原创生成器', '答案由程序计算并有单元测试核对'));
       }
 
-  // 7. 题库（本年级上、下册；一年级按新版教材单元）
+  // 7. 英语单词卡（V2.18）：一年级为启蒙单元，三～六年级为 PEP 单元（二年级与一年级相同，不重复列）
+  for (const u of WORD_UNITS.filter((x) => (grade === 1 ? x.book === '启蒙' : x.grade === grade && x.book !== '启蒙')))
+    for (const c of u.cards)
+      rows.push({
+        编号: `word/${c.id}`,
+        分类: '英语单词卡',
+        学科: '英语',
+        位置: `${u.book} ${u.title}`,
+        题型: '单词',
+        题目: `${c.w}  /${c.ipa}/`,
+        选项: '',
+        答案: c.py ? `${c.zh}（${c.py}）` : c.zh,
+        讲解: `${c.ex}  ${c.exZh}`,
+        来源: u.source === 'original' ? '原创（APP 启蒙课程单词）' : '按 PEP 单词表整理，未核对课本；意思和例句原创',
+        自动核查: c.py ? '音标由 CMU 发音词典自动生成；拼音已核对词库' : '音标由 CMU 发音词典自动生成（美式）',
+      });
+
+  // 8. 题库（本年级上、下册；一年级按新版教材单元）
   const bankStats: Record<string, unknown>[] = [];
   for (const id of BANK_INDEX.filter((b) => b.grade === grade).map((b) => b.id)) {
     const book = loadBook(id)!;
@@ -276,7 +294,7 @@ it('导出一～六年级教师审核表数据', () => {
     const rows = exportGrade(g);
     expect(rows.length).toBeGreaterThan(1000);
     // 每个年级都有讲解、题库、每日挑战
-    for (const cat of ['知识点小讲解', '题库（AI 生成）', '每日挑战'])
+    for (const cat of ['知识点小讲解', '题库（AI 生成）', '每日挑战', ...(g === 2 ? [] : ['英语单词卡'])])
       expect(rows.some((r) => r.分类 === cat)).toBe(true);
   }
 });

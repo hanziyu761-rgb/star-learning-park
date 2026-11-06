@@ -6,6 +6,7 @@ import { KP_TEACH } from '@/knowledge/teach';
 import { findClip } from '@/speech/clips';
 import { CLIP_VOICES, CLIPS } from '@/speech/voiceClips.native';
 import type { Speakable } from '@/lesson/types';
+import { ALL_CARDS } from '@/words/catalog';
 
 function speakables(node: unknown, out: Speakable[] = []): Speakable[] {
   if (Array.isArray(node)) node.forEach((n) => speakables(n, out));
@@ -29,6 +30,12 @@ it('所有课程和讲解的朗读都有录音（女声、男声、童声）', (
     ...Object.values(KP_TEACH).flatMap((ss) => ss.map((s) => ({ text: s.speak, lang: s.lang ?? 'zh-CN' }) as Speakable)),
   ];
   expect(all.length).toBeGreaterThan(1000);
+  const missing = all.filter((s) => !findClip(s, 'female') || !findClip(s, 'male') || !findClip(s, 'child'));
+  expect(missing.map((s) => s.text).slice(0, 5)).toEqual([]);
+});
+
+it('单词卡（V2.18）每个单词和例句都有美式英语女声、男声录音（童声用女声）', () => {
+  const all = ALL_CARDS.flatMap((c) => [c.w, c.ex]).map((text) => ({ text, lang: 'en-US' }) as Speakable);
   const missing = all.filter((s) => !findClip(s, 'female') || !findClip(s, 'male') || !findClip(s, 'child'));
   expect(missing.map((s) => s.text).slice(0, 5)).toEqual([]);
 });

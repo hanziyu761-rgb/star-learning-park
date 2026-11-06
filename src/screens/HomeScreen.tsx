@@ -55,7 +55,7 @@ export default function HomeScreen() {
         <Mascot size={84} />
         <View style={{ flex: 1, alignItems: 'flex-start' }}>
           <DisplayTextView text={zh('你好！', 'nǐ hǎo')} size={26} />
-          <Text style={styles.appName}>星星学习乐园</Text>
+          <Text style={styles.appName}>林亨学习乐园</Text>
         </View>
         <StarBadge count={state.totalStars} testID="total-stars" />
       </View>
