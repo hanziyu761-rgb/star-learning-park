@@ -28,6 +28,10 @@ function toHref(route: Route) {
       return '/challenge' as const;
     case 'words':
       return '/words' as const;
+    case 'games':
+      return '/games' as const;
+    case 'game':
+      return { pathname: '/game/[id]' as const, params: { id: route.id } };
     case 'practice':
       return { pathname: '/practice/[id]' as const, params: { id: route.id } };
   }

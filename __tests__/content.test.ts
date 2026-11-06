@@ -12,12 +12,17 @@ import { zh } from '@/content/zh';
 import type { Exercise, Lesson, ZhText } from '@/lesson/types';
 import { KP_TEACH } from '@/knowledge/teach';
 import { ALL_CARDS } from '@/words/catalog';
+import { GAME_TEXT } from '@/games/ui/text';
+import { GAMES } from '@/games/common';
 
 /**
  * 已人工确认的读法差异（词库对多音字、轻声、变调判断有误）。
  * 键为“汉字:我们的拼音:词库拼音”，只放行这个具体组合，其它错误仍会被发现。
  */
 const ACCEPTED: Record<string, string> = {
+  '少:shao:shǎo': '询问数量的“多少”中“少”读轻声（《现代汉语词典》duō·shao）',
+  '泡:pao:pào': '“泡泡”中第二个“泡”读轻声（《现代汉语词典》pào·pao）',
+  '睛:jing:jīng': '“眼睛”中“睛”读轻声（《现代汉语词典》yǎn·jing）',
   '头:tou:tóu': '“罐头”中“头”读轻声（《现代汉语词典》guàn·tou）',
   '指:zhi:zhǐ': '“戒指”中“指”读轻声（《现代汉语词典》jiè·zhi）',
   '食:shi:shí': '“粮食”的“食”读轻声',
@@ -229,6 +234,13 @@ describe('课程内容', () => {
           problems.push(`${c.w}「${c.zh}」第${i + 1}字：填写 ${py}，词库 ${ref[i]}`);
       });
     }
+    expect(problems).toEqual([]);
+  });
+
+  it('游戏乐园（V2.19）界面文字的拼音与词库一致', () => {
+    const problems = [...Object.values(GAME_TEXT), ...GAMES.map((g) => g.name)].flatMap((t) =>
+      checkPinyin('游戏乐园', t as ZhText),
+    );
     expect(problems).toEqual([]);
   });
 

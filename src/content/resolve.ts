@@ -10,6 +10,15 @@ import { getKp } from '@/knowledge/graph';
 import { findOralExercise, ORAL_TOPICS } from './oral';
 import { plainText } from './zh';
 import { ALL_WRITE_SETS, isWriteLessonId, traceExercise } from './writing';
+import { bubbleExercise } from '@/games/bubble';
+import { fishExercise } from '@/games/fish';
+import { kitchenExercise } from '@/games/kitchen';
+
+const GAME_SOURCES: Record<string, { subject: Subject; name: string; make: (id: string) => Exercise | null }> = {
+  'game:kitchen': { subject: 'math', name: '游戏 · 凑数小厨房', make: kitchenExercise },
+  'game:fish': { subject: 'chinese', name: '游戏 · 拼音钓鱼', make: fishExercise },
+  'game:bubble': { subject: 'english', name: '游戏 · 拼词泡泡', make: bubbleExercise },
+};
 
 export interface ResolvedExercise {
   exercise: Exercise;
@@ -21,6 +30,11 @@ export interface ResolvedExercise {
 export type ExerciseResolver = (lessonId: string, exerciseId: string) => ResolvedExercise | null;
 
 export const resolveExercise: ExerciseResolver = (lessonId, exerciseId) => {
+  const game = GAME_SOURCES[lessonId];
+  if (game) {
+    const ex = game.make(exerciseId);
+    return ex ? { exercise: ex, subject: game.subject, source: game.name } : null;
+  }
   if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:')) {
     const ex = exerciseFromKpId(exerciseId);
     const kp = getKp(lessonId.split(':')[1]);
@@ -54,6 +68,7 @@ export const resolveExercise: ExerciseResolver = (lessonId, exerciseId) => {
 
 /** 课程、题库单元、口算的显示名称 */
 export function sourceName(lessonId: string): string {
+  if (GAME_SOURCES[lessonId]) return GAME_SOURCES[lessonId].name;
   if (lessonId.startsWith('bank:')) {
     const f = findUnit(lessonId.slice(5));
     return f ? `${f.book.title} · ${f.unit.title}` : lessonId;
@@ -77,7 +92,12 @@ export function sourceName(lessonId: string): string {
 /** 错题的题目文字（家长中心显示） */
 export function mistakeLabel(lessonId: string, exerciseId: string): string {
   if (isWriteLessonId(lessonId)) return `描红：${exerciseId.replace(/^write-/, '')}`;
-  if (!lessonId.startsWith('bank:') && !lessonId.startsWith('oral:')) return exerciseLabel(lessonId, exerciseId);
+  if (lessonId.startsWith('game:bubble')) {
+    const r = resolveExercise(lessonId, exerciseId);
+    return r && r.exercise.kind === 'choice' ? `拼写：${r.exercise.answerId}` : exerciseId;
+  }
+  if (!lessonId.startsWith('bank:') && !lessonId.startsWith('oral:') && !lessonId.startsWith('game:'))
+    return exerciseLabel(lessonId, exerciseId);
   const r = resolveExercise(lessonId, exerciseId);
   if (!r) return exerciseId;
   const e = r.exercise;

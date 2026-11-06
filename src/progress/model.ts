@@ -17,8 +17,9 @@ import { dayKey, isGraduated, newSrs, reviewSrs, type SrsState } from './srs';
  * v4 — 新增前置知识诊断记录 diagnoses；练习结果来源增加 diagnose
  * v5 — 新增思维训练：答对后“你是怎么想的”的思路选择 strategies、每日挑战记录 challenges
  * v6 — 新增英语单词卡生词本 wordbook（V2.18）
+ * v7 — 新增游戏乐园记录 games；练习结果来源增加 game（V2.19）
  */
-export const PROGRESS_VERSION = 6;
+export const PROGRESS_VERSION = 7;
 
 /** 答对后孩子选的解题思路（没有对错之分） */
 export interface StrategyRecord {
@@ -74,6 +75,8 @@ export interface Settings {
   speechRate: 'slow' | 'normal';
   /** 说话提问（V2.17）：家长同意后才打开麦克风，默认关闭；离线识别，声音不离开手机 */
   voiceInput: boolean;
+  /** 游戏乐园每天最多玩几分钟（V2.19，默认 15；0 = 不限制，只提醒休息） */
+  gameMinutes: number;
   /** 星星宝用云端自然语音朗读（V2.18，阿里云百炼 CosyVoice，需服务端配置密钥；默认开启，失败时用手机语音） */
   aiCloudVoice: boolean;
 }
@@ -87,7 +90,7 @@ export interface ExerciseResult {
   attempts: number;
   at: number;
   /** 来自课程还是“今日复习”；v1 旧记录没有此字段，视为课程 */
-  source?: 'lesson' | 'review' | 'diagnose';
+  source?: 'lesson' | 'review' | 'diagnose' | 'game';
 }
 
 export interface MistakeEntry {
@@ -162,7 +165,24 @@ export interface ProgressState {
   challenges: ChallengeRecord[];
   /** 英语单词卡生词本（v6）：按单词记；streak 为听写连续拼对次数，满 3 次自动移出 */
   wordbook: WordbookEntry[];
+  /** 游戏乐园每局记录（v7）：用来算每天玩了多久、难度跟着孩子走 */
+  games: GameRecord[];
 }
+
+export type GameId = 'kitchen' | 'fish' | 'bubble';
+export interface GameRecord {
+  game: GameId;
+  /** 结束时间 */
+  at: number;
+  /** 这局用时（秒，最多计 5 分钟） */
+  sec: number;
+  stars: number;
+  /** 一次做对的题数 / 总题数 */
+  correct: number;
+  total: number;
+  level: number;
+}
+export const MAX_GAMES = 500;
 
 export interface WordbookEntry {
   w: string;
@@ -196,6 +216,7 @@ export function createEmptyProgress(): ProgressState {
       voiceEn: '',
       speechRate: 'slow',
       voiceInput: false,
+      gameMinutes: 15,
       aiCloudVoice: true,
     },
     hidden: [],
@@ -203,6 +224,7 @@ export function createEmptyProgress(): ProgressState {
     strategies: [],
     challenges: [],
     wordbook: [],
+    games: [],
   };
 }
 
@@ -224,7 +246,7 @@ export type ProgressAction =
       firstTryCorrect: boolean;
       attempts: number;
       now: number;
-      source?: 'lesson' | 'review' | 'diagnose';
+      source?: 'lesson' | 'review' | 'diagnose' | 'game';
     }
   | { type: 'lesson/complete'; lessonId: string; subject: Subject; now: number }
   /** 完成一轮题库或口算练习（不影响“继续学习”的课程） */
@@ -237,6 +259,8 @@ export type ProgressAction =
     }
   | { type: 'settings/set'; settings: Partial<Settings> }
   /** 生词本：收藏（红心）、移除、听写结果（拼对连续 3 次移出；拼错自动加入并清零） */
+  /** 玩完一局游戏：保存记录，奖励这局得到的星星 */
+  | { type: 'game/complete'; record: GameRecord }
   | { type: 'wordbook/add'; w: string; now: number }
   | { type: 'wordbook/remove'; w: string }
   | { type: 'wordbook/dictation'; w: string; correct: boolean; now: number }
@@ -399,6 +423,11 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
       return { ...state, strategies: strategies.length > MAX_RESULTS ? strategies.slice(-MAX_RESULTS) : strategies };
     }
 
+    case 'game/complete': {
+      const r = { ...action.record, sec: Math.max(0, Math.min(300, Math.round(action.record.sec))), stars: Math.max(0, Math.min(3, action.record.stars)) };
+      const games = [...state.games, r];
+      return { ...state, totalStars: state.totalStars + r.stars, games: games.length > MAX_GAMES ? games.slice(-MAX_GAMES) : games };
+    }
     case 'wordbook/add':
       return state.wordbook.some((e) => e.w === action.w)
         ? state
@@ -539,6 +568,7 @@ export function migrateProgress(data: ProgressState, now: number = Date.now()): 
     wordbook: Array.isArray(data.wordbook)
       ? data.wordbook.filter((e) => e && typeof e.w === 'string').map((e) => ({ w: e.w, streak: Number(e.streak) || 0, addedAt: Number(e.addedAt) || 0 }))
       : [],
+    games: Array.isArray(data.games) ? data.games.filter((g) => g && typeof g.game === 'string') : [],
     version: PROGRESS_VERSION,
   };
 }

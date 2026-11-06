@@ -21,6 +21,8 @@ import SubjectScreen from '@/screens/SubjectScreen';
 import ExamScreen from '@/screens/ExamScreen';
 import ChallengeScreen from '@/screens/ChallengeScreen';
 import WordCardsScreen from '@/screens/WordCardsScreen';
+import GamesScreen from '@/screens/GamesScreen';
+import GameScreen from '@/screens/GameScreen';
 import { colors } from '@/theme';
 
 function renderRoute(route: Route) {
@@ -49,6 +51,10 @@ function renderRoute(route: Route) {
       return <ChallengeScreen />;
     case 'words':
       return <WordCardsScreen />;
+    case 'games':
+      return <GamesScreen />;
+    case 'game':
+      return <GameScreen id={route.id} />;
   }
 }
 

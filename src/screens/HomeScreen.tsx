@@ -175,6 +175,25 @@ export default function HomeScreen() {
         {thinking.doneToday ? <Text style={styles.play}>✅</Text> : <Text style={styles.play}>▶️</Text>}
       </Pressable>
 
+      {/* 游戏乐园（V2.19） */}
+      <Pressable
+        testID="games-entry"
+        accessibilityRole="button"
+        onPress={() => {
+          tapFeedback();
+          speak({ text: '游戏乐园', lang: 'zh-CN' });
+          nav.push({ name: 'games' });
+        }}
+        style={[styles.continue, { borderColor: '#E8772E' }]}
+      >
+        <Text style={{ fontSize: 40 }}>🎮</Text>
+        <View style={{ flex: 1 }}>
+          <DisplayTextView text={zh('游戏乐园', 'yóu xì lè yuán')} size={22} color="#E8772E" />
+          <Text style={styles.continueSub}>凑数小厨房 · 拼音钓鱼 · 拼词泡泡</Text>
+        </View>
+        <Text style={styles.play}>▶️</Text>
+      </Pressable>
+
       {/* AI 老师入口：家长开启后才显示 */}
       {state.settings.aiEnabled ? (
         <Pressable

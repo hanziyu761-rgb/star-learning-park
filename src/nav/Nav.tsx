@@ -25,7 +25,10 @@ export type Route =
   /** 每日挑战（思维题） */
   | { name: 'challenge' }
   /** 英语单词卡（V2.18） */
-  | { name: 'words' };
+  | { name: 'words' }
+  /** 游戏乐园（V2.19）与某一个游戏 */
+  | { name: 'games' }
+  | { name: 'game'; id: 'kitchen' | 'fish' | 'bubble' };
 
 export interface Nav {
   push: (route: Route) => void;

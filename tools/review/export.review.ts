@@ -20,6 +20,7 @@ import type { DisplayText, Exercise } from '@/lesson/types';
 import { levelOfGrade, seeded } from '@/thinking/challenges';
 import { gensFor } from '@/thinking/registry';
 import { WORD_UNITS } from '@/words/catalog';
+import { POLY } from '@/games/fish';
 
 interface Row {
   编号: string;
@@ -207,7 +208,24 @@ function exportGrade(grade: number) {
         自动核查: c.py ? '音标由 CMU 发音词典自动生成；拼音已核对词库' : '音标由 CMU 发音词典自动生成（美式）',
       });
 
-  // 8. 题库（本年级上、下册；一年级按新版教材单元）
+  // 8. 游戏乐园 · 多音字钓鱼（三年级起，V2.19）：句子和读音为人工编写
+  if (grade >= 3)
+    for (const p of POLY)
+      rows.push({
+        编号: `game/fish/${p.char}/${p.py}`,
+        分类: '游戏（多音字）',
+        学科: '语文',
+        位置: `多音字“${p.char}”`,
+        题型: '多音字',
+        题目: p.sentence,
+        选项: [...new Set(POLY.filter((x) => x.char === p.char).map((x) => x.py))].join(' / '),
+        答案: p.py,
+        讲解: '',
+        来源: '原创（人工编写）',
+        自动核查: '读音在词库该字的读音里；句中该字只出现一次',
+      });
+
+  // 9. 题库（本年级上、下册；一年级按新版教材单元）
   const bankStats: Record<string, unknown>[] = [];
   for (const id of BANK_INDEX.filter((b) => b.grade === grade).map((b) => b.id)) {
     const book = loadBook(id)!;

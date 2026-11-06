@@ -20,6 +20,9 @@ export function lessonsFor(subject: Subject): Lesson[] {
 
 /** 知识点名称（家长中心显示用） */
 export const SKILL_LABELS: Record<string, string> = {
+  'game.kitchen': '游戏：凑数小厨房',
+  'game.fish': '游戏：拼音钓鱼',
+  'game.bubble': '游戏：拼词泡泡',
   'math.count': '数数与数量对应',
   'math.compare': '比多少',
   'math.add': '5 以内加法',

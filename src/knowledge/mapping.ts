@@ -83,6 +83,12 @@ export function kpForRecord(lessonId: string, exerciseId: string, skill: string)
     return m ? m[1] : null;
   }
   if (lessonId.startsWith('oral:')) return ORAL_MAP[lessonId.slice(5)] ?? null;
+  // 游戏乐园（V2.19）：一年级凑数归到“10 以内分与合 / 20 以内进位加”，拼音钓鱼归到汉语拼音
+  if (lessonId === 'game:kitchen') {
+    const lv = Number(/^kitchen:(\d+):/.exec(exerciseId)?.[1]);
+    return lv <= 2 ? 'm1.compose10' : lv === 3 ? 'm1.carry20' : null;
+  }
+  if (lessonId === 'game:fish') return /^fish:.:[^:]+$/u.test(exerciseId) ? 'c1.a4' : null;
   if (lessonId.startsWith('bank:math-g1')) {
     const label = skill.split(':').slice(2).join(':');
     const ex = findBankExercise(lessonId, exerciseId)?.exercise;

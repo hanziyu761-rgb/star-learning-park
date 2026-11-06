@@ -12,6 +12,7 @@ import { AiCard, GradeCard, HiddenCard } from './ParentSettings';
 import { KnowledgeCard } from './ParentKnowledge';
 import { ThinkingCard } from './ParentThinking';
 import { VoiceCheckCard } from './VoiceCheckCard';
+import { GameParentCard } from '@/games/ui/GameParentCard';
 import { trackProgress } from './EnglishTracks';
 import { STARTER_NOTE, TRACK_INFO } from '@/content/englishStarter';
 import { useProgress } from '@/progress/ProgressContext';
@@ -212,6 +213,7 @@ function ParentDashboard() {
 
       <GradeCard />
       <VoiceCheckCard />
+      <GameParentCard />
       <AiCard />
       <HiddenCard />
 

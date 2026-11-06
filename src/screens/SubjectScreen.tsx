@@ -10,7 +10,10 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { BankSection, GraphicsSection, OralSection, WriteSection } from './PracticeSections';
 import { EnglishTracks, ReadingHouse } from './EnglishTracks';
+import { GAME_BY_ID } from '@/games/common';
 import { colors, radius, shadow, space, subjectTheme } from '@/theme';
+
+const GAME_OF = { math: 'kitchen', chinese: 'fish', english: 'bubble' } as const;
 
 const TITLES: Record<Subject, ReturnType<typeof zh>> = {
   math: zh('数学乐园', 'shù xué lè yuán'),
@@ -44,6 +47,19 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
   return (
     <Screen bg={theme.soft} testID={`subject-screen-${subject}`}>
       <Header title={TITLES[subject]} onBack={goHome} />
+      <Pressable
+        onPress={() => nav.push({ name: 'game', id: GAME_OF[subject] })}
+        style={styles.gameEntry}
+        accessibilityRole="button"
+        testID={`subject-game-${subject}`}
+      >
+        <Text style={styles.wordEmoji}>{GAME_BY_ID[GAME_OF[subject]].emoji}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.gameTitle}>游戏：{GAME_BY_ID[GAME_OF[subject]].namePlain}</Text>
+          <Text style={styles.gameSub}>{GAME_BY_ID[GAME_OF[subject]].intro}</Text>
+        </View>
+        <Text style={styles.gameGo}>▶️</Text>
+      </Pressable>
       {subject === 'english' ? (
         <Pressable onPress={() => nav.push({ name: 'words' })} style={styles.wordEntry} accessibilityRole="button" testID="words-entry">
           <Text style={styles.wordEmoji}>🃏</Text>
@@ -100,6 +116,20 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
 }
 
 const styles = StyleSheet.create({
+  gameEntry: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    backgroundColor: '#fff',
+    borderRadius: radius.lg,
+    borderWidth: 3,
+    borderColor: '#E8772E',
+    padding: space.md,
+    minHeight: 76,
+  },
+  gameTitle: { fontSize: 19, fontWeight: '900', color: '#E8772E' },
+  gameSub: { fontSize: 13, color: colors.textSoft, marginTop: 2 },
+  gameGo: { fontSize: 26 },
   wordEntry: {
     flexDirection: 'row',
     alignItems: 'center',
