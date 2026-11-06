@@ -6,6 +6,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header, LoadingView } from '@/components/Screen';
+import { useLayout } from '@/components/useLayout';
 import { zh } from '@/content/zh';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
@@ -36,6 +37,7 @@ export default function WordCardsScreen() {
 function WordCards() {
   const nav = useNav();
   const insets = useSafeAreaInsets();
+  const L = useLayout();
   const { state, dispatch } = useProgress();
   const startGrade = state.settings.grade <= 2 ? 1 : state.settings.grade;
   const [grade, setGrade] = useState(startGrade);
@@ -97,10 +99,12 @@ function WordCards() {
   };
 
   const pct = round.total ? round.remembered.length / round.total : 0;
+  // 卡片高度：手机 400；平板竖屏 520；平板横屏按屏幕高度
+  const cardHeight = L.wide ? Math.max(360, Math.min(L.height - 250, 560)) : L.tablet ? 520 : 400;
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 8 }]} testID="wc-screen">
-      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
+      <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24, maxWidth: L.wide ? 1280 : L.tablet ? 760 : undefined }]}>
         <Header title={zh('单词卡', 'dān cí kǎ')} onBack={nav.back} />
 
         {/* 年级 */}
@@ -138,6 +142,103 @@ function WordCards() {
           ))}
         </ScrollView>
 
+        {L.wide ? (
+          // 平板横屏：左边卡片，右边进度和按钮
+          <View style={styles.wideRow}>
+            <View style={{ flex: 1.25 }}>
+        {/* 卡片 */}
+        {card ? (
+          <WordCardView
+            key={card.id}
+            card={card}
+            grade={grade}
+            flipped={flipped}
+            onFlip={() => setFlipped((f) => !f)}
+            saved={saved}
+            onToggleSave={toggleSave}
+            times={timesShown(round, card.id)}
+            onJump={jumpToWord}
+            height={cardHeight}
+            k={L.k}
+          />
+        ) : (
+          <View style={[styles.doneCard, { height: cardHeight }]} testID="wc-all-done">
+            <Text style={styles.doneText}>🎉 本单元全部记住啦！</Text>
+            <Pressable onPress={() => openUnit(unitId)} style={styles.primary} accessibilityRole="button" testID="wc-again">
+              <Text style={styles.primaryText}>🔁 再刷一遍</Text>
+            </Pressable>
+          </View>
+        )}
+
+            </View>
+            <View style={{ flex: 1, gap: 14 }}>
+        {/* 进度条 + 串起来看 */}
+        <View style={styles.progressRow}>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={styles.progressText} testID="wc-progress">
+              本单元已记住 {round.remembered.length}/{round.total}
+            </Text>
+            <View style={styles.bar}>
+              <View style={[styles.barFill, { width: `${Math.round(pct * 100)}%` }]} />
+            </View>
+          </View>
+          <Pressable onPress={() => setShowMap(true)} style={styles.mapBtn} accessibilityRole="button" testID="wc-map">
+            <Text style={styles.mapText}>🧩 串起来看</Text>
+          </Pressable>
+        </View>
+
+        {/* 翻到背面后：没记住 / 记住了 */}
+        {card && flipped ? (
+          <View style={styles.judgeRow}>
+            <Pressable
+              onPress={forgetCard}
+              style={[styles.judge, styles.forget]}
+              accessibilityRole="button"
+              testID="wc-forget"
+            >
+              <Text style={styles.judgeText}>😣 没记住</Text>
+            </Pressable>
+            <Pressable onPress={() => step(remember)} style={[styles.judge, styles.remember]} accessibilityRole="button" testID="wc-remember">
+              <Text style={styles.judgeText}>😀 记住了</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        <View style={styles.actions}>
+          <Pressable onPress={() => card && setFlipped((f) => !f)} disabled={!card} style={styles.action} accessibilityRole="button" testID="wc-flip">
+            <Text style={styles.actionText}>翻转卡片</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => step((r) => randomNext(r, Math.random))}
+            disabled={!card || round.queue.length <= 1}
+            style={[styles.action, (!card || round.queue.length <= 1) && { opacity: 0.45 }]}
+            accessibilityRole="button"
+            testID="wc-random"
+          >
+            <Text style={styles.actionText}>随机下一个</Text>
+          </Pressable>
+          <Pressable onPress={() => setShowBook(true)} style={styles.action} accessibilityRole="button" testID="wc-book">
+            <Text style={styles.actionText}>查看生词本{state.wordbook.length ? `（${state.wordbook.length}）` : ''}</Text>
+          </Pressable>
+        </View>
+        <Pressable
+          onPress={() => setDictation({ title: `听写 · ${unit.title}`, pool: unit.cards })}
+          style={styles.primary}
+          accessibilityRole="button"
+          testID="wc-dictation"
+        >
+          <Text style={styles.primaryText}>✍️ 开始听写（本单元随机 10 个）</Text>
+        </Pressable>
+        <Text style={styles.source} testID="wc-source">
+          {unit.source === 'original'
+            ? '启蒙单词：本 APP 英语启蒙课程里的单词，例句为原创。'
+            : '单词按通行的人教版 PEP 单词表整理，未逐一核对课本原书；中文意思和例句为原创。'}
+          音标由程序按 CMU 发音词典自动生成（美式）。
+        </Text>
+            </View>
+          </View>
+        ) : (
+          <>
         {/* 进度条 + 串起来看 */}
         <View style={styles.progressRow}>
           <View style={{ flex: 1, gap: 4 }}>
@@ -165,9 +266,11 @@ function WordCards() {
             onToggleSave={toggleSave}
             times={timesShown(round, card.id)}
             onJump={jumpToWord}
+            height={cardHeight}
+            k={L.k}
           />
         ) : (
-          <View style={styles.doneCard} testID="wc-all-done">
+          <View style={[styles.doneCard, { height: cardHeight }]} testID="wc-all-done">
             <Text style={styles.doneText}>🎉 本单元全部记住啦！</Text>
             <Pressable onPress={() => openUnit(unitId)} style={styles.primary} accessibilityRole="button" testID="wc-again">
               <Text style={styles.primaryText}>🔁 再刷一遍</Text>
@@ -223,6 +326,8 @@ function WordCards() {
             : '单词按通行的人教版 PEP 单词表整理，未逐一核对课本原书；中文意思和例句为原创。'}
           音标由程序按 CMU 发音词典自动生成（美式）。
         </Text>
+          </>
+        )}
       </ScrollView>
 
       <WordbookModal
@@ -253,7 +358,8 @@ function WordCards() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: WC.bg },
-  page: { paddingHorizontal: 16, gap: 14 },
+  page: { paddingHorizontal: 16, gap: 14, width: '100%', alignSelf: 'center' },
+  wideRow: { flexDirection: 'row', gap: 20, alignItems: 'flex-start' },
   books: { flexDirection: 'row', gap: 6 },
   book: { flex: 1, alignItems: 'center', minHeight: 44, paddingHorizontal: 2, borderRadius: 22, borderWidth: 2, borderColor: WC.main, backgroundColor: '#fff', justifyContent: 'center' },
   bookOn: { backgroundColor: WC.main },

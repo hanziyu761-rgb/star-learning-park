@@ -76,7 +76,7 @@ def flip(page):
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get("CHROME") or None, args=["--no-sandbox"])
     errors = []
-    for (w, h) in [(360, 640), (390, 820)]:
+    for (w, h) in [(360, 640), (390, 820), (800, 1280), (1280, 800), (1024, 1366), (1366, 1024)]:
         ctx = b.new_context(viewport={"width": w, "height": h}, device_scale_factor=2)
         ctx.add_init_script(SPY)
         page = ctx.new_page()
@@ -88,8 +88,12 @@ with sync_playwright() as p:
         flip(page)
         expect(tid(page, "wc-remember")).to_be_visible()
         n2 = no_overlap(page, f"{w}×{h} 背面")
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), f"{w}×{h} 横向超出屏幕"
+        if w > h and w >= 900:  # 平板横屏：卡片在左、按钮在右
+            card = tid(page, "wc-card").bounding_box(); rem = tid(page, "wc-remember").bounding_box()
+            assert card["x"] + card["width"] <= rem["x"], f"{w}×{h} 没有变成左右两栏"
         page.screenshot(path=f"{OUT}/wc-{w}-back.png", full_page=True)
-        ok(f"{w}×{h}：正面 {n1} 个、背面 {n2} 个按钮，互不重叠")
+        ok(f"{w}×{h}：正面 {n1} 个、背面 {n2} 个按钮，互不重叠、不超出屏幕" + ("（左右两栏）" if w > h and w >= 900 else ""))
         ctx.close()
 
     ctx = b.new_context(viewport={"width": 390, "height": 820}, device_scale_factor=2)

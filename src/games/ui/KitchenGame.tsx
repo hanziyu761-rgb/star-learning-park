@@ -5,6 +5,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { DisplayTextView } from '@/components/PinyinText';
+import { useLayout } from '@/components/useLayout';
 import { DragArea, Draggable, DropZone, justDragged } from '@/drag/DragArea';
 import { ROUND_SIZE } from '@/games/common';
 import { fmt, makeOrder, orderExerciseId, potState, type Ingredient } from '@/games/kitchen';
@@ -16,6 +17,7 @@ const MAIN = '#E8772E';
 const say = (t: string) => speak({ text: t.replace(/\./g, '点'), lang: 'zh-CN' });
 
 export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProps) {
+  const L = useLayout();
   const [q, setQ] = useState(0);
   const order = useMemo(() => makeOrder(level, rand, q), [level, rand, q]);
   const [pot, setPot] = useState<string[]>([]);
@@ -62,24 +64,25 @@ export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProp
   };
 
   return (
-    <DragArea style={styles.root}>
+    <DragArea style={[styles.root, L.tablet && !L.wide && styles.tabletCol, L.wide && styles.wideRoot]}>
+      <View style={[{ gap: 10 }, L.wide && { flex: 1, justifyContent: 'center' }]}>
       <Text style={styles.progress} testID="kitchen-progress">
         第 {q + 1} / {ROUND_SIZE} 位客人
       </Text>
       <View style={styles.customerRow}>
-        <Text style={styles.customer}>{order.customer}</Text>
+        <Text style={[styles.customer, L.tablet && { fontSize: 84 }]}>{order.customer}</Text>
         <Pressable onPress={() => say(`我要${target}`)} style={styles.orderCard} accessibilityRole="button" testID="kitchen-order">
           <DisplayTextView text={gt('iWant', grade)} size={18} />
-          <Text style={styles.target} testID="kitchen-target">
+          <Text style={[styles.target, L.tablet && { fontSize: 60 }]} testID="kitchen-target">
             {target}
           </Text>
         </Pressable>
       </View>
 
-      <DropZone id="pot" style={[styles.pot, smoke && styles.potSmoke, done && styles.potDone]} testID="kitchen-pot">
+      <DropZone id="pot" style={[styles.pot, L.tablet && { minHeight: 170 }, smoke && styles.potSmoke, done && styles.potDone]} testID="kitchen-pot">
         <Text style={styles.potIcon}>{done ? '🍲' : smoke ? '💨' : '🥘'}</Text>
         <View style={styles.potItems}>
-          {inPot.length === 0 ? <DisplayTextView text={gt('tapFood', grade)} size={15} color="#8A6A50" /> : null}
+          {inPot.length === 0 ? <DisplayTextView text={gt('tapFood', grade)} size={15} color="#F6E3D3" /> : null}
           {inPot.map((it, i) => (
             <React.Fragment key={it.id}>
               {i > 0 ? <Text style={styles.plus}>+</Text> : null}
@@ -102,7 +105,9 @@ export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProp
           </Text>
         ) : null}
       </View>
+      </View>
 
+      <View style={[{ gap: 10 }, L.wide && { flex: 1, justifyContent: 'center' }]}>
       {done ? (
         <Pressable onPress={next} style={styles.nextBtn} accessibilityRole="button" testID="kitchen-next">
           <DisplayTextView text={q + 1 >= ROUND_SIZE ? gt('finishedRound', grade) : gt('nextGuest', grade)} size={20} color="#fff" />
@@ -112,10 +117,10 @@ export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProp
           {order.items
             .filter((it) => !pot.includes(it.id))
             .map((it) => (
-              <Draggable key={it.id} onDrop={(zone) => (zone === 'pot' ? (put(it), true) : false)} style={styles.foodWrap}>
+              <Draggable key={it.id} onDrop={(zone) => (zone === 'pot' ? (put(it), true) : false)} style={[styles.foodWrap, L.wide && { width: '45%' }]}>
                 <Pressable
                   onPress={() => !justDragged() && put(it)}
-                  style={styles.food}
+                  style={[styles.food, L.tablet && { minHeight: 120 }]}
                   accessibilityRole="button"
                   accessibilityLabel={`${fmt(it.units, order.scale)}`}
                   testID={`food-${it.id}`}
@@ -126,6 +131,7 @@ export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProp
             ))}
         </View>
       )}
+      </View>
     </DragArea>
   );
 }
@@ -149,6 +155,8 @@ function FoodFace({ it, scale }: { it: Ingredient; scale: number }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 14, gap: 10 },
+  tabletCol: { width: '100%', maxWidth: 760, alignSelf: 'center', justifyContent: 'center' },
+  wideRoot: { flexDirection: 'row', gap: 28, paddingHorizontal: 28, alignItems: 'stretch' },
   progress: { textAlign: 'center', fontSize: 14, color: '#8A6A50', fontWeight: '700' },
   customerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
   customer: { fontSize: 64 },

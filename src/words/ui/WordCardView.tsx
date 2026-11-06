@@ -30,11 +30,12 @@ export function sayWord(w: string) {
 
 /** 正面的大单词：颜色词用本色，其他词按段换色；意思和样子有关的词改变样子 */
 export function WordArt({ w, size = 56 }: { w: string; size?: number }) {
+  const longCap = Math.floor((560 * size) / 56 / Math.max(w.length, 6));
   const lw = w.toLowerCase();
   const color = COLOR_WORDS[lw];
   const look = LOOK_WORDS[lw];
   const segs = segments(w);
-  const base: TextStyle = { fontSize: Math.min(size, Math.max(30, Math.floor(560 / Math.max(w.length, 6)))), fontWeight: '900' };
+  const base: TextStyle = { fontSize: Math.min(size, Math.max(30, longCap)), fontWeight: '900' };
   const outline: TextStyle | undefined = color?.outline
     ? { textShadowColor: '#4A3A00', textShadowRadius: 2, textShadowOffset: { width: 1, height: 1 } }
     : undefined;
@@ -69,6 +70,8 @@ export function WordCardView({
   onToggleSave,
   times,
   onJump,
+  height = 400,
+  k = 1,
 }: {
   card: WordCard;
   grade: number;
@@ -78,6 +81,10 @@ export function WordCardView({
   onToggleSave: () => void;
   times: number;
   onJump: (word: string) => void;
+  /** 卡片高度（平板更高） */
+  height?: number;
+  /** 平板放大系数 */
+  k?: number;
 }) {
   const [turn] = useState(() => new Animated.Value(flipped ? 1 : 0));
   useEffect(() => {
@@ -99,7 +106,7 @@ export function WordCardView({
   const conf = confusables(card.w);
 
   return (
-    <View style={styles.wrap} testID="wc-card">
+    <View style={[styles.wrap, { height }]} testID="wc-card">
       {/* 正面 */}
       <Animated.View
         style={[styles.face, styles.front, { opacity: frontOpacity, transform: [{ perspective: 1200 }, { rotateY: front }] }]}
@@ -110,7 +117,7 @@ export function WordCardView({
       >
         <TopBar times={times} saved={saved} onToggleSave={onToggleSave} onSpeak={() => sayWord(card.w)} />
         <Pressable style={styles.center} onPress={onFlip} accessibilityRole="button" accessibilityLabel="翻转卡片">
-          <WordArt w={card.w} />
+          <WordArt w={card.w} size={Math.round(56 * k)} />
           {card.ipa ? (
             <Text style={styles.ipa} testID="wc-ipa">
               /{card.ipa}/ <Text style={styles.ipaTag}>美式</Text>

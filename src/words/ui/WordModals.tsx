@@ -186,7 +186,7 @@ export function MapModal({ visible, unit, onClose, onOpen }: { visible: boolean;
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(10,30,22,0.55)', justifyContent: 'center', padding: 16 },
-  sheet: { backgroundColor: WC.bg, borderRadius: 24, padding: 16, gap: 12, maxHeight: '92%' },
+  sheet: { backgroundColor: WC.bg, borderRadius: 24, padding: 16, gap: 12, maxHeight: '92%', width: '100%', maxWidth: 640, alignSelf: 'center' },
   head: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { flex: 1, fontSize: 21, fontWeight: '900', color: WC.main },
   close: { minHeight: 44, paddingHorizontal: 14, borderRadius: 22, backgroundColor: '#fff', justifyContent: 'center', borderWidth: 2, borderColor: WC.line },

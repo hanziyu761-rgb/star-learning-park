@@ -6,6 +6,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Animated, Easing, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { DisplayTextView } from '@/components/PinyinText';
+import { useLayout } from '@/components/useLayout';
 import { ROUND_SIZE } from '@/games/common';
 import { fishRound } from '@/games/fish';
 import type { GameProps } from '@/screens/GameScreen';
@@ -17,6 +18,7 @@ const FISH = ['🐟', '🐠', '🐡', '🐟'];
 
 export function FishGame({ level, grade, rand, onAnswer, onFinish }: GameProps) {
   const questions = useMemo(() => fishRound(level, rand, ROUND_SIZE), [level, rand]);
+  const L = useLayout();
   const [q, setQ] = useState(0);
   const [missed, setMissed] = useState<string[]>([]);
   const [caught, setCaught] = useState(false);
@@ -50,18 +52,19 @@ export function FishGame({ level, grade, rand, onAnswer, onFinish }: GameProps) 
   };
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, L.tablet && !L.wide && styles.tabletCol, L.wide && styles.wideRoot]}>
+      <View style={[{ gap: 12 }, L.wide && { flex: 1, justifyContent: 'center' }]}>
       <Text style={styles.progress} testID="fish-progress">
         第 {q + 1} / {questions.length} 题
       </Text>
       <Pressable
-        style={styles.card}
+        style={[styles.card, L.wide && { paddingVertical: 28 }]}
         onPress={() => (cur.sentence ? caught && speak({ text: cur.sentence, lang: 'zh-CN' }) : speak({ text: cur.char, lang: 'zh-CN' }))}
         accessibilityRole="button"
         testID="fish-prompt"
       >
         {cur.sentence ? (
-          <Text style={styles.sentence} testID="fish-sentence">
+          <Text style={[styles.sentence, L.tablet && { fontSize: 38, lineHeight: 54 }]} testID="fish-sentence">
             {[...cur.sentence].map((c, i) => (
               <Text key={i} style={i === cur.at ? styles.target : null}>
                 {c}
@@ -69,27 +72,15 @@ export function FishGame({ level, grade, rand, onAnswer, onFinish }: GameProps) 
             ))}
           </Text>
         ) : (
-          <Text style={styles.char} testID="fish-char">
+          <Text style={[styles.char, L.tablet && { fontSize: 110 }]} testID="fish-char">
             {cur.char}
           </Text>
         )}
         <DisplayTextView text={cur.sentence ? `红色的“${cur.char}”在这里怎么读？` : gt('fishTip', grade)} size={16} color="#3A6B85" />
         {!cur.sentence ? <Text style={styles.speakHint}>🔊 点这里再听一遍</Text> : null}
       </Pressable>
-
-      <View style={styles.pond} testID="fish-pond">
-        {cur.options.map((py, i) => (
-          <SwimmingFish
-            key={`${q}-${py}`}
-            index={i}
-            py={py}
-            emoji={FISH[i % FISH.length]}
-            state={caught && py === cur.answer ? 'caught' : missed.includes(py) ? 'gone' : 'swim'}
-            onPress={() => tap(py)}
-          />
-        ))}
-      </View>
-
+      {L.wide ? (
+        <>
       <View style={styles.status} testID="fish-status">
         {caught ? (
           <DisplayTextView text={gt('caught', grade)} size={22} color="#2E9E4F" />
@@ -102,6 +93,39 @@ export function FishGame({ level, grade, rand, onAnswer, onFinish }: GameProps) 
           <DisplayTextView text={q + 1 >= questions.length ? gt('finishedRound', grade) : gt('next', grade)} size={20} color="#fff" />
         </Pressable>
       ) : null}
+        </>
+      ) : null}
+      </View>
+      <View style={[{ flex: 1, gap: 12 }, L.wide && { flex: 1.2 }]}>
+      <View style={styles.pond} testID="fish-pond">
+        {cur.options.map((py, i) => (
+          <SwimmingFish
+            key={`${q}-${py}`}
+            index={i}
+            py={py}
+            emoji={FISH[i % FISH.length]}
+            state={caught && py === cur.answer ? 'caught' : missed.includes(py) ? 'gone' : 'swim'}
+            onPress={() => tap(py)}
+          />
+        ))}
+      </View>
+      {!L.wide ? (
+        <>
+      <View style={styles.status} testID="fish-status">
+        {caught ? (
+          <DisplayTextView text={gt('caught', grade)} size={22} color="#2E9E4F" />
+        ) : missed.length ? (
+          <DisplayTextView text={gt('swimAway', grade)} size={18} color="#C0392B" />
+        ) : null}
+      </View>
+      {caught ? (
+        <Pressable onPress={next} style={styles.nextBtn} accessibilityRole="button" testID="fish-next">
+          <DisplayTextView text={q + 1 >= questions.length ? gt('finishedRound', grade) : gt('next', grade)} size={20} color="#fff" />
+        </Pressable>
+      ) : null}
+        </>
+      ) : null}
+      </View>
     </View>
   );
 }
@@ -151,6 +175,8 @@ function SwimmingFish({
 
 const styles = StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 14, gap: 12 },
+  tabletCol: { width: '100%', maxWidth: 760, alignSelf: 'center' },
+  wideRoot: { flexDirection: 'row', gap: 28, paddingHorizontal: 28 },
   progress: { textAlign: 'center', fontSize: 14, color: '#3A6B85', fontWeight: '700' },
   card: { backgroundColor: '#fff', borderRadius: 24, borderWidth: 3, borderColor: MAIN, padding: 14, alignItems: 'center', gap: 6 },
   char: { fontSize: 72, fontWeight: '900', color: '#1B2B34' },

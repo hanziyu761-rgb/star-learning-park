@@ -5,6 +5,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Animated, Easing, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { DisplayTextView } from '@/components/PinyinText';
+import { useLayout } from '@/components/useLayout';
 import { ROUND_SIZE } from '@/games/common';
 import { acceptsBubble, bubbleExerciseId, bubbleRound } from '@/games/bubble';
 import { useProgress } from '@/progress/ProgressContext';
@@ -20,6 +21,7 @@ const sayWord = (w: string) => speak({ text: w, lang: 'en-US' });
 export function BubbleGame({ level, grade, rand, onAnswer, onFinish }: GameProps) {
   const { dispatch } = useProgress();
   const questions = useMemo(() => bubbleRound(grade, level, rand, ROUND_SIZE), [grade, level, rand]);
+  const L = useLayout();
   const [q, setQ] = useState(0);
   const [typed, setTyped] = useState('');
   const [popped, setPopped] = useState<string[]>([]);
@@ -59,12 +61,13 @@ export function BubbleGame({ level, grade, rand, onAnswer, onFinish }: GameProps
   };
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, L.tablet && !L.wide && styles.tabletCol, L.wide && styles.wideRoot]}>
+      <View style={[{ gap: 12 }, L.wide && { flex: 1, justifyContent: 'center' }]}>
       <Text style={styles.progress} testID="bubble-progress">
         第 {q + 1} / {questions.length} 个单词
       </Text>
       <View style={styles.card}>
-        <Text style={styles.zh} testID="bubble-zh">
+        <Text style={[styles.zh, L.tablet && { fontSize: 44 }]} testID="bubble-zh">
           {cur.card.zh}
         </Text>
         <Pressable onPress={() => sayWord(cur.card.w)} style={styles.listen} accessibilityRole="button" testID="bubble-listen">
@@ -79,7 +82,9 @@ export function BubbleGame({ level, grade, rand, onAnswer, onFinish }: GameProps
           ))}
         </View>
       </View>
+      </View>
 
+      <View style={[{ flex: 1, gap: 12 }, L.wide && { flex: 1.2, justifyContent: 'center' }]}>
       {done ? (
         <View style={{ gap: 12 }}>
           <View style={styles.status} testID="bubble-done">
@@ -96,19 +101,20 @@ export function BubbleGame({ level, grade, rand, onAnswer, onFinish }: GameProps
           <View style={styles.sky} testID="bubble-sky">
             {cur.bubbles.map((b, i) =>
               popped.includes(b.id) ? (
-                <View key={b.id} style={styles.bubbleSpace} />
+                <View key={b.id} style={[styles.bubbleSpace, L.tablet && { width: 92, height: 92 }]} />
               ) : (
-                <FloatingBubble key={b.id} index={i} letter={b.letter} shaking={shake === b.id} onPress={() => tap(b.id, b.letter)} testID={`bubble-${b.id}`} />
+                <FloatingBubble key={b.id} big={L.tablet} index={i} letter={b.letter} shaking={shake === b.id} onPress={() => tap(b.id, b.letter)} testID={`bubble-${b.id}`} />
               ),
             )}
           </View>
         </>
       )}
+      </View>
     </View>
   );
 }
 
-function FloatingBubble({ index, letter, shaking, onPress, testID }: { index: number; letter: string; shaking: boolean; onPress: () => void; testID: string }) {
+function FloatingBubble({ big, index, letter, shaking, onPress, testID }: { big?: boolean; index: number; letter: string; shaking: boolean; onPress: () => void; testID: string }) {
   const [y] = useState(() => new Animated.Value(0));
   const [sx] = useState(() => new Animated.Value(0));
   useEffect(() => {
@@ -132,12 +138,12 @@ function FloatingBubble({ index, letter, shaking, onPress, testID }: { index: nu
     <Animated.View style={{ transform: [{ translateY: dy }, { translateX: sx }] }}>
       <Pressable
         onPress={onPress}
-        style={[styles.bubble, { backgroundColor: COLORS[index % COLORS.length] }, shaking && styles.bubbleWrong]}
+        style={[styles.bubble, big && { width: 92, height: 92, borderRadius: 46 }, { backgroundColor: COLORS[index % COLORS.length] }, shaking && styles.bubbleWrong]}
         accessibilityRole="button"
         accessibilityLabel={letter}
         testID={testID}
       >
-        <Text style={styles.bubbleText}>{letter}</Text>
+        <Text style={[styles.bubbleText, big && { fontSize: 44 }]}>{letter}</Text>
       </Pressable>
     </Animated.View>
   );
@@ -145,6 +151,8 @@ function FloatingBubble({ index, letter, shaking, onPress, testID }: { index: nu
 
 const styles = StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 14, gap: 12 },
+  tabletCol: { width: '100%', maxWidth: 760, alignSelf: 'center' },
+  wideRoot: { flexDirection: 'row', gap: 28, paddingHorizontal: 28 },
   progress: { textAlign: 'center', fontSize: 14, color: '#6B5BA8', fontWeight: '700' },
   card: { backgroundColor: '#fff', borderRadius: 24, borderWidth: 3, borderColor: MAIN, padding: 14, alignItems: 'center', gap: 10 },
   zh: { fontSize: 32, fontWeight: '900', color: '#2B2350' },

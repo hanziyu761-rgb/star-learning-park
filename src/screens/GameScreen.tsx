@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   exit: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   exitText: { fontSize: 22, fontWeight: '900', color: '#555' },
   level: { fontSize: 14, fontWeight: '800', minWidth: 48, textAlign: 'right' },
-  summary: { padding: 20, gap: 16, alignItems: 'center' },
+  summary: { padding: 20, gap: 16, alignItems: 'center', width: '100%', maxWidth: 640, alignSelf: 'center' },
   stars: { fontSize: 48, color: '#F2B705' },
   score: { fontSize: 18, fontWeight: '700', color: '#333', textAlign: 'center' },
   wrongBox: { alignSelf: 'stretch', backgroundColor: '#fff', borderRadius: 18, padding: 14, gap: 4 },

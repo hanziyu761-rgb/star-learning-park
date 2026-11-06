@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { OrientationGate } from '@/components/OrientationGate';
 import { NavProvider } from '@/nav/Nav';
 import { expoRouterNav } from '@/nav/expoRouterNav';
 import { ProgressProvider } from '@/progress/ProgressContext';
@@ -15,6 +16,7 @@ export default function RootLayout() {
         <ProgressProvider>
           <NavProvider nav={expoRouterNav}>
             <StatusBar style="dark" />
+            <OrientationGate />
             <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg }, animation: 'slide_from_right' }} />
           </NavProvider>
         </ProgressProvider>

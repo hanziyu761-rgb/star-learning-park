@@ -122,15 +122,26 @@ with sync_playwright() as p:
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
         return ctx, page
 
-    for (w, h) in [(360, 640), (390, 820)]:
+    for (w, h) in [(360, 640), (390, 820), (800, 1280), (1280, 800), (1024, 1366), (1366, 1024)]:
         ctx, page = ctx_page(w, h)
         counts = []
         for gid in ["kitchen", "fish", "bubble"]:
             open_game(page, gid)
             counts.append(no_overlap(page, f"{w}×{h} {gid}"))
+            assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), f"{w}×{h} 横向超出屏幕"
+            vis = page.evaluate("() => [...document.querySelectorAll('[role=button]')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && (r.bottom > window.innerHeight + 1 || r.right > window.innerWidth + 1); }).map(e => e.getAttribute('data-testid'))")
+            assert not vis, f"{w}×{h} {gid} 有按钮在屏幕外：{vis}"
             page.screenshot(path=f"{OUT}/g-{w}-{gid}.png", full_page=True)
-        ok(f"{w}×{h}：三个游戏页面（按钮 {counts}）互不重叠")
+        ok(f"{w}×{h}：三个游戏页面（按钮 {counts}）互不重叠、都在屏幕内")
         ctx.close()
+
+    ctx, page = ctx_page(1280, 800)
+    open_game(page, "kitchen"); play_kitchen(page, shots="g-wide-kitchen")
+    open_game(page, "fish"); play_fish(page, shots="g-wide-fish")
+    open_game(page, "bubble"); play_bubble(page, shots="g-wide-bubble")
+    page.wait_for_selector('[data-testid="game-summary"]'); page.screenshot(path=f"{OUT}/g-wide-summary.png")
+    ok("平板横屏 1280×800：三个游戏各玩完一局")
+    ctx.close()
 
     ctx, page = ctx_page(390, 820)
     open_game(page, "kitchen")

@@ -4,7 +4,7 @@
  * 生词本里的词拼对一次亮一个小圆点，亮满 3 个自动移出。
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useProgress } from '@/progress/ProgressContext';
 import type { WordCard } from '../catalog';
 import { isCorrectSpelling, letterTiles, needsSpaceKey, pickDictation } from '../dictation';
@@ -27,6 +27,7 @@ export function DictationModal({
 }) {
   const { dispatch } = useProgress();
   // 每次打开（父组件重新挂载这个弹窗）抽一次题
+  const win = useWindowDimensions();
   const [items] = useState<WordCard[]>(() => pickDictation(pool, rand));
   const [i, setI] = useState(0);
   const [answer, setAnswer] = useState('');
@@ -72,7 +73,7 @@ export function DictationModal({
 
   return (
     <Modal visible animationType="slide" onRequestClose={onClose} transparent={false}>
-      <View style={styles.root} testID="dict-modal">
+      <View style={[styles.root, { paddingHorizontal: Math.max(0, (win.width - 760) / 2) }]} testID="dict-modal">
         <View style={styles.head}>
           <Text style={styles.title}>✍️ {title}</Text>
           <Pressable onPress={onClose} style={styles.close} accessibilityRole="button" testID="dict-close">
