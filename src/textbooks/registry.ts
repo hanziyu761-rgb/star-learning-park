@@ -5,7 +5,7 @@ import type { Subject } from '@/lesson/types';
 import { bankVolumes, courseCount } from './adapters';
 import { TONGBIAN_2024, TONGBIAN_LEGACY } from './data/chineseTongbian';
 import { MATH_PEP_2024, MATH_PEP_LEGACY } from './data/mathPep';
-import { MATH_BSD_2024 } from './data/mathBsd';
+import { MATH_BSD_2024, MATH_BSD_LEGACY } from './data/mathBsd';
 import { EDITION_BY_ID, EDITIONS } from './editions';
 import type { Completeness, Edition, LessonEntry, Provenance, Unit, Volume } from './types';
 import { loadRawBook } from '@/content/bank';
@@ -15,7 +15,7 @@ import { IMPORTED } from './data/imported';
 
 let cached: Volume[] | null = null;
 export function allVolumes(): Volume[] {
-  cached ??= [...TONGBIAN_2024, ...TONGBIAN_LEGACY, ...MATH_PEP_2024, ...MATH_PEP_LEGACY, ...MATH_BSD_2024, ...IMPORTED, ...bankVolumes()];
+  cached ??= [...TONGBIAN_2024, ...TONGBIAN_LEGACY, ...MATH_PEP_2024, ...MATH_PEP_LEGACY, ...MATH_BSD_2024, ...MATH_BSD_LEGACY, ...IMPORTED, ...bankVolumes()];
   return cached;
 }
 
