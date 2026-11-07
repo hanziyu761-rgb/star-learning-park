@@ -155,7 +155,18 @@ export const EDITIONS: Edition[] = [
     aliases: ['PEP', '人教版英语（三年级起点）'],
     publisher: '人民教育出版社',
     priority: 1,
-    ...pending('现有题库按旧版（2012 版）单元整理；2026 秋起五、六年级英语换用修订版（报道），三、四年级修订版启用时间待核实。'),
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台提供人教版（主编：吴欣）小学英语电子课本，书名页印“英语（PEP）”。第五批已核对：三～四年级上下册、五～六年级上册修订版；平台现有五、六年级下册为未修订版，另行登记。现有题库按旧版（2012 版）单元整理，只与未修订版五、六年级下册单元名一致。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 人教版（主编：吴欣）小学英语电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: '2026-11-08',
+        note: '在 APP 所有者已登录的浏览器里逐册打开 Contents 页查看并录入；教材详情页显示出版社“人民教育出版社”。',
+      },
+      SRC_ROLLOUT,
+    ],
   },
   {
     id: 'english.fltrp',

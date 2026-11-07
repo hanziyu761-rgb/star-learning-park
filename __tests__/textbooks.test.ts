@@ -7,6 +7,7 @@ import { BANK_INDEX } from '@/content/bank';
 import { EDITIONS } from '@/textbooks/editions';
 import { parseToc } from '@/textbooks/data/mathJijiao';
 import { parseBeijingToc } from '@/textbooks/data/mathBeijing';
+import { parsePepToc } from '@/textbooks/data/englishPep';
 import { allVolumes, completeness, isComplete, summary, validateAll, validateVolume, volumesFor } from '@/textbooks/registry';
 import type { Volume } from '@/textbooks/types';
 
@@ -197,13 +198,46 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(78);
+  expect(s.volumes).toBe(86);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(72);
-  expect(s.verifiedUnits).toBe(716);
+  expect(s.verifiedVolumes).toBe(80);
+  expect(s.verifiedUnits).toBe(813);
   expect(s.lessons.verified).toBe(744);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
+});
+
+describe('第五批：人教版英语（PEP）', () => {
+  const vols = volumesFor({ editionId: 'english.pep' }).filter((v) => !v.id.startsWith('bank.'));
+  it('8 册：修订版三～四年级上下册、五～六年级上册 + 平台现有五、六年级下册未修订版', () => {
+    expect(vols.map((v) => v.id)).toEqual([
+      'english.pep.2024.g3a', 'english.pep.2024.g3b', 'english.pep.2024.g4a', 'english.pep.2024.g4b',
+      'english.pep.2024.g5a', 'english.pep.2024.g6a', 'english.pep.legacy.g5b', 'english.pep.legacy.g6b',
+    ]);
+    for (const v of vols) {
+      expect(v.tocProvenance).toBe('verified');
+      expect(v.sources[0].title).toMatch(/人民教育出版社/);
+    }
+    expect(vols.reduce((n, v) => n + v.units.length, 0)).toBe(97);
+    expect(vols[0].units.slice(0, 7).map((u) => `${u.title}@${u.page}`)).toEqual([
+      'Unit 1 Making friends@2', 'Unit 2 Different families@14', 'Unit 3 Our animal friends@26', 'Unit 4 Plants around us@38',
+      'Unit 5 The colourful world@50', 'Unit 6 Useful numbers@62', 'Revision Being a good guest@74',
+    ]);
+  });
+  it('修订版不关联旧版题库；未修订版只关联单元名逐字相同的题库单元', () => {
+    for (const v of vols.filter((x) => x.revision === 2024)) {
+      expect(v.bankBookId).toBeUndefined();
+      expect(v.units.every((u) => u.bankUnitIds.length === 0)).toBe(true);
+    }
+    const g5b = vols.find((v) => v.id === 'english.pep.legacy.g5b')!;
+    expect(g5b.units.filter((u) => u.bankUnitIds.length).map((u) => u.bankUnitIds[0])).toEqual([
+      'english-g5b-u1', 'english-g5b-u2', 'english-g5b-u3', 'english-g5b-u4', 'english-g5b-u5', 'english-g5b-u6',
+    ]);
+    const g6b = vols.find((v) => v.id === 'english.pep.legacy.g6b')!;
+    expect(g6b.units.find((u) => u.title.startsWith('Recycle'))!.bankUnitIds).toEqual([]);
+    expect(completeness(g5b).exercises).toBeGreaterThan(0);
+    expect(() => parsePepToc('x', 'Lesson 1 Hello 3')).toThrow(/格式不对/);
+  });
 });
 
 describe('第四批：北京版数学', () => {
