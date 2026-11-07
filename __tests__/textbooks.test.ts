@@ -195,10 +195,10 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(39);
+  expect(s.volumes).toBe(41);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(33);
-  expect(s.verifiedUnits).toBe(312);
+  expect(s.verifiedVolumes).toBe(35);
+  expect(s.verifiedUnits).toBe(332);
   expect(s.lessons.verified).toBe(559);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
@@ -206,15 +206,15 @@ it('汇总数字（汇报用）', () => {
 
 describe('第三批：北师大版数学修订版', () => {
   const vols = volumesFor({ editionId: 'math.bsd' });
-  it('只登记已截图核对的册：一年级下册、二～三年级上下册、四～五年级上册，另有平台现有的四、五年级下册未修订版', () => {
-    expect(vols.map((v) => v.id)).toEqual(['math.bsd.2024.g1b', 'math.bsd.2024.g2a', 'math.bsd.2024.g2b', 'math.bsd.2024.g3a', 'math.bsd.2024.g3b', 'math.bsd.2024.g4a', 'math.bsd.2024.g5a', 'math.bsd.legacy.g4b', 'math.bsd.legacy.g5b']);
+  it('只登记已截图核对的册：一年级下册、二～三年级上下册、四～六年级上册，另有平台现有的四～六年级下册未修订版', () => {
+    expect(vols.map((v) => v.id)).toEqual(['math.bsd.2024.g1b', 'math.bsd.2024.g2a', 'math.bsd.2024.g2b', 'math.bsd.2024.g3a', 'math.bsd.2024.g3b', 'math.bsd.2024.g4a', 'math.bsd.2024.g5a', 'math.bsd.2024.g6a', 'math.bsd.legacy.g4b', 'math.bsd.legacy.g5b', 'math.bsd.legacy.g6b']);
     for (const v of vols) {
       expect(v.tocProvenance).toBe('verified');
       expect(v.sources[0].kind).toBe('official');
       expect(v.bankBookId).toBeUndefined(); // 题库按人教版整理，不冒充北师大版练习
       expect(v.units.every((u) => u.bankUnitIds.length === 0 && u.kpIds.length === 0)).toBe(true);
     }
-    const [g1b, g2a, g2b, g3a, g3b, g4a, g5a, g4bOld, g5bOld] = vols;
+    const [g1b, g2a, g2b, g3a, g3b, g4a, g5a, g6a, g4bOld, g5bOld, g6bOld] = vols;
     expect(g1b.units.map((u) => u.title)).toEqual([
       '第一单元 20以内数与加法', '第二单元 图形大变身（一）', '综合实践 设计教室装饰图', '第三单元 20以内数与减法', '第四单元 100以内数的认识',
       '数学好玩 填数游戏', '第五单元 100以内数加与减（一）', '第六单元 有趣的平面图形（一）', '综合实践 画数学连环画', '总复习',
@@ -230,6 +230,10 @@ describe('第三批：北师大版数学修订版', () => {
     expect(g3b.units[3].title).toBe('综合实践 制作动物体重“说明书”');
     expect(g4a.units.map((u) => u.page)).toEqual([2, 19, 23, 39, 58, 63, 77, 79, 85, 94, 99, 103]);
     expect(g5a.units.map((u) => u.page)).toEqual([2, 21, 31, 35, 50, 60, 80, 82, 89, 102, 109, 113]);
+    expect(g6a.units.map((u) => u.page)).toEqual([2, 11, 33, 44, 49, 57, 67, 73, 75, 86, 91, 103, 108]);
+    expect(g6bOld.units.map((u) => u.title)).toEqual(['一 圆柱与圆锥', '二 比例', '三 图形的运动', '四 正比例与反比例', '数学好玩', '整理与复习', '总复习']);
+    expect(g6bOld.units.map((u) => u.page)).toEqual([2, 16, 28, 39, 51, 58, 63]);
+    expect(vols.reduce((n, v) => n + v.units.length, 0)).toBe(120);
     expect(g5bOld.revision).toBeNull();
     expect(g5bOld.units.map((u) => u.page)).toEqual([2, 11, 22, 36, 50, 55, 65, 69, 75, 82, 92]);
     expect(g4bOld.revision).toBeNull();
