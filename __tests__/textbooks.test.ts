@@ -195,10 +195,10 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(49);
+  expect(s.volumes).toBe(51);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(43);
-  expect(s.verifiedUnits).toBe(420);
+  expect(s.verifiedVolumes).toBe(45);
+  expect(s.verifiedUnits).toBe(443);
   expect(s.lessons.verified).toBe(559);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
@@ -206,15 +206,18 @@ it('汇总数字（汇报用）', () => {
 
 describe('第四批：苏教版数学修订版', () => {
   const vols = volumesFor({ editionId: 'math.sujiao' });
-  it('只登记已截图核对的册：一年级上下册、二年级下册、三年级上下册、四年级上册，另有平台现有的四年级下册未修订版（二年级上册截图不全，未登记）；不关联人教版题库', () => {
-    expect(vols.map((v) => v.id)).toEqual(['math.sujiao.2024.g1a', 'math.sujiao.2024.g1b', 'math.sujiao.2024.g2b', 'math.sujiao.2024.g3a', 'math.sujiao.2024.g3b', 'math.sujiao.2024.g4a', 'math.sujiao.legacy.g4b']);
+  it('只登记已截图核对的册：一年级上下册、二年级下册、三年级上下册、四～五年级上册，另有平台现有的四、五年级下册未修订版（二年级上册截图不全，未登记）；不关联人教版题库', () => {
+    expect(vols.map((v) => v.id)).toEqual(['math.sujiao.2024.g1a', 'math.sujiao.2024.g1b', 'math.sujiao.2024.g2b', 'math.sujiao.2024.g3a', 'math.sujiao.2024.g3b', 'math.sujiao.2024.g4a', 'math.sujiao.2024.g5a', 'math.sujiao.legacy.g4b', 'math.sujiao.legacy.g5b']);
     for (const v of vols) {
       expect(v.tocProvenance).toBe('verified');
       expect(v.sources[0].kind).toBe('official');
       expect(v.bankBookId).toBeUndefined();
       expect(v.units.every((u) => u.bankUnitIds.length === 0 && u.kpIds.length === 0)).toBe(true);
     }
-    const [a, b, c, d, e, f, g] = vols;
+    const [a, b, c, d, e, f, f5, g, g5] = vols;
+    expect(f5.units.map((u) => u.page)).toEqual([1, 14, 17, 26, 30, 51, 55, 65, 74, 96, 110, 112, 119]);
+    expect(g5.revision).toBeNull();
+    expect(g5.units.map((u) => u.page)).toEqual([1, 21, 28, 30, 50, 76, 81, 106, 108, 120]);
     expect(f.units.map((u) => u.page)).toEqual([1, 17, 42, 44, 57, 64, 67, 89, 94, 104, 108]);
     expect(g.revision).toBeNull();
     expect(g.units.map((u) => u.page)).toEqual([1, 18, 20, 33, 38, 40, 47, 67, 88, 90, 108, 115]);
