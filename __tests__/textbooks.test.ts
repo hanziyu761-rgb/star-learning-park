@@ -195,10 +195,10 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(51);
+  expect(s.volumes).toBe(53);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(45);
-  expect(s.verifiedUnits).toBe(443);
+  expect(s.verifiedVolumes).toBe(47);
+  expect(s.verifiedUnits).toBe(466);
   expect(s.lessons.verified).toBe(559);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
@@ -206,15 +206,19 @@ it('汇总数字（汇报用）', () => {
 
 describe('第四批：苏教版数学修订版', () => {
   const vols = volumesFor({ editionId: 'math.sujiao' });
-  it('只登记已截图核对的册：一年级上下册、二年级下册、三年级上下册、四～五年级上册，另有平台现有的四、五年级下册未修订版（二年级上册截图不全，未登记）；不关联人教版题库', () => {
-    expect(vols.map((v) => v.id)).toEqual(['math.sujiao.2024.g1a', 'math.sujiao.2024.g1b', 'math.sujiao.2024.g2b', 'math.sujiao.2024.g3a', 'math.sujiao.2024.g3b', 'math.sujiao.2024.g4a', 'math.sujiao.2024.g5a', 'math.sujiao.legacy.g4b', 'math.sujiao.legacy.g5b']);
+  it('只登记已截图核对的册：一年级上下册、二年级下册、三年级上下册、四～六年级上册，另有平台现有的四～六年级下册未修订版（二年级上册截图不全，未登记）；不关联人教版题库', () => {
+    expect(vols.map((v) => v.id)).toEqual(['math.sujiao.2024.g1a', 'math.sujiao.2024.g1b', 'math.sujiao.2024.g2b', 'math.sujiao.2024.g3a', 'math.sujiao.2024.g3b', 'math.sujiao.2024.g4a', 'math.sujiao.2024.g5a', 'math.sujiao.2024.g6a', 'math.sujiao.legacy.g4b', 'math.sujiao.legacy.g5b', 'math.sujiao.legacy.g6b']);
     for (const v of vols) {
       expect(v.tocProvenance).toBe('verified');
       expect(v.sources[0].kind).toBe('official');
       expect(v.bankBookId).toBeUndefined();
       expect(v.units.every((u) => u.bankUnitIds.length === 0 && u.kpIds.length === 0)).toBe(true);
     }
-    const [a, b, c, d, e, f, f5, g, g5] = vols;
+    const [a, b, c, d, e, f, f5, f6, g, g5, g6] = vols;
+    expect(f6.units.map((u) => u.page)).toEqual([1, 14, 26, 30, 42, 44, 64, 68, 88, 92, 103, 112]);
+    expect(g6.units.map((u) => u.page)).toEqual([1, 9, 27, 33, 48, 50, 56, 66, 68, 107, 110]);
+    expect(g6.units[8].note).toMatch(/数与代数 68.*图形与几何 86.*统计与可能性 101/);
+    expect(vols.reduce((n, v) => n + v.units.length, 0)).toBe(124);
     expect(f5.units.map((u) => u.page)).toEqual([1, 14, 17, 26, 30, 51, 55, 65, 74, 96, 110, 112, 119]);
     expect(g5.revision).toBeNull();
     expect(g5.units.map((u) => u.page)).toEqual([1, 21, 28, 30, 50, 76, 81, 106, 108, 120]);
