@@ -134,6 +134,25 @@ const VERIFIED: { grade: number; term: Term; pages: number; rows: U[]; srcNote?:
       [null, '期末复习', 112],
     ],
   },
+  {
+    grade: 4,
+    term: '上',
+    pages: 131,
+    srcNote: '目录一屏截图（全屏阅读第 7 页），从“一 两、三位数除以两位数 1”到“期末复习 108”。',
+    rows: [
+      ['一', '两、三位数除以两位数', 1],
+      ['二', '周长与面积', 17],
+      [null, '周长与面积的变化', 42, ICON2],
+      ['三', '乘法数量关系', 44],
+      ['四', '混合运算与数量关系（二）', 57],
+      [null, '制订旅游计划', 64, ICON],
+      ['五', '多位数的认识', 67],
+      [null, '度量衡的故事', 89, ICON],
+      ['六', '大数的运算', 94],
+      [null, '生活中的大数', 104, ICON],
+      [null, '期末复习', 108],
+    ],
+  },
 ];
 
 export const MATH_SUJIAO_2024: Volume[] = VERIFIED.map((p) => {
@@ -152,6 +171,62 @@ export const MATH_SUJIAO_2024: Volume[] = VERIFIED.map((p) => {
     regions: [],
     tocProvenance: 'verified',
     sources: [src(`${CN[p.grade]}年级${p.term}册`, p.pages, p.srcNote)],
+    units: units(id, p.rows),
+    copyright: '目录只录单元名；教材正文、插图、例题、习题和教师用书版权归出版社，不复制。',
+  };
+});
+
+/**
+ * 平台目前提供的未修订版（书名没有“根据2022年版课程标准修订”）：目录已核实，单独登记，不当作修订版。
+ */
+const LEGACY: { grade: number; term: Term; pages: number; rows: U[]; srcNote: string }[] = [
+  {
+    grade: 4,
+    term: '下',
+    pages: 127,
+    srcNote:
+      '截图来自平台全屏阅读页（第 3 页，共 127 页），页头书名“义务教育教科书·四年级下册”（没有“根据2022年版课程标准修订”，也没有写学科）；页面上没有显示出版社名称，按 APP 所有者选择的苏教版数学登记。最后一行“九 整理与复习 115”在屏幕下方。',
+    rows: [
+      ['一', '认识多位数', 1],
+      [null, '数字与信息', 18, '目录上用圆点图标标出，没有单元序号'],
+      ['二', '三位数乘两位数', 20],
+      ['三', '用计算器计算', 33],
+      [null, '一亿有多大', 38, '目录上用圆点图标标出，没有单元序号'],
+      ['四', '解决问题的策略', 40],
+      ['五', '运算律', 47],
+      ['六', '三角形、平行四边形和梯形', 67],
+      [null, '多边形的内角和', 88, '目录上用星形图标标出，没有单元序号'],
+      ['七', '小数的意义和性质', 90],
+      ['八', '小数加法和减法', 108],
+      ['九', '整理与复习', 115],
+    ],
+  },
+];
+
+export const MATH_SUJIAO_LEGACY: Volume[] = LEGACY.map((p) => {
+  const t = p.term === '上' ? 'a' : 'b';
+  const id = `math.sujiao.legacy.g${p.grade}${t}`;
+  return {
+    id,
+    editionId: 'math.sujiao',
+    subject: 'math',
+    grade: p.grade,
+    term: p.term,
+    officialName: `义务教育教科书·数学 ${CN[p.grade]}年级${p.term}册（未修订版）`,
+    revision: null,
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台目前提供的是这一版；修订版启用后会成为历史版本（启用时间待核实）。',
+    regions: [],
+    tocProvenance: 'verified',
+    sources: [
+      {
+        title: `国家中小学智慧教育平台 义务教育教科书·${CN[p.grade]}年级${p.term}册（苏教版数学）电子课本 目录页（共 ${p.pages} 页；书名未标注“根据2022年版课程标准修订”）`,
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: '2026-11-07',
+        note: `APP 所有者在平台打开并截图提供。${p.srcNote}`,
+      },
+    ],
     units: units(id, p.rows),
     copyright: '目录只录单元名；教材正文、插图、例题、习题和教师用书版权归出版社，不复制。',
   };
