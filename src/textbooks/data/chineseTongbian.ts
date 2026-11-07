@@ -1,7 +1,8 @@
 /**
  * 第一批：统编版小学语文 一至六年级 上下册（根据 2022 年版课程标准修订的版本）——版本登记（V4.0）。
  *
- * 一～三年级上下册目录已与官方电子课本核对（chineseTongbianG1.ts、G2.ts、G3.ts）；其余各册目录尚未核对，units 为空、tocProvenance = 'none'。
+ * 修订版一～三年级上下册、四～六年级上册目录已与官方电子课本核对（chineseTongbianG1～G6.ts）；
+ * 四～六年级下册修订版平台尚未提供（units 为空、tocProvenance = 'none'），平台现有的未修订版单独登记在 TONGBIAN_LEGACY。
  * 核实方式：国家中小学智慧教育平台 统编版语文电子课本的目录页，逐条录入后标 verified 并记录日期。
  * 不录课文正文、习题、教参，只录单元名和课题名。
  */
@@ -12,6 +13,7 @@ import { G2A_UNITS, G2B_UNITS, SRC_G2A, SRC_G2B } from './chineseTongbianG2';
 import { G3A_UNITS, G3B_UNITS, SRC_G3A, SRC_G3B } from './chineseTongbianG3';
 import { G4A_UNITS, G4B_LEGACY_UNITS, SRC_G4A, SRC_G4B_LEGACY } from './chineseTongbianG4';
 import { G5A_UNITS, G5B_LEGACY_UNITS, SRC_G5A, SRC_G5B_LEGACY } from './chineseTongbianG5';
+import { G6A_UNITS, G6B_LEGACY_UNITS, SRC_G6A, SRC_G6B_LEGACY } from './chineseTongbianG6';
 
 const CN = ['', '一', '二', '三', '四', '五', '六'];
 
@@ -48,6 +50,7 @@ const VERIFIED: Record<string, { units: (id: string) => Volume['units']; src: Vo
   g3b: { units: G3B_UNITS, src: SRC_G3B },
   g4a: { units: G4A_UNITS, src: SRC_G4A },
   g5a: { units: G5A_UNITS, src: SRC_G5A },
+  g6a: { units: G6A_UNITS, src: SRC_G6A },
 };
 
 export const TONGBIAN_2024: Volume[] = PLANS.map((p) => {
@@ -82,6 +85,7 @@ export const TONGBIAN_2024: Volume[] = PLANS.map((p) => {
 const LEGACY: { grade: number; term: Term; units: (id: string) => Volume['units']; src: Volume['sources'][number] }[] = [
   { grade: 4, term: '下', units: G4B_LEGACY_UNITS, src: SRC_G4B_LEGACY },
   { grade: 5, term: '下', units: G5B_LEGACY_UNITS, src: SRC_G5B_LEGACY },
+  { grade: 6, term: '下', units: G6B_LEGACY_UNITS, src: SRC_G6B_LEGACY },
 ];
 
 export const TONGBIAN_LEGACY: Volume[] = LEGACY.map((p) => {

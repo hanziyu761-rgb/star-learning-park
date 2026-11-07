@@ -117,9 +117,19 @@ describe('第一批：统编版语文修订版 12 册登记', () => {
     expect(old.units.flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no))).toEqual(Array.from({ length: 23 }, (_, i) => i + 1));
     expect(old.units[2].lessons.map((l) => l.title)).toEqual(['综合性学习：遨游汉字王国', '汉字真有趣', '我爱你，汉字']);
   });
-  it('还没核实的修订版（四、五年级下册，六年级上下册）：不算已核实，也不算完整', () => {
+  it('六年级：上册修订版、下册未修订版目录都已核实；下册的古诗词诵读 10 首单独成组', () => {
+    const a = vols[10];
+    expect(a.id).toBe('chinese.tongbian.2024.g6a');
+    expect(completeness(a).lessons.verified).toBe(48);
+    expect(a.units.flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no))).toEqual(Array.from({ length: 26 }, (_, i) => i + 1));
+    const old = allVolumes().find((v) => v.id === 'chinese.tongbian.legacy.g6b')!;
+    expect(completeness(old).lessons.verified).toBe(46);
+    expect(old.units.map((u) => u.title)).toEqual(['第一单元', '第二单元', '第三单元', '第四单元', '第五单元', '第六单元', '古诗词诵读', '附录']);
+    expect(old.units[6].lessons.map((l) => l.no)).toEqual(Array.from({ length: 10 }, (_, i) => i + 1));
+  });
+  it('还没核实的只剩平台尚未提供的修订版下册（四、五、六年级）：不算已核实，也不算完整', () => {
     expect(vols.filter((v) => v.tocProvenance === 'none').map((v) => v.id)).toEqual([
-      'chinese.tongbian.2024.g4b', 'chinese.tongbian.2024.g5b', 'chinese.tongbian.2024.g6a', 'chinese.tongbian.2024.g6b',
+      'chinese.tongbian.2024.g4b', 'chinese.tongbian.2024.g5b', 'chinese.tongbian.2024.g6b',
     ]);
     for (const v of vols.filter((x) => x.tocProvenance === 'none')) {
       expect(v.tocProvenance).toBe('none');
@@ -184,9 +194,9 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(14);
+  expect(s.volumes).toBe(15);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(10);
-  expect(s.verifiedUnits).toBe(91);
-  expect(s.lessons.verified).toBe(463);
+  expect(s.verifiedVolumes).toBe(12);
+  expect(s.verifiedUnits).toBe(108);
+  expect(s.lessons.verified).toBe(557);
 });
