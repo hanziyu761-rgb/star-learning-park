@@ -25,30 +25,58 @@ export const SRC_G1B: SourceRef = {
   note: 'APP 所有者登录平台后截图提供；逐条核对单元名、课题名、页码。截图从“第一单元”开始，其上方若有内容未录入。',
 };
 
-export type Row = [no: number | null, title: string, page: number, kind?: LessonEntry['kind'], parts?: string[]];
+/** 课文编号写成 '3*' 表示略读课文（目录中带 * 号）；note 写核实备注 */
+export type Row = [no: number | string | null, title: string, page: number, kind?: LessonEntry['kind'], parts?: string[], note?: string];
 export interface U {
   order: number;
   title: string;
+  page?: number;
+  note?: string;
   kind: LessonEntry['kind'];
   rows: Row[];
   bank: string[];
 }
 
+function autoKind(title: string, fallback: LessonEntry['kind']): LessonEntry['kind'] {
+  if (title.startsWith('语文园地')) return 'garden';
+  if (title.startsWith('快乐读书吧')) return 'reading';
+  if (title.startsWith('口语交际')) return 'oral';
+  if (title.startsWith('习作例文')) return 'example';
+  if (title.startsWith('习作')) return 'writing';
+  return fallback;
+}
+
 export function build(volId: string, units: U[]): Unit[] {
   return units.map((u) => {
     const uid = `${volId}.u${u.order}`;
-    const lessons: LessonEntry[] = u.rows.map(([no, title, page, kind, parts], i) => ({
-      id: `${uid}.l${i + 1}`,
-      order: i + 1,
-      ...(no ? { no } : {}),
-      title,
-      kind: kind ?? (title.startsWith('语文园地') ? 'garden' : title.startsWith('快乐读书吧') ? 'reading' : u.kind),
-      ...(parts ? { parts } : {}),
-      page,
-      provenance: 'verified' as const,
-    }));
+    const lessons: LessonEntry[] = u.rows.map(([no, title, page, kind, parts, note], i) => {
+      const starred = typeof no === 'string' && no.endsWith('*');
+      const n = typeof no === 'string' ? Number(no.replace('*', '')) : no;
+      return {
+        id: `${uid}.l${i + 1}`,
+        order: i + 1,
+        ...(n ? { no: n } : {}),
+        title,
+        kind: kind ?? autoKind(title, u.kind),
+        ...(starred ? { starred: true } : {}),
+        ...(parts ? { parts } : {}),
+        page,
+        ...(note ? { note } : {}),
+        provenance: 'verified' as const,
+      };
+    });
     const kpIds = [...new Set(u.bank.map((b) => UNIT_TO_KP[b]).filter(Boolean))];
-    return { id: uid, order: u.order, title: u.title, provenance: 'verified' as const, lessons, kpIds, bankUnitIds: u.bank };
+    return {
+      id: uid,
+      order: u.order,
+      title: u.title,
+      ...(u.page ? { page: u.page } : {}),
+      ...(u.note ? { note: u.note } : {}),
+      provenance: 'verified' as const,
+      lessons,
+      kpIds,
+      bankUnitIds: u.bank,
+    };
   });
 }
 

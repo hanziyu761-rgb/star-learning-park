@@ -68,8 +68,24 @@ describe('第一批：统编版语文修订版 12 册登记', () => {
     expect(b.units[4].lessons[0]).toMatchObject({ title: '寓言二则', parts: ['亡羊补牢', '揠苗助长'] });
     for (const v of [a, b]) for (const u of v.units.slice(0, 8)) expect(u.bankUnitIds).toHaveLength(1);
   });
-  it('三至六年级目录尚未与官方核对：不算已核实，也不算完整', () => {
-    for (const v of vols.slice(4)) {
+  it('三年级上、下册目录已核实：略读课文、口语交际、习作、习作单元例文都录了；截图不全的地方有备注', () => {
+    const [a, b] = vols.slice(4, 6);
+    expect([a.tocProvenance, b.tocProvenance]).toEqual(['verified', 'verified']);
+    expect(completeness(a).lessons.verified).toBe(50);
+    expect(completeness(b).lessons.verified).toBe(51);
+    const nos = (v: Volume) => v.units.flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no));
+    expect(nos(a)).toEqual(Array.from({ length: 26 }, (_, i) => i + 1));
+    expect(nos(b)).toEqual(Array.from({ length: 27 }, (_, i) => i + 1));
+    const starred = (v: Volume) => v.units.flatMap((u) => u.lessons.filter((l) => l.starred).map((l) => l.no));
+    expect(starred(a)).toEqual([3, 7, 9, 10, 13, 19, 26]);
+    expect(starred(b)).toEqual([4, 8, 11, 15, 21, 27]);
+    expect(a.units[2].note).toBe('阅读策略单元');
+    expect(a.units[4].lessons.at(-1)).toMatchObject({ kind: 'example', parts: ['我家的小狗', '我爱故乡的杨梅'] });
+    expect(a.units[6].lessons[0].note).toMatch(/第三首待补/);
+    expect(b.units[3].lessons.map((l) => l.kind)).toEqual(['text', 'text', 'text', 'text', 'other', 'garden']);
+  });
+  it('四至六年级目录尚未与官方核对：不算已核实，也不算完整', () => {
+    for (const v of vols.slice(6)) {
       expect(v.tocProvenance).toBe('none');
       const c = completeness(v);
       expect(c.lessons.verified).toBe(0);
@@ -134,7 +150,7 @@ it('汇总数字（汇报用）', () => {
   const s = summary();
   expect(s.volumes).toBe(12);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(4);
-  expect(s.verifiedUnits).toBe(37);
-  expect(s.lessons.verified).toBe(165);
+  expect(s.verifiedVolumes).toBe(6);
+  expect(s.verifiedUnits).toBe(55);
+  expect(s.lessons.verified).toBe(266);
 });

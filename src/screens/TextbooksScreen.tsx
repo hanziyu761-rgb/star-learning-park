@@ -112,13 +112,18 @@ function VolumeRow({ v }: { v: Volume }) {
           ) : null}
           {v.units.map((u) => (
             <View key={u.id} style={{ gap: 2 }}>
-              <Text style={styles.unit}>{u.title}</Text>
+              <Text style={styles.unit}>
+                {u.title}
+                {u.note ? `（${u.note}）` : ''}
+                {u.page ? `　…… ${u.page}` : ''}
+              </Text>
               {u.lessons.map((l) => (
                 <Text key={l.id} style={styles.lesson}>
-                  {l.no ? `${l.no}　` : '◎　'}
+                  {l.no ? `${l.no}${l.starred ? '*' : ''}　` : '◎　'}
                   {l.title}
                   {l.parts ? `（${l.parts.join('、')}）` : ''}
                   {l.page ? `　…… ${l.page}` : ''}
+                  {l.note ? `　【${l.note}】` : ''}
                 </Text>
               ))}
             </View>

@@ -1,7 +1,7 @@
 /**
  * 第一批：统编版小学语文 一至六年级 上下册（根据 2022 年版课程标准修订的版本）——版本登记（V4.0）。
  *
- * 一、二年级上下册目录已与官方电子课本核对（chineseTongbianG1.ts、G2.ts）；其余各册目录尚未核对，units 为空、tocProvenance = 'none'。
+ * 一～三年级上下册目录已与官方电子课本核对（chineseTongbianG1.ts、G2.ts、G3.ts）；其余各册目录尚未核对，units 为空、tocProvenance = 'none'。
  * 核实方式：国家中小学智慧教育平台 统编版语文电子课本的目录页，逐条录入后标 verified 并记录日期。
  * 不录课文正文、习题、教参，只录单元名和课题名。
  */
@@ -9,6 +9,7 @@ import { CHECKED, SRC_ROLLOUT } from '../editions';
 import type { Term, Volume } from '../types';
 import { G1A_UNITS, G1B_UNITS, SRC_G1A, SRC_G1B } from './chineseTongbianG1';
 import { G2A_UNITS, G2B_UNITS, SRC_G2A, SRC_G2B } from './chineseTongbianG2';
+import { G3A_UNITS, G3B_UNITS, SRC_G3A, SRC_G3B } from './chineseTongbianG3';
 
 const CN = ['', '一', '二', '三', '四', '五', '六'];
 
@@ -41,6 +42,8 @@ const VERIFIED: Record<string, { units: (id: string) => Volume['units']; src: Vo
   g1b: { units: G1B_UNITS, src: SRC_G1B },
   g2a: { units: G2A_UNITS, src: SRC_G2A },
   g2b: { units: G2B_UNITS, src: SRC_G2B },
+  g3a: { units: G3A_UNITS, src: SRC_G3A },
+  g3b: { units: G3B_UNITS, src: SRC_G3B },
 };
 
 export const TONGBIAN_2024: Volume[] = PLANS.map((p) => {

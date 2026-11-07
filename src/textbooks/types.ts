@@ -62,6 +62,8 @@ export interface LessonEntry {
   parts?: string[];
   /** 教材页码（目录上的页码，便于核对） */
   page?: number;
+  /** 核实备注（如截图不全，某一部分待补） */
+  note?: string;
   provenance: Provenance;
   /** 本项目对这一课时已建设的内容（原创课程 id、知识点 id、练习题 id） */
   lessonIds?: string[];
@@ -75,6 +77,10 @@ export interface Unit {
   order: number;
   /** 教材上的单元名（没有正式单元名的写“第一单元”） */
   title: string;
+  /** 单元起始页码 */
+  page?: number;
+  /** 单元说明（如“阅读策略单元”“习作单元”，来自教材目录页的说明） */
+  note?: string;
   provenance: Provenance;
   /** 单元学习目标、语文要素等（本项目编写的标 original） */
   objectives?: { text: string; provenance: Provenance }[];
