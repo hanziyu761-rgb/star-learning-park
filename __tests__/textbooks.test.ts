@@ -195,13 +195,42 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(30);
+  expect(s.volumes).toBe(35);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(24);
-  expect(s.verifiedUnits).toBe(212);
+  expect(s.verifiedVolumes).toBe(29);
+  expect(s.verifiedUnits).toBe(268);
   expect(s.lessons.verified).toBe(559);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
+});
+
+describe('第三批：北师大版数学修订版', () => {
+  const vols = volumesFor({ editionId: 'math.bsd' });
+  it('只登记已截图核对的册：一年级下册、二～三年级上下册', () => {
+    expect(vols.map((v) => v.id)).toEqual(['math.bsd.2024.g1b', 'math.bsd.2024.g2a', 'math.bsd.2024.g2b', 'math.bsd.2024.g3a', 'math.bsd.2024.g3b']);
+    for (const v of vols) {
+      expect(v.tocProvenance).toBe('verified');
+      expect(v.sources[0].kind).toBe('official');
+      expect(v.bankBookId).toBeUndefined(); // 题库按人教版整理，不冒充北师大版练习
+      expect(v.units.every((u) => u.bankUnitIds.length === 0 && u.kpIds.length === 0)).toBe(true);
+    }
+    const [g1b, g2a, g2b, g3a, g3b] = vols;
+    expect(g1b.units.map((u) => u.title)).toEqual([
+      '第一单元 20以内数与加法', '第二单元 图形大变身（一）', '综合实践 设计教室装饰图', '第三单元 20以内数与减法', '第四单元 100以内数的认识',
+      '数学好玩 填数游戏', '第五单元 100以内数加与减（一）', '第六单元 有趣的平面图形（一）', '综合实践 画数学连环画', '总复习',
+    ]);
+    expect(g1b.units.map((u) => u.page)).toEqual([2, 18, 24, 27, 44, 60, 62, 76, 87, 90]);
+    expect(g2a.units).toHaveLength(12);
+    expect(g2a.units.map((u) => u.page)).toEqual([2, 18, 20, 30, 43, 53, 56, 72, 77, 87, 94, 98]);
+    expect(g2b.units).toHaveLength(11);
+    expect(g2b.units.map((u) => u.page)).toEqual([2, 10, 16, 28, 32, 52, 60, 62, 79, 85, 88]);
+    expect(g2b.units[2].title).toBe('第三单元 除法的应用');
+    expect(g3a.units.map((u) => u.page)).toEqual([2, 13, 24, 28, 41, 49, 62, 64, 75, 90, 95, 99]);
+    expect(g3b.units.map((u) => u.page)).toEqual([2, 20, 33, 43, 48, 67, 72, 74, 80, 86, 90]);
+    expect(g3b.units[3].title).toBe('综合实践 制作动物体重“说明书”');
+    expect(completeness(g1b).todo.join()).toMatch(/课时/);
+    expect(isComplete(completeness(g1b), g1b)).toBe(false);
+  });
 });
 
 describe('第二批：人教版数学修订版', () => {

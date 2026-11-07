@@ -66,7 +66,25 @@ export const EDITIONS: Edition[] = [
       },
     ],
   },
-  { id: 'math.bsd', subject: 'math', name: '北师大版', aliases: [], publisher: '北京师范大学出版社', priority: 1, ...pending('第三批核实。') },
+  {
+    id: 'math.bsd',
+    subject: 'math',
+    name: '北师大版',
+    aliases: ['北师版'],
+    publisher: '北京师范大学出版社',
+    priority: 1,
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台提供北师大版小学数学修订版电子课本（第三批核实中：一年级下册、二～三年级上下册目录已核对）；修订版各册启用时间和使用地区待核实。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 北师大版小学数学（根据2022年版课程标准修订）电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: CHECKED,
+        note: 'APP 所有者登录平台查看并截图目录页；页面显示出版社“北京师范大学出版社”。',
+      },
+    ],
+  },
   {
     id: 'math.sujiao',
     subject: 'math',
