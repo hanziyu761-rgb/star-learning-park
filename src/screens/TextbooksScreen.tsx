@@ -39,7 +39,7 @@ export default function TextbooksScreen() {
       <View style={styles.card} testID="textbooks-summary">
         <Text style={styles.h}>目前的真实情况</Text>
         <Text style={styles.p}>
-          登记教材版本 {s.editions} 套；新版教材册次 {s.volumes} 册（目录已核实 {s.verifiedVolumes} 册）；现有题库 {s.bankVolumes} 册（旧版单元，目录待核实）。
+          登记教材版本 {s.editions} 套；教材册次 {s.volumes} 册（目录已核实 {s.verifiedVolumes} 册）；现有题库 {s.bankVolumes} 册（旧版单元，目录待核实）。
           已核实的课时目录 {s.lessons.verified} 条。
         </Text>
         <Text style={styles.small}>
@@ -86,7 +86,7 @@ function VolumeRow({ v }: { v: Volume }) {
     <View style={styles.vol} testID={`tb-vol-${v.id}`}>
       <View style={styles.row}>
         <Text style={styles.volName}>
-          {v.grade}年级{v.term}册 {v.revision ? `· ${v.revision} 修订版` : '· 旧版单元（题库）'}
+          {v.grade}年级{v.term}册 {v.id.startsWith('bank.') ? '· 旧版单元（题库）' : v.revision ? `· ${v.revision} 修订版` : '· 未修订版（平台现有）'}
         </Text>
         <Text style={[styles.tag, { color: toc.color, borderColor: toc.color }]} testID={`tb-toc-${v.id}`}>
           {toc.text}

@@ -10,6 +10,8 @@ import type { Term, Volume } from '../types';
 import { G1A_UNITS, G1B_UNITS, SRC_G1A, SRC_G1B } from './chineseTongbianG1';
 import { G2A_UNITS, G2B_UNITS, SRC_G2A, SRC_G2B } from './chineseTongbianG2';
 import { G3A_UNITS, G3B_UNITS, SRC_G3A, SRC_G3B } from './chineseTongbianG3';
+import { G4A_UNITS, G4B_LEGACY_UNITS, SRC_G4A, SRC_G4B_LEGACY } from './chineseTongbianG4';
+import { G5A_UNITS, G5B_LEGACY_UNITS, SRC_G5A, SRC_G5B_LEGACY } from './chineseTongbianG5';
 
 const CN = ['', '一', '二', '三', '四', '五', '六'];
 
@@ -44,6 +46,8 @@ const VERIFIED: Record<string, { units: (id: string) => Volume['units']; src: Vo
   g2b: { units: G2B_UNITS, src: SRC_G2B },
   g3a: { units: G3A_UNITS, src: SRC_G3A },
   g3b: { units: G3B_UNITS, src: SRC_G3B },
+  g4a: { units: G4A_UNITS, src: SRC_G4A },
+  g5a: { units: G5A_UNITS, src: SRC_G5A },
 };
 
 export const TONGBIAN_2024: Volume[] = PLANS.map((p) => {
@@ -66,6 +70,37 @@ export const TONGBIAN_2024: Volume[] = PLANS.map((p) => {
     sources: [...(ver ? [ver.src] : []), { ...SRC_ROLLOUT, checkedAt: CHECKED }],
     units: ver ? ver.units(id) : [],
     // 练习暂用现有开源题库同年级同册（按旧版主题单元整理），见 adapters.ts
+    bankBookId: `chinese-g${p.grade}${t}`,
+    copyright: '目录只录单元名和课题名；课文正文、插图、习题和教师用书版权归人民教育出版社，不复制。',
+  };
+});
+
+/**
+ * 平台目前提供的未修订版（书名没有“根据2022年版课程标准修订”）：目录已核实，单独登记，不当作修订版。
+ * 四至六年级下册修订版启用前，学生用的可能仍是这一版（待核实）。
+ */
+const LEGACY: { grade: number; term: Term; units: (id: string) => Volume['units']; src: Volume['sources'][number] }[] = [
+  { grade: 4, term: '下', units: G4B_LEGACY_UNITS, src: SRC_G4B_LEGACY },
+  { grade: 5, term: '下', units: G5B_LEGACY_UNITS, src: SRC_G5B_LEGACY },
+];
+
+export const TONGBIAN_LEGACY: Volume[] = LEGACY.map((p) => {
+  const t = p.term === '上' ? 'a' : 'b';
+  const id = `chinese.tongbian.legacy.g${p.grade}${t}`;
+  return {
+    id,
+    editionId: 'chinese.tongbian',
+    subject: 'chinese',
+    grade: p.grade,
+    term: p.term,
+    officialName: `义务教育教科书·语文 ${CN[p.grade]}年级${p.term}册（未修订版）`,
+    revision: null,
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台目前提供的是这一版；修订版启用后会成为历史版本（启用时间待核实）。',
+    regions: ['全国'],
+    tocProvenance: 'verified',
+    sources: [p.src],
+    units: p.units(id),
     bankBookId: `chinese-g${p.grade}${t}`,
     copyright: '目录只录单元名和课题名；课文正文、插图、习题和教师用书版权归人民教育出版社，不复制。',
   };

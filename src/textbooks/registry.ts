@@ -3,7 +3,7 @@
  */
 import type { Subject } from '@/lesson/types';
 import { bankVolumes, courseCount } from './adapters';
-import { TONGBIAN_2024 } from './data/chineseTongbian';
+import { TONGBIAN_2024, TONGBIAN_LEGACY } from './data/chineseTongbian';
 import { EDITION_BY_ID, EDITIONS } from './editions';
 import type { Completeness, Edition, LessonEntry, Provenance, Unit, Volume } from './types';
 import { loadRawBook } from '@/content/bank';
@@ -13,7 +13,7 @@ import { IMPORTED } from './data/imported';
 
 let cached: Volume[] | null = null;
 export function allVolumes(): Volume[] {
-  cached ??= [...TONGBIAN_2024, ...IMPORTED, ...bankVolumes()];
+  cached ??= [...TONGBIAN_2024, ...TONGBIAN_LEGACY, ...IMPORTED, ...bankVolumes()];
   return cached;
 }
 

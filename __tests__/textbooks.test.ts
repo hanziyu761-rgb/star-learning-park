@@ -84,8 +84,44 @@ describe('第一批：统编版语文修订版 12 册登记', () => {
     expect(a.units[6].lessons[0].note).toMatch(/第三首待补/);
     expect(b.units[3].lessons.map((l) => l.kind)).toEqual(['text', 'text', 'text', 'text', 'other', 'garden']);
   });
-  it('四至六年级目录尚未与官方核对：不算已核实，也不算完整', () => {
-    for (const v of vols.slice(6)) {
+  it('四年级上册（修订版）目录已核实；截图缺的第七单元开头有备注，不凭印象补', () => {
+    const a = vols[6];
+    expect(a.tocProvenance).toBe('verified');
+    expect(completeness(a).lessons.verified).toBe(50);
+    const nos = a.units.flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no));
+    expect(nos).toEqual([...Array.from({ length: 19 }, (_, i) => i + 1), ...Array.from({ length: 7 }, (_, i) => i + 21)]);
+    expect(a.units[6].note).toMatch(/待补/);
+    expect(a.units[6].page).toBeUndefined();
+    expect(a.units[3].lessons[3]).toMatchObject({ no: 14, title: '女娲补天', starred: true });
+  });
+  it('四年级下册：平台目前是未修订版，单独登记为 legacy，不冒充修订版', () => {
+    const old = volumesFor({ editionId: 'chinese.tongbian' }).find((v) => v.id === 'chinese.tongbian.legacy.g4b')!;
+    expect(old.revision).toBeNull();
+    expect(old.officialName).toMatch(/未修订版/);
+    expect(old.tocProvenance).toBe('verified');
+    expect(completeness(old).lessons.verified).toBe(51);
+    expect(old.units.flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no))).toEqual(Array.from({ length: 28 }, (_, i) => i + 1));
+    expect(old.units[2].lessons[4]).toMatchObject({ title: '综合性学习：轻叩诗歌大门', kind: 'other' });
+    // 修订版四年级下册仍是“即将启用、目录未录入”
+    expect(vols[7]).toMatchObject({ id: 'chinese.tongbian.2024.g4b', status: 'upcoming', tocProvenance: 'none' });
+  });
+  it('五年级：上册修订版、下册未修订版目录都已核实', () => {
+    const a = vols[8];
+    expect(a.id).toBe('chinese.tongbian.2024.g5a');
+    expect(a.tocProvenance).toBe('verified');
+    expect(completeness(a).lessons.verified).toBe(48);
+    expect(a.units[1].note).toBe('阅读策略单元');
+    expect(a.units.flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no))).toEqual(Array.from({ length: 25 }, (_, i) => i + 1));
+    const old = allVolumes().find((v) => v.id === 'chinese.tongbian.legacy.g5b')!;
+    expect(completeness(old).lessons.verified).toBe(48);
+    expect(old.units.flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no))).toEqual(Array.from({ length: 23 }, (_, i) => i + 1));
+    expect(old.units[2].lessons.map((l) => l.title)).toEqual(['综合性学习：遨游汉字王国', '汉字真有趣', '我爱你，汉字']);
+  });
+  it('还没核实的修订版（四、五年级下册，六年级上下册）：不算已核实，也不算完整', () => {
+    expect(vols.filter((v) => v.tocProvenance === 'none').map((v) => v.id)).toEqual([
+      'chinese.tongbian.2024.g4b', 'chinese.tongbian.2024.g5b', 'chinese.tongbian.2024.g6a', 'chinese.tongbian.2024.g6b',
+    ]);
+    for (const v of vols.filter((x) => x.tocProvenance === 'none')) {
       expect(v.tocProvenance).toBe('none');
       const c = completeness(v);
       expect(c.lessons.verified).toBe(0);
@@ -148,9 +184,9 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(12);
+  expect(s.volumes).toBe(14);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(6);
-  expect(s.verifiedUnits).toBe(55);
-  expect(s.lessons.verified).toBe(266);
+  expect(s.verifiedVolumes).toBe(10);
+  expect(s.verifiedUnits).toBe(91);
+  expect(s.lessons.verified).toBe(463);
 });
