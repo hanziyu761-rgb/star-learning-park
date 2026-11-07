@@ -126,7 +126,25 @@ export const EDITIONS: Edition[] = [
   },
   { id: 'math.qingdao', subject: 'math', name: '青岛版', aliases: [], publisher: '青岛出版社', priority: 2, ...pending('第四批核实（注意有六三制、五四制两套）。') },
   { id: 'math.xishi', subject: 'math', name: '西师版', aliases: ['西师大版'], publisher: '西南大学出版社', priority: 2, ...pending('第四批核实。') },
-  { id: 'math.beijing', subject: 'math', name: '北京版', aliases: [], publisher: '北京出版社', priority: 2, ...pending('第四批核实。') },
+  {
+    id: 'math.beijing',
+    subject: 'math',
+    name: '北京版',
+    aliases: [],
+    publisher: '北京出版社',
+    priority: 2,
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台提供北京版小学数学电子课本（出版社：北京出版社；北京教育科学研究院 编）。第四批已核对：一～三年级上下册、四～六年级上册修订版；平台现有四～六年级下册为未修订版，另行登记。各地选用情况待核实。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 北京版小学数学电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: '2026-11-08',
+        note: '在 APP 所有者已登录的浏览器里逐册打开目录页查看并录入；教材详情页显示出版社“北京出版社”。',
+      },
+    ],
+  },
   { id: 'math.hujiao', subject: 'math', name: '沪教版', aliases: [], publisher: '上海教育出版社', priority: 2, ...pending('第四批核实（上海为五四学制）。') },
 
   /* ───── 英语 ───── */

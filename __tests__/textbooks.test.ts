@@ -6,6 +6,7 @@ import path from 'path';
 import { BANK_INDEX } from '@/content/bank';
 import { EDITIONS } from '@/textbooks/editions';
 import { parseToc } from '@/textbooks/data/mathJijiao';
+import { parseBeijingToc } from '@/textbooks/data/mathBeijing';
 import { allVolumes, completeness, isComplete, summary, validateAll, validateVolume, volumesFor } from '@/textbooks/registry';
 import type { Volume } from '@/textbooks/types';
 
@@ -196,13 +197,41 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(66);
+  expect(s.volumes).toBe(78);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(60);
-  expect(s.verifiedUnits).toBe(591);
+  expect(s.verifiedVolumes).toBe(72);
+  expect(s.verifiedUnits).toBe(716);
   expect(s.lessons.verified).toBe(744);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
+});
+
+describe('第四批：北京版数学', () => {
+  const vols = volumesFor({ editionId: 'math.beijing' });
+  it('12 册：修订版 9 册 + 平台现有四～六年级下册未修订版 3 册；不关联人教版题库', () => {
+    expect(vols).toHaveLength(12);
+    expect(vols.filter((v) => v.revision === null).map((v) => `${v.grade}${v.term}`)).toEqual(['4下', '5下', '6下']);
+    for (const v of vols) {
+      expect(v.tocProvenance).toBe('verified');
+      expect(v.sources[0].kind).toBe('official');
+      expect(v.sources[0].title).toMatch(/北京出版社/);
+      expect(v.bankBookId).toBeUndefined();
+      expect(v.units.every((u) => u.lessons.length === 0 && u.bankUnitIds.length === 0 && u.kpIds.length === 0)).toBe(true);
+    }
+    expect(vols.reduce((n, v) => n + v.units.length, 0)).toBe(125);
+  });
+  it('一年级上册逐条对照；没有序号的栏目照实标注；遮挡的序号写明', () => {
+    const g1a = vols[0];
+    expect(g1a.units.map((u) => `${u.title}@${u.page}`)).toEqual([
+      '我是小学生@2', '一 5以内数的认识和加、减法@14', '二 认识立体图形@35', '三 10以内数的认识和加、减法@38',
+      '四 20以内数的认识和进位加法@69', '时间在哪里@85', '五 数学百花园@90', '六 总复习@92', '附页@101',
+    ]);
+    expect(g1a.units[0].note).toMatch(/图标/);
+    const g4a = vols.find((v) => v.id === 'math.beijing.2024.g4a')!;
+    expect(g4a.units[2]).toMatchObject({ title: '二 运算定律', page: 25 });
+    expect(g4a.units[2].note).toMatch(/遮住/);
+    expect(() => parseBeijingToc('x', '一 没有页码')).toThrow(/格式不对/);
+  });
 });
 
 describe('第四批：冀教版数学（目录含小节）', () => {
