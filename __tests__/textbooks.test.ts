@@ -81,17 +81,17 @@ describe('第一批：统编版语文修订版 12 册登记', () => {
     expect(starred(b)).toEqual([4, 8, 11, 15, 21, 27]);
     expect(a.units[2].note).toBe('阅读策略单元');
     expect(a.units[4].lessons.at(-1)).toMatchObject({ kind: 'example', parts: ['我家的小狗', '我爱故乡的杨梅'] });
-    expect(a.units[6].lessons[0].note).toMatch(/第三首待补/);
+    expect(a.units[6].lessons[0].parts).toEqual(['鹿柴', '望天门山', '饮湖上初晴后雨']);
     expect(b.units[3].lessons.map((l) => l.kind)).toEqual(['text', 'text', 'text', 'text', 'other', 'garden']);
   });
-  it('四年级上册（修订版）目录已核实；截图缺的第七单元开头有备注，不凭印象补', () => {
+  it('四年级上册（修订版）目录已核实；第七单元开头由补充截图补齐', () => {
     const a = vols[6];
     expect(a.tocProvenance).toBe('verified');
-    expect(completeness(a).lessons.verified).toBe(50);
+    expect(completeness(a).lessons.verified).toBe(51);
     const nos = a.units.flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no));
-    expect(nos).toEqual([...Array.from({ length: 19 }, (_, i) => i + 1), ...Array.from({ length: 7 }, (_, i) => i + 21)]);
-    expect(a.units[6].note).toMatch(/待补/);
-    expect(a.units[6].page).toBeUndefined();
+    expect(nos).toEqual(Array.from({ length: 27 }, (_, i) => i + 1));
+    expect(a.units[6]).toMatchObject({ page: 87 });
+    expect(a.units[6].lessons[0]).toMatchObject({ no: 20, title: '牛和鹅', page: 88 });
     expect(a.units[3].lessons[3]).toMatchObject({ no: 14, title: '女娲补天', starred: true });
   });
   it('四年级下册：平台目前是未修订版，单独登记为 legacy，不冒充修订版', () => {
@@ -99,7 +99,8 @@ describe('第一批：统编版语文修订版 12 册登记', () => {
     expect(old.revision).toBeNull();
     expect(old.officialName).toMatch(/未修订版/);
     expect(old.tocProvenance).toBe('verified');
-    expect(completeness(old).lessons.verified).toBe(51);
+    expect(completeness(old).lessons.verified).toBe(52);
+    expect(old.units[5].lessons.at(-1)).toMatchObject({ title: '语文园地', page: 99 });
     expect(old.units.flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no))).toEqual(Array.from({ length: 28 }, (_, i) => i + 1));
     expect(old.units[2].lessons[4]).toMatchObject({ title: '综合性学习：轻叩诗歌大门', kind: 'other' });
     // 修订版四年级下册仍是“即将启用、目录未录入”
@@ -198,7 +199,9 @@ it('汇总数字（汇报用）', () => {
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
   expect(s.verifiedVolumes).toBe(24);
   expect(s.verifiedUnits).toBe(212);
-  expect(s.lessons.verified).toBe(557);
+  expect(s.lessons.verified).toBe(559);
+  // 没有遗留的“待补”
+  expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
 });
 
 describe('第二批：人教版数学修订版', () => {

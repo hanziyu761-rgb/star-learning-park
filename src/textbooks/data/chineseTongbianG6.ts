@@ -19,7 +19,7 @@ export const SRC_G6B_LEGACY: SourceRef = {
   url: 'https://basic.smartedu.cn/tchMaterial',
   kind: 'official',
   checkedAt: G1_CHECKED,
-  note: 'APP 所有者登录平台后截图提供。第六单元“回忆往事 98”在截图底部，其下若还有内容未显示，待补。目录页说明：标*的是略读课文。',
+  note: 'APP 所有者登录平台后截图提供（页面标注出版社：人民教育出版社）。补充截图确认第六单元左栏到“回忆往事 98”为止，右栏接“依依惜别 105”。目录页说明：标*的是略读课文。',
 };
 
 export const G6A_UNITS = (volId: string) =>
@@ -42,7 +42,7 @@ export const G6B_LEGACY_UNITS = (volId: string) =>
     { order: 3, title: '第三单元', page: 43, kind: 'text', bank: ['chinese-g6b-u3'], rows: [[8, '匆匆', 44], [9, '那个星期天', 46], [null, '习作例文', 51, 'example', ['别了，语文课', '阳光的两种用法']], [null, '习作：让真情自然流露', 56]] },
     { order: 4, title: '第四单元', page: 57, kind: 'text', bank: ['chinese-g6b-u4'], rows: [[10, '古诗三首', 58, 'text', ['马诗', '石灰吟', '竹石']], [11, '十六年前的回忆', 60], [12, '为人民服务', 64], ['13*', '董存瑞舍身炸暗堡', 66], [null, '综合性学习：奋斗的历程', 68, 'other'], [null, '语文园地', 77]] },
     { order: 5, title: '第五单元', page: 79, kind: 'text', bank: ['chinese-g6b-u5'], rows: [[14, '文言文二则', 80, 'text', ['学弈', '两小儿辩日']], [15, '真理诞生于一百个问号之后', 82], [16, '表里的生物', 87], ['17*', '他们那时候多有趣啊', 90], [null, '口语交际：辩论', 93], [null, '习作：插上科学的翅膀飞', 94], [null, '语文园地', 95]] },
-    { order: 6, title: '第六单元', page: 97, kind: 'other', bank: ['chinese-g6b-u6'], rows: [[null, '综合性学习：难忘小学生活', 98], [null, '回忆往事', 98, undefined, undefined, '截图底部，其下若还有内容未显示，待补'], [null, '依依惜别', 105]] },
+    { order: 6, title: '第六单元', page: 97, kind: 'other', bank: ['chinese-g6b-u6'], rows: [[null, '综合性学习：难忘小学生活', 98], [null, '回忆往事', 98], [null, '依依惜别', 105]] },
     { order: 7, title: '古诗词诵读', kind: 'poem', bank: [], rows: [[1, '采薇（节选）', 111], [2, '送元二使安西', 112], [3, '春夜喜雨', 113], [4, '早春呈水部张十八员外', 114], [5, '江上渔者', 115], [6, '泊船瓜洲', 116], [7, '游园不值', 117], [8, '卜算子·送鲍浩然之浙东', 118], [9, '浣溪沙', 119], [10, '清平乐', 120]] },
     { order: 8, title: '附录', kind: 'other', bank: [], rows: [[null, '写字表', 121], [null, '词语表', 122]] },
   ]);
