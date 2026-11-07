@@ -20,6 +20,7 @@ import { GAMES } from '@/games/common';
  * 键为“汉字:我们的拼音:词库拼音”，只放行这个具体组合，其它错误仍会被发现。
  */
 const ACCEPTED: Record<string, string> = {
+  '重:chóng:zhòng': '“重做”“重来”是再一次的意思，读 chóng（《现代汉语词典》）',
   '少:shao:shǎo': '询问数量的“多少”中“少”读轻声（《现代汉语词典》duō·shao）',
   '泡:pao:pào': '“泡泡”中第二个“泡”读轻声（《现代汉语词典》pào·pao）',
   '睛:jing:jīng': '“眼睛”中“睛”读轻声（《现代汉语词典》yǎn·jing）',

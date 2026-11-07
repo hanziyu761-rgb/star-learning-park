@@ -22,12 +22,13 @@ MIT License 全文：
 - 许可证：MIT License, Copyright (c) 2025 Student Trainee Center
 - 使用内容：`src/progress/plan.ts` 借鉴其学习计划规则（按知识点统计正确率，低于 70% 判为薄弱）；未复制代码。
 
-## Kokoro-82M（预先录制的朗读声音，V2.16）
-- 模型：https://huggingface.co/hexgrad/Kokoro-82M （v1.0，ONNX 版来自 https://github.com/thewh1teagle/kokoro-onnx 发布的模型文件）
-- 许可证：Apache License 2.0（允许商用）
-- 使用内容：在开发环境用 `tools/voice/generate.py` 把课程、讲解、短文等固定朗读内容生成音频，放在 `assets/voice/`；APP 内不包含模型本身。
-  使用的声音：中文女声 zf_xiaoxiao、中文男声 zm_yunxi、中文童声 zm_yunxia、英语女声 af_heart、英语男声 am_puck。
-- 生成工具（只在开发环境使用，不随 APP 发布）：kokoro-onnx（MIT）、misaki（Apache-2.0，中文拼音转音标）、jieba（MIT）、pypinyin（MIT）、cn2an（MIT）。
+## 阿里云百炼 CosyVoice（预先录制的朗读声音 + 联网朗读，V2.21 起）
+- 服务：阿里云百炼 语音合成 cosyvoice-v3-flash，音色 longhuhu_v3（龙呼呼）。云端服务，不是开源模型，APP 内不包含模型和密钥。
+- 使用方式：APP 所有者用自己的百炼账号，经自家 AI 服务（server/ai-worker）批量合成固定朗读内容（`tools/voice/cloud/record.ps1`），
+  导入为 `assets/voice/c/`；随机出的题联网时经自家 AI 服务现念。按字数计费，费用由 APP 所有者承担。
+- 合成内容的使用（含商用）条件以《阿里云百炼服务协议》和阿里云相关条款为准；正式上架前建议再核对一次。
+- V2.16～V2.20 使用的 Kokoro-82M（Apache-2.0）录音已在 V2.21 全部替换，不再随 APP 发布；`tools/voice/generate.py` 保留为历史工具。
+- 回听检查用的离线识别模型 sherpa-onnx-paraformer-zh-small（只在开发环境使用，不随 APP 发布）。
 
 ## sherpa-onnx 与中文语音识别模型（说话提问，V2.17）
 - 识别引擎：sherpa-onnx 1.12.21 安卓库 https://github.com/k2-fsa/sherpa-onnx （Apache License 2.0，允许商用；库内含 onnxruntime，MIT License）

@@ -1,5 +1,6 @@
 /**
- * V2.16 预先录好的朗读：编号与生成脚本一致；有录音放录音，没有录音用手机语音。
+ * 预先录好的朗读：编号与生成脚本一致；有录音放录音，没有录音（又没开联网童声）用手机语音。
+ * V2.21 起只有一套童声录音（中英文同一个声音）。
  */
 import * as Speech from 'expo-speech';
 import { clipId } from '@/speech/clips';
@@ -15,7 +16,7 @@ jest.mock('@/speech/voiceClips', () => {
   })();
   return {
     CLIP_VOICES: {},
-    CLIPS: { f: { '2035680e': 101, [en]: 111 }, m: { '2035680e': 202 }, c: { '2035680e': 303 } },
+    CLIPS: { c: { '2035680e': 303, [en]: 313 } },
   };
 });
 
@@ -36,12 +37,12 @@ describe('朗读时优先放录音', () => {
     audio.createAudioPlayer.mockClear();
   });
 
-  it('有录音：按选的性别放对应录音，不用手机语音；放完才算读完', () => {
-    setVoicePrefs({ gender: 'male', zh: '', en: '', rate: 'slow' });
+  it('有录音：放童声录音，不用手机语音；放完才算读完', () => {
+    setVoicePrefs({ gender: 'child', zh: '', en: '', rate: 'slow' });
     const done = jest.fn();
     speak({ text: '你好', lang: 'zh-CN' }, done);
     expect(Speech.speak).not.toHaveBeenCalled();
-    expect(audio.createAudioPlayer).toHaveBeenLastCalledWith(202);
+    expect(audio.createAudioPlayer).toHaveBeenLastCalledWith(303);
     const p = audio.__players.at(-1);
     expect(p.play).toHaveBeenCalled();
     expect(p.setPlaybackRate).not.toHaveBeenCalled();
@@ -50,30 +51,22 @@ describe('朗读时优先放录音', () => {
     expect(done).toHaveBeenCalledTimes(1);
   });
 
-  it('“正常”语速稍快播放；换女声放女声录音', () => {
-    setVoicePrefs({ gender: 'female', zh: '', en: '', rate: 'normal' });
-    speak({ text: '你好', lang: 'zh-CN' });
-    expect(audio.createAudioPlayer).toHaveBeenLastCalledWith(101);
-    expect(audio.__players.at(-1).setPlaybackRate).toHaveBeenCalledWith(1.12);
-  });
-
-  it('没有录音的内容（例如题库题）用手机语音；试听某个手机声音时也用手机语音', () => {
-    setVoicePrefs({ gender: 'female', zh: '', en: '', rate: 'slow' });
-    speak({ text: '一道题库题', lang: 'zh-CN' });
-    expect(audio.createAudioPlayer).not.toHaveBeenCalled();
-    expect(Speech.speak).toHaveBeenCalledTimes(1);
-    speak({ text: '你好', lang: 'zh-CN' }, undefined, { voice: 'x' });
-    expect(Speech.speak).toHaveBeenLastCalledWith('你好', expect.objectContaining({ voice: 'x' }));
-  });
-
-  it('童声：中文放童声录音，英语用英语女声录音；手机语音时音调调高', () => {
-    setVoicePrefs({ gender: 'child', zh: '', en: '', rate: 'slow' });
+  it('“正常”语速稍快播放；英语也是同一套童声录音', () => {
+    setVoicePrefs({ gender: 'child', zh: '', en: '', rate: 'normal' });
     speak({ text: '你好', lang: 'zh-CN' });
     expect(audio.createAudioPlayer).toHaveBeenLastCalledWith(303);
+    expect(audio.__players.at(-1).setPlaybackRate).toHaveBeenCalledWith(1.12);
     speak({ text: 'Hi', lang: 'en-US' });
-    expect(audio.createAudioPlayer).toHaveBeenLastCalledWith(111);
-    speak({ text: '没有录音的句子', lang: 'zh-CN' });
-    expect(Speech.speak).toHaveBeenLastCalledWith('没有录音的句子', expect.objectContaining({ pitch: 1.3 }));
+    expect(audio.createAudioPlayer).toHaveBeenLastCalledWith(313);
+  });
+
+  it('没有录音又没开联网童声：用手机语音（音调调高接近童声）；试听某个手机声音时也用手机语音', () => {
+    setVoicePrefs({ gender: 'child', zh: '', en: '', rate: 'slow' });
+    speak({ text: '一道题库题', lang: 'zh-CN' });
+    expect(audio.createAudioPlayer).not.toHaveBeenCalled();
+    expect(Speech.speak).toHaveBeenLastCalledWith('一道题库题', expect.objectContaining({ pitch: 1.3 }));
+    speak({ text: '你好', lang: 'zh-CN' }, undefined, { voice: 'x' });
+    expect(Speech.speak).toHaveBeenLastCalledWith('你好', expect.objectContaining({ voice: 'x' }));
   });
 
   it('新的朗读会停掉正在放的录音', () => {

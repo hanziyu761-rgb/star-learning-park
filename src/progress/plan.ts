@@ -40,6 +40,21 @@ export function reviewQueue(state: ProgressState, resolve: ExerciseResolver, now
   return items;
 }
 
+/** 错题本“重做错题”（V2.21）：这一科还没掌握的错题（不管有没有到复习日），最近答错的在前 */
+export function mistakeQueue(state: ProgressState, resolve: ExerciseResolver, subject: Subject, limit = 10): ReviewItem[] {
+  const hidden = new Set(state.hidden);
+  const items: ReviewItem[] = [];
+  const list = Object.values(state.mistakes)
+    .filter((m) => m.subject === subject && !m.resolved && !hidden.has(m.exerciseId))
+    .sort((a, b) => b.lastWrongAt - a.lastWrongAt);
+  for (const m of list) {
+    const found = resolve(m.lessonId, m.exerciseId);
+    if (found) items.push({ mistake: m, ...found });
+    if (items.length >= limit) break;
+  }
+  return items;
+}
+
 export type Suggestion =
   | { kind: 'continue'; lessonId: string }
   | { kind: 'review'; count: number }

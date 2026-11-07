@@ -1,8 +1,8 @@
 /**
- * 收集 APP 里固定的朗读内容（V2.16），交给 tools/voice/generate.py 用开源语音模型提前录好男声、女声。
+ * 收集 APP 里固定的朗读内容（V2.16）。V2.21 起交给 tools/voice/cloud/record.ps1 用星星宝童声（CosyVoice 龙呼呼）提前录好（清单 tools/voice/cloud/list.json）。
  * 运行：npx jest --testMatch '<rootDir>/tools/voice/*.review.ts'  → tools/voice/out/speakables.json
  * 收集范围：所有课程（含英语三条主线、阅读小屋）、知识点小讲解、描红提示、单词卡的单词和例句（V2.18）、源代码里写死的朗读句子（鼓励语、按钮、试听句）。
- * 题库、口算、每日挑战等程序随机出的题目不预先录制，仍用手机语音。
+ * 题库、口算、每日挑战等程序随机出的题目不预先录制，联网时用同一个童声现念并存在手机里。
  */
 import fs from 'fs';
 import path from 'path';

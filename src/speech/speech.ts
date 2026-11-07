@@ -1,23 +1,25 @@
 /**
- * 发音：使用设备自带的语音合成引擎（expo-speech）。
- * - 不需要网络，也不需要账号。
- * - 发音质量取决于手机的语音引擎；部分安卓手机需要在系统设置中安装中文/英文语音包。
- * - 第二阶段计划为核心词汇替换成真人录音（见 docs/DEVELOPMENT_PLAN.md）。
+ * 发音（V2.21 全 APP 统一“星星宝童声”）：
+ * 1. 预先录好的童声录音（固定内容，没网也能听）
+ * 2. 手机里存过的云端童声（随机出的题，第一次联网合成后存下）
+ * 3. 联网用云端童声现念（阿里云百炼 CosyVoice 龙呼呼，经自家 AI 服务，APP 里没有密钥）
+ * 4. 都不行（没网、没配置）时才用手机自带语音（expo-speech），音调调高一点接近童声
  */
 import * as Speech from 'expo-speech';
-import { playClip, playUri, stopClip } from './clips';
+import { clipId, playClip, playUri, stopClip } from './clips';
+import { cachedTts, saveTts } from './ttsCache';
 import type { Speakable } from '@/lesson/types';
 
-/* ───── 朗读声音（V2.16）：女声 / 男声、指定声音、语速，对小朋友更友好 ───── */
+/* ───── 朗读声音：V2.21 起只有童声；这里的设置只影响语速和没网时备用的手机语音 ───── */
 export interface VoicePrefs {
-  /** 童声：中文用预先录好的童声录音；手机语音用女声调高音调 */
+  /** V2.21 起固定为童声（保留字段兼容旧记录）；手机语音用女声调高音调 */
   gender: 'female' | 'male' | 'child';
   /** 指定的中文、英语声音（手机语音引擎里的声音编号；空 = 用默认声音） */
   zh: string;
   en: string;
   rate: 'slow' | 'normal';
 }
-let prefs: VoicePrefs = { gender: 'female', zh: '', en: '', rate: 'slow' };
+let prefs: VoicePrefs = { gender: 'child', zh: '', en: '', rate: 'slow' };
 export function setVoicePrefs(p: VoicePrefs) {
   prefs = p;
 }
@@ -58,7 +60,7 @@ export function onSpeakingChange(listener: Listener): () => void {
   return () => listeners.delete(listener);
 }
 
-/* ───── 云端自然语音（V2.18）：只用于 AI 当场生成的话；没开启、没网或出错时改用手机语音 ───── */
+/* ───── 云端童声（V2.18 星星宝；V2.21 起所有没有预录的句子都用它）；没开启、没网或出错时改用手机语音 ───── */
 type CloudVoice = (item: Speakable) => Promise<string>;
 let cloudVoice: CloudVoice | null = null;
 export function setCloudVoice(f: CloudVoice | null) {
@@ -77,11 +79,22 @@ export function speak(item: Speakable, onDone?: () => void, override?: { voice?:
     onDone?.();
   };
   const phone = () => phoneSpeak(item, id, finish, override);
-  if (item.cloud && cloudVoice && !override?.voice) {
+  // 试听手机里的某个声音：直接用手机语音
+  if (override?.voice) return phone();
+  const rate = prefs.rate === 'slow' ? 1 : 1.12; // 录音是正常语速：慢一点 = 原速，正常 = 稍快播放
+  // 1. 预先录好的童声
+  if (!item.cloud && playClip(item, rate, finish)) return;
+  // 2. 手机里存过的云端童声
+  const cid = clipId(item.lang, item.text.trim());
+  const local = cachedTts(cid);
+  if (local && playUri(local, finish, () => id === speakingId && phone(), rate)) return;
+  // 3. 联网现念
+  if (cloudVoice) {
     cloudVoice(item).then(
       (uri) => {
         if (id !== speakingId) return; // 已经被新的朗读打断
-        if (!playUri(uri, finish, () => id === speakingId && phone())) phone();
+        if (!item.cloud) void saveTts(cid, uri); // 星星宝每次说的话都不一样，不存
+        if (!playUri(uri, finish, () => id === speakingId && phone(), rate)) phone();
       },
       () => {
         if (id === speakingId) phone();
@@ -89,8 +102,7 @@ export function speak(item: Speakable, onDone?: () => void, override?: { voice?:
     );
     return;
   }
-  // 有预先录好的录音就放录音（慢一点 = 原速，正常 = 稍快播放）
-  if (!override?.voice && playClip(item, prefs.gender, prefs.rate === 'slow' ? 1 : 1.12, finish)) return;
+  // 4. 手机语音
   phone();
 }
 

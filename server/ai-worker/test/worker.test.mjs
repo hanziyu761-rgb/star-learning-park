@@ -200,4 +200,17 @@ describe('语音合成返回 http 地址', () => {
     const d = await (await post('/api/tts', { text: 'http 地址的一句' }, env)).json();
     assert.equal(d.url, 'https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com/prod/a.mp3?Expires=1');
   });
+
+  it('朗读单独限频（默认每分钟 90 句），不占用提问的 20 次', async () => {
+    const env = {
+      DASHSCOPE_API_KEY: 'k',
+      __fetch: async () => new Response(JSON.stringify({ output: { audio: { url: 'https://x.example/a.mp3' } } }), { status: 200 }),
+    };
+    const h = { 'X-Forwarded-For': '9.9.9.9' };
+    for (let i = 0; i < 90; i++) assert.equal((await post('/api/tts', { text: `第${i}句` }, env, h)).status, 200);
+    assert.equal((await post('/api/tts', { text: '第91句' }, env, h)).status, 429);
+    // 同一个 IP 提问不受影响
+    const chat = mockEnv('好的');
+    assert.equal((await post('/api/tutor/hint', { subject: 'math', grade: 1, question: '1+1', wrong: '3' }, chat.env, h)).status, 200);
+  });
 });

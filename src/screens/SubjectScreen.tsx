@@ -6,6 +6,7 @@ import { DisplayTextView } from '@/components/PinyinText';
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
 import { BigButton, Stars } from '@/components/ui';
 import type { Subject } from '@/lesson/types';
+import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { BankSection, GraphicsSection, OralSection, WriteSection } from './PracticeSections';
@@ -43,6 +44,7 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
   const theme = subjectTheme[subject];
   // 英语启蒙课按三条主线单独展示
   const lessons = lessonsFor(subject).filter((l) => !l.track);
+  const wrong = openCount(state, subject);
 
   return (
     <Screen bg={theme.soft} testID={`subject-screen-${subject}`}>
@@ -59,6 +61,24 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
           <Text style={styles.gameSub}>{GAME_BY_ID[GAME_OF[subject]].intro}</Text>
         </View>
         <Text style={styles.gameGo}>▶️</Text>
+      </Pressable>
+      <Pressable
+        onPress={() => nav.push({ name: 'mistakes', subject })}
+        style={[styles.bookEntry, { borderColor: theme.color }]}
+        accessibilityRole="button"
+        testID={`subject-mistakes-${subject}`}
+      >
+        <Text style={styles.wordEmoji}>📒</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.gameTitle, { color: theme.color }]}>{theme.name}错题本</Text>
+          <Text style={styles.gameSub}>{wrong ? `还有 ${wrong} 道题没掌握 · 可以重做、打印` : '还没有错题 · 做错的题会自动记在这里'}</Text>
+        </View>
+        {wrong ? (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{wrong}</Text>
+          </View>
+        ) : null}
+        <Text style={[styles.gameGo, { color: theme.color }]}>›</Text>
       </Pressable>
       {subject === 'english' ? (
         <Pressable onPress={() => nav.push({ name: 'words' })} style={styles.wordEntry} accessibilityRole="button" testID="words-entry">
@@ -116,6 +136,18 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
 }
 
 const styles = StyleSheet.create({
+  bookEntry: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    backgroundColor: '#FFFDF5',
+    borderRadius: radius.lg,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    padding: space.md,
+  },
+  badge: { minWidth: 30, height: 30, borderRadius: 15, backgroundColor: colors.wrong, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
+  badgeText: { color: '#fff', fontWeight: '900', fontSize: 15 },
   gameEntry: {
     flexDirection: 'row',
     alignItems: 'center',

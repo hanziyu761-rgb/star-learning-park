@@ -16,24 +16,29 @@ import type { ExerciseOutcome } from '@/exercises/common';
 import { ExerciseView } from '@/exercises/ExerciseView';
 import { AskTeacher } from '@/ai/AskTeacher';
 import { langForSubject, type FeedbackMessage } from '@/lesson/feedback';
+import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
-import { reviewQueue, type ReviewItem } from '@/progress/plan';
+import { mistakeQueue, reviewQueue, type ReviewItem } from '@/progress/plan';
 import { useProgress } from '@/progress/ProgressContext';
 import { speak, stopSpeaking } from '@/speech/speech';
 import { colors, radius, space, subjectTheme } from '@/theme';
 
-export default function ReviewScreen() {
+export default function ReviewScreen({ subject }: { subject?: Subject } = {}) {
   const { status } = useProgress();
   if (status === 'loading') return <LoadingView />;
-  return <ReviewSession />;
+  return <ReviewSession subject={subject} />;
 }
 
-function ReviewSession() {
+/** subject：从错题本进来时只重做这一科还没掌握的错题（V2.21）；不传 = 今日复习（到期的错题） */
+function ReviewSession({ subject }: { subject?: Subject }) {
   const nav = useNav();
   const insets = useSafeAreaInsets();
   const { state, dispatch } = useProgress();
   // 进入页面时确定本轮题目，作答过程中不再变化
-  const [queue] = useState<ReviewItem[]>(() => reviewQueue(state, resolveExercise, Date.now()));
+  const [queue] = useState<ReviewItem[]>(() =>
+    subject ? mistakeQueue(state, resolveExercise, subject) : reviewQueue(state, resolveExercise, Date.now()),
+  );
+  const title = subject ? zh('重做错题', 'chóng zuò cuò tí') : zh('今日复习', 'jīn rì fù xí');
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
@@ -51,7 +56,7 @@ function ReviewSession() {
     return (
       <View style={[styles.root, { paddingTop: insets.top + space.md, backgroundColor: colors.bg }]} testID="review-empty">
         <View style={styles.headerWrap}>
-          <Header title={zh('今日复习', 'jīn rì fù xí')} onBack={nav.back} />
+          <Header title={title} onBack={nav.back} />
         </View>
         <View style={styles.center}>
           <Mascot size={130} mood="cheer" />
@@ -112,7 +117,7 @@ function ReviewSession() {
     <View style={[styles.root, { paddingTop: insets.top + space.sm, backgroundColor: theme.soft }]} testID="review-screen">
       <View style={styles.headerWrap}>
         <Header
-          title={zh('今日复习', 'jīn rì fù xí')}
+          title={title}
           onBack={nav.back}
           right={
             <Text style={styles.count} testID="review-progress">

@@ -171,7 +171,7 @@ export async function handleTts(body, env) {
     err.detail = `TTS 没有返回音频地址：${JSON.stringify(data, (k, v) => (typeof v === 'string' && v.length > 60 ? `${v.slice(0, 60)}…(${v.length})` : v)).slice(0, 400)}`;
     throw err;
   }
-  if (ttsCache.size > 500) ttsCache.clear();
+  if (ttsCache.size > 3000) ttsCache.clear();
   ttsCache.set(key, { url, until: Date.now() + 23 * 3600 * 1000 });
   return { url };
 }
@@ -311,8 +311,10 @@ export default {
     if (!handler || request.method !== 'POST') return json({ ok: false, error: '接口不存在', code: 'NOT_FOUND' }, 404);
 
     const ip = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'local';
-    const limit = Number(env.RATE_LIMIT_PER_MINUTE) || 20;
-    if (rateLimited(ip, limit)) return json({ ok: false, error: '请求太频繁，休息一下再问吧', code: 'RATE_LIMITED' }, 429);
+    // 朗读（/api/tts）单独计数：全 APP 统一童声后，随机出的题目每句都要合成，比提问频繁得多（V2.21）
+    const isTts = url.pathname === '/api/tts';
+    const limit = isTts ? Number(env.TTS_RATE_LIMIT_PER_MINUTE) || 90 : Number(env.RATE_LIMIT_PER_MINUTE) || 20;
+    if (rateLimited(isTts ? `tts:${ip}` : ip, limit)) return json({ ok: false, error: '请求太频繁，休息一下再问吧', code: 'RATE_LIMITED' }, 429);
 
     let body;
     try {

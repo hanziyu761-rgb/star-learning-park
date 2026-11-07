@@ -78,16 +78,16 @@ describe('声音挑选', () => {
     setVoicePrefs({ gender: 'female', zh: '', en: '', rate: 'slow' });
   });
 
-  it('旧数据没有声音设置：读入后默认女声、慢一点', () => {
+  it('旧数据没有声音设置：读入后是童声（V2.21 起只有童声）、慢一点', () => {
     const p = parseProgress(
       JSON.stringify({ ...createEmptyProgress(), settings: { grade: 2, aiEnabled: false, aiBaseUrl: '' } }),
     )!;
-    expect(p.settings).toMatchObject({ grade: 2, voiceGender: 'female', speechRate: 'slow', voiceZh: '', voiceEn: '' });
+    expect(p.settings).toMatchObject({ grade: 2, voiceGender: 'child', speechRate: 'slow', voiceZh: '', voiceEn: '' });
   });
 });
 
 describe('声音设置卡片', () => {
-  it('点“男声”自动选上手机里的男声并朗读；声音列表可试听、可指定', async () => {
+  it('只有童声（没有男女声选项）；可试听童声；没网时的备用手机声音可试听、可指定；开机动画可以关', async () => {
     (Speech.getAvailableVoicesAsync as jest.Mock).mockResolvedValue(RAW);
     await render(
       <ProgressProvider>
@@ -95,18 +95,16 @@ describe('声音设置卡片', () => {
       </ProgressProvider>,
     );
     await waitFor(() => expect(screen.getByTestId('voice-list-zh-CN')).toBeTruthy());
-    expect(screen.getByTestId('voice-gender-female').props.accessibilityState.selected).toBe(true);
-    await fireEvent.press(screen.getByTestId('voice-gender-male'));
-    await waitFor(() => expect(screen.getByTestId('voice-gender-male').props.accessibilityState.selected).toBe(true));
-    await waitFor(() =>
-      expect(Speech.speak).toHaveBeenLastCalledWith(
-        '小朋友你好，我们一起来学习吧！',
-        expect.objectContaining({ voice: 'zh-CN-SMTm00' }),
-      ),
-    );
-    // 童声：手机语音部分用女声
-    await fireEvent.press(screen.getByTestId('voice-gender-child'));
-    await waitFor(() => expect(screen.getByTestId('voice-gender-note')).toHaveTextContent(/童声/));
+    expect(screen.queryByTestId('voice-gender-female')).toBeNull();
+    expect(screen.queryByTestId('voice-gender-male')).toBeNull();
+    expect(screen.getByTestId('voice-gender-note')).toHaveTextContent(/星星宝童声/);
+    // 试听童声（没有录音、没开联网童声的测试环境里用手机语音）
+    await fireEvent.press(screen.getByTestId('voice-test-zh'));
+    expect(Speech.speak).toHaveBeenLastCalledWith('小朋友你好，我们一起来学习吧！', expect.objectContaining({ language: 'zh-CN' }));
+    // 开机动画开关
+    expect(screen.getByTestId('splash-switch').props.value).toBe(true);
+    await fireEvent(screen.getByTestId('splash-switch'), 'valueChange', false);
+    await waitFor(() => expect(screen.getByTestId('splash-switch').props.value).toBe(false));
     // 试听第 1 个英语声音
     await fireEvent.press(screen.getByTestId('voice-try-en-US-0'));
     expect(Speech.speak).toHaveBeenLastCalledWith(

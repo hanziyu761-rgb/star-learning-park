@@ -5,6 +5,7 @@ import { plainText } from '@/content/zh';
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
 import { markParentUnlocked, ParentGate } from '@/components/ParentGate';
 import { Card, SectionTitle, Stars } from '@/components/ui';
+import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
@@ -196,6 +197,22 @@ function ParentDashboard() {
           第一次答错的题目会进入“今日复习”，按 1 天、3 天的间隔再练，连续答对 2 次视为掌握。已掌握 {mastered} 道 ·
           完成复习 {state.reviews.length} 次
         </Text>
+        <View style={styles.bookRow}>
+          {(['math', 'chinese', 'english'] as const).map((sub) => (
+            <Pressable
+              key={sub}
+              onPress={() => nav.push({ name: 'mistakes', subject: sub })}
+              style={[styles.bookBtn, { borderColor: subjectTheme[sub].color }]}
+              accessibilityRole="button"
+              testID={`parent-mistakes-${sub}`}
+            >
+              <Text style={[styles.bookBtnText, { color: subjectTheme[sub].color }]}>
+                {subjectTheme[sub].emoji} {subjectTheme[sub].name}错题本（{openCount(state, sub)}）
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={styles.small}>点开可以看每一科的错题、马上重做，或打印成错题单。</Text>
         {mistakes.length === 0 ? <Text style={styles.empty}>暂无错题</Text> : null}
         {mistakes.map((m) => (
           <View key={m.key} style={styles.row} testID="mistake-row">
@@ -277,6 +294,9 @@ function Metric({ label, value, testID }: { label: string; value: string; testID
 }
 
 const styles = StyleSheet.create({
+  bookRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginVertical: space.sm },
+  bookBtn: { borderWidth: 2, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 10, backgroundColor: '#fff' },
+  bookBtnText: { fontSize: 14, fontWeight: '800' },
   examBtn: {
     marginTop: space.sm,
     minHeight: 52,

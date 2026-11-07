@@ -1,13 +1,13 @@
 /**
- * 家长中心 · 声音设置（V2.15 声音检查；V2.16 女声 / 男声、语速、挑选手机里的声音）。
- * APP 用手机自带的“文字转语音”朗读。不同手机的声音不一样：这里列出这台手机的中文、英语声音，家长试听后选孩子喜欢的。
+ * 家长中心 · 声音设置（V2.21）：全 APP 只用一个声音——星星宝童声（预先录好 + 联网现念）。
+ * 这里可以调语速、试听；下面的“没网时的备用声音”是手机自带的文字转语音，只在没网又没有录音时使用。
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { Card, SectionTitle } from '@/components/ui';
 import { useProgress } from '@/progress/ProgressContext';
 import type { Settings } from '@/progress/model';
-import { getVoices, pickVoice, speak, summarizeVoices, type VoiceInfo } from '@/speech/speech';
+import { getVoices, speak, summarizeVoices, type VoiceInfo } from '@/speech/speech';
 import { colors, radius, space } from '@/theme';
 import { APP_VERSION } from '@/version';
 
@@ -16,11 +16,6 @@ const SAMPLE = {
   'en-US': 'Hello! Let’s learn together.',
 } as const;
 const GENDER_CN = { female: '女声', male: '男声', unknown: '未知' } as const;
-const GENDER_NOTE = {
-  female: '亲切的老师声音',
-  male: '年轻的男老师声音',
-  child: '像小伙伴一样的童声（中文课程用童声录音；英语用女声）',
-} as const;
 
 export function VoiceCheckCard() {
   const { state, dispatch } = useProgress();
@@ -44,17 +39,6 @@ export function VoiceCheckCard() {
   const check = voices ? summarizeVoices(voices.map((v) => ({ language: v.lang }))) : null;
   const mark = (ok: boolean) => (ok ? '✅ 有' : '⚠️ 没检测到');
 
-  const chooseGender = (gender: 'female' | 'male' | 'child') => {
-    const vs = voices ?? [];
-    // 童声：手机语音用女声调高音调
-    const g = gender === 'child' ? 'female' : gender;
-    const zh = pickVoice(vs, 'zh-CN', g);
-    const en = pickVoice(vs, 'en-US', g);
-    set({ voiceGender: gender, voiceZh: zh, voiceEn: en });
-    // 用新的设置马上读一句
-    sampleLater();
-  };
-
   const list = (lang: VoiceInfo['lang']) => (voices ?? []).filter((v) => v.lang === lang);
   const current = (lang: VoiceInfo['lang']) => (lang === 'zh-CN' ? s.voiceZh : s.voiceEn);
 
@@ -62,30 +46,8 @@ export function VoiceCheckCard() {
     <Card>
       <View testID="voice-check">
         <SectionTitle>🔊 声音设置</SectionTitle>
-        <Text style={styles.small}>
-          APP
-          用手机自带的“文字转语音”朗读题目。可以选女声或男声、调慢语速，也可以在下面试听这台手机里的每个声音，选孩子喜欢的。
-        </Text>
-
-        <Text style={styles.label}>声音</Text>
-        <View style={styles.row}>
-          {(['female', 'male', 'child'] as const).map((g) => (
-            <Pressable
-              key={g}
-              testID={`voice-gender-${g}`}
-              accessibilityRole="button"
-              accessibilityState={{ selected: s.voiceGender === g }}
-              onPress={() => chooseGender(g)}
-              style={[styles.chip, s.voiceGender === g && styles.chipOn]}
-            >
-              <Text style={[styles.chipText, s.voiceGender === g && styles.chipTextOn]}>
-                {g === 'female' ? '👩 女声' : g === 'male' ? '👨 男声' : '🧒 童声'}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        <Text style={styles.note} testID="voice-gender-note">
-          {GENDER_NOTE[s.voiceGender]}。课程、讲解、短文用预先录好的声音；题库等随机出的题用手机语音。
+        <Text style={styles.small} testID="voice-gender-note">
+          全 APP 统一用“星星宝童声”（中文、英语是同一个声音）。课程、讲解、短文、单词卡已经提前录好，没网也能听；随机出的题联网时用同一个童声现念，念过的存在手机里。没网又没念过的句子，才用下面的手机备用声音。
         </Text>
         <Text style={styles.label}>语速</Text>
         <View style={styles.row}>
@@ -108,17 +70,6 @@ export function VoiceCheckCard() {
           ))}
         </View>
 
-        <Text style={styles.line} testID="voice-result">
-          {check === null
-            ? '正在检查这台手机的声音……'
-            : `中文语音：${mark(check.zh)}　英语语音：${mark(check.en)}（共找到 ${voices!.length} 种）`}
-        </Text>
-        {s.voiceGender === 'male' && voices && !s.voiceZh ? (
-          <Text style={styles.note} testID="voice-male-note">
-            这台手机没找到能确定是男声的中文声音，暂时用调低音调的方式模拟男声；可以在下面逐个试听，找到男声后点“用这个”。
-          </Text>
-        ) : null}
-
         <View style={styles.row}>
           <Pressable
             style={styles.btn}
@@ -126,7 +77,7 @@ export function VoiceCheckCard() {
             testID="voice-test-zh"
             onPress={() => speak({ text: SAMPLE['zh-CN'], lang: 'zh-CN' })}
           >
-            <Text style={styles.btnText}>试听中文</Text>
+            <Text style={styles.btnText}>试听童声·中文</Text>
           </Pressable>
           <Pressable
             style={styles.btn}
@@ -134,9 +85,17 @@ export function VoiceCheckCard() {
             testID="voice-test-en"
             onPress={() => speak({ text: SAMPLE['en-US'], lang: 'en-US' })}
           >
-            <Text style={styles.btnText}>试听英语</Text>
+            <Text style={styles.btnText}>试听童声·英语</Text>
           </Pressable>
         </View>
+
+        <Text style={styles.label}>没网时的备用声音（手机自带）</Text>
+        <Text style={styles.line} testID="voice-result">
+          {check === null
+            ? '正在检查这台手机的声音……'
+            : `中文语音：${mark(check.zh)}　英语语音：${mark(check.en)}（共找到 ${voices!.length} 种）`}
+        </Text>
+
 
         {(['zh-CN', 'en-US'] as const).map((lang) =>
           list(lang).length ? (
@@ -181,6 +140,13 @@ export function VoiceCheckCard() {
             APP。
           </Text>
         ) : null}
+        <View style={styles.splashRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.label}>开机动画</Text>
+            <Text style={styles.note}>打开 APP 时播放约 3 秒的小动画，最后星星宝说欢迎语；点一下就能跳过。</Text>
+          </View>
+          <Switch value={s.splash} onValueChange={(v) => set({ splash: v })} testID="splash-switch" />
+        </View>
         <Text style={styles.version} testID="app-version">
           林亨学习乐园 版本 {APP_VERSION}
         </Text>
@@ -243,5 +209,6 @@ const styles = StyleSheet.create({
     marginTop: space.sm,
     lineHeight: 19,
   },
+  splashRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.sm },
   version: { fontSize: 12, color: colors.textSoft, marginTop: space.md, textAlign: 'right' },
 });

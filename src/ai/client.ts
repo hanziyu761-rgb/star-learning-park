@@ -106,8 +106,8 @@ export async function aiReport(
   return (await call<{ text: string }>(cfg, '/api/tutor/report', req, 30000)).text;
 }
 
-/** 星星宝的音色（阿里云百炼 CosyVoice）：跟着家长选的女声 / 男声 / 童声 */
-export const AI_VOICE = { child: 'longhuhu_v3', female: 'longxing_v3', male: 'longanyang' } as const;
+/** 星星宝童声（阿里云百炼 CosyVoice 龙呼呼，中英文都能读）：V2.21 起全 APP 只用这一个声音 */
+export const AI_VOICE = 'longhuhu_v3';
 
 const ttsCache = new Map<string, { url: string; until: number }>();
 /** 把星星宝要说的话合成为语音，返回音频地址（24 小时有效）；同一句话 23 小时内不重复请求 */

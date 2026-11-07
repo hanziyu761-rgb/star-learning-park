@@ -162,7 +162,7 @@ export function AiCard() {
       ) : null}
 
       <View style={styles.row}>
-        <Text style={[styles.label, { flex: 1 }]}>星星宝用自然语音</Text>
+        <Text style={[styles.label, { flex: 1 }]}>联网童声朗读</Text>
         <Switch
           value={aiCloudVoice}
           onValueChange={(v) => dispatch({ type: 'settings/set', settings: { aiCloudVoice: v } })}
@@ -170,12 +170,12 @@ export function AiCard() {
         />
       </View>
       <Text style={styles.small}>
-        打开后，星星宝的回答用阿里云 CosyVoice 合成的自然语音朗读（只发送星星宝要说的文字，按字数计费，服务端需配置百炼密钥）；声音跟着上面“声音设置”的女声 / 男声 / 童声走。连不上时自动改用手机语音。
+        打开后，没有提前录好的句子（随机出的题、星星宝的回答）联网用星星宝童声朗读，和课程里的录音是同一个声音（只发送要朗读的文字，按字数计费，同一句念过就存在手机里不再收费）。关掉或连不上时改用手机自带语音。
       </Text>
       <Pressable
         onPress={() => speak({ text: '小朋友你好，我是星星宝！有不会的题就来问我吧。', lang: 'zh-CN', cloud: true })}
-        disabled={!aiEnabled}
-        style={[styles.btn, !aiEnabled && { backgroundColor: colors.disabled }]}
+        disabled={!aiCloudVoice}
+        style={[styles.btn, !aiCloudVoice && { backgroundColor: colors.disabled }]}
         accessibilityRole="button"
         testID="ai-voice-try"
       >

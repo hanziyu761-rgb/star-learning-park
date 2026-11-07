@@ -18,8 +18,9 @@ import { dayKey, isGraduated, newSrs, reviewSrs, type SrsState } from './srs';
  * v5 — 新增思维训练：答对后“你是怎么想的”的思路选择 strategies、每日挑战记录 challenges
  * v6 — 新增英语单词卡生词本 wordbook（V2.18）
  * v7 — 新增游戏乐园记录 games；练习结果来源增加 game（V2.19）
+ * v8 — 全 APP 统一童声（voiceGender 固定为 child）；新增开机动画开关 splash（V2.21）
  */
-export const PROGRESS_VERSION = 7;
+export const PROGRESS_VERSION = 8;
 
 /** 答对后孩子选的解题思路（没有对错之分） */
 export interface StrategyRecord {
@@ -79,6 +80,8 @@ export interface Settings {
   gameMinutes: number;
   /** 星星宝用云端自然语音朗读（V2.18，阿里云百炼 CosyVoice，需服务端配置密钥；默认开启，失败时用手机语音） */
   aiCloudVoice: boolean;
+  /** 打开 APP 时播放开机动画（V2.21，默认开启） */
+  splash: boolean;
 }
 
 export interface ExerciseResult {
@@ -211,13 +214,14 @@ export function createEmptyProgress(): ProgressState {
       aiEnabled: false,
       aiBaseUrl: '',
       adaptiveChallenge: true,
-      voiceGender: 'female',
+      voiceGender: 'child',
       voiceZh: '',
       voiceEn: '',
       speechRate: 'slow',
       voiceInput: false,
       gameMinutes: 15,
       aiCloudVoice: true,
+      splash: true,
     },
     hidden: [],
     diagnoses: [],
@@ -560,7 +564,8 @@ export function migrateProgress(data: ProgressState, now: number = Date.now()): 
     ...data,
     mistakes,
     reviews: Array.isArray(data.reviews) ? data.reviews : [],
-    settings: { ...createEmptyProgress().settings, ...(data.settings ?? {}) },
+    // v8：只保留童声，旧记录里的女声 / 男声一律改为童声
+    settings: { ...createEmptyProgress().settings, ...(data.settings ?? {}), voiceGender: 'child' },
     hidden: Array.isArray(data.hidden) ? data.hidden : [],
     diagnoses: Array.isArray(data.diagnoses) ? data.diagnoses : [],
     strategies: Array.isArray(data.strategies) ? data.strategies : [],

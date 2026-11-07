@@ -42,19 +42,19 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   // 朗读声音跟着家长的设置走（V2.16）
   const s = state.settings;
   useEffect(() => {
-    setVoicePrefs({ gender: s.voiceGender, zh: s.voiceZh, en: s.voiceEn, rate: s.speechRate });
-  }, [s.voiceGender, s.voiceZh, s.voiceEn, s.speechRate]);
-  // 星星宝的云端自然语音（V2.18）：家长开启 AI 老师和“自然语音”后才使用
+    setVoicePrefs({ gender: 'child', zh: s.voiceZh, en: s.voiceEn, rate: s.speechRate });
+  }, [s.voiceZh, s.voiceEn, s.speechRate]);
+  // 云端童声（V2.21）：没有预录的句子联网用星星宝童声现念。只发送要朗读的文字。
+  // 星星宝的回答（AI 老师）仍需家长先开启 AI 老师；题目朗读只要“联网童声”开关打开就用
   useEffect(() => {
     const baseUrl = s.aiBaseUrl || DEFAULT_AI_BASE_URL;
-    if (!s.aiEnabled || !s.aiCloudVoice || !baseUrl) {
+    if (!s.aiCloudVoice || !baseUrl) {
       setCloudVoice(null);
       return;
     }
-    const voice = AI_VOICE[s.voiceGender];
-    setCloudVoice((item) => aiTts({ enabled: true, baseUrl }, item.text, voice, s.speechRate));
+    setCloudVoice((item) => aiTts({ enabled: true, baseUrl }, item.text, AI_VOICE, 'normal'));
     return () => setCloudVoice(null);
-  }, [s.aiEnabled, s.aiCloudVoice, s.aiBaseUrl, s.voiceGender, s.speechRate]);
+  }, [s.aiCloudVoice, s.aiBaseUrl]);
 
   const dispatch = useCallback((action: ProgressAction) => {
     if (!loaded.current) return; // 读取完成之前不允许写入，防止覆盖已有进度

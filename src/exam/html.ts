@@ -62,7 +62,7 @@ const BLANK = '<span class="paren">（　　）</span>';
 /** 题干里已经有填空括号时，不再在末尾加括号（避免出现两个括号） */
 const HAS_BLANK = /（\s*[？?]?\s*）|\(\s*[？?]?\s*\)|_{2,}/;
 
-function itemHtml(it: ExamItem, no: number): string {
+export function itemHtml(it: ExamItem, no: number): string {
   const stem = it.stem.map(displayHtml).join(' ');
   const plain = it.stem.map((t) => (typeof t === 'string' ? t : t.map((x) => x.char).join(''))).join(' ');
   const blank = HAS_BLANK.test(plain) ? '' : BLANK;
@@ -85,30 +85,9 @@ function itemHtml(it: ExamItem, no: number): string {
   return `<div class="item"><span class="no">${no}.</span> ${stem} ${blank}${vis}<div class="opts">${opts}</div></div>`;
 }
 
-export function examHtml(exam: Exam, opts: { withAnswers: boolean; date?: string }): string {
-  const low = exam.config.grade <= 2;
-  const pts = (n: number) => `${Math.round(n * exam.perPoint * 10) / 10}`;
-  const sections = exam.sections
-    .map((s, si) => {
-      const items =
-        s.kind === 'calc'
-          ? `<div class="calc-grid">${s.items.map((it, i) => itemHtml(it, i + 1)).join('')}</div>`
-          : s.items.map((it, i) => itemHtml(it, i + 1)).join('');
-      return `<section data-kind="${s.kind}"><h2>${CN_NUM[si]}、${displayHtml(s.title)}<small>（每题 ${exam.perPoint} 分，共 ${pts(s.items.length)} 分）</small></h2><p class="ins">${displayHtml(s.instruction)}</p>${items}</section>`;
-    })
-    .join('');
-  const answers = opts.withAnswers
-    ? `<div class="answers"><h1 class="ans-title">参考答案</h1><p class="meta">${esc(exam.code)}</p>${exam.sections
-        .map(
-          (s, si) =>
-            `<h3>${CN_NUM[si]}、${displayHtml(s.title)}</h3><div class="ans-grid">${s.items
-              .map((it, i) => `<span>${i + 1}. ${esc(it.answer)}</span>`)
-              .join('')}</div>`,
-        )
-        .join('')}</div>`
-    : '';
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${esc(typeof exam.title === 'string' ? exam.title : exam.title.map((x) => x.char).join(''))}</title><style>
-@page { size: A4; margin: 14mm 14mm 16mm; }
+/** 试卷和错题本共用的 A4 排版样式（V2.21 抽出） */
+export function paperCss(low: boolean): string {
+  return `@page { size: A4; margin: 14mm 14mm 16mm; }
 * { box-sizing: border-box; }
 body { font-family: "PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Source Han Sans SC",sans-serif; color: #111; font-size: ${low ? '15pt' : '12pt'}; line-height: ${low ? 2.1 : 1.7}; margin: 0; }
 ruby rt { font-size: 0.5em; color: #333; }
@@ -138,7 +117,33 @@ h2 small { font-size: 10pt; font-weight: normal; margin-left: 2mm; }
 .ans-title { font-size: 16pt; }
 .answers h3 { font-size: 12pt; margin: 4mm 0 1mm; }
 .ans-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1mm 4mm; font-size: 10.5pt; }
-</style></head><body>
+`;
+}
+
+export function examHtml(exam: Exam, opts: { withAnswers: boolean; date?: string }): string {
+  const low = exam.config.grade <= 2;
+  const pts = (n: number) => `${Math.round(n * exam.perPoint * 10) / 10}`;
+  const sections = exam.sections
+    .map((s, si) => {
+      const items =
+        s.kind === 'calc'
+          ? `<div class="calc-grid">${s.items.map((it, i) => itemHtml(it, i + 1)).join('')}</div>`
+          : s.items.map((it, i) => itemHtml(it, i + 1)).join('');
+      return `<section data-kind="${s.kind}"><h2>${CN_NUM[si]}、${displayHtml(s.title)}<small>（每题 ${exam.perPoint} 分，共 ${pts(s.items.length)} 分）</small></h2><p class="ins">${displayHtml(s.instruction)}</p>${items}</section>`;
+    })
+    .join('');
+  const answers = opts.withAnswers
+    ? `<div class="answers"><h1 class="ans-title">参考答案</h1><p class="meta">${esc(exam.code)}</p>${exam.sections
+        .map(
+          (s, si) =>
+            `<h3>${CN_NUM[si]}、${displayHtml(s.title)}</h3><div class="ans-grid">${s.items
+              .map((it, i) => `<span>${i + 1}. ${esc(it.answer)}</span>`)
+              .join('')}</div>`,
+        )
+        .join('')}</div>`
+    : '';
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${esc(typeof exam.title === 'string' ? exam.title : exam.title.map((x) => x.char).join(''))}</title><style>
+${paperCss(low)}</style></head><body>
 <h1>${displayHtml(exam.title)}</h1>
 <p class="sub">${esc(exam.subtitle)} · ${esc(exam.scopeText)} · 满分 ${exam.total} 分</p>
 <div class="info"><span>学校：________</span><span>班级：______</span><span>姓名：________</span><span>得分：______</span></div>

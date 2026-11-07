@@ -23,6 +23,8 @@ import ChallengeScreen from '@/screens/ChallengeScreen';
 import WordCardsScreen from '@/screens/WordCardsScreen';
 import GamesScreen from '@/screens/GamesScreen';
 import GameScreen from '@/screens/GameScreen';
+import MistakesScreen from '@/screens/MistakesScreen';
+import { SplashGate } from '@/components/SplashGate';
 import { colors } from '@/theme';
 
 function renderRoute(route: Route) {
@@ -36,7 +38,9 @@ function renderRoute(route: Route) {
     case 'parent':
       return <ParentScreen />;
     case 'review':
-      return <ReviewScreen />;
+      return <ReviewScreen subject={route.subject} />;
+    case 'mistakes':
+      return <MistakesScreen subject={route.subject} />;
     case 'practice':
       return <PracticeScreen id={route.id} />;
     case 'teacher':
@@ -80,6 +84,7 @@ export default function SingleApp() {
             <View key={top.key} style={{ flex: 1, backgroundColor: colors.bg }}>
               {renderRoute(top.route)}
             </View>
+            <SplashGate />
           </NavProvider>
         </ProgressProvider>
       </SafeAreaProvider>

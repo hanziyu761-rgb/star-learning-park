@@ -1,7 +1,8 @@
 /**
- * 预先录好的朗读（V2.16）：课程、讲解、短文等固定内容用开源语音模型 Kokoro-82M（Apache-2.0）提前录成男声、女声，
- * 播放录音比手机自带语音更自然、对孩子更友好。没有录音的内容（题库、口算、每日挑战等程序出的题）仍用手机语音。
- * 单文件 HTML 版和网页版不带录音文件，一律用浏览器语音。
+ * 预先录好的朗读：V2.21 起全 APP 统一用“星星宝童声”（阿里云百炼 CosyVoice 龙呼呼，中英文同一个声音）。
+ * 课程、讲解、短文、单词卡等固定内容提前录好放在 APP 里（没网也能听）；
+ * 随机出的题（题库、口算、每日挑战等）联网时用同一个童声现念，念过的存在手机里（见 ttsCache）；没网又没存过时才用手机语音。
+ * 单文件 HTML 版和网页版不带录音文件。
  */
 import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
 import { Platform } from 'react-native';
@@ -19,10 +20,8 @@ export function clipId(lang: string, text: string): string {
   return h.toString(16).padStart(8, '0');
 }
 
-export function findClip(item: Speakable, gender: 'female' | 'male' | 'child'): number | undefined {
-  // 童声只有中文录音；英语童声用英语女声
-  const set = gender === 'male' ? 'm' : gender === 'child' && item.lang === 'zh-CN' ? 'c' : 'f';
-  return CLIPS[set]?.[clipId(item.lang, item.text.trim())];
+export function findClip(item: Speakable): number | undefined {
+  return CLIPS.c?.[clipId(item.lang, item.text.trim())];
 }
 
 let player: AudioPlayer | null = null;
@@ -48,14 +47,9 @@ export function stopClip() {
 }
 
 /** 有录音就播放并返回 true；没有录音（或网页版）返回 false，由调用方改用手机语音 */
-export function playClip(
-  item: Speakable,
-  gender: 'female' | 'male' | 'child',
-  rate: number,
-  onDone: () => void,
-): boolean {
+export function playClip(item: Speakable, rate: number, onDone: () => void): boolean {
   if (Platform.OS === 'web') return false;
-  const src = findClip(item, gender);
+  const src = findClip(item);
   if (src === undefined) return false;
   stopClip();
   try {
@@ -81,7 +75,7 @@ export function playClip(
 }
 
 /** 播放网络上的音频（星星宝的云端语音，V2.18）。成功开始播放返回 true */
-export function playUri(uri: string, onDone: () => void, onFail: () => void): boolean {
+export function playUri(uri: string, onDone: () => void, onFail: () => void, rate = 1): boolean {
   stopClip();
   let finished = false;
   const finish = () => {
@@ -95,6 +89,7 @@ export function playUri(uri: string, onDone: () => void, onFail: () => void): bo
       if (!AudioCtor) return false;
       const a = new AudioCtor(uri);
       webAudio = a;
+      a.playbackRate = rate;
       a.onended = finish;
       a.onerror = () => {
         if (!finished) {
@@ -112,6 +107,7 @@ export function playUri(uri: string, onDone: () => void, onFail: () => void): bo
     }
     const p = createAudioPlayer({ uri });
     player = p;
+    if (rate !== 1) p.setPlaybackRate(rate);
     p.addListener('playbackStatusUpdate', (s) => {
       if (s.didJustFinish) {
         if (player === p) stopClip();

@@ -11,7 +11,10 @@ export type Route =
   | { name: 'subject'; subject: Subject }
   | { name: 'lesson'; id: string; resume?: boolean }
   | { name: 'parent' }
-  | { name: 'review' }
+  /** 今日复习；带 subject = 错题本里重做这一科的错题（V2.21） */
+  | { name: 'review'; subject?: Subject }
+  /** 错题本（V2.21） */
+  | { name: 'mistakes'; subject: Subject }
   /** 题库单元（bank:单元id）或口算（oral:主题id）练习 */
   | { name: 'practice'; id: string }
   /** 问问星星宝（AI 老师） */

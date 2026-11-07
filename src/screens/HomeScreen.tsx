@@ -7,6 +7,7 @@ import { DisplayTextView } from '@/components/PinyinText';
 import { LoadingView, Notice, Screen } from '@/components/Screen';
 import { BigButton, SpeakerButton, StarBadge, tapFeedback } from '@/components/ui';
 import type { Subject } from '@/lesson/types';
+import { GREETING } from '@/content/greeting';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { resolveExercise } from '@/content/resolve';
@@ -26,8 +27,6 @@ const SUBJECT_LABEL: Record<Subject, { text: ReturnType<typeof zh>; say: string 
   english: { text: zh('英语', 'yīng yǔ'), say: '英语' },
 };
 
-/** 首页问候语（V2.20.1）：点问候语或小喇叭朗读 */
-const GREETING = { text: '你好，欢迎来到林亨学习乐园！今天想学什么？点一点下面的大按钮吧。', lang: 'zh-CN' } as const;
 
 export default function HomeScreen() {
   // 特别窄的手机（宽度 < 350）问候语字小一点，免得“！”单独掉到下一行
