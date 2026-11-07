@@ -60,6 +60,8 @@ export interface LessonEntry {
   starred?: boolean;
   /** 一课里的几篇（如《古诗三首》里的三首） */
   parts?: string[];
+  /** 教材页码（目录上的页码，便于核对） */
+  page?: number;
   provenance: Provenance;
   /** 本项目对这一课时已建设的内容（原创课程 id、知识点 id、练习题 id） */
   lessonIds?: string[];

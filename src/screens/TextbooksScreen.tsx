@@ -78,6 +78,7 @@ export default function TextbooksScreen() {
 }
 
 function VolumeRow({ v }: { v: Volume }) {
+  const [open, setOpen] = useState(false);
   const c = completeness(v);
   const toc = TOC[c.tocProvenance];
   const done = isComplete(c, v);
@@ -97,6 +98,33 @@ function VolumeRow({ v }: { v: Volume }) {
         单元 {c.units} · 已核实课时 {c.lessons.verified} · 待核实课时 {c.lessons.pending} · 知识点 {c.kps} · 原创课程 {c.courses} · 练习题 {c.exercises} · 例题 {c.examples}
       </Text>
       <Text style={styles.todo}>待补充：{c.todo.join('；')}</Text>
+      {v.units.length ? (
+        <Pressable onPress={() => setOpen(!open)} accessibilityRole="button" testID={`tb-open-${v.id}`}>
+          <Text style={styles.link}>{open ? '收起目录' : `查看目录（${v.units.length} 个单元）`}</Text>
+        </Pressable>
+      ) : null}
+      {open ? (
+        <View style={styles.toc} testID={`tb-tocview-${v.id}`}>
+          {v.sources[0] ? (
+            <Text style={styles.small}>
+              来源：{v.sources[0].title}（{v.sources[0].kind === 'official' ? '官方' : '二手'}，核对 {v.sources[0].checkedAt}）
+            </Text>
+          ) : null}
+          {v.units.map((u) => (
+            <View key={u.id} style={{ gap: 2 }}>
+              <Text style={styles.unit}>{u.title}</Text>
+              {u.lessons.map((l) => (
+                <Text key={l.id} style={styles.lesson}>
+                  {l.no ? `${l.no}　` : '◎　'}
+                  {l.title}
+                  {l.parts ? `（${l.parts.join('、')}）` : ''}
+                  {l.page ? `　…… ${l.page}` : ''}
+                </Text>
+              ))}
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -122,6 +150,10 @@ const styles = StyleSheet.create({
   pri: { color: '#7A5AF8', borderColor: '#7A5AF8' },
   vol: { borderTopWidth: 1, borderTopColor: '#EEE', paddingTop: 8, marginTop: 4, gap: 2 },
   volName: { fontSize: 14, fontWeight: '800', color: colors.text },
+  link: { fontSize: 13, fontWeight: '800', color: '#4D9DE0', paddingVertical: 4 },
+  toc: { backgroundColor: '#FAFBFD', borderRadius: radius.md, padding: space.sm, gap: 8 },
+  unit: { fontSize: 14, fontWeight: '900', color: '#2E8B57' },
+  lesson: { fontSize: 13, color: colors.text, paddingLeft: 8 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: { borderRadius: radius.round, borderWidth: 2, borderColor: '#4D9DE0', paddingHorizontal: 14, paddingVertical: 6, backgroundColor: '#fff' },
   chipOn: { backgroundColor: '#4D9DE0' },

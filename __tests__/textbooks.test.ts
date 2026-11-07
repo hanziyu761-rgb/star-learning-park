@@ -32,8 +32,32 @@ describe('第一批：统编版语文修订版 12 册登记', () => {
   it('一至六年级上下册各一册，编号唯一', () => {
     expect(vols.map((v) => `${v.grade}${v.term}`)).toEqual(['1上', '1下', '2上', '2下', '3上', '3下', '4上', '4下', '5上', '5下', '6上', '6下']);
   });
-  it('目录尚未与官方核对：不算已核实，也不算完整', () => {
-    for (const v of vols) {
+  it('一年级上、下册目录已与官方电子课本核对：逐条录入，有官方来源和日期', () => {
+    const [a, b] = vols;
+    for (const v of [a, b]) {
+      expect(v.tocProvenance).toBe('verified');
+      expect(v.sources[0]).toMatchObject({ kind: 'official', checkedAt: '2026-11-07' });
+      expect(v.units.every((u) => u.provenance === 'verified' && u.lessons.every((l) => l.provenance === 'verified' && l.page! > 0))).toBe(true);
+    }
+    expect(completeness(a).lessons.verified).toBe(46);
+    expect(completeness(b).lessons.verified).toBe(40);
+    expect(a.units.map((u) => u.title)).toEqual([
+      '我上学了', '第一单元·识字', '第二单元·汉语拼音', '第三单元·汉语拼音', '第四单元·汉语拼音',
+      '第五单元·阅读', '第六单元·识字', '第七单元·阅读', '第八单元·阅读', '附录',
+    ]);
+    // 抽查：页码递增、课文编号
+    const pages = a.units.flatMap((u) => u.lessons.map((l) => l.page!));
+    expect(pages.every((p, i) => i === 0 || p > pages[i - 1])).toBe(true);
+    expect(b.units[5].lessons[0]).toMatchObject({ no: 10, title: '古诗二首', parts: ['池上', '小池'], page: 61 });
+    expect(b.units[7].lessons.map((l) => l.title)).toEqual(['棉花姑娘', '咕咚', '小壁虎借尾巴', '语文园地八']);
+    // 关联了知识点和练习题，但还没有例题，所以仍不算完整
+    const c = completeness(a);
+    expect(c.kps).toBeGreaterThan(3);
+    expect(c.exercises).toBeGreaterThan(100);
+    expect(isComplete(c, a)).toBe(false);
+  });
+  it('二至六年级目录尚未与官方核对：不算已核实，也不算完整', () => {
+    for (const v of vols.slice(2)) {
       expect(v.tocProvenance).toBe('none');
       const c = completeness(v);
       expect(c.lessons.verified).toBe(0);
@@ -98,6 +122,7 @@ it('汇总数字（汇报用）', () => {
   const s = summary();
   expect(s.volumes).toBe(12);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(0);
-  expect(s.lessons.verified).toBe(0);
+  expect(s.verifiedVolumes).toBe(2);
+  expect(s.verifiedUnits).toBe(19);
+  expect(s.lessons.verified).toBe(86);
 });

@@ -51,6 +51,7 @@ export function completeness(v: Volume): Completeness {
   todo.push('典型例题未建设');
   if (exercises === 0) todo.push('练习题未建设');
   else if (v.units.length === 0 || v.tocProvenance !== 'verified') todo.push('练习题暂按旧版题库单元，未对应本册目录');
+  else todo.push('练习题按内容从旧版题库对应到本册单元（不是本册原题），逐课原创练习待建设');
   return {
     volumeId: v.id,
     tocProvenance: v.tocProvenance,
