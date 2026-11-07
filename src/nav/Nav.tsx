@@ -15,6 +15,8 @@ export type Route =
   | { name: 'review'; subject?: Subject }
   /** 错题本（V2.21） */
   | { name: 'mistakes'; subject: Subject }
+  /** 家长中心 · 教材资源库（V4.0） */
+  | { name: 'textbooks' }
   /** 题库单元（bank:单元id）或口算（oral:主题id）练习 */
   | { name: 'practice'; id: string }
   /** 问问星星宝（AI 老师） */

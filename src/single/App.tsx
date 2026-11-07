@@ -24,6 +24,7 @@ import WordCardsScreen from '@/screens/WordCardsScreen';
 import GamesScreen from '@/screens/GamesScreen';
 import GameScreen from '@/screens/GameScreen';
 import MistakesScreen from '@/screens/MistakesScreen';
+import TextbooksScreen from '@/screens/TextbooksScreen';
 import { SplashGate } from '@/components/SplashGate';
 import { colors } from '@/theme';
 
@@ -39,6 +40,8 @@ function renderRoute(route: Route) {
       return <ParentScreen />;
     case 'review':
       return <ReviewScreen subject={route.subject} />;
+    case 'textbooks':
+      return <TextbooksScreen />;
     case 'mistakes':
       return <MistakesScreen subject={route.subject} />;
     case 'practice':

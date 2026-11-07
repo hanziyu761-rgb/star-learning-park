@@ -1,0 +1,43 @@
+{
+  "_说明": "教材数据 JSON 模板（V4.0）。这是格式示例，不是真实教材目录，不要导入 APP。真实数据请复制本文件改写，再用 tools/textbooks/import.review.ts 检查导入。",
+  "id": "chinese.tongbian.example.g1a",
+  "editionId": "chinese.tongbian",
+  "subject": "chinese",
+  "grade": 1,
+  "term": "上",
+  "officialName": "义务教育教科书·语文 一年级上册（示例）",
+  "revision": 2099,
+  "firstUse": "2024秋",
+  "status": "current",
+  "statusNote": "写明状态依据",
+  "regions": ["全国"],
+  "tocProvenance": "verified",
+  "sources": [
+    {
+      "title": "国家中小学智慧教育平台 统编版语文一年级上册电子课本 目录页（第 2～3 页）",
+      "url": "https://basic.smartedu.cn/",
+      "kind": "official",
+      "checkedAt": "2026-11-07",
+      "note": "逐条核对单元名和课题名"
+    }
+  ],
+  "bankBookId": "chinese-g1a",
+  "copyright": "目录只录单元名和课题名；课文正文、插图、习题和教师用书版权归出版社，不复制。",
+  "units": [
+    {
+      "id": "chinese.tongbian.example.g1a.u1",
+      "order": 1,
+      "title": "第一单元（示例）",
+      "provenance": "verified",
+      "objectives": [{ "text": "本项目编写的单元学习目标写在这里", "provenance": "original" }],
+      "kpIds": ["c1.a2"],
+      "bankUnitIds": ["chinese-g1a-u2"],
+      "lessons": [
+        { "id": "chinese.tongbian.example.g1a.u1.l1", "order": 1, "no": 1, "title": "示例课题一", "kind": "literacy", "provenance": "verified" },
+        { "id": "chinese.tongbian.example.g1a.u1.l2", "order": 2, "no": 2, "title": "示例课题二", "kind": "text", "starred": true, "provenance": "verified" },
+        { "id": "chinese.tongbian.example.g1a.u1.l3", "order": 3, "title": "口语交际（示例）", "kind": "oral", "provenance": "verified" },
+        { "id": "chinese.tongbian.example.g1a.u1.l4", "order": 4, "title": "语文园地（示例）", "kind": "garden", "provenance": "verified" }
+      ]
+    }
+  ]
+}

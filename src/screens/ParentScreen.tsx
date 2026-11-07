@@ -213,6 +213,9 @@ function ParentDashboard() {
           ))}
         </View>
         <Text style={styles.small}>点开可以看每一科的错题、马上重做，或打印成错题单。</Text>
+        <Pressable onPress={() => nav.push({ name: 'textbooks' })} style={styles.bookBtn} accessibilityRole="button" testID="parent-textbooks">
+          <Text style={styles.bookBtnText}>📚 教材资源库：各版本教材建设情况</Text>
+        </Pressable>
         {mistakes.length === 0 ? <Text style={styles.empty}>暂无错题</Text> : null}
         {mistakes.map((m) => (
           <View key={m.key} style={styles.row} testID="mistake-row">
