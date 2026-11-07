@@ -194,10 +194,10 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(28);
+  expect(s.volumes).toBe(29);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(20);
-  expect(s.verifiedUnits).toBe(175);
+  expect(s.verifiedVolumes).toBe(22);
+  expect(s.verifiedUnits).toBe(195);
   expect(s.lessons.verified).toBe(557);
 });
 
@@ -222,7 +222,14 @@ describe('第二批：人教版数学修订版', () => {
     // 知识点：一年级原创知识点关联上了
     expect(a.units[1].kpIds).toEqual(expect.arrayContaining(['m1.count5', 'm1.add5']));
     expect(completeness(a).exercises).toBeGreaterThan(300);
-    expect(vols.slice(7).every((v) => v.tocProvenance === 'none')).toBe(true);
+    expect(vols.filter((v) => v.tocProvenance === 'none').map((v) => `${v.grade}${v.term}`)).toEqual(['4下', '5下', '6上', '6下']);
+    expect(vols[8].units.map((u) => u.page)).toEqual([1, 7, 24, 39, 55, 72, 95, 98, 107]);
+    expect(vols[8].units[6].title).toBe('有趣的密铺');
+    const old5 = allVolumes().find((v) => v.id === 'math.pep.legacy.g5b')!;
+    expect(old5.units.map((u) => u.title)).toEqual([
+      '1 观察物体（三）', '2 因数和倍数', '3 长方体和正方体', '探索图形', '4 分数的意义和性质', '5 图形的运动（三）',
+      '6 分数的加法和减法', '怎样通知最快', '7 折线统计图', '8 数学广角——找次品', '9 总复习',
+    ]);
     expect(vols[6].units.map((u) => [u.title, u.page])).toEqual([
       ['一 万以上数的认识', 1], ['1亿有多大', 24], ['二 角的度量', 28], ['三 多位数乘两位数', 39], ['四 加法模型和乘法模型', 58],
       ['五 平行四边形和梯形', 70], ['六 条形统计图', 88], ['寻找宝藏', 102], ['七 复习与关联', 108],
