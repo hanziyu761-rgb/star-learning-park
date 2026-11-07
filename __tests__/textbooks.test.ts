@@ -56,8 +56,20 @@ describe('第一批：统编版语文修订版 12 册登记', () => {
     expect(c.exercises).toBeGreaterThan(100);
     expect(isComplete(c, a)).toBe(false);
   });
-  it('二至六年级目录尚未与官方核对：不算已核实，也不算完整', () => {
-    for (const v of vols.slice(2)) {
+  it('二年级上、下册目录已核实：每册 9 个单元（含附录），课文编号连续', () => {
+    const [a, b] = vols.slice(2, 4);
+    expect([a.tocProvenance, b.tocProvenance]).toEqual(['verified', 'verified']);
+    expect(completeness(a).lessons.verified).toBe(39);
+    expect(completeness(b).lessons.verified).toBe(40);
+    // 阅读课文编号 1～23 / 1～24 连续（识字课另起编号）
+    const textNos = (v: Volume) => v.units.filter((u) => u.title.endsWith('阅读')).flatMap((u) => u.lessons.filter((l) => l.no).map((l) => l.no));
+    expect(textNos(a)).toEqual(Array.from({ length: 23 }, (_, i) => i + 1));
+    expect(textNos(b)).toEqual(Array.from({ length: 24 }, (_, i) => i + 1));
+    expect(b.units[4].lessons[0]).toMatchObject({ title: '寓言二则', parts: ['亡羊补牢', '揠苗助长'] });
+    for (const v of [a, b]) for (const u of v.units.slice(0, 8)) expect(u.bankUnitIds).toHaveLength(1);
+  });
+  it('三至六年级目录尚未与官方核对：不算已核实，也不算完整', () => {
+    for (const v of vols.slice(4)) {
       expect(v.tocProvenance).toBe('none');
       const c = completeness(v);
       expect(c.lessons.verified).toBe(0);
@@ -122,7 +134,7 @@ it('汇总数字（汇报用）', () => {
   const s = summary();
   expect(s.volumes).toBe(12);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(2);
-  expect(s.verifiedUnits).toBe(19);
-  expect(s.lessons.verified).toBe(86);
+  expect(s.verifiedVolumes).toBe(4);
+  expect(s.verifiedUnits).toBe(37);
+  expect(s.lessons.verified).toBe(165);
 });

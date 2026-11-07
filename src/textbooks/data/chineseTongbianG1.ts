@@ -25,8 +25,8 @@ export const SRC_G1B: SourceRef = {
   note: 'APP 所有者登录平台后截图提供；逐条核对单元名、课题名、页码。截图从“第一单元”开始，其上方若有内容未录入。',
 };
 
-type Row = [no: number | null, title: string, page: number, kind?: LessonEntry['kind'], parts?: string[]];
-interface U {
+export type Row = [no: number | null, title: string, page: number, kind?: LessonEntry['kind'], parts?: string[]];
+export interface U {
   order: number;
   title: string;
   kind: LessonEntry['kind'];
@@ -34,7 +34,7 @@ interface U {
   bank: string[];
 }
 
-function build(volId: string, units: U[]): Unit[] {
+export function build(volId: string, units: U[]): Unit[] {
   return units.map((u) => {
     const uid = `${volId}.u${u.order}`;
     const lessons: LessonEntry[] = u.rows.map(([no, title, page, kind, parts], i) => ({
