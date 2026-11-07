@@ -194,10 +194,10 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(29);
+  expect(s.volumes).toBe(30);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(22);
-  expect(s.verifiedUnits).toBe(195);
+  expect(s.verifiedVolumes).toBe(24);
+  expect(s.verifiedUnits).toBe(212);
   expect(s.lessons.verified).toBe(557);
 });
 
@@ -222,7 +222,13 @@ describe('第二批：人教版数学修订版', () => {
     // 知识点：一年级原创知识点关联上了
     expect(a.units[1].kpIds).toEqual(expect.arrayContaining(['m1.count5', 'm1.add5']));
     expect(completeness(a).exercises).toBeGreaterThan(300);
-    expect(vols.filter((v) => v.tocProvenance === 'none').map((v) => `${v.grade}${v.term}`)).toEqual(['4下', '5下', '6上', '6下']);
+    expect(vols.filter((v) => v.tocProvenance === 'none').map((v) => `${v.grade}${v.term}`)).toEqual(['4下', '5下', '6下']);
+    expect(vols[10].units.map((u) => [u.title, u.page])).toEqual([
+      ['一 确定位置', 1], ['二 分数乘法', 16], ['三 分数除法', 32], ['生活中的负数', 44], ['四 圆', 48],
+      ['体育中的数学', 74], ['五 百分数', 79], ['水是生命之源', 101], ['六 复习与关联', 106],
+    ]);
+    const old6 = allVolumes().find((v) => v.id === 'math.pep.legacy.g6b')!;
+    expect(old6.units.map((u) => u.page)).toEqual([2, 8, 15, 16, 38, 65, 67, 71]);
     expect(vols[8].units.map((u) => u.page)).toEqual([1, 7, 24, 39, 55, 72, 95, 98, 107]);
     expect(vols[8].units[6].title).toBe('有趣的密铺');
     const old5 = allVolumes().find((v) => v.id === 'math.pep.legacy.g5b')!;
