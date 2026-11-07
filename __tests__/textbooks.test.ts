@@ -195,13 +195,34 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(42);
+  expect(s.volumes).toBe(44);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(36);
-  expect(s.verifiedUnits).toBe(342);
+  expect(s.verifiedVolumes).toBe(38);
+  expect(s.verifiedUnits).toBe(362);
   expect(s.lessons.verified).toBe(559);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
+});
+
+describe('第四批：苏教版数学修订版', () => {
+  const vols = volumesFor({ editionId: 'math.sujiao' });
+  it('只登记已截图核对的册：一年级上下册；不关联人教版题库', () => {
+    expect(vols.map((v) => v.id)).toEqual(['math.sujiao.2024.g1a', 'math.sujiao.2024.g1b']);
+    for (const v of vols) {
+      expect(v.tocProvenance).toBe('verified');
+      expect(v.sources[0].kind).toBe('official');
+      expect(v.bankBookId).toBeUndefined();
+      expect(v.units.every((u) => u.bankUnitIds.length === 0 && u.kpIds.length === 0)).toBe(true);
+    }
+    const [a, b] = vols;
+    expect(a.units.map((u) => u.title)).toEqual([
+      '数学游戏分享', '一 0～5的认识和加减法', '生活中的位置', '二 6～9的认识和加减法', '三 图形的初步认识（一）',
+      '四 10的认识和加减法', '好玩的“抢10”', '五 认识11～19', '期末复习',
+    ]);
+    expect(a.units.map((u) => u.page)).toEqual([1, 11, 32, 35, 53, 62, 75, 78, 88]);
+    expect(b.units.map((u) => u.page)).toEqual([1, 22, 32, 36, 42, 53, 57, 71, 78, 85, 88]);
+    expect(b.units[6].title).toBe('五 两位数加、减整十数和一位数');
+  });
 });
 
 describe('第三批：北师大版数学修订版', () => {
