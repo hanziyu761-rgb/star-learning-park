@@ -26,7 +26,7 @@ with sync_playwright() as p:
         tid(page, "key-确定").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')
         tid(page, "parent-textbooks").scroll_into_view_if_needed(); tid(page, "parent-textbooks").click()
         page.wait_for_selector('[data-testid="textbooks-screen"]')
-        expect(tid(page, "textbooks-summary")).to_contain_text("教材册次 53 册（目录已核实 47 册）")
+        expect(tid(page, "textbooks-summary")).to_contain_text("教材册次 54 册（目录已核实 48 册）")
         expect(tid(page, "tb-toc-chinese.tongbian.2024.g6b")).to_have_text("目录未录入")
         expect(tid(page, "tb-toc-chinese.tongbian.2024.g1a")).to_have_text("目录已核实")
         tid(page, "tb-open-chinese.tongbian.2024.g1b").click()
@@ -53,7 +53,7 @@ with sync_playwright() as p:
         expect(tid(page, "tb-edition-english.yilin")).to_contain_text("现行")
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
         page.screenshot(path=f"{OUT}/v40-textbooks-en-{w}.png", full_page=True)
-        ok(f"{w}×{h}：教材资源库按真实数据显示（53 册中 47 册已核实、一年级目录可展开；题库旧版待核实；筛选年级、切换学科正常）")
+        ok(f"{w}×{h}：教材资源库按真实数据显示（54 册中 48 册已核实、一年级目录可展开；题库旧版待核实；筛选年级、切换学科正常）")
         page.close()
     print({"errors": errors, "pass": len(RESULTS)})
     assert not errors
