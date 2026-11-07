@@ -194,9 +194,62 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(15);
+  expect(s.volumes).toBe(28);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(12);
-  expect(s.verifiedUnits).toBe(108);
+  expect(s.verifiedVolumes).toBe(20);
+  expect(s.verifiedUnits).toBe(175);
   expect(s.lessons.verified).toBe(557);
+});
+
+describe('第二批：人教版数学修订版', () => {
+  const vols = volumesFor({ editionId: 'math.pep' }).filter((v) => v.revision === 2024);
+  it('12 册登记；一年级上、下册单元目录已核实（数学目录只列单元）', () => {
+    expect(vols).toHaveLength(12);
+    const [a, b] = vols;
+    expect(a.units.map((u) => u.title)).toEqual([
+      '数学游戏', '一 5以内数的认识和加、减法', '二 6～10的认识和加、减法', '三 认识立体图形', '四 11～20的认识', '五 20以内的进位加法', '六 复习与关联',
+    ]);
+    expect(a.units.map((u) => u.page)).toEqual([1, 12, 34, 67, 73, 88, 103]);
+    expect(b.units.map((u) => u.title)).toEqual([
+      '一 认识平面图形', '二 20以内的退位减法', '三 100以内数的认识', '四 100以内的口算加、减法', '五 100以内的笔算加、减法', '六 数量间的加减关系', '欢乐购物街', '七 复习与关联',
+    ]);
+    expect(b.units.map((u) => u.page)).toEqual([1, 8, 23, 43, 56, 69, 77, 83]);
+    for (const v of [a, b]) {
+      expect(v.tocProvenance).toBe('verified');
+      expect(v.sources[0].kind).toBe('official');
+      expect(completeness(v).todo.join()).toMatch(/只列单元/);
+    }
+    // 知识点：一年级原创知识点关联上了
+    expect(a.units[1].kpIds).toEqual(expect.arrayContaining(['m1.count5', 'm1.add5']));
+    expect(completeness(a).exercises).toBeGreaterThan(300);
+    expect(vols.slice(7).every((v) => v.tocProvenance === 'none')).toBe(true);
+    expect(vols[6].units.map((u) => [u.title, u.page])).toEqual([
+      ['一 万以上数的认识', 1], ['1亿有多大', 24], ['二 角的度量', 28], ['三 多位数乘两位数', 39], ['四 加法模型和乘法模型', 58],
+      ['五 平行四边形和梯形', 70], ['六 条形统计图', 88], ['寻找宝藏', 102], ['七 复习与关联', 108],
+    ]);
+    const old = allVolumes().find((v) => v.id === 'math.pep.legacy.g4b')!;
+    expect(old.revision).toBeNull();
+    expect(old.units.map((u) => u.title)).toEqual([
+      '1 四则运算', '2 观察物体（二）', '3 运算律', '4 小数的意义和性质', '5 三角形', '6 小数的加法和减法',
+      '7 图形的运动（二）', '8 平均数与条形统计图', '营养午餐', '9 数学广角——鸡兔同笼', '10 总复习',
+    ]);
+    expect(completeness(old).exercises).toBe(432);
+    expect(vols[4].units.map((u) => u.title)).toEqual([
+      '一 观察物体', '二 混合运算', '三 毫米、分米和千米', '曹冲称象的故事', '四 多位数乘一位数', '数字编码', '五 线和角', '六 分数的初步认识', '七 复习与关联',
+    ]);
+    expect(vols[5].units.map((u) => u.page)).toEqual([1, 10, 39, 52, 65, 77, 86, 95]);
+    expect(vols[5].units[5].title).toBe('年、月、日的秘密');
+  });
+  it('二年级上、下册单元目录已核实；没有序号的主题活动照目录原样录入', () => {
+    const [a, b] = vols.slice(2, 4);
+    expect(a.units.map((u) => [u.title, u.page])).toEqual([
+      ['一 分类与整理', 1], ['二 1～6的表内乘法', 10], ['三 1～6的表内除法', 30], ['校园小导游', 49],
+      ['四 厘米和米', 55], ['身体上的尺子', 68], ['五 7～9的表内乘、除法', 73], ['六 复习与关联', 91],
+    ]);
+    expect(b.units.map((u) => [u.title, u.page])).toEqual([
+      ['时间在哪里', 1], ['一 有余数的除法', 10], ['二 数量间的乘除关系', 24], ['三 万以内数的认识', 40],
+      ['四 万以内的加法和减法', 63], ['数学连环画', 83], ['五 复习与关联', 87],
+    ]);
+    expect(a.units[3].note).toMatch(/没有单元序号/);
+  });
 });

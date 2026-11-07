@@ -4,6 +4,7 @@
 import type { Subject } from '@/lesson/types';
 import { bankVolumes, courseCount } from './adapters';
 import { TONGBIAN_2024, TONGBIAN_LEGACY } from './data/chineseTongbian';
+import { MATH_PEP_2024, MATH_PEP_LEGACY } from './data/mathPep';
 import { EDITION_BY_ID, EDITIONS } from './editions';
 import type { Completeness, Edition, LessonEntry, Provenance, Unit, Volume } from './types';
 import { loadRawBook } from '@/content/bank';
@@ -13,7 +14,7 @@ import { IMPORTED } from './data/imported';
 
 let cached: Volume[] | null = null;
 export function allVolumes(): Volume[] {
-  cached ??= [...TONGBIAN_2024, ...TONGBIAN_LEGACY, ...IMPORTED, ...bankVolumes()];
+  cached ??= [...TONGBIAN_2024, ...TONGBIAN_LEGACY, ...MATH_PEP_2024, ...MATH_PEP_LEGACY, ...IMPORTED, ...bankVolumes()];
   return cached;
 }
 
@@ -46,7 +47,7 @@ export function completeness(v: Volume): Completeness {
   const todo: string[] = [];
   if (v.tocProvenance === 'none') todo.push('单元目录未录入');
   else if (v.tocProvenance === 'pending') todo.push('单元目录待与官方来源核实');
-  if (v.units.length && allLessons(v).length === 0) todo.push('课时目录未录入');
+  if (v.units.length && allLessons(v).length === 0) todo.push(v.subject === 'math' ? '教材目录只列单元；课时（小节）待按课本内容录入' : '课时目录未录入');
   if (kps.size === 0) todo.push('知识点未关联');
   todo.push('典型例题未建设');
   if (exercises === 0) todo.push('练习题未建设');

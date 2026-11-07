@@ -54,7 +54,17 @@ export const EDITIONS: Edition[] = [
     aliases: ['人教版数学'],
     publisher: '人民教育出版社',
     priority: 1,
-    ...pending('现有题库按旧版（2012 版）单元整理；一年级 2024 修订版单元已重排（V2.4）。各年级修订版启用时间见第二批核实。'),
+    status: 'current',
+    statusNote: '国家中小学智慧教育平台提供人教版小学数学修订版（一～三年级上下册、四年级上册已核对目录；四年级下册平台现为未修订版）；各地是否选用以当地为准。现有题库按旧版（2012 版）单元整理。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 人教版小学数学（根据2022年版课程标准修订）电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: CHECKED,
+        note: 'APP 所有者登录平台查看并截图一～四年级目录页。',
+      },
+    ],
   },
   { id: 'math.bsd', subject: 'math', name: '北师大版', aliases: [], publisher: '北京师范大学出版社', priority: 1, ...pending('第三批核实。') },
   {
