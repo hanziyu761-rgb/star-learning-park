@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { BANK_INDEX } from '@/content/bank';
 import { EDITIONS } from '@/textbooks/editions';
+import { parseToc } from '@/textbooks/data/mathJijiao';
 import { allVolumes, completeness, isComplete, summary, validateAll, validateVolume, volumesFor } from '@/textbooks/registry';
 import type { Volume } from '@/textbooks/types';
 
@@ -195,13 +196,54 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(54);
+  expect(s.volumes).toBe(66);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(48);
-  expect(s.verifiedUnits).toBe(476);
-  expect(s.lessons.verified).toBe(559);
+  expect(s.verifiedVolumes).toBe(60);
+  expect(s.verifiedUnits).toBe(591);
+  expect(s.lessons.verified).toBe(744);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
+});
+
+describe('第四批：冀教版数学（目录含小节）', () => {
+  const vols = volumesFor({ editionId: 'math.jijiao' });
+  it('12 册：修订版 9 册 + 平台现有四～六年级下册未修订版 3 册；不关联人教版题库', () => {
+    expect(vols.map((v) => v.id)).toEqual([
+      'math.jijiao.2024.g1a', 'math.jijiao.2024.g1b', 'math.jijiao.2024.g2a', 'math.jijiao.2024.g2b', 'math.jijiao.2024.g3a',
+      'math.jijiao.2024.g3b', 'math.jijiao.2024.g4a', 'math.jijiao.2024.g5a', 'math.jijiao.2024.g6a',
+      'math.jijiao.legacy.g4b', 'math.jijiao.legacy.g5b', 'math.jijiao.legacy.g6b',
+    ]);
+    for (const v of vols) {
+      expect(v.tocProvenance).toBe('verified');
+      expect(v.sources[0].kind).toBe('official');
+      expect(v.sources[0].title).toMatch(/河北教育出版社/);
+      expect(v.bankBookId).toBeUndefined();
+      expect(v.units.every((u) => u.bankUnitIds.length === 0 && u.kpIds.length === 0)).toBe(true);
+    }
+    expect(vols.reduce((n, v) => n + v.units.length, 0)).toBe(115);
+    expect(vols.reduce((n, v) => n + v.units.reduce((m, u) => m + u.lessons.length, 0), 0)).toBe(185);
+    expect(vols.filter((v) => v.revision === null).map((v) => v.grade)).toEqual([4, 5, 6]);
+  });
+  it('一年级上册逐条对照：单元、小节编号、栏目和页码', () => {
+    const g1a = vols[0];
+    expect(g1a.units.map((u) => `${u.title}@${u.page}`)).toEqual([
+      '我上学了@2', '一 熟悉的数与加减法@12', '二 认识图形（一）@56', '三 认识11～20@62', '四 20以内的加法@74', '五 探索乐园@88', '六 期末复习@92', '拓展学习@102',
+    ]);
+    const u1 = g1a.units[1].lessons;
+    expect(u1.map((l) => [l.no ?? null, l.title, l.page])).toEqual([
+      [1, '认识1～9', 12], [2, '10以内的加减', 30], [3, '0的认识和加减', 40], [4, '10的认识和加减', 43], [null, '数字古诗两首', 55],
+    ]);
+    expect(u1[4].kind).toBe('other');
+    expect(g1a.units[6].lessons.map((l) => l.kind)).toEqual(['review', 'review']);
+    expect(completeness(g1a).lessons.verified).toBe(18);
+  });
+  it('“附页”没有页码的照实登记；格式不对的目录行会报错', () => {
+    const g4b = vols[9];
+    expect(g4b.units.at(-1)).toMatchObject({ title: '附页', note: '目录上没有页码' });
+    expect(g4b.units.at(-1)?.page).toBeUndefined();
+    expect(() => parseToc('x', '一 没有页码')).toThrow(/格式不对/);
+    expect(() => parseToc('x', '一 单元 3 | 小节没页码')).toThrow(/格式不对/);
+  });
 });
 
 describe('第四批：苏教版数学修订版', () => {
