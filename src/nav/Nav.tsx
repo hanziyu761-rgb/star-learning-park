@@ -27,6 +27,8 @@ export type Route =
   | { name: 'diagnose'; kp: string }
   /** 家长中心：试卷生成 */
   | { name: 'exam' }
+  /** 家长中心：拍照错题（V4.1） */
+  | { name: 'photo' }
   /** 每日挑战（思维题） */
   | { name: 'challenge' }
   /** 英语单词卡（V2.18） */

@@ -11,6 +11,8 @@
  *   POST /api/tutor/chat           问问星星宝（学习问答、英语陪练）
  *   POST /api/tutor/report         给家长的错题分析与学习建议
  *   POST /api/tts                  把星星宝要说的话合成为自然的语音（阿里云百炼 CosyVoice，V2.18；密钥 DASHSCOPE_API_KEY）
+ *   POST /api/photo/analyze        家长拍错题：识别题目、孩子的答案和知识点（阿里云百炼通义千问 VL；照片不保存）
+ *   POST /api/photo/similar        语文、英语按错题出同类选择题（DeepSeek；标注“AI 生成，未经人工审核”）
  *
  * 参考：ChinaStudyFree apps/server（MIT）的 OpenAI 兼容调用与未配置时返回 501 的降级方式。
  */
@@ -285,6 +287,166 @@ export async function handleReport(body, env) {
   return { text };
 }
 
+// ---------------- 拍照错题（V4.1：家长拍错题 → 识别题目 → 出同类题） ----------------
+//
+// 照片只在这一次请求里转给阿里云百炼的视觉模型（通义千问 VL，OpenAI 兼容接口），
+// 服务端不保存、不写日志；返回的文字同样去除个人信息。
+
+export const DEFAULT_VL_MODEL = 'qwen3-vl-plus';
+const DEFAULT_VL_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+/** 照片大小上限（base64 字符数，约 1.3 MB 图片）；APP 端先压缩到 1280 像素以内 */
+export const PHOTO_MAX_CHARS = 1_800_000;
+
+export class PhotoNotConfigured extends Error {}
+
+function imageOf(v) {
+  const s = String(v ?? '');
+  if (!s) throw new BadRequest('缺少 image');
+  if (s.length > PHOTO_MAX_CHARS) throw new BadRequest('照片太大');
+  if (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/.test(s)) throw new BadRequest('image 格式不对');
+  return s;
+}
+
+/** 从模型回复里取出第一个 JSON 对象或数组（模型偶尔会在前后加说明或 ``` 包裹） */
+export function extractJson(text) {
+  const t = String(text ?? '').replace(/```(?:json)?/g, '');
+  const start = t.search(/[[{]/);
+  if (start < 0) return null;
+  const open = t[start];
+  const close = open === '{' ? '}' : ']';
+  const end = t.lastIndexOf(close);
+  if (end <= start) return null;
+  try {
+    return JSON.parse(t.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
+
+/** 模型返回的文字：去个人信息、去 Markdown、截断；含不良内容时返回空 */
+function safeText(v, max) {
+  // 只去掉 Markdown 的 * # `；保留 _（英语填空 ___）和 > <（数学比较大小）
+  const t = scrubPersonalInfo(String(v ?? ''))
+    .replace(/[*#`]/g, '')
+    .trim();
+  if (BLOCKED_OUTPUT.test(t)) return '';
+  return Array.from(t).slice(0, max).join('');
+}
+
+async function callVL(env, messages) {
+  if (!env.DASHSCOPE_API_KEY) throw new PhotoNotConfigured('DASHSCOPE_API_KEY 未配置');
+  const fetchImpl = env.__fetch ?? fetch;
+  const res = await fetchImpl(env.DASHSCOPE_VL_URL || DEFAULT_VL_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.DASHSCOPE_API_KEY}` },
+    body: JSON.stringify({
+      model: env.DASHSCOPE_VL_MODEL || DEFAULT_VL_MODEL,
+      messages,
+      enable_thinking: false,
+      max_tokens: 800,
+      temperature: 0.1,
+      stream: false,
+    }),
+  });
+  if (!res.ok) {
+    const err = new Error(`VL ${res.status}`);
+    err.status = res.status;
+    err.detail = (await res.text().catch(() => '')).slice(0, 300);
+    throw err;
+  }
+  const data = await res.json();
+  return data?.choices?.[0]?.message?.content ?? '';
+}
+
+/**
+ * 识别一张错题照片。
+ * 入参：image（data:image/jpeg;base64,…）、grade、subject（家长选的科目，可空）、
+ *       candidates（APP 按科目和年级给出的知识点候选 [{id,name}]，最多 120 个；模型只能从中选）
+ * 返回：subject、question（题目文字）、childAnswer（孩子写的答案）、correctAnswer（模型认为的正确答案，可能不准）、
+ *       kpId（候选中的一个，或空）、reason（为什么错）
+ */
+export async function handlePhotoAnalyze(body, env) {
+  const image = imageOf(body.image);
+  const grade = gradeOf(body.grade);
+  const hinted = ['math', 'chinese', 'english'].includes(body.subject) ? body.subject : '';
+  const candidates = (Array.isArray(body.candidates) ? body.candidates.slice(0, 120) : [])
+    .map((c, i) => ({ id: str(c?.id, 60, `candidates[${i}].id`), name: str(c?.name, 40, `candidates[${i}].name`) }));
+  const ids = new Set(candidates.map((c) => c.id));
+
+  const sys =
+    `你是小学${GRADE_CN[grade]}年级的教研老师，帮家长分析孩子做错的一道题。照片里可能有几道题，只看孩子做错（有红叉、圈出或明显写错）的那一道；看不出哪道错时取第一道。` +
+    '只输出一个 JSON 对象，不要任何说明，字段：' +
+    '{"subject":"math|chinese|english","question":"题目原文（照抄，不超过200字）","childAnswer":"孩子写的答案，看不清写空","correctAnswer":"正确答案","kpId":"从候选知识点里选最贴切的一个 id，都不合适写空","reason":"一句话说明可能错在哪里（不超过60字）"}。' +
+    '不要写出照片里出现的姓名、学校、班级、电话等个人信息。照片里不是题目时，question 写空。';
+  const user =
+    (hinted ? `家长说这是${SUBJECT_CN[hinted]}题。` : '') +
+    (candidates.length ? `候选知识点：${candidates.map((c) => `${c.id}=${c.name}`).join('；')}` : '没有候选知识点，kpId 写空。');
+
+  const raw = await callVL(env, [
+    { role: 'system', content: sys },
+    { role: 'user', content: [{ type: 'image_url', image_url: { url: image } }, { type: 'text', text: user }] },
+  ]);
+  const obj = extractJson(raw);
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    const err = new Error('识别结果不是 JSON');
+    err.status = 502;
+    err.detail = '识别结果格式不对，请重拍或换一张清楚的照片';
+    throw err;
+  }
+  const subject = ['math', 'chinese', 'english'].includes(obj.subject) ? obj.subject : hinted || 'math';
+  const kpId = typeof obj.kpId === 'string' && ids.has(obj.kpId) ? obj.kpId : '';
+  return {
+    subject,
+    question: safeText(obj.question, 200),
+    childAnswer: safeText(obj.childAnswer, 60),
+    correctAnswer: safeText(obj.correctAnswer, 60),
+    kpId,
+    reason: safeText(obj.reason, 80),
+  };
+}
+
+/**
+ * 语文、英语出同类题（数学由 APP 的原创出题程序出，答案由程序保证）。
+ * 入参：subject（chinese|english）、grade、question（家长确认后的原题）、knowledgePoint（知识点名称）、count（1–5）
+ * 返回：items [{question, options, answer, explain}]；只保留结构正确的题（2–4 个不同选项、答案在选项里）
+ */
+export async function handlePhotoSimilar(body, env) {
+  if (!['chinese', 'english'].includes(body.subject)) throw new BadRequest('subject 只能是 chinese 或 english');
+  const subject = body.subject;
+  const grade = gradeOf(body.grade);
+  const question = str(body.question, 300, 'question');
+  const kp = str(body.knowledgePoint, 40, 'knowledgePoint', false);
+  const count = Math.min(5, Math.max(1, Number(body.count) || 5));
+  const sys =
+    `你是小学${GRADE_CN[grade]}年级${SUBJECT_CN[subject]}老师，要根据一道孩子做错的题，出 ${count} 道考查同一知识点的选择题。` +
+    '要求：难度和原题相当；题目不要照抄原题；每题 3 个选项，只有 1 个正确；内容健康积极；' +
+    (subject === 'english' ? '题目和选项用英文，explain 用中文；' : '用简体中文；') +
+    '只输出 JSON 数组，不要任何说明：[{"question":"题目","options":["A","B","C"],"answer":"与正确选项完全相同的文字","explain":"一句话讲解（不超过40字）"}]。';
+  const user = `${kp ? `知识点：${kp}。` : ''}原题：${question}`;
+  const raw = await callLLM(env, [{ role: 'system', content: sys }, { role: 'user', content: user }], { maxTokens: 1200, temperature: 0.7 });
+  const arr = extractJson(raw);
+  const items = (Array.isArray(arr) ? arr : [])
+    .map((it) => {
+      const q = safeText(it?.question, 120);
+      const options = Array.isArray(it?.options) ? it.options.slice(0, 4).map((o) => safeText(o, 40)) : [];
+      const answer = safeText(it?.answer, 40);
+      const explain = safeText(it?.explain, 60);
+      const unique = new Set(options).size === options.length;
+      if (!q || options.length < 2 || options.some((o) => !o) || !unique || !options.includes(answer)) return null;
+      return { question: q, options, answer, explain };
+    })
+    .filter(Boolean)
+    .slice(0, count);
+  if (items.length === 0) {
+    const err = new Error('没有结构正确的题');
+    err.status = 502;
+    err.genInvalid = true;
+    err.detail = '这次没有出好题，请再试一次';
+    throw err;
+  }
+  return { items, generatedBy: 'ai', reviewed: false };
+}
+
 // ---------------- HTTP 入口 ----------------
 
 const CORS = {
@@ -298,14 +460,28 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS } });
 }
 
-const ROUTES = { '/api/tutor/hint': handleHint, '/api/tutor/chat': handleChat, '/api/tutor/report': handleReport, '/api/tts': handleTts };
+const ROUTES = {
+  '/api/tutor/hint': handleHint,
+  '/api/tutor/chat': handleChat,
+  '/api/tutor/report': handleReport,
+  '/api/tts': handleTts,
+  '/api/photo/analyze': handlePhotoAnalyze,
+  '/api/photo/similar': handlePhotoSimilar,
+};
 
 export default {
   async fetch(request, env = {}) {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
     if (url.pathname === '/api/health' && request.method === 'GET') {
-      return json({ ok: true, llm: !!env.DEEPSEEK_API_KEY, model: env.DEEPSEEK_MODEL || DEFAULT_MODEL, tts: !!env.DASHSCOPE_API_KEY });
+      return json({
+        ok: true,
+        llm: !!env.DEEPSEEK_API_KEY,
+        model: env.DEEPSEEK_MODEL || DEFAULT_MODEL,
+        tts: !!env.DASHSCOPE_API_KEY,
+        photo: !!env.DASHSCOPE_API_KEY,
+        vlModel: env.DASHSCOPE_VL_MODEL || DEFAULT_VL_MODEL,
+      });
     }
     const handler = ROUTES[url.pathname];
     if (!handler || request.method !== 'POST') return json({ ok: false, error: '接口不存在', code: 'NOT_FOUND' }, 404);
@@ -313,13 +489,22 @@ export default {
     const ip = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'local';
     // 朗读（/api/tts）单独计数：全 APP 统一童声后，随机出的题目每句都要合成，比提问频繁得多（V2.21）
     const isTts = url.pathname === '/api/tts';
-    const limit = isTts ? Number(env.TTS_RATE_LIMIT_PER_MINUTE) || 90 : Number(env.RATE_LIMIT_PER_MINUTE) || 20;
-    if (rateLimited(isTts ? `tts:${ip}` : ip, limit)) return json({ ok: false, error: '请求太频繁，休息一下再问吧', code: 'RATE_LIMITED' }, 429);
+    // 拍照错题单独计数，次数更少（识别照片费用比文字高）
+    const isPhoto = url.pathname.startsWith('/api/photo/');
+    const limit = isTts
+      ? Number(env.TTS_RATE_LIMIT_PER_MINUTE) || 90
+      : isPhoto
+        ? Number(env.PHOTO_RATE_LIMIT_PER_MINUTE) || 6
+        : Number(env.RATE_LIMIT_PER_MINUTE) || 20;
+    const bucket = isTts ? `tts:${ip}` : isPhoto ? `photo:${ip}` : ip;
+    if (rateLimited(bucket, limit)) return json({ ok: false, error: '请求太频繁，休息一下再问吧', code: 'RATE_LIMITED' }, 429);
 
     let body;
     try {
       const raw = await request.text();
-      if (raw.length > 8000) return json({ ok: false, error: '请求太大', code: 'TOO_LARGE' }, 413);
+      // 只有识别照片的接口允许大请求体
+      const maxBody = url.pathname === '/api/photo/analyze' ? PHOTO_MAX_CHARS + 20000 : 8000;
+      if (raw.length > maxBody) return json({ ok: false, error: '请求太大', code: 'TOO_LARGE' }, 413);
       body = JSON.parse(raw || '{}');
     } catch {
       return json({ ok: false, error: '请求格式错误', code: 'BAD_JSON' }, 400);
@@ -333,6 +518,15 @@ export default {
       if (e instanceof BadRequest) return json({ ok: false, error: e.message, code: 'BAD_REQUEST' }, 400);
       if (e instanceof LLMNotConfigured) return json({ ok: false, error: 'AI 服务未配置', code: 'LLM_NOT_CONFIGURED' }, 501);
       if (e instanceof TTSNotConfigured) return json({ ok: false, error: '语音合成未配置', code: 'TTS_NOT_CONFIGURED' }, 501);
+      if (e instanceof PhotoNotConfigured) return json({ ok: false, error: '照片识别未配置', code: 'PHOTO_NOT_CONFIGURED' }, 501);
+      if (url.pathname === '/api/photo/analyze') {
+        // 日志不记录照片和识别内容，只记录状态
+        console.log(JSON.stringify({ route: url.pathname, ms: Date.now() - started, ok: false, status: e.status ?? 500 }));
+        return json({ ok: false, error: '照片识别暂时不可用', code: 'PHOTO_ERROR', upstream: { status: e.status ?? 500, detail: e.detail ?? e.message } }, 502);
+      }
+      if (e.genInvalid) {
+        return json({ ok: false, error: e.detail, code: 'PHOTO_GEN_INVALID' }, 502);
+      }
       if (url.pathname === '/api/tts') {
         console.log(JSON.stringify({ route: url.pathname, ms: Date.now() - started, ok: false, status: e.status ?? 500, detail: e.detail }));
         // 把百炼返回的错误原因（错误码和说明，不含密钥）带回去，方便家长或开发者排查

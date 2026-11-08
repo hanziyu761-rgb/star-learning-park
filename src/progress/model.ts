@@ -19,8 +19,39 @@ import { dayKey, isGraduated, newSrs, reviewSrs, type SrsState } from './srs';
  * v6 — 新增英语单词卡生词本 wordbook（V2.18）
  * v7 — 新增游戏乐园记录 games；练习结果来源增加 game（V2.19）
  * v8 — 全 APP 统一童声（voiceGender 固定为 child）；新增开机动画开关 splash（V2.21）
+ * v9 — 新增家长“拍照错题” photoMistakes（V4.1）：只存识别出的文字和同类题，不存照片
  */
-export const PROGRESS_VERSION = 8;
+export const PROGRESS_VERSION = 9;
+
+/** AI 出的同类选择题（语文、英语）：标注“AI 生成，未经人工审核”，只在家长中心显示 */
+export interface PhotoAiItem {
+  question: string;
+  options: string[];
+  answer: string;
+  explain: string;
+}
+
+/** 家长拍照录入的一道错题（V4.1） */
+export interface PhotoMistake {
+  id: string;
+  at: number;
+  subject: Subject;
+  grade: number;
+  /** 家长确认的知识点（可为空：AI 和家长都没选出合适的） */
+  kpId: string;
+  kpName: string;
+  /** 家长确认（可修改）后的题目文字 */
+  question: string;
+  childAnswer: string;
+  correctAnswer: string;
+  /** AI 对错因的分析（家长可修改） */
+  reason: string;
+  /** 数学：原创出题程序出的同类题 id（kp:知识点:签名，可还原题目，答案由程序计算） */
+  exerciseIds: string[];
+  /** 语文、英语：AI 出的同类题 */
+  aiItems: PhotoAiItem[];
+}
+export const MAX_PHOTO_MISTAKES = 200;
 
 /** 答对后孩子选的解题思路（没有对错之分） */
 export interface StrategyRecord {
@@ -170,6 +201,8 @@ export interface ProgressState {
   wordbook: WordbookEntry[];
   /** 游戏乐园每局记录（v7）：用来算每天玩了多久、难度跟着孩子走 */
   games: GameRecord[];
+  /** 家长拍照录入的错题（v9），新的在后 */
+  photoMistakes: PhotoMistake[];
 }
 
 export type GameId = 'kitchen' | 'fish' | 'bubble';
@@ -229,6 +262,7 @@ export function createEmptyProgress(): ProgressState {
     challenges: [],
     wordbook: [],
     games: [],
+    photoMistakes: [],
   };
 }
 
@@ -265,6 +299,8 @@ export type ProgressAction =
   /** 生词本：收藏（红心）、移除、听写结果（拼对连续 3 次移出；拼错自动加入并清零） */
   /** 玩完一局游戏：保存记录，奖励这局得到的星星 */
   | { type: 'game/complete'; record: GameRecord }
+  | { type: 'photo/add'; entry: PhotoMistake }
+  | { type: 'photo/remove'; id: string }
   | { type: 'wordbook/add'; w: string; now: number }
   | { type: 'wordbook/remove'; w: string }
   | { type: 'wordbook/dictation'; w: string; correct: boolean; now: number }
@@ -432,6 +468,12 @@ export function progressReducer(state: ProgressState, action: ProgressAction): P
       const games = [...state.games, r];
       return { ...state, totalStars: state.totalStars + r.stars, games: games.length > MAX_GAMES ? games.slice(-MAX_GAMES) : games };
     }
+    case 'photo/add': {
+      const list = [...state.photoMistakes.filter((m) => m.id !== action.entry.id), action.entry];
+      return { ...state, photoMistakes: list.length > MAX_PHOTO_MISTAKES ? list.slice(-MAX_PHOTO_MISTAKES) : list };
+    }
+    case 'photo/remove':
+      return { ...state, photoMistakes: state.photoMistakes.filter((m) => m.id !== action.id) };
     case 'wordbook/add':
       return state.wordbook.some((e) => e.w === action.w)
         ? state
@@ -574,6 +616,15 @@ export function migrateProgress(data: ProgressState, now: number = Date.now()): 
       ? data.wordbook.filter((e) => e && typeof e.w === 'string').map((e) => ({ w: e.w, streak: Number(e.streak) || 0, addedAt: Number(e.addedAt) || 0 }))
       : [],
     games: Array.isArray(data.games) ? data.games.filter((g) => g && typeof g.game === 'string') : [],
+    photoMistakes: Array.isArray(data.photoMistakes)
+      ? data.photoMistakes
+          .filter((m) => m && typeof m.id === 'string' && typeof m.question === 'string')
+          .map((m) => ({
+            ...m,
+            exerciseIds: Array.isArray(m.exerciseIds) ? m.exerciseIds.filter((x) => typeof x === 'string') : [],
+            aiItems: Array.isArray(m.aiItems) ? m.aiItems.filter((x) => x && Array.isArray(x.options)) : [],
+          }))
+      : [],
     version: PROGRESS_VERSION,
   };
 }

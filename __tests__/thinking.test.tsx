@@ -55,7 +55,7 @@ describe('学习记录 v5', () => {
     delete v4.strategies;
     delete v4.challenges;
     const s = parseProgress(JSON.stringify(v4))!;
-    expect(s.version).toBe(8); // V2.21 起为 v8（统一童声、开机动画开关）
+    expect(s.version).toBe(9); // V2.21 为 v8（统一童声、开机动画开关），V4.1 起为 v9（拍照错题）
     expect(s.totalStars).toBe(7);
     expect(s.strategies).toEqual([]);
     expect(s.challenges).toEqual([]);

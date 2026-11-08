@@ -19,6 +19,7 @@ import KnowledgeMapScreen from '@/screens/KnowledgeMapScreen';
 import DiagnoseScreen from '@/screens/DiagnoseScreen';
 import SubjectScreen from '@/screens/SubjectScreen';
 import ExamScreen from '@/screens/ExamScreen';
+import PhotoMistakeScreen from '@/screens/PhotoMistakeScreen';
 import ChallengeScreen from '@/screens/ChallengeScreen';
 import WordCardsScreen from '@/screens/WordCardsScreen';
 import GamesScreen from '@/screens/GamesScreen';
@@ -54,6 +55,8 @@ function renderRoute(route: Route) {
       return <DiagnoseScreen kp={route.kp} />;
     case 'exam':
       return <ExamScreen />;
+    case 'photo':
+      return <PhotoMistakeScreen />;
     case 'challenge':
       return <ChallengeScreen />;
     case 'words':

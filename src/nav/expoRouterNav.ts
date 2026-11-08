@@ -28,6 +28,8 @@ function toHref(route: Route) {
       return '/teacher' as const;
     case 'exam':
       return '/exam' as const;
+    case 'photo':
+      return '/photo' as const;
     case 'challenge':
       return '/challenge' as const;
     case 'words':

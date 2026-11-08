@@ -32,7 +32,15 @@
     "scheme": "starlearningpark",
     "plugins": [
       "expo-router",
-      "./plugins/with-offline-asr.js"
+      "./plugins/with-offline-asr.js",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "家长中心“拍照错题”需要从相册选择错题照片。",
+          "cameraPermission": "家长中心“拍照错题”需要用相机拍下孩子的错题。",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

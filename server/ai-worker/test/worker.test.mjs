@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'node:test';
-import worker, { _resetRateLimit, _resetTtsCache, cleanOutput, DISTRESS_REPLY, FALLBACK_REPLY, scrubPersonalInfo } from '../src/worker.js';
+import worker, { _resetRateLimit, extractJson, _resetTtsCache, cleanOutput, DISTRESS_REPLY, FALLBACK_REPLY, scrubPersonalInfo } from '../src/worker.js';
 
 /** 模拟 DeepSeek：记录请求，返回指定内容 */
 function mockEnv(reply, { status = 200 } = {}) {
@@ -29,7 +29,7 @@ beforeEach(() => {
 describe('健康检查与配置', () => {
   it('未配置密钥时 health 显示 llm=false，业务接口返回 501', async () => {
     const h = await (await worker.fetch(new Request('http://x/api/health'), {})).json();
-    assert.deepEqual(h, { ok: true, llm: false, model: 'deepseek-flash', tts: false });
+    assert.deepEqual(h, { ok: true, llm: false, model: 'deepseek-flash', tts: false, photo: false, vlModel: 'qwen3-vl-plus' });
     const r = await post('/api/tutor/chat', { messages: [{ role: 'user', content: '你好' }] }, {});
     assert.equal(r.status, 501);
     assert.equal((await r.json()).code, 'LLM_NOT_CONFIGURED');
@@ -212,5 +212,135 @@ describe('语音合成返回 http 地址', () => {
     // 同一个 IP 提问不受影响
     const chat = mockEnv('好的');
     assert.equal((await post('/api/tutor/hint', { subject: 'math', grade: 1, question: '1+1', wrong: '3' }, chat.env, h)).status, 200);
+  });
+});
+
+// ---------------- 拍照错题（V4.1） ----------------
+
+const IMG = 'data:image/jpeg;base64,' + 'A'.repeat(4000) + '==';
+
+/** 模拟百炼视觉模型：记录请求，返回指定内容 */
+function vlEnv(reply, { status = 200 } = {}) {
+  const calls = [];
+  return {
+    calls,
+    env: {
+      DASHSCOPE_API_KEY: 'test-ds',
+      __fetch: async (url, init) => {
+        calls.push({ url, body: JSON.parse(init.body), auth: init.headers.Authorization });
+        if (status !== 200) return new Response('{"code":"AccessDenied","message":"Model access denied."}', { status });
+        return new Response(JSON.stringify({ choices: [{ message: { content: reply } }] }), { status: 200 });
+      },
+    },
+  };
+}
+
+describe('拍照错题：识别', () => {
+  const cands = [{ id: 'm1-add10', name: '10以内加法' }, { id: 'm1-sub10', name: '10以内减法' }];
+
+  it('未配置百炼密钥时返回 501 PHOTO_NOT_CONFIGURED', async () => {
+    const r = await post('/api/photo/analyze', { image: IMG }, {});
+    assert.equal(r.status, 501);
+    assert.equal((await r.json()).code, 'PHOTO_NOT_CONFIGURED');
+  });
+
+  it('按 OpenAI 兼容格式把照片发给视觉模型，并只接受候选中的知识点', async () => {
+    const reply = '```json\n{"subject":"math","question":"7-3=","childAnswer":"5","correctAnswer":"4","kpId":"m1-sub10","reason":"退位没想清楚"}\n```';
+    const { env, calls } = vlEnv(reply);
+    const r = await post('/api/photo/analyze', { image: IMG, grade: 1, subject: 'math', candidates: cands }, env);
+    assert.equal(r.status, 200);
+    const d = await r.json();
+    assert.equal(d.question, '7-3=');
+    assert.equal(d.childAnswer, '5');
+    assert.equal(d.kpId, 'm1-sub10');
+    assert.equal(calls[0].url, 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions');
+    assert.equal(calls[0].body.model, 'qwen3-vl-plus');
+    assert.equal(calls[0].auth, 'Bearer test-ds');
+    const content = calls[0].body.messages[1].content;
+    assert.equal(content[0].type, 'image_url');
+    assert.equal(content[0].image_url.url, IMG);
+    assert.match(content[1].text, /m1-sub10=10以内减法/);
+  });
+
+  it('模型给出候选以外的知识点时 kpId 为空；文字里的手机号被隐藏', async () => {
+    const { env } = vlEnv('{"subject":"math","question":"小明13812345678 算 2+3","kpId":"made-up"}');
+    const d = await (await post('/api/photo/analyze', { image: IMG, candidates: cands }, env)).json();
+    assert.equal(d.kpId, '');
+    assert.ok(!d.question.includes('13812345678'));
+  });
+
+  it('照片格式不对或太大时返回 400/413，不调用模型', async () => {
+    const { env, calls } = vlEnv('{}');
+    assert.equal((await post('/api/photo/analyze', { image: 'http://x/a.jpg' }, env)).status, 400);
+    assert.equal((await post('/api/photo/analyze', { image: 'data:image/jpeg;base64,' + 'A'.repeat(1_900_000) }, env)).status, 413);
+    assert.equal(calls.length, 0);
+  });
+
+  it('其他接口仍然限制 8000 字节', async () => {
+    const { env } = mockEnv('x');
+    const r = await post('/api/tutor/chat', { messages: [{ role: 'user', content: 'a'.repeat(9000) }] }, env);
+    assert.equal(r.status, 413);
+  });
+
+  it('百炼拒绝（例如没开通模型）时返回 502 并带回错误原因，不含密钥', async () => {
+    const { env } = vlEnv('', { status: 403 });
+    const r = await post('/api/photo/analyze', { image: IMG }, env);
+    assert.equal(r.status, 502);
+    const d = await r.json();
+    assert.equal(d.code, 'PHOTO_ERROR');
+    assert.equal(d.upstream.status, 403);
+    assert.match(d.upstream.detail, /AccessDenied/);
+    assert.ok(!JSON.stringify(d).includes('test-ds'));
+  });
+
+  it('识别结果不是 JSON 时返回 502', async () => {
+    const { env } = vlEnv('看不清楚');
+    assert.equal((await post('/api/photo/analyze', { image: IMG }, env)).status, 502);
+  });
+
+  it('拍照接口单独限流（默认每分钟 6 次）', async () => {
+    const { env } = vlEnv('{"subject":"math","question":"1+1="}');
+    for (let i = 0; i < 6; i++) assert.equal((await post('/api/photo/analyze', { image: IMG }, env)).status, 200);
+    assert.equal((await post('/api/photo/analyze', { image: IMG }, env)).status, 429);
+    // 普通接口不受影响
+    const { env: e2 } = mockEnv('好的');
+    assert.equal((await post('/api/tutor/chat', { messages: [{ role: 'user', content: '你好' }] }, e2)).status, 200);
+  });
+});
+
+describe('拍照错题：语文、英语出同类题', () => {
+  it('只保留结构正确的题，并标明 AI 生成、未审核', async () => {
+    const reply = JSON.stringify([
+      { question: 'What colour is the sky?', options: ['blue', 'red', 'green'], answer: 'blue', explain: '天空是蓝色的' },
+      { question: '答案不在选项里', options: ['a', 'b', 'c'], answer: 'd' },
+      { question: '选项重复', options: ['a', 'a', 'b'], answer: 'a' },
+      { question: 'I ___ a pupil.', options: ['am', 'is', 'are'], answer: 'am' },
+    ]);
+    const { env, calls } = mockEnv(reply);
+    const r = await post('/api/photo/similar', { subject: 'english', grade: 3, question: 'What colour is it?', knowledgePoint: '颜色', count: 5 }, env);
+    assert.equal(r.status, 200);
+    const d = await r.json();
+    assert.equal(d.items.length, 2);
+    assert.equal(d.items[1].question, 'I ___ a pupil.'); // 填空横线保留
+    assert.equal(d.generatedBy, 'ai');
+    assert.equal(d.reviewed, false);
+    assert.match(calls[0].body.messages[0].content, /出 5 道/);
+  });
+
+  it('数学不走 AI 出题（由 APP 原创出题程序出），返回 400', async () => {
+    const { env } = mockEnv('[]');
+    assert.equal((await post('/api/photo/similar', { subject: 'math', question: '1+1' }, env)).status, 400);
+  });
+
+  it('一道合格的题都没有时返回 502 PHOTO_GEN_INVALID', async () => {
+    const { env } = mockEnv('不会出');
+    const r = await post('/api/photo/similar', { subject: 'chinese', question: '“日”字有几画？' }, env);
+    assert.equal(r.status, 502);
+    assert.equal((await r.json()).code, 'PHOTO_GEN_INVALID');
+  });
+
+  it('extractJson 能从带说明的回复中取出 JSON', () => {
+    assert.deepEqual(extractJson('好的：\n```json\n[{"a":1}]\n```'), [{ a: 1 }]);
+    assert.equal(extractJson('没有'), null);
   });
 });

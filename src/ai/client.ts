@@ -10,12 +10,15 @@ export type AiErrorCode =
   | 'NETWORK' // 网络不通或超时
   | 'RATE_LIMITED'
   | 'LLM_NOT_CONFIGURED' // 服务端没有配置 DeepSeek 密钥
+  | 'PHOTO_NOT_CONFIGURED' // 服务端没有配置阿里云百炼密钥（拍照错题）
   | 'SERVER';
 
 export class AiError extends Error {
   constructor(
     public code: AiErrorCode,
     message: string,
+    /** 服务端带回的原因（例如百炼返回的错误码），给家长或开发者排查用，不含密钥 */
+    public detail?: string,
   ) {
     super(message);
   }
@@ -30,6 +33,7 @@ export const AI_ERROR_TEXT: Record<AiErrorCode, string> = {
   NETWORK: '星星宝老师连不上网络，等一会儿再试试吧。',
   RATE_LIMITED: '问得太快啦，休息一下再问吧。',
   LLM_NOT_CONFIGURED: 'AI 老师还没准备好（服务端未配置），请爸爸妈妈检查设置。',
+  PHOTO_NOT_CONFIGURED: '照片识别还没准备好：AI 服务上还没有配置阿里云百炼密钥。',
   SERVER: '星星宝老师暂时休息了，等一会儿再试试吧。',
 };
 
@@ -66,12 +70,16 @@ async function call<T>(cfg: AiConfig, path: string, body?: unknown, timeoutMs = 
   if (!res.ok || !data.ok) {
     if (data.code === 'RATE_LIMITED') throw new AiError('RATE_LIMITED', AI_ERROR_TEXT.RATE_LIMITED);
     if (data.code === 'LLM_NOT_CONFIGURED') throw new AiError('LLM_NOT_CONFIGURED', AI_ERROR_TEXT.LLM_NOT_CONFIGURED);
-    throw new AiError('SERVER', AI_ERROR_TEXT.SERVER);
+    if (data.code === 'PHOTO_NOT_CONFIGURED') throw new AiError('PHOTO_NOT_CONFIGURED', AI_ERROR_TEXT.PHOTO_NOT_CONFIGURED);
+    if (data.code === 'PHOTO_GEN_INVALID' || data.code === 'TOO_LARGE' || data.code === 'BAD_REQUEST')
+      throw new AiError('SERVER', typeof data.error === 'string' ? data.error : AI_ERROR_TEXT.SERVER);
+    const up = data.upstream as { status?: number; detail?: string } | undefined;
+    throw new AiError('SERVER', AI_ERROR_TEXT.SERVER, up ? `${up.status ?? ''} ${up.detail ?? ''}`.trim() : undefined);
   }
   return data as T;
 }
 
-export async function aiHealth(cfg: AiConfig): Promise<{ llm: boolean; model: string; tts?: boolean }> {
+export async function aiHealth(cfg: AiConfig): Promise<{ llm: boolean; model: string; tts?: boolean; photo?: boolean; vlModel?: string }> {
   return call(cfg, '/api/health', undefined, 8000);
 }
 
@@ -118,4 +126,39 @@ export async function aiTts(cfg: AiConfig, text: string, voice: string, rate: 's
   const { url } = await call<{ url: string }>(cfg, '/api/tts', { text: text.slice(0, 300), voice, rate }, 15000);
   ttsCache.set(key, { url, until: Date.now() + 23 * 3600 * 1000 });
   return url;
+}
+
+// ---------------- 拍照错题（V4.1） ----------------
+
+export interface PhotoAnalysis {
+  subject: 'math' | 'chinese' | 'english';
+  question: string;
+  childAnswer: string;
+  correctAnswer: string;
+  /** 候选知识点中的一个，或空 */
+  kpId: string;
+  reason: string;
+}
+
+/** 把压缩后的错题照片（data:image/jpeg;base64,…）交给自家 AI 服务识别；照片不在服务端保存 */
+export async function aiPhotoAnalyze(
+  cfg: AiConfig,
+  req: { image: string; grade: number; subject?: Subject; candidates: { id: string; name: string }[] },
+): Promise<PhotoAnalysis> {
+  return call<PhotoAnalysis>(cfg, '/api/photo/analyze', req, 60000);
+}
+
+export interface PhotoSimilarItem {
+  question: string;
+  options: string[];
+  answer: string;
+  explain: string;
+}
+
+/** 语文、英语：请 AI 出同类选择题（数学由 APP 原创出题程序出） */
+export async function aiPhotoSimilar(
+  cfg: AiConfig,
+  req: { subject: 'chinese' | 'english'; grade: number; question: string; knowledgePoint?: string; count: number },
+): Promise<PhotoSimilarItem[]> {
+  return (await call<{ items: PhotoSimilarItem[] }>(cfg, '/api/photo/similar', req, 45000)).items;
 }

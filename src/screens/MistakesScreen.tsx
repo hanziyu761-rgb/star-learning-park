@@ -101,6 +101,13 @@ export default function MistakesScreen({ subject }: { subject: Subject }) {
         <Switch value={withAnswers} onValueChange={setWithAnswers} testID="mistakes-with-answers" />
       </View>
       {error ? <Notice text={error} /> : null}
+      {state.photoMistakes.some((m) => m.subject === subject) ? (
+        <Pressable onPress={() => nav.push({ name: 'photo' })} accessibilityRole="button" testID="mistakes-photo-link">
+          <Text style={styles.small}>
+            📷 家长拍照录入的{SUBJECT_CN[subject]}错题 {state.photoMistakes.filter((m) => m.subject === subject).length} 道（在家长中心“拍照错题”里查看，需要家长验证）
+          </Text>
+        </Pressable>
+      ) : null}
 
       <View style={styles.tabs}>
         {(['open', 'mastered'] as const).map((t) => (

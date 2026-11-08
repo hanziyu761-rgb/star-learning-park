@@ -112,7 +112,7 @@ describe('V2.21 设置迁移', () => {
     const p = parseProgress(JSON.stringify({ ...old, version: 7, settings }));
     expect(p?.settings.voiceGender).toBe('child');
     expect(p?.settings.splash).toBe(true);
-    expect(p?.version).toBe(8);
+    expect(p?.version).toBe(9); // V4.1 起为 v9（新增拍照错题）
   });
 });
 
