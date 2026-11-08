@@ -175,7 +175,17 @@ export const EDITIONS: Edition[] = [
     aliases: ['外研社版', '新标准英语'],
     publisher: '外语教学与研究出版社',
     priority: 1,
-    ...pending('第五批核实（注意有一年级起点、三年级起点两套）。'),
+    status: 'unknown',
+    statusNote: '本条目指国家中小学智慧教育平台上的“外研社版（主编：孙有中）”三年级起点修订版（外语教学与研究出版社）。第五批已核对平台列出的 7 册：三～五年级上下册、六年级上册；六年级下册平台尚未列出。平台另有“外研社版（主编：刘兆义）”“外研社版（主编：张祖春）”两套，尚未核实。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 外研社版（主编：孙有中）小学英语电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: '2026-11-08',
+        note: '在 APP 所有者已登录的浏览器里逐册打开 Contents 页查看并录入；教材详情页显示出版社“外语教学与研究出版社”。',
+      },
+    ],
   },
   {
     id: 'english.yilin',

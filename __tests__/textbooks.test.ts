@@ -8,6 +8,7 @@ import { EDITIONS } from '@/textbooks/editions';
 import { parseToc } from '@/textbooks/data/mathJijiao';
 import { parseBeijingToc } from '@/textbooks/data/mathBeijing';
 import { parsePepToc } from '@/textbooks/data/englishPep';
+import { parseFltrpToc } from '@/textbooks/data/englishFltrp';
 import { allVolumes, completeness, isComplete, summary, validateAll, validateVolume, volumesFor } from '@/textbooks/registry';
 import type { Volume } from '@/textbooks/types';
 
@@ -198,13 +199,31 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(86);
+  expect(s.volumes).toBe(93);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(80);
-  expect(s.verifiedUnits).toBe(813);
-  expect(s.lessons.verified).toBe(744);
+  expect(s.verifiedVolumes).toBe(87);
+  expect(s.verifiedUnits).toBe(863);
+  expect(s.lessons.verified).toBe(782);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
+});
+
+describe('第五批：外研社版英语（主编：孙有中）', () => {
+  const vols = volumesFor({ editionId: 'english.fltrp' }).filter((v) => !v.id.startsWith('bank.'));
+  it('平台列出的 7 册全部核对；六年级下册平台没有，不登记', () => {
+    expect(vols.map((v) => `${v.grade}${v.term}`)).toEqual(['3上', '3下', '4上', '4下', '5上', '5下', '6上']);
+    for (const v of vols) {
+      expect(v.revision).toBe(2024);
+      expect(v.sources[0].title).toMatch(/外语教学与研究出版社/);
+      expect(v.bankBookId).toBeUndefined();
+      expect(v.units.at(-1)!.title).toBe('Appendices');
+    }
+    expect(vols.reduce((n, v) => n + v.units.length, 0)).toBe(50);
+    expect(vols[0].units.slice(0, 2).map((u) => `${u.title}@${u.page}`)).toEqual(['Welcome to school@2', "Unit 1 Let's be friends!@6"]);
+    expect(vols[6].units[0].title).toBe('Unit 1 What do you do with money?');
+    expect(vols[6].units.at(-1)!.lessons.map((l) => l.page)).toEqual([76, 88, 96, 99, 103, 104]);
+    expect(() => parseFltrpToc('x', 'Module 1 Hello 2')).toThrow(/格式不对/);
+  });
 });
 
 describe('第五批：人教版英语（PEP）', () => {
