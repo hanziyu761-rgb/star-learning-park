@@ -11,6 +11,8 @@ android {
   defaultConfig {
     versionCode 1
     versionName "1.0.0"
+    // 发布版混淆时保留 sherpa-onnx 的类名和字段名（见 proguard-rules.pro）
+    consumerProguardFiles 'proguard-rules.pro'
   }
   // 模型文件已经压缩过，打包时不要再压缩（加载更快）
   androidResources {
