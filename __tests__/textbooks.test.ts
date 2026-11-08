@@ -7,6 +7,7 @@ import { BANK_INDEX } from '@/content/bank';
 import { EDITIONS } from '@/textbooks/editions';
 import { parseToc } from '@/textbooks/data/mathJijiao';
 import { parseBeijingToc } from '@/textbooks/data/mathBeijing';
+import { parsePlatformToc } from '@/textbooks/data/platformToc';
 import { parsePepToc } from '@/textbooks/data/englishPep';
 import { parseFltrpToc } from '@/textbooks/data/englishFltrp';
 import { allVolumes, completeness, isComplete, summary, validateAll, validateVolume, volumesFor } from '@/textbooks/registry';
@@ -199,10 +200,10 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(93);
+  expect(s.volumes).toBe(117);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(87);
-  expect(s.verifiedUnits).toBe(863);
+  expect(s.verifiedVolumes).toBe(111);
+  expect(s.verifiedUnits).toBe(1142);
   expect(s.lessons.verified).toBe(782);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
@@ -476,5 +477,34 @@ describe('第二批：人教版数学修订版', () => {
       ['四 万以内的加法和减法', 63], ['数学连环画', 83], ['五 复习与关联', 87],
     ]);
     expect(a.units[3].note).toMatch(/没有单元序号/);
+  });
+});
+
+describe('第四批（补）：青岛版、西师版数学（平台电子课本目录页，2026-11-09）', () => {
+  const qd = volumesFor({ editionId: 'math.qingdao' });
+  const xs = volumesFor({ editionId: 'math.xishi' });
+  it('各 12 册，全部目录已核实；四～六年级下册是未修订版', () => {
+    for (const vs of [qd, xs]) {
+      expect(vs).toHaveLength(12);
+      expect(vs.every((v) => v.tocProvenance === 'verified' && v.units.length >= 8 && v.sources[0].kind === 'official')).toBe(true);
+      expect(vs.filter((v) => v.revision === null).map((v) => `${v.grade}${v.term}`).sort()).toEqual(['4下', '5下', '6下']);
+      expect(vs.every((v) => v.units.every((u, i, a) => i === 0 || (u.page ?? 0) >= (a[i - 1].page ?? 0)))).toBe(true);
+    }
+  });
+  it('抽查：青岛版一年级上册、西师版二年级下册', () => {
+    const g1a = qd.find((v) => v.id === 'math.qingdao.2024.g1a')!;
+    expect(g1a.units.map((u) => [u.title, u.page])).toEqual([
+      ['主题活动——我的幼儿园', 1], ['一 快乐的课堂——1～5数的认识和加减法', 7], ['二 走进花果山——6～10数的认识和加减法', 27],
+      ['三 创意拼搭——认识立体图形', 66], ['智慧广场', 72], ['四 漂亮的粘贴画——11～20各数的认识', 74], ['主题活动——找找身边的数', 85],
+      ['五 我爱读书——20以内的进位加法', 89], ['智慧广场', 102], ['六 我爱冰雪运动——总复习', 104],
+    ]);
+    expect(g1a.units[4].note).toMatch(/没有单元序号/);
+    const g2b = xs.find((v) => v.id === 'math.xishi.2024.g2b')!;
+    expect(g2b.units.map((u) => u.title)).toContain('数学游戏 抢数游戏');
+    expect(g2b.units.at(-1)).toMatchObject({ title: '第五单元 总复习', page: 93 });
+  });
+  it('目录行格式不对时报错', () => {
+    expect(() => parsePlatformToc('x', '第一单元 没有页码')).toThrow(/格式不对/);
+    expect(() => parsePlatformToc('x', '')).toThrow(/为空/);
   });
 });

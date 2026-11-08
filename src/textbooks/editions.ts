@@ -17,7 +17,7 @@ export const SRC_ROLLOUT: SourceRef = {
 
 const pending = (note: string) => ({ status: 'unknown' as const, statusNote: note, sources: [] as SourceRef[] });
 const NOTE_ZH_OTHER =
-  '待核实：一般认为义务教育语文已全国统一使用统编教材，此版本应为历史版本；停用时间和是否还有地区使用，需官方来源核实后再写。';
+  '国家中小学智慧教育平台“小学 → 语文”下只有统编版（2026-11-09 查看平台版本列表），这一版本没有官方电子课本可核对目录。一般认为义务教育语文已全国统一使用统编教材，此版本应为历史版本；停用时间和是否还有地区使用，需官方来源核实后再写。';
 
 export const EDITIONS: Edition[] = [
   /* ───── 语文 ───── */
@@ -124,8 +124,44 @@ export const EDITIONS: Edition[] = [
       },
     ],
   },
-  { id: 'math.qingdao', subject: 'math', name: '青岛版', aliases: [], publisher: '青岛出版社', priority: 2, ...pending('第四批核实（注意有六三制、五四制两套）。') },
-  { id: 'math.xishi', subject: 'math', name: '西师版', aliases: ['西师大版'], publisher: '西南大学出版社', priority: 2, ...pending('第四批核实。') },
+  {
+    id: 'math.qingdao',
+    subject: 'math',
+    name: '青岛版',
+    aliases: [],
+    publisher: '青岛出版社',
+    priority: 2,
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台提供青岛版小学数学电子课本 12 册（六三学制；平台没有单独列出五四学制）。已核对：一～六年级上册、一～三年级下册修订版；四～六年级下册平台现有为未修订版，另行登记。各地选用情况待核实。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 青岛版小学数学电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: '2026-11-09',
+        note: '在 APP 所有者已登录的浏览器里查看平台电子课本页面，逐册对照目录页录入。',
+      },
+    ],
+  },
+  {
+    id: 'math.xishi',
+    subject: 'math',
+    name: '西师版',
+    aliases: ['西师大版', '西南大学版'],
+    publisher: '西南大学出版社',
+    priority: 2,
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台提供西南大学版（西师版）小学数学电子课本 12 册。已核对：一～六年级上册、一～三年级下册修订版；四～六年级下册平台现有为未修订版，另行登记。各地选用情况待核实。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 西南大学版小学数学电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: '2026-11-09',
+        note: '在 APP 所有者已登录的浏览器里查看平台电子课本页面，逐册对照目录页录入。',
+      },
+    ],
+  },
   {
     id: 'math.beijing',
     subject: 'math',
@@ -145,7 +181,7 @@ export const EDITIONS: Edition[] = [
       },
     ],
   },
-  { id: 'math.hujiao', subject: 'math', name: '沪教版', aliases: [], publisher: '上海教育出版社', priority: 2, ...pending('第四批核实（上海为五四学制）。') },
+  { id: 'math.hujiao', subject: 'math', name: '沪教版', aliases: [], publisher: '上海教育出版社', priority: 2, ...pending('国家中小学智慧教育平台“小学 → 数学”下没有沪教版（2026-11-09 查看平台版本列表），暂时无法按官方电子课本核对；上海为五四学制。') },
 
   /* ───── 英语 ───── */
   {

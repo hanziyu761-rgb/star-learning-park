@@ -55,7 +55,7 @@ with sync_playwright() as p:
         ok(f"{w}×{h}：简单视图下拉选科目、版本、年级、学期正常；未核对版本只提示；英语从三年级起；选过的版本会记住；不超出屏幕")
         # V4.0 详细资料（折叠）
         tid(page, "tb-details-toggle").click()
-        expect(tid(page, "textbooks-summary")).to_contain_text("教材册次 93 册（目录已核实 87 册）")
+        expect(tid(page, "textbooks-summary")).to_contain_text("教材册次 117 册（目录已核实 111 册）")
         expect(tid(page, "tb-toc-chinese.tongbian.2024.g6b")).to_have_text("目录未录入")
         expect(tid(page, "tb-toc-chinese.tongbian.2024.g1a")).to_have_text("目录已核实")
         tid(page, "tb-open-chinese.tongbian.2024.g1b").click()
@@ -82,7 +82,7 @@ with sync_playwright() as p:
         expect(tid(page, "tb-edition-english.yilin")).to_contain_text("现行")
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
         page.screenshot(path=f"{OUT}/v40-textbooks-en-{w}.png", full_page=True)
-        ok(f"{w}×{h}：教材资源库按真实数据显示（93 册中 87 册已核实、一年级目录可展开；题库旧版待核实；筛选年级、切换学科正常）")
+        ok(f"{w}×{h}：教材资源库按真实数据显示（117 册中 111 册已核实、一年级目录可展开；题库旧版待核实；筛选年级、切换学科正常）")
         page.close()
     print({"errors": errors, "pass": len(RESULTS)})
     assert not errors
