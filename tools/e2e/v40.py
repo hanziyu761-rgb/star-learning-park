@@ -38,7 +38,7 @@ with sync_playwright() as p:
         tid(page, "tb-dd-term").click(); tid(page, "tb-dd-term-opt-上").click()
         expect(tid(page, "tb-book-title")).to_have_text("北师大版 · 二年级上册")
         assert page.locator('[data-testid="tb-unit"]').count() >= 5
-        tid(page, "tb-dd-edition").click(); tid(page, "tb-dd-edition-opt-math.qingdao").click()
+        tid(page, "tb-dd-edition").click(); tid(page, "tb-dd-edition-opt-math.hujiao").click()
         expect(tid(page, "tb-not-ready")).to_contain_text("照常能用")
         tid(page, "tb-dd-subject").click(); tid(page, "tb-dd-subject-opt-english").click()
         tid(page, "tb-dd-grade").click()
@@ -47,15 +47,15 @@ with sync_playwright() as p:
         expect(tid(page, "tb-book-title")).to_contain_text("人教PEP版 · 三年级")
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
         page.screenshot(path=f"{OUT}/v41-textbooks-{w}.png", full_page=True)
-        # 选过的版本会记住：数学最后选的是青岛版
+        # 选过的版本会记住：数学最后选的是沪教版（平台没有，目录未核对）
         tid(page, "tb-dd-subject").click(); tid(page, "tb-dd-subject-opt-math").click()
-        expect(tid(page, "tb-book-title")).to_contain_text("青岛版")
+        expect(tid(page, "tb-book-title")).to_contain_text("沪教版")
         tid(page, "tb-dd-edition").click(); tid(page, "tb-dd-edition-opt-math.pep").click()
         tid(page, "tb-dd-subject").click(); tid(page, "tb-dd-subject-opt-chinese").click()
         ok(f"{w}×{h}：简单视图下拉选科目、版本、年级、学期正常；未核对版本只提示；英语从三年级起；选过的版本会记住；不超出屏幕")
         # V4.0 详细资料（折叠）
         tid(page, "tb-details-toggle").click()
-        expect(tid(page, "textbooks-summary")).to_contain_text("教材册次 117 册（目录已核实 111 册）")
+        expect(tid(page, "textbooks-summary")).to_contain_text("教材册次 170 册（目录已核实 164 册）")
         expect(tid(page, "tb-toc-chinese.tongbian.2024.g6b")).to_have_text("目录未录入")
         expect(tid(page, "tb-toc-chinese.tongbian.2024.g1a")).to_have_text("目录已核实")
         tid(page, "tb-open-chinese.tongbian.2024.g1b").click()
@@ -82,7 +82,7 @@ with sync_playwright() as p:
         expect(tid(page, "tb-edition-english.yilin")).to_contain_text("现行")
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
         page.screenshot(path=f"{OUT}/v40-textbooks-en-{w}.png", full_page=True)
-        ok(f"{w}×{h}：教材资源库按真实数据显示（117 册中 111 册已核实、一年级目录可展开；题库旧版待核实；筛选年级、切换学科正常）")
+        ok(f"{w}×{h}：教材资源库按真实数据显示（170 册中 164 册已核实、一年级目录可展开；题库旧版待核实；筛选年级、切换学科正常）")
         page.close()
     print({"errors": errors, "pass": len(RESULTS)})
     assert not errors

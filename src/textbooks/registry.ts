@@ -9,6 +9,13 @@ import { MATH_BSD_2024, MATH_BSD_LEGACY } from './data/mathBsd';
 import { MATH_SUJIAO_2024, MATH_SUJIAO_LEGACY } from './data/mathSujiao';
 import { MATH_JIJIAO_2024, MATH_JIJIAO_LEGACY } from './data/mathJijiao';
 import { MATH_BEIJING_2024, MATH_BEIJING_LEGACY } from './data/mathBeijing';
+import { ENGLISH_BSD } from './data/englishBsd';
+import { ENGLISH_FLTRP_LIU } from './data/englishFltrpLiu';
+import { ENGLISH_FLTRP_ZHANG } from './data/englishFltrpZhang';
+import { ENGLISH_HUJIAO } from './data/englishHujiao';
+import { ENGLISH_JIJIAO } from './data/englishJijiao';
+import { ENGLISH_XIANGSHAO } from './data/englishXiangshao';
+import { ENGLISH_YILIN } from './data/englishYilin';
 import { MATH_QINGDAO } from './data/mathQingdao';
 import { MATH_XISHI } from './data/mathXishi';
 import { ENGLISH_PEP_2024, ENGLISH_PEP_LEGACY } from './data/englishPep';
@@ -22,7 +29,7 @@ import { IMPORTED } from './data/imported';
 
 let cached: Volume[] | null = null;
 export function allVolumes(): Volume[] {
-  cached ??= [...TONGBIAN_2024, ...TONGBIAN_LEGACY, ...MATH_PEP_2024, ...MATH_PEP_LEGACY, ...MATH_BSD_2024, ...MATH_BSD_LEGACY, ...MATH_SUJIAO_2024, ...MATH_SUJIAO_LEGACY, ...MATH_JIJIAO_2024, ...MATH_JIJIAO_LEGACY, ...MATH_BEIJING_2024, ...MATH_BEIJING_LEGACY, ...MATH_QINGDAO, ...MATH_XISHI, ...ENGLISH_PEP_2024, ...ENGLISH_PEP_LEGACY, ...ENGLISH_FLTRP_2024, ...IMPORTED, ...bankVolumes()];
+  cached ??= [...TONGBIAN_2024, ...TONGBIAN_LEGACY, ...MATH_PEP_2024, ...MATH_PEP_LEGACY, ...MATH_BSD_2024, ...MATH_BSD_LEGACY, ...MATH_SUJIAO_2024, ...MATH_SUJIAO_LEGACY, ...MATH_JIJIAO_2024, ...MATH_JIJIAO_LEGACY, ...MATH_BEIJING_2024, ...MATH_BEIJING_LEGACY, ...MATH_QINGDAO, ...MATH_XISHI, ...ENGLISH_PEP_2024, ...ENGLISH_PEP_LEGACY, ...ENGLISH_FLTRP_2024, ...ENGLISH_FLTRP_LIU, ...ENGLISH_FLTRP_ZHANG, ...ENGLISH_YILIN, ...ENGLISH_BSD, ...ENGLISH_HUJIAO, ...ENGLISH_JIJIAO, ...ENGLISH_XIANGSHAO, ...IMPORTED, ...bankVolumes()];
   return cached;
 }
 

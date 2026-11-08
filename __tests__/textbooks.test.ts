@@ -20,9 +20,9 @@ const template = (): Volume => {
 };
 
 describe('版本清单', () => {
-  it('用户需求列出的全部候选版本都已登记（语文 6、数学 8、英语 7）', () => {
+  it('用户需求列出的全部候选版本都已登记（语文 6、数学 8、英语 7 + 平台上另外两套外研社版 = 9）', () => {
     const n = (s: string) => EDITIONS.filter((e) => e.subject === s).length;
-    expect([n('chinese'), n('math'), n('english')]).toEqual([6, 8, 7]);
+    expect([n('chinese'), n('math'), n('english')]).toEqual([6, 8, 9]);
   });
   it('没有来源的版本不写现行 / 历史状态；部编版与统编版不重复登记', () => {
     for (const e of EDITIONS) if (e.status !== 'unknown') expect(e.sources.length).toBeGreaterThan(0);
@@ -200,10 +200,10 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(117);
+  expect(s.volumes).toBe(170);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(111);
-  expect(s.verifiedUnits).toBe(1142);
+  expect(s.verifiedVolumes).toBe(164);
+  expect(s.verifiedUnits).toBe(1833);
   expect(s.lessons.verified).toBe(782);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
@@ -506,5 +506,37 @@ describe('第四批（补）：青岛版、西师版数学（平台电子课本�
   it('目录行格式不对时报错', () => {
     expect(() => parsePlatformToc('x', '第一单元 没有页码')).toThrow(/格式不对/);
     expect(() => parsePlatformToc('x', '')).toThrow(/为空/);
+  });
+});
+
+describe('第五批（补）：译林、北师大、沪教、冀教、湘少、外研社（刘兆义、张祖春）英语（平台电子课本 Contents 页，2026-11-09）', () => {
+  const ids = ['english.yilin', 'english.bsd', 'english.hujiao', 'english.jijiao', 'english.xiangshao', 'english.fltrp-liu'];
+  it('六套各 8 册（五、六年级下册为未修订版）、张祖春主编 5 册，全部目录已核实、来源是官方电子课本', () => {
+    for (const id of ids) {
+      const vs = volumesFor({ editionId: id });
+      expect(vs).toHaveLength(8);
+      expect(vs.filter((v) => v.revision === null).map((v) => `${v.grade}${v.term}`).sort()).toEqual(['5下', '6下']);
+    }
+    const zh = volumesFor({ editionId: 'english.fltrp-zhang' });
+    expect(zh.map((v) => `${v.grade}${v.term}`).sort()).toEqual(['3上', '3下', '4上', '4下', '5上']);
+    for (const v of [...ids.flatMap((id) => volumesFor({ editionId: id })), ...zh]) {
+      expect(v.tocProvenance).toBe('verified');
+      expect(v.sources[0].kind).toBe('official');
+      expect(v.units.filter((u) => u.title.startsWith('Unit ')).length).toBeGreaterThanOrEqual(4);
+      expect(v.units.every((u, i, a) => i === 0 || (u.page ?? 0) >= (a[i - 1].page ?? 0))).toBe(true);
+    }
+  });
+  it('抽查：译林三年级上册、北师大六年级下册（未修订版）', () => {
+    const y = volumesFor({ editionId: 'english.yilin' }).find((v) => v.grade === 3 && v.term === '上')!;
+    expect(y.units.slice(0, 5).map((u) => [u.title, u.page])).toEqual([
+      ['Unit 1 Hello!', 9], ['Unit 2 What\'s your name?', 17], ['Unit 3 Are you Su Hai?', 25], ['Unit 4 This is my friend', 33], ['Project 1 Making friends', 40],
+    ]);
+    const b = volumesFor({ editionId: 'english.bsd' }).find((v) => v.grade === 6 && v.term === '下')!;
+    expect(b.revision).toBeNull();
+    expect(b.units[0]).toMatchObject({ title: 'Unit 7 Vacation', page: 3 });
+  });
+  it('不同主编的外研社版分开登记，不混在一起', () => {
+    const names = EDITIONS.filter((e) => e.id.startsWith('english.fltrp')).map((e) => e.id).sort();
+    expect(names).toEqual(['english.fltrp', 'english.fltrp-liu', 'english.fltrp-zhang']);
   });
 });
