@@ -11,9 +11,8 @@ export type PickResult = { ok: true; dataUrl: string } | { ok: false; reason: 'c
 
 export async function pickPhoto(from: 'camera' | 'library'): Promise<PickResult> {
   try {
-    const perm =
-      from === 'camera' ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) return { ok: false, reason: 'denied' };
+    // 只有拍照要申请相机权限；从相册选用系统照片选择器，不需要读取存储权限（APP 也屏蔽了这个权限）
+    if (from === 'camera' && !(await ImagePicker.requestCameraPermissionsAsync()).granted) return { ok: false, reason: 'denied' };
     const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: true, quality: 1 };
     const res = from === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);
     if (res.canceled || !res.assets?.[0]) return { ok: false, reason: 'cancel' };
