@@ -113,6 +113,8 @@ export interface Settings {
   aiCloudVoice: boolean;
   /** 打开 APP 时播放开机动画（V2.21，默认开启） */
   splash: boolean;
+  /** 教材资源库里家长选的教材版本（V4.1，空 = 自动选第一套已核实目录的版本） */
+  textbookEdition: { chinese: string; math: string; english: string };
 }
 
 export interface ExerciseResult {
@@ -255,6 +257,7 @@ export function createEmptyProgress(): ProgressState {
       gameMinutes: 15,
       aiCloudVoice: true,
       splash: true,
+      textbookEdition: { chinese: '', math: '', english: '' },
     },
     hidden: [],
     diagnoses: [],
@@ -607,7 +610,15 @@ export function migrateProgress(data: ProgressState, now: number = Date.now()): 
     mistakes,
     reviews: Array.isArray(data.reviews) ? data.reviews : [],
     // v8：只保留童声，旧记录里的女声 / 男声一律改为童声
-    settings: { ...createEmptyProgress().settings, ...(data.settings ?? {}), voiceGender: 'child' },
+    settings: {
+      ...createEmptyProgress().settings,
+      ...(data.settings ?? {}),
+      voiceGender: 'child',
+      textbookEdition: {
+        ...createEmptyProgress().settings.textbookEdition,
+        ...(data.settings?.textbookEdition && typeof data.settings.textbookEdition === 'object' ? data.settings.textbookEdition : {}),
+      },
+    },
     hidden: Array.isArray(data.hidden) ? data.hidden : [],
     diagnoses: Array.isArray(data.diagnoses) ? data.diagnoses : [],
     strategies: Array.isArray(data.strategies) ? data.strategies : [],
