@@ -25,15 +25,17 @@ export function usePinyinOn(): boolean {
 export function Txt({ children, pinyin }: { children: string; pinyin?: boolean }) {
   const auto = usePinyinOn();
   const on = pinyin ?? auto;
-  const [fn, setFn] = useState<PinyinFn | null>(pinyinFn);
+  // Wrapped in an object: React would treat a bare function as a state updater.
+  const [holder, setHolder] = useState<{ fn: PinyinFn } | null>(() => (pinyinFn ? { fn: pinyinFn } : null));
+  const fn = holder?.fn ?? null;
   useEffect(() => {
-    if (on && !fn) void loadPinyin().then(setFn).catch(() => undefined);
+    if (on && !fn) void loadPinyin().then((f) => setHolder({ fn: f })).catch(() => undefined);
   }, [on, fn]);
   if (!on || !fn) return <>{children}</>;
   return (
     <span className="py">
       {fn(children).map((c, i) => c.isZh && c.pinyin
-        ? <ruby key={i}>{c.origin}<rt>{c.pinyin}</rt></ruby>
+        ? <ruby key={i}>{c.origin}<rt aria-hidden="true">{c.pinyin}</rt></ruby>
         : <Fragment key={i}>{c.origin}</Fragment>)}
     </span>
   );

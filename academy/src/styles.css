@@ -40,7 +40,9 @@ p { line-height: 1.75; }
 
 /* Pinyin above characters */
 ruby { ruby-position: over; }
-rt { font-size: .5em; color: var(--muted); font-weight: 400; letter-spacing: 0; }
+rt { font-size: max(.52em, 11px); color: var(--muted); font-weight: 400; letter-spacing: 0; }
+.lower .card-item, .lower .option { font-size: 18px; }
+.lower .card-item { min-height: 110px; }
 .lower .content { font-size: 19px; }
 .lower p, .lower li { line-height: 2.1; }
 
