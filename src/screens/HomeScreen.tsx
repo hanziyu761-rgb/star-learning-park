@@ -152,7 +152,8 @@ export default function HomeScreen() {
         <View style={{ flex: 1 }}>
           <DisplayTextView
             text={zh('我的知识小地图', 'wǒ de zhī shi xiǎo dì tú')}
-            size={22}
+            size={20}
+            nowrap
             color={subjectTheme.math.color}
           />
           <Text style={styles.continueSub}>数学 · 看看学会了哪些本领</Text>
@@ -249,7 +250,7 @@ export default function HomeScreen() {
           >
             <Text style={styles.taskEmoji}>{reviewCount === 0 ? '✅' : '🔁'}</Text>
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end', gap: 6 }}>
-              <DisplayTextView text={zh('今日复习', 'jīn rì fù xí')} size={20} />
+              <DisplayTextView text={zh('今日复习', 'jīn rì fù xí')} size={20} nowrap />
               {reviewCount > 0 ? (
                 <Text style={styles.badge} testID="review-count">
                   {reviewCount}
