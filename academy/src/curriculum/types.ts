@@ -118,11 +118,24 @@ export interface BlocksActivity {
   title: string;
   instruction: string;
   levels: BlocksLevel[];
+  /** Offer the loop blocks (重复 2 次 / 重复 3 次). */
+  allowRepeat?: boolean;
   explain: string;
   knowledgePoints: string[];
 }
 
-export type Activity = ExplainStep | SortActivity | OrderActivity | QuizActivity | ThinkActivity | TaskActivity | ProjectActivity | BlocksActivity;
+/** AI 训练模拟器 (simulation). */
+export interface TrainLabActivity {
+  kind: 'trainlab';
+  id: string;
+  title: string;
+  instruction: string;
+  preset: 'exam' | 'bias';
+  knowledgePoints: string[];
+  explain: string;
+}
+
+export type Activity = ExplainStep | SortActivity | OrderActivity | QuizActivity | ThinkActivity | TaskActivity | ProjectActivity | BlocksActivity | TrainLabActivity;
 
 export interface ProjectActivity {
   kind: 'project';
@@ -130,7 +143,7 @@ export interface ProjectActivity {
   title: string;
   instruction: string;
   /** Which built-in project editor to open. */
-  editor: 'robot-designer' | 'fruit-trainer' | 'prompt-card';
+  editor: 'robot-designer' | 'fruit-trainer' | 'prompt-card' | 'tree-game';
   /** Knowledge points this project gives evidence for. */
   knowledgePoints?: string[];
 }

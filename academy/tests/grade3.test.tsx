@@ -84,7 +84,7 @@ describe('grade 3 in the app', () => {
       window.location.hash = '#/play/g3-l9';
       render(<App />);
       const step = findLesson('g3-l9')!.steps.find((s) => s.kind === 'blocks') as BlocksActivity;
-      const label: Record<Block, RegExp> = { forward: /前进一格/, left: /向左转/, right: /向右转/ };
+      const label: Record<Block, RegExp> = { forward: /前进一格/, left: /向左转/, right: /向右转/, repeat2: /重复 2 次/, repeat3: /重复 3 次/ };
       const runProgram = async (prog: Block[]) => {
         for (const b of prog) click(screen.getByRole('button', { name: label[b] }));
         click(screen.getByRole('button', { name: /运行程序/ }));

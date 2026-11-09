@@ -16,6 +16,8 @@ import { RobotDesigner } from '../activities/RobotDesigner';
 import { FruitTrainer } from '../activities/FruitTrainer';
 import { BlocksView } from '../activities/Blocks';
 import { PromptCard } from '../activities/PromptCard';
+import { TrainLabView } from '../activities/TrainLab';
+import { TreeGame } from '../activities/TreeGame';
 
 export function Player({ id }: { id: string }) {
   const { learner, events, refresh } = useApp();
@@ -91,6 +93,8 @@ export function Player({ id }: { id: string }) {
         {step.kind === 'project' && step.editor === 'fruit-trainer' && <FruitTrainer step={step} {...props} />}
         {step.kind === 'project' && step.editor === 'prompt-card' && <PromptCard step={step} {...props} />}
         {step.kind === 'blocks' && <BlocksView step={step} {...props} />}
+        {step.kind === 'trainlab' && <TrainLabView step={step} {...props} />}
+        {step.kind === 'project' && step.editor === 'tree-game' && <TreeGame step={step} {...props} />}
       </div>
     </Shell>
   );

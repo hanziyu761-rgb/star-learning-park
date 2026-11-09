@@ -15,7 +15,7 @@ export function LessonDetail({ id }: { id: string }) {
   const missing = missingPrerequisites(lesson, LESSONS, events);
   const mod = MODULES.find((m) => m.id === lesson.module)!;
   const weak = weakPrerequisites(lesson, allKnowledgePoints(), events).filter((w) => w.reason === 'weak');
-  const experiments = lesson.steps.filter((s) => s.kind === 'sort' || s.kind === 'order' || s.kind === 'blocks').length;
+  const experiments = lesson.steps.filter((s) => s.kind === 'sort' || s.kind === 'order' || s.kind === 'blocks' || s.kind === 'trainlab').length;
   const quizCount = lesson.steps.reduce((n, s) => n + (s.kind === 'quiz' ? s.questions.length : 0), 0);
 
   return (

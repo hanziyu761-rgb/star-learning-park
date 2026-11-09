@@ -1,6 +1,6 @@
 import type { Lesson } from './types';
 import { GRADE_PLANS, LESSONS } from './catalog';
-import { shortestSolution } from '../learning/blocks';
+import { compress, shortestSolution } from '../learning/blocks';
 
 // Phrases the accuracy checklist forbids (they teach a wrong idea of AI).
 const FORBIDDEN_PHRASES = ['什么都知道', '像人一样看懂', '永远正确', 'AI 有感情', 'AI 是活的'];
@@ -18,7 +18,7 @@ export function validateLesson(lesson: Lesson, allLessonIds: Set<string>, allKpI
   const kinds = lesson.steps.map((s) => s.kind);
   if (!kinds.includes('explain')) at('教学内容 (explain) missing');
   if (lesson.steps.some((s) => s.kind === 'explain' && !s.visual)) at('可视化讲解 missing on an explain step');
-  if (!kinds.includes('sort') && !kinds.includes('order') && !kinds.includes('blocks')) at('互动实验 (sort/order/blocks) missing');
+  if (!['sort', 'order', 'blocks', 'trainlab'].some((k) => kinds.includes(k as never))) at('互动实验 (sort/order/blocks/trainlab) missing');
   if (!kinds.includes('think')) at('思考题 missing');
   if (!kinds.includes('task') && !kinds.includes('project')) at('实践任务 missing');
   if (!kinds.includes('quiz')) at('练习题 missing');
@@ -41,12 +41,16 @@ export function validateLesson(lesson: Lesson, allLessonIds: Set<string>, allKpI
       if (!s.items.some((i) => i.bin === 'a') || !s.items.some((i) => i.bin === 'b')) at(`sort ${s.id} must use both bins`);
       for (const kp of s.knowledgePoints) if (!allKpIds.has(kp)) at(`sort ${s.id} unknown knowledge point ${kp}`);
     }
+    if (s.kind === 'trainlab') for (const kp of s.knowledgePoints) if (!allKpIds.has(kp)) at(`trainlab ${s.id} unknown knowledge point ${kp}`);
     if (s.kind === 'blocks') {
       for (const kp of s.knowledgePoints) if (!allKpIds.has(kp)) at(`blocks ${s.id} unknown knowledge point ${kp}`);
       for (const lv of s.levels) {
         const sol = shortestSolution(lv);
         if (!sol) at(`blocks level ${lv.id} cannot be solved`);
-        else if (sol.length > lv.maxBlocks) at(`blocks level ${lv.id} needs ${sol.length} blocks but allows ${lv.maxBlocks}`);
+        else {
+          const need = s.allowRepeat ? compress(sol).length : sol.length;
+          if (need > lv.maxBlocks) at(`blocks level ${lv.id} needs ${need} blocks but allows ${lv.maxBlocks}`);
+        }
       }
     }
     if (s.kind === 'order') {

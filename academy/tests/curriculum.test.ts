@@ -45,8 +45,17 @@ describe('curriculum', () => {
     expect(validateLesson(blocked, ids, kps).join()).toMatch(/cannot be solved/);
   });
 
-  it('grades 4–6 are marked unavailable and have no placeholder lessons', () => {
-    for (const g of [4, 5, 6] as const) {
+  it('grade 4 has all 8 lessons, both training-lab modes, a loop maze and the decision-tree project', () => {
+    const g4 = lessonsForGrade(4);
+    expect(g4).toHaveLength(8);
+    const steps = g4.flatMap((l) => l.steps);
+    expect(steps.filter((s) => s.kind === 'trainlab').map((s) => s.kind === 'trainlab' && s.preset).sort()).toEqual(['bias', 'exam']);
+    expect(steps.some((s) => s.kind === 'blocks' && s.allowRepeat)).toBe(true);
+    expect(steps.some((s) => s.kind === 'project' && s.editor === 'tree-game')).toBe(true);
+  });
+
+  it('grades 5–6 are marked unavailable and have no placeholder lessons', () => {
+    for (const g of [5, 6] as const) {
       expect(GRADE_PLANS.find((p) => p.grade === g)!.available).toBe(false);
       expect(LESSONS.filter((l) => l.grade === g)).toHaveLength(0);
     }

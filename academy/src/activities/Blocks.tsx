@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { BlocksActivity } from '../curriculum/types';
-import { BLOCK_INFO, DIR_ARROW, run, type Block, type Pose, type RunResult } from '../learning/blocks';
+import { BLOCK_INFO, DIR_ARROW, isRepeat, MOVES, run, type Block, type Pose, type RunResult } from '../learning/blocks';
 import { useApp } from '../app/state';
 import { speak } from '../ui/speech';
 import { SpeakButton, Txt } from '../ui/Txt';
@@ -12,6 +12,7 @@ const REASON: Record<string, string> = {
   edge: '走出地图了！看看是哪一块积木出了问题。',
   'not-at-goal': '程序走完了，可是还没到星星那里。再加几块积木试试。',
   empty: '先放几块积木，再点"运行"。',
+  'bad-repeat': '"重复"积木后面要接一块动作积木（前进或转向）。',
 };
 
 export function BlocksView({ step, recorder, onDone }: ActivityProps<BlocksActivity>) {
@@ -90,13 +91,13 @@ export function BlocksView({ step, recorder, onDone }: ActivityProps<BlocksActiv
       <ol className="program" aria-label="我的程序">
         {program.length === 0 && <li className="muted">程序是空的，点下面的积木添加</li>}
         {program.map((b, i) => (
-          <li key={i} className={'block b-' + b + (failedAt === i ? ' failed' : '')}>{BLOCK_INFO[b].icon} {BLOCK_INFO[b].label}</li>
+          <li key={i} className={'block b-' + (isRepeat(b) ? 'repeat' : b) + (failedAt === i ? ' failed' : '')}>{BLOCK_INFO[b].icon} {BLOCK_INFO[b].label}</li>
         ))}
       </ol>
       <p className="muted small">{program.length}/{level.maxBlocks} 块积木</p>
-      <div className="palette">
-        {(Object.keys(BLOCK_INFO) as Block[]).map((b) => (
-          <button key={b} className={'block-btn b-' + b} disabled={running || program.length >= level.maxBlocks} onClick={() => add(b)}>{BLOCK_INFO[b].icon} {BLOCK_INFO[b].label}</button>
+      <div className={'palette' + (step.allowRepeat ? ' five' : '')}>
+        {([...MOVES, ...(step.allowRepeat ? ['repeat2', 'repeat3'] as Block[] : [])] as Block[]).map((b) => (
+          <button key={b} className={'block-btn b-' + (isRepeat(b) ? 'repeat' : b)} disabled={running || program.length >= level.maxBlocks} onClick={() => add(b)}>{BLOCK_INFO[b].icon} {BLOCK_INFO[b].label}</button>
         ))}
       </div>
       <div className="row-btns">

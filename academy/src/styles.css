@@ -290,3 +290,13 @@ th { color: var(--muted); font-weight: 600; }
 .checklist li { color: var(--muted); }
 .checklist li.ok { color: #17784a; font-weight: 600; }
 .example-ai { padding: 12px 14px; border-radius: 16px; background: #f6f7fc; border-left: 5px solid #9aa4ff; }
+.b-repeat { background: #2fb37a; }
+.palette.five { grid-template-columns: repeat(3, 1fr); }
+
+.tag-label { font-size: 13px; font-weight: 700; color: var(--primary-dark); }
+.train-card.pool { font: inherit; cursor: pointer; }
+.train-card.pool.on { border-color: var(--good); background: #eefaf3; }
+.exam-btns { display: grid; gap: 4px; }
+.branch { margin: 14px 0; padding: 12px; border-radius: 18px; border: 2px solid var(--line); background: #fbfcff; display: grid; gap: 8px; }
+.branch-title { margin: 0; }
+.chips.sub { align-items: center; padding-left: 8px; }
