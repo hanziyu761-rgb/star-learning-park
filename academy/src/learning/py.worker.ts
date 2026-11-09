@@ -7,9 +7,10 @@ let ready: Promise<PyodideLike> | null = null;
 
 function load(): Promise<PyodideLike> {
   ready ??= (async () => {
-    const url = '/academy/pyodide/pyodide.mjs';
-    const mod = await import(/* @vite-ignore */ url);
-    return (await mod.loadPyodide({ indexURL: '/academy/pyodide/' })) as PyodideLike;
+    // '/academy/pyodide/' on the website, '/pyodide/' inside the Android app.
+    const base = import.meta.env.BASE_URL + 'pyodide/';
+    const mod = await import(/* @vite-ignore */ base + 'pyodide.mjs');
+    return (await mod.loadPyodide({ indexURL: base })) as PyodideLike;
   })();
   return ready;
 }

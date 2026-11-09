@@ -7,7 +7,8 @@ createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictM
 
 // The academy's own service worker, scoped to /academy/ only, so the legacy
 // app's worker (scope /) keeps handling everything else.
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+// The Android app has everything built in, so it registers no worker.
+if ('serviceWorker' in navigator && import.meta.env.PROD && import.meta.env.MODE !== 'app') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/academy/sw.js', { scope: '/academy/' }).catch(() => undefined);
   });

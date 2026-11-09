@@ -1,0 +1,16 @@
+{
+  "name": "ai-academy-android",
+  "private": true,
+  "version": "1.0.0",
+  "description": "AI 少年学院 安卓 App 外壳（Capacitor）。网页内容来自 ../academy 的 App 模式构建，全部装在安装包里，离线可用。",
+  "scripts": {
+    "web": "cd ../academy && npm ci --include=dev && npm run build:app",
+    "sync": "cap sync android",
+    "apk": "npm run web && npm run sync && cd android && ./gradlew assembleDebug"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0"
+  }
+}

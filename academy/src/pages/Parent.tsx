@@ -190,7 +190,7 @@ function ParentDashboard() {
 
       <section className="card">
         <h2>数据与备份</h2>
-        <p>所有学习记录只保存在这台设备的浏览器里（数据库名 ai-academy），不会上传，也不会影响星星闯关乐园的记录。清除浏览器数据会删除这些记录，建议定期导出备份。</p>
+        <p>所有学习记录只保存在这台设备上（数据库名 ai-academy），不会上传，也不会影响星星闯关乐园的记录。网页版和手机 App 的记录各自保存、互不相通。清除浏览器数据或卸载 App 会删除这些记录，建议定期导出备份。</p>
         <button className="big-btn secondary" onClick={() => void download()}>⬇ 导出学习记录（JSON）</button>
       </section>
     </Shell>

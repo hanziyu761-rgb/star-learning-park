@@ -1,0 +1,10 @@
+{
+  "appId": "cn.linheng.aiacademy",
+  "appName": "AI 少年学院",
+  "webDir": "../academy/dist-app",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": false,
+    "webContentsDebuggingEnabled": false
+  }
+}

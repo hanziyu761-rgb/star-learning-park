@@ -52,14 +52,27 @@ self.addEventListener('fetch',e=>{
   };
 }
 
-export default defineConfig({
-  base: '/academy/',
-  plugins: [react(), academyServiceWorker(), copyPyodide()],
+// App mode (`vite build --mode app`) builds the Android app's bundle: served
+// from the app's own root, no service worker (everything is already inside the
+// installed app), and a strict content policy in the page itself, because in
+// the app there is no server to send one. connect-src 'self' means the page
+// cannot contact any outside website.
+const APP_CSP = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
+function appCsp(): Plugin {
+  return {
+    name: 'app-csp',
+    transformIndexHtml: (html) => html.replace('<meta charset="utf-8" />', `<meta charset="utf-8" />\n    <meta http-equiv="Content-Security-Policy" content="${APP_CSP}" />`),
+  };
+}
+
+export default defineConfig(({ mode }) => ({
+  base: mode === 'app' ? '/' : '/academy/',
+  plugins: mode === 'app' ? [react(), appCsp(), copyPyodide()] : [react(), academyServiceWorker(), copyPyodide()],
   worker: { format: 'es' },
-  build: { outDir: 'dist', emptyOutDir: true, sourcemap: false, target: 'es2020' },
+  build: { outDir: mode === 'app' ? 'dist-app' : 'dist', emptyOutDir: true, sourcemap: false, target: 'es2020' },
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./tests/setup.ts'],
   },
-});
+}));
