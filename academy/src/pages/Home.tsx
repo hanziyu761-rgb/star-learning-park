@@ -85,7 +85,7 @@ export function Home() {
                 <button key={m.id} className={'module' + (has ? '' : ' soon')} onClick={() => go(`/map/${studyGrade}`)}>
                   <span className="module-icon">{m.icon}</span>
                   <span>{m.name}</span>
-                  <span className="module-sub">{has ? `${lessons.filter((l) => l.module === m.id).length} 节课` : '即将上线'}</span>
+                  <span className="module-sub">{has ? `${lessons.filter((l) => l.module === m.id).length} 节课` : '在其他年级'}</span>
                 </button>
               );
             })}

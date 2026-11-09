@@ -300,3 +300,32 @@ th { color: var(--muted); font-weight: 600; }
 .branch { margin: 14px 0; padding: 12px; border-radius: 18px; border: 2px solid var(--line); background: #fbfcff; display: grid; gap: 8px; }
 .branch-title { margin: 0; }
 .chips.sub { align-items: center; padding-left: 8px; }
+
+/* Python */
+.code { width: 100%; font-family: "JetBrains Mono", "Consolas", "Menlo", monospace; font-size: 15px; line-height: 1.6; padding: 12px; border-radius: 14px; border: 2px solid #2d3160; background: #1f2246; color: #e8ebff; tab-size: 4; white-space: pre; overflow-x: auto; resize: vertical; }
+.output { margin-top: 10px; border-radius: 14px; background: #0f1430; color: #d6f5e3; padding: 12px; }
+.output pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: "Consolas", "Menlo", monospace; font-size: 14px; }
+.py-error { margin: 8px 0 0; color: #ffb4a3; font-size: 14px; line-height: 1.7; }
+.hints { margin: 8px 0; padding-left: 20px; color: #7a5a00; background: #fff7e0; border-radius: 12px; padding: 10px 10px 10px 28px; }
+
+/* Mini language model */
+.corpus { columns: 2; font-size: 14px; color: var(--muted); padding-left: 18px; }
+.lm-sentence { min-height: 56px; margin: 12px 0; padding: 12px 14px; border-radius: 16px; background: #f3f0ff; border: 2px solid #e1dcff; font-size: 22px; font-weight: 700; }
+.cands { list-style: none; padding: 0; display: grid; gap: 6px; }
+.cand { width: 100%; display: grid; grid-template-columns: 5em 1fr auto; gap: 10px; align-items: center; min-height: 48px; padding: 6px 12px; border-radius: 14px; border: 2px solid var(--line); background: var(--card); text-align: left; }
+.cand-word { font-size: 18px; font-weight: 800; }
+.cand-bar { height: 12px; border-radius: 6px; background: #eef0ff; overflow: hidden; }
+.cand-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan), var(--primary)); }
+.cand-p { font-size: 13px; color: var(--muted); }
+/* Retrieval */
+.kb summary { cursor: pointer; font-weight: 700; min-height: 36px; }
+.kb ol { font-size: 15px; line-height: 1.8; }
+.rag-compare { display: grid; gap: 10px; margin-top: 12px; }
+.rag-col { padding: 12px; border-radius: 16px; border: 2px solid #bfe9d0; background: #f6fdf9; }
+.rag-col.norag { border-color: #f5d0c4; background: #fff8f5; }
+.rag-col h2 { font-size: 16px; margin: 6px 0; }
+.hits { margin: 0; padding-left: 20px; font-size: 14px; }
+.hits li.top { font-weight: 700; color: #17784a; }
+.rag-answer { font-size: 17px; font-weight: 600; margin: 6px 0; }
+.cite { display: block; font-size: 13px; color: #17784a; font-weight: 700; margin-top: 4px; }
+@media (min-width: 560px) { .rag-compare { grid-template-columns: 1fr 1fr; } }

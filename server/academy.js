@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DIST = path.resolve(process.env.ACADEMY_DIST || path.join(__dirname, '..', 'academy', 'dist'));
-const VERSION = '1.0.0';
+const VERSION = '2.0.0';
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -18,7 +18,15 @@ const MIME = {
   '.webmanifest': 'application/manifest+json; charset=utf-8',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.wasm': 'application/wasm',
+  '.zip': 'application/zip',
 };
+
+// The academy runs Python (Pyodide, WebAssembly) in a same-origin worker. This
+// needs 'wasm-unsafe-eval' and worker-src. It is applied ONLY to /academy/
+// responses; the legacy app keeps its original, stricter policy.
+const ACADEMY_CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' data:; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'";
 
 function sendJson(res, status, payload) {
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -43,15 +51,20 @@ function resolveFile(pathname) {
 }
 
 function serveFile(req, res, full, isIndex) {
-  fs.readFile(full, (err, data) => {
-    if (err) return sendJson(res, 404, { error: 'not found' });
+  fs.stat(full, (err, st) => {
+    if (err || !st.isFile()) return sendJson(res, 404, { error: 'not found' });
     const ext = path.extname(full);
     const immutable = full.includes(path.sep + 'assets' + path.sep);
+    const pyodide = full.includes(path.sep + 'pyodide' + path.sep);
     res.writeHead(200, {
       'Content-Type': MIME[ext] || 'application/octet-stream',
-      'Cache-Control': (isIndex || path.basename(full) === 'sw.js') ? 'no-cache' : immutable ? 'private, max-age=31536000, immutable' : 'private, max-age=300',
+      'Content-Length': st.size,
+      'Cache-Control': (isIndex || path.basename(full) === 'sw.js') ? 'no-cache'
+        : immutable ? 'private, max-age=31536000, immutable'
+        : pyodide ? 'private, max-age=604800' : 'private, max-age=300',
     });
-    res.end(req.method === 'HEAD' ? undefined : data);
+    if (req.method === 'HEAD') return res.end();
+    fs.createReadStream(full).on('error', () => res.destroy()).pipe(res);
   });
 }
 
@@ -67,6 +80,7 @@ function handle(req, res, pathname) {
   if (pathname.startsWith('/api/academy/')) { sendJson(res, 404, { error: 'not found' }); return true; }
   if (pathname === '/academy') { res.writeHead(301, { Location: '/academy/' }); res.end(); return true; }
   if (!pathname.startsWith('/academy/')) return false;
+  res.setHeader('Content-Security-Policy', ACADEMY_CSP);
 
   if (req.method !== 'GET' && req.method !== 'HEAD') { sendJson(res, 405, { error: 'Method not allowed' }); return true; }
   if (!fs.existsSync(path.join(DIST, 'index.html'))) { notBuilt(res); return true; }

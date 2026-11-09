@@ -135,7 +135,28 @@ export interface TrainLabActivity {
   explain: string;
 }
 
-export type Activity = ExplainStep | SortActivity | OrderActivity | QuizActivity | ThinkActivity | TaskActivity | ProjectActivity | BlocksActivity | TrainLabActivity;
+/** A Python exercise, run for real in the browser (Pyodide) and checked automatically. */
+export interface PythonActivity {
+  kind: 'python';
+  id: string;
+  title: string;
+  instruction: string;
+  starter: string;
+  /** Lines fed to input(), in order. */
+  inputs?: string[];
+  check: { includes?: string[]; codeIncludes?: string[]; codeExcludes?: string[] };
+  hints: string[];
+  /** A correct answer, used by the tests to prove the exercise is solvable. Never shown to the child. */
+  solution: string;
+  explain: string;
+  knowledgePoints: string[];
+}
+
+/** Mini language model (real bigram counting) or knowledge-base retrieval (real keyword matching). */
+export interface MiniLmActivity { kind: 'minilm'; id: string; title: string; instruction: string; knowledgePoints: string[]; explain: string }
+export interface RetrievalActivity { kind: 'retrieval'; id: string; title: string; instruction: string; knowledgePoints: string[]; explain: string }
+
+export type Activity = MiniLmActivity | RetrievalActivity | PythonActivity | ExplainStep | SortActivity | OrderActivity | QuizActivity | ThinkActivity | TaskActivity | ProjectActivity | BlocksActivity | TrainLabActivity;
 
 export interface ProjectActivity {
   kind: 'project';
@@ -143,7 +164,9 @@ export interface ProjectActivity {
   title: string;
   instruction: string;
   /** Which built-in project editor to open. */
-  editor: 'robot-designer' | 'fruit-trainer' | 'prompt-card' | 'tree-game';
+  editor: 'robot-designer' | 'fruit-trainer' | 'prompt-card' | 'tree-game' | 'python-project' | 'product-canvas';
+  /** For python-project: the starting code, inputs, check and a reference solution (tests only). */
+  python?: { starter: string; inputs?: string[]; check: { includes?: string[]; codeIncludes?: string[] }; solution: string };
   /** Knowledge points this project gives evidence for. */
   knowledgePoints?: string[];
 }

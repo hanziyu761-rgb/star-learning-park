@@ -13,6 +13,9 @@ function fakeDist() {
   fs.writeFileSync(path.join(dir, 'index.html'), '<!doctype html><title>AI 少年学院</title><div id="root"></div>');
   fs.writeFileSync(path.join(dir, 'assets', 'app-abc.js'), 'console.log(1)');
   fs.writeFileSync(path.join(dir, 'sw.js'), '// sw');
+  fs.mkdirSync(path.join(dir, 'pyodide'));
+  fs.writeFileSync(path.join(dir, 'pyodide', 'pyodide.asm.wasm'), Buffer.from([0, 97, 115, 109]));
+  fs.writeFileSync(path.join(dir, 'pyodide', 'pyodide.mjs'), 'export {}');
   return dir;
 }
 
@@ -78,7 +81,27 @@ test.describe('academy mount with a build present', () => {
     assert.equal(r.status, 405);
   });
 
-  test('health reports honestly that no AI model is used in V1', async () => {
+  test('academy pages allow WebAssembly for Python; the legacy app keeps its stricter policy', async () => {
+    const a = await fetch(srv.base + '/academy/', { headers: { cookie } });
+    const acsp = a.headers.get('content-security-policy') || '';
+    assert.match(acsp, /'wasm-unsafe-eval'/);
+    assert.match(acsp, /worker-src 'self'/);
+    assert.match(acsp, /connect-src 'self'/);
+    assert.doesNotMatch(acsp, /'unsafe-eval'(?!.)|[^-]'unsafe-eval'/);
+    const legacy = await fetch(srv.base + '/', { headers: { cookie } });
+    assert.doesNotMatch(legacy.headers.get('content-security-policy') || '', /wasm-unsafe-eval/);
+  });
+
+  test('Python runtime files are served with the right types', async () => {
+    const w = await fetch(srv.base + '/academy/pyodide/pyodide.asm.wasm', { headers: { cookie } });
+    assert.equal(w.status, 200);
+    assert.equal(w.headers.get('content-type'), 'application/wasm');
+    assert.match(w.headers.get('cache-control'), /max-age=604800/);
+    const m = await fetch(srv.base + '/academy/pyodide/pyodide.mjs', { headers: { cookie } });
+    assert.match(m.headers.get('content-type'), /javascript/);
+  });
+
+  test('health reports honestly that no AI model is used', async () => {
     const r = await fetch(srv.base + '/api/academy/health', { headers: { cookie } });
     assert.equal(r.status, 200);
     const data = await r.json();

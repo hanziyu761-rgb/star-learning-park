@@ -18,6 +18,11 @@ import { BlocksView } from '../activities/Blocks';
 import { PromptCard } from '../activities/PromptCard';
 import { TrainLabView } from '../activities/TrainLab';
 import { TreeGame } from '../activities/TreeGame';
+import { PythonView } from '../activities/Python';
+import { PythonProject } from '../activities/PythonProject';
+import { MiniLmView } from '../activities/MiniLm';
+import { RetrievalView } from '../activities/Retrieval';
+import { ProductCanvas } from '../activities/ProductCanvas';
 
 export function Player({ id }: { id: string }) {
   const { learner, events, refresh } = useApp();
@@ -94,6 +99,11 @@ export function Player({ id }: { id: string }) {
         {step.kind === 'project' && step.editor === 'prompt-card' && <PromptCard step={step} {...props} />}
         {step.kind === 'blocks' && <BlocksView step={step} {...props} />}
         {step.kind === 'trainlab' && <TrainLabView step={step} {...props} />}
+        {step.kind === 'python' && <PythonView step={step} {...props} />}
+        {step.kind === 'minilm' && <MiniLmView step={step} {...props} />}
+        {step.kind === 'retrieval' && <RetrievalView step={step} {...props} />}
+        {step.kind === 'project' && step.editor === 'product-canvas' && <ProductCanvas step={step} {...props} />}
+        {step.kind === 'project' && step.editor === 'python-project' && <PythonProject step={step} {...props} />}
         {step.kind === 'project' && step.editor === 'tree-game' && <TreeGame step={step} {...props} />}
       </div>
     </Shell>

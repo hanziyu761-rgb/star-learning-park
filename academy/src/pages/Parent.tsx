@@ -73,7 +73,7 @@ function ParentDashboard() {
     URL.revokeObjectURL(url);
   }
 
-  const lessonRows = LESSONS.map((l) => {
+  const lessonRows = LESSONS.filter((l) => l.grade === learner.grade || lessonProgress(l, events).started).map((l) => {
     const p = lessonProgress(l, events);
     const firsts = new Map<string, boolean>();
     for (const e of events) if (e.type === 'answer' && e.lessonId === l.id && e.attemptNo === 1) firsts.set(e.questionId, e.correct);
@@ -131,7 +131,7 @@ function ParentDashboard() {
             </tbody>
           </table>
         </div>
-        <p className="muted small">二至六年级课程将在 V2.0 上线。</p>
+        <p className="muted small">显示 {learner.grade} 年级的课程，以及其他年级里已经开始学的课程。</p>
       </section>
 
       <section className="card">
@@ -144,7 +144,7 @@ function ParentDashboard() {
             </li>
           ))}
         </ul>
-        <p className="muted small">计算规则：练习题只算第一次作答；互动实验看是否一次做对；作品只计算孩子自己完成的部分。"创造迁移"在认知、应用等维度需要 V2.0 的迁移任务，目前最高到"独立应用"。</p>
+        <p className="muted small">计算规则：练习题只算第一次作答；互动实验看是否一次做对；作品只计算孩子自己完成的部分。"创造迁移"在认知、应用等维度需要迁移任务（后续版本加入），目前最高到"独立应用"。</p>
       </section>
 
       <KnowledgeMap />

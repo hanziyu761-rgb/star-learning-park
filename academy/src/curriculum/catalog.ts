@@ -7,11 +7,13 @@ import { GRADE3 } from './grade3';
 import { GRADE3_REVIEW } from './grade3-review';
 import { GRADE4 } from './grade4';
 import { GRADE4_REVIEW } from './grade4-review';
+import { GRADE5 } from './grade5';
+import { GRADE6 } from './grade6';
+import { GRADE56_REVIEW } from './grade56-review';
 
-export const CURRICULUM_VERSION = '2.0.0-g4';
+export const CURRICULUM_VERSION = '2.0.0';
 
-// The six-year map. Grades 5–6 list their lessons but have no playable content
-// yet (later V2.x rounds). They are shown as "即将上线", never with placeholder lessons.
+// The six-year map. All six grades have playable content.
 export const GRADE_PLANS: GradePlan[] = [
   {
     grade: 1, theme: 'AI 小小探索家', goal: '认识人工智能', project: '设计我的智能机器人', available: true,
@@ -30,18 +32,18 @@ export const GRADE_PLANS: GradePlan[] = [
     lessonTitles: GRADE4.map((l) => l.title),
   },
   {
-    grade: 5, theme: 'AI 小小工程师', goal: '学习编程和 AI 应用开发', project: '制作 AI 英语学习助手', available: false,
-    lessonTitles: ['Python 入门', '变量', '数据类型', '条件判断', '循环', '函数', '算法', '神经网络基础概念', '大语言模型', 'API 基础', 'AI 应用开发'],
+    grade: 5, theme: 'AI 小小工程师', goal: '学习编程和 AI 应用开发', project: '英语单词练习助手（Python）', available: true,
+    lessonTitles: GRADE5.map((l) => l.title),
   },
   {
-    grade: 6, theme: 'AI 小小创造家', goal: '能够独立完成 AI 项目', project: '设计并完成一个自己的 AI 产品', available: false,
-    lessonTitles: ['Python 项目开发', '机器学习进阶', '大语言模型原理', '多模态 AI', 'AI Agent', '工具调用', '知识库', 'RAG 入门', 'AI 产品设计', '数据安全', 'AI 伦理'],
+    grade: 6, theme: 'AI 小小创造家', goal: '能够独立完成 AI 项目', project: '设计我的 AI 产品（毕业项目）', available: true,
+    lessonTitles: GRADE6.map((l) => l.title),
   },
 ];
 
-const REVIEW: Record<string, Lesson['review']> = { ...GRADE1_REVIEW, ...GRADE2_REVIEW, ...GRADE3_REVIEW, ...GRADE4_REVIEW };
+const REVIEW: Record<string, Lesson['review']> = { ...GRADE1_REVIEW, ...GRADE2_REVIEW, ...GRADE3_REVIEW, ...GRADE4_REVIEW, ...GRADE56_REVIEW };
 
-export const LESSONS: Lesson[] = [...GRADE1, ...GRADE2, ...GRADE3, ...GRADE4].map((l) => ({ ...l, review: REVIEW[l.id] ?? l.review }));
+export const LESSONS: Lesson[] = [...GRADE1, ...GRADE2, ...GRADE3, ...GRADE4, ...GRADE5, ...GRADE6].map((l) => ({ ...l, review: REVIEW[l.id] ?? l.review }));
 
 export function lessonsForGrade(grade: Grade): Lesson[] {
   return LESSONS.filter((l) => l.grade === grade).sort((a, b) => a.order - b.order);

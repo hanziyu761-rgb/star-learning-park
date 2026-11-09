@@ -18,7 +18,7 @@ export function validateLesson(lesson: Lesson, allLessonIds: Set<string>, allKpI
   const kinds = lesson.steps.map((s) => s.kind);
   if (!kinds.includes('explain')) at('教学内容 (explain) missing');
   if (lesson.steps.some((s) => s.kind === 'explain' && !s.visual)) at('可视化讲解 missing on an explain step');
-  if (!['sort', 'order', 'blocks', 'trainlab'].some((k) => kinds.includes(k as never))) at('互动实验 (sort/order/blocks/trainlab) missing');
+  if (!['sort', 'order', 'blocks', 'trainlab', 'python', 'retrieval', 'minilm'].some((k) => kinds.includes(k as never))) at('互动实验 (sort/order/blocks/trainlab) missing');
   if (!kinds.includes('think')) at('思考题 missing');
   if (!kinds.includes('task') && !kinds.includes('project')) at('实践任务 missing');
   if (!kinds.includes('quiz')) at('练习题 missing');
@@ -41,6 +41,11 @@ export function validateLesson(lesson: Lesson, allLessonIds: Set<string>, allKpI
       if (!s.items.some((i) => i.bin === 'a') || !s.items.some((i) => i.bin === 'b')) at(`sort ${s.id} must use both bins`);
       for (const kp of s.knowledgePoints) if (!allKpIds.has(kp)) at(`sort ${s.id} unknown knowledge point ${kp}`);
     }
+    if (s.kind === 'python') {
+      for (const kp of s.knowledgePoints) if (!allKpIds.has(kp)) at(`python ${s.id} unknown knowledge point ${kp}`);
+      if (!s.hints.length) at(`python ${s.id} needs hints`);
+    }
+    if (s.kind === 'minilm' || s.kind === 'retrieval') for (const kp of s.knowledgePoints) if (!allKpIds.has(kp)) at(`${s.kind} ${s.id} unknown knowledge point ${kp}`);
     if (s.kind === 'trainlab') for (const kp of s.knowledgePoints) if (!allKpIds.has(kp)) at(`trainlab ${s.id} unknown knowledge point ${kp}`);
     if (s.kind === 'blocks') {
       for (const kp of s.knowledgePoints) if (!allKpIds.has(kp)) at(`blocks ${s.id} unknown knowledge point ${kp}`);

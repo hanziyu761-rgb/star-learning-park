@@ -54,11 +54,19 @@ describe('curriculum', () => {
     expect(steps.some((s) => s.kind === 'project' && s.editor === 'tree-game')).toBe(true);
   });
 
-  it('grades 5–6 are marked unavailable and have no placeholder lessons', () => {
-    for (const g of [5, 6] as const) {
-      expect(GRADE_PLANS.find((p) => p.grade === g)!.available).toBe(false);
-      expect(LESSONS.filter((l) => l.grade === g)).toHaveLength(0);
-    }
+  it('grades 5 and 6 have 11 lessons each with their projects', () => {
+    expect(lessonsForGrade(5)).toHaveLength(11);
+    expect(lessonsForGrade(6)).toHaveLength(11);
+    const steps = [...lessonsForGrade(5), ...lessonsForGrade(6)].flatMap((l) => l.steps);
+    expect(steps.some((s) => s.kind === 'project' && s.editor === 'python-project')).toBe(true);
+    expect(steps.some((s) => s.kind === 'project' && s.editor === 'product-canvas')).toBe(true);
+    expect(steps.some((s) => s.kind === 'minilm')).toBe(true);
+    expect(steps.some((s) => s.kind === 'retrieval')).toBe(true);
+  });
+
+  it('all six grades are available, 53 lessons in total', () => {
+    expect(GRADE_PLANS.every((p) => p.available)).toBe(true);
+    expect(LESSONS).toHaveLength(53);
   });
 
   it('grade 3 includes the added visual-programming intro lesson', () => {

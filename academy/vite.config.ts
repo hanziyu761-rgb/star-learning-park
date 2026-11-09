@@ -2,6 +2,23 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { createHash } from 'node:crypto';
+import { copyFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+// Pyodide (Python in the browser) is served from our own site, never a CDN.
+const PYODIDE_FILES = ['pyodide.mjs', 'pyodide.asm.mjs', 'pyodide.asm.wasm', 'python_stdlib.zip', 'pyodide-lock.json'];
+const PYODIDE_VERSION = JSON.parse(readFileSync(join(__dirname, 'node_modules/pyodide/package.json'), 'utf8')).version as string;
+function copyPyodide(): Plugin {
+  return {
+    name: 'copy-pyodide',
+    apply: 'build',
+    writeBundle(opts) {
+      const out = join(opts.dir ?? 'dist', 'pyodide');
+      mkdirSync(out, { recursive: true });
+      for (const f of PYODIDE_FILES) copyFileSync(join(__dirname, 'node_modules/pyodide', f), join(out, f));
+    },
+  };
+}
 
 // Emits /academy/sw.js with the exact list of built files, so every lesson
 // opened once keeps working offline. The cache name is derived from the file
@@ -17,6 +34,7 @@ function academyServiceWorker(): Plugin {
       const version = 'ai-academy-' + createHash('sha256').update(files.sort().join('|')).digest('hex').slice(0, 12);
       const code = `// Generated at build time. Scope: /academy/ only.
 const VERSION=${JSON.stringify(version)};
+const PY_CACHE=${JSON.stringify('academy-pyodide-' + PYODIDE_VERSION)};
 const ASSETS=${JSON.stringify(assets)};
 self.addEventListener('install',e=>e.waitUntil(caches.open(VERSION).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('ai-academy-')&&k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
@@ -24,6 +42,8 @@ self.addEventListener('fetch',e=>{
  const req=e.request,url=new URL(req.url);
  if(req.method!=='GET'||url.origin!==self.location.origin||!url.pathname.startsWith('/academy/'))return;
  if(req.mode==='navigate'){e.respondWith(fetch(req).catch(()=>caches.match('./')));return;}
+ // Python runtime (~13 MB): cached on first use, kept across app updates.
+ if(url.pathname.startsWith('/academy/pyodide/')){e.respondWith(caches.open(PY_CACHE).then(c=>c.match(req).then(hit=>hit||fetch(req).then(r=>{if(r.ok)c.put(req,r.clone());return r;}))));return;}
  e.respondWith(caches.match(req).then(hit=>hit||fetch(req)));
 });
 `;
@@ -34,7 +54,8 @@ self.addEventListener('fetch',e=>{
 
 export default defineConfig({
   base: '/academy/',
-  plugins: [react(), academyServiceWorker()],
+  plugins: [react(), academyServiceWorker(), copyPyodide()],
+  worker: { format: 'es' },
   build: { outDir: 'dist', emptyOutDir: true, sourcemap: false, target: 'es2020' },
   test: {
     environment: 'jsdom',

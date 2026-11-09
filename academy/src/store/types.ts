@@ -26,7 +26,7 @@ export type LearningEvent = EventBase & (
   | { type: 'lesson_start' }
   | { type: 'step_done'; stepId: string; kind: string }
   | { type: 'answer'; stepId: string; questionId: string; knowledgePoints: string[]; choice: string; correct: boolean; attemptNo: number }
-  | { type: 'experiment'; stepId: string; kind: 'sort' | 'order' | 'simulate' | 'blocks' | 'classifier'; knowledgePoints: string[]; total: number; mistakes: number }
+  | { type: 'experiment'; stepId: string; kind: 'sort' | 'order' | 'simulate' | 'blocks' | 'classifier' | 'python' | 'retrieval' | 'language-model'; knowledgePoints: string[]; total: number; mistakes: number }
   | { type: 'think'; stepId: string; choiceId: string }
   | { type: 'task'; stepId: string; selfReported: true }
   | { type: 'project_saved'; stepId: string; workId: string }
@@ -49,7 +49,7 @@ export interface Work {
   id: string;
   learnerId: string;
   lessonId: string;
-  type: 'robot' | 'fruit-ai' | 'prompt-card' | 'classifier';
+  type: 'robot' | 'fruit-ai' | 'prompt-card' | 'classifier' | 'python' | 'product';
   title: string;
   parts: WorkPart[];
   /** A result computed by the program (not made by the child, not AI-generated). */
