@@ -1,4 +1,4 @@
-import { validateCurriculum } from '../src/curriculum/validate';
+import { validateCurriculum, validateLesson } from '../src/curriculum/validate';
 import { GRADE_PLANS, LESSONS, lessonsForGrade } from '../src/curriculum/catalog';
 
 describe('curriculum', () => {
@@ -26,8 +26,27 @@ describe('curriculum', () => {
     for (const l of LESSONS) expect((l.review ?? []).length, l.id).toBeGreaterThanOrEqual(2);
   });
 
-  it('grades 3–6 are marked unavailable and have no placeholder lessons', () => {
-    for (const g of [3, 4, 5, 6] as const) {
+  it('grade 3 has all 9 lessons, the prompt-card project and a block-programming maze', () => {
+    const g3 = lessonsForGrade(3);
+    expect(g3).toHaveLength(9);
+    expect(g3.some((l) => l.steps.some((s) => s.kind === 'project' && s.editor === 'prompt-card'))).toBe(true);
+    expect(g3.some((l) => l.steps.some((s) => s.kind === 'blocks'))).toBe(true);
+  });
+
+  it('the validator catches an unlabelled AI answer and an unsolvable maze', () => {
+    const base = lessonsForGrade(3).find((l) => l.id === 'g3-l9')!;
+    const ids = new Set(LESSONS.map((l) => l.id));
+    const kps = new Set(LESSONS.flatMap((l) => l.knowledgePoints.map((k) => k.id)));
+    const unlabelled = { ...base, lifeExamples: [{ icon: '🤖', text: 'AI 回答：地球是方的。' }] };
+    expect(validateLesson(unlabelled, ids, kps).join()).toMatch(/示例/);
+    const blocked = { ...base, steps: base.steps.map((s) => s.kind === 'blocks'
+      ? { ...s, levels: [{ id: 'bad', width: 3, height: 1, start: { x: 0, y: 0, dir: 1 as const }, goal: { x: 2, y: 0 }, walls: [{ x: 1, y: 0 }], maxBlocks: 5 }] }
+      : s) };
+    expect(validateLesson(blocked, ids, kps).join()).toMatch(/cannot be solved/);
+  });
+
+  it('grades 4–6 are marked unavailable and have no placeholder lessons', () => {
+    for (const g of [4, 5, 6] as const) {
       expect(GRADE_PLANS.find((p) => p.grade === g)!.available).toBe(false);
       expect(LESSONS.filter((l) => l.grade === g)).toHaveLength(0);
     }

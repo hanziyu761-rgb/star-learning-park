@@ -3,10 +3,12 @@ import { GRADE1 } from './grade1';
 import { GRADE1_REVIEW } from './grade1-review';
 import { GRADE2 } from './grade2';
 import { GRADE2_REVIEW } from './grade2-review';
+import { GRADE3 } from './grade3';
+import { GRADE3_REVIEW } from './grade3-review';
 
-export const CURRICULUM_VERSION = '2.0.0-g2';
+export const CURRICULUM_VERSION = '2.0.0-g3';
 
-// The six-year map. Grades 3–6 list their lessons but have no playable content
+// The six-year map. Grades 4–6 list their lessons but have no playable content
 // yet (later V2.x rounds). They are shown as "即将上线", never with placeholder lessons.
 export const GRADE_PLANS: GradePlan[] = [
   {
@@ -18,8 +20,8 @@ export const GRADE_PLANS: GradePlan[] = [
     lessonTitles: GRADE2.map((l) => l.title),
   },
   {
-    grade: 3, theme: 'AI 小小应用师', goal: '学会有效使用 AI', project: '制作 AI 故事助手（家长陪同）', available: false,
-    lessonTitles: ['如何提出好问题？', '提示词是什么？', '如何优化提示词？', 'AI 辅助语文学习', 'AI 辅助数学学习', 'AI 辅助英语学习', '算法和逻辑', 'AI 生成内容的判断', '图形化编程入门'],
+    grade: 3, theme: 'AI 小小应用师', goal: '学会有效使用 AI', project: '设计我的 AI 故事助手（提示词卡片）', available: true,
+    lessonTitles: GRADE3.map((l) => l.title),
   },
   {
     grade: 4, theme: 'AI 小小研究员', goal: '理解人工智能基本原理', project: '制作智能分类游戏', available: false,
@@ -35,9 +37,9 @@ export const GRADE_PLANS: GradePlan[] = [
   },
 ];
 
-const REVIEW: Record<string, Lesson['review']> = { ...GRADE1_REVIEW, ...GRADE2_REVIEW };
+const REVIEW: Record<string, Lesson['review']> = { ...GRADE1_REVIEW, ...GRADE2_REVIEW, ...GRADE3_REVIEW };
 
-export const LESSONS: Lesson[] = [...GRADE1, ...GRADE2].map((l) => ({ ...l, review: REVIEW[l.id] ?? l.review }));
+export const LESSONS: Lesson[] = [...GRADE1, ...GRADE2, ...GRADE3].map((l) => ({ ...l, review: REVIEW[l.id] ?? l.review }));
 
 export function lessonsForGrade(grade: Grade): Lesson[] {
   return LESSONS.filter((l) => l.grade === grade).sort((a, b) => a.order - b.order);

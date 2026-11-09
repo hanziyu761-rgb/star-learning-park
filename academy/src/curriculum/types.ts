@@ -101,7 +101,28 @@ export interface TaskActivity {
   instruction: string;
 }
 
-export type Activity = ExplainStep | SortActivity | OrderActivity | QuizActivity | ThinkActivity | TaskActivity | ProjectActivity;
+export type Dir = 0 | 1 | 2 | 3; // up, right, down, left
+export interface BlocksLevel {
+  id: string;
+  width: number;
+  height: number;
+  start: { x: number; y: number; dir: Dir };
+  goal: { x: number; y: number };
+  walls: { x: number; y: number }[];
+  maxBlocks: number;
+}
+/** Block programming: build a sequence of commands to move a robot to the goal. */
+export interface BlocksActivity {
+  kind: 'blocks';
+  id: string;
+  title: string;
+  instruction: string;
+  levels: BlocksLevel[];
+  explain: string;
+  knowledgePoints: string[];
+}
+
+export type Activity = ExplainStep | SortActivity | OrderActivity | QuizActivity | ThinkActivity | TaskActivity | ProjectActivity | BlocksActivity;
 
 export interface ProjectActivity {
   kind: 'project';
@@ -109,7 +130,7 @@ export interface ProjectActivity {
   title: string;
   instruction: string;
   /** Which built-in project editor to open. */
-  editor: 'robot-designer' | 'fruit-trainer';
+  editor: 'robot-designer' | 'fruit-trainer' | 'prompt-card';
   /** Knowledge points this project gives evidence for. */
   knowledgePoints?: string[];
 }

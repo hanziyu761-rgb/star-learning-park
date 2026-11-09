@@ -14,6 +14,8 @@ import { QuizView } from '../activities/Quiz';
 import { ThinkView, TaskView } from '../activities/Think';
 import { RobotDesigner } from '../activities/RobotDesigner';
 import { FruitTrainer } from '../activities/FruitTrainer';
+import { BlocksView } from '../activities/Blocks';
+import { PromptCard } from '../activities/PromptCard';
 
 export function Player({ id }: { id: string }) {
   const { learner, events, refresh } = useApp();
@@ -87,6 +89,8 @@ export function Player({ id }: { id: string }) {
         {step.kind === 'task' && <TaskView step={step} {...props} />}
         {step.kind === 'project' && step.editor === 'robot-designer' && <RobotDesigner step={step} {...props} />}
         {step.kind === 'project' && step.editor === 'fruit-trainer' && <FruitTrainer step={step} {...props} />}
+        {step.kind === 'project' && step.editor === 'prompt-card' && <PromptCard step={step} {...props} />}
+        {step.kind === 'blocks' && <BlocksView step={step} {...props} />}
       </div>
     </Shell>
   );

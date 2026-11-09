@@ -64,8 +64,8 @@ export function Growth() {
           <ul className="works">
             {works.map((w) => (
               <li key={w.id} className="work">
-                <div className="work-head"><span>{w.type === 'fruit-ai' ? '🍎' : '🤖'}</span><b>{w.title}</b><span className="share-badge">{Math.round(childShare(w) * 100)}% 自己完成</span></div>
-                <dl>{w.parts.map((p) => <div key={p.field}><dt>{p.label}</dt><dd>{p.value}{p.by === 'ai' && <span className="by-ai">模拟 AI 生成</span>}</dd></div>)}</dl>
+                <div className="work-head"><span>{w.type === 'fruit-ai' ? '🍎' : w.type === 'prompt-card' ? '📝' : '🤖'}</span><b>{w.title}</b><span className="share-badge">{Math.round(childShare(w) * 100)}% 自己完成</span></div>
+                <dl>{w.parts.map((p) => <div key={p.field}><dt>{p.label}</dt><dd>{p.value}{p.by === 'ai' && <span className="by-ai">模拟 AI 生成</span>}{p.by === 'template' && <span className="by-ai">平台模板</span>}</dd></div>)}</dl>
               </li>
             ))}
           </ul>
