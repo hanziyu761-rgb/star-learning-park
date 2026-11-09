@@ -246,3 +246,23 @@ th { color: var(--muted); font-weight: 600; }
   .cards { grid-template-columns: repeat(3, 1fr); }
   .module-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+.lv-weak { background: #fff1ea; color: #b4502f; }
+.kp-grade summary { font-weight: 700; min-height: 40px; cursor: pointer; }
+
+/* Fruit trainer (simulation) */
+.sim-note { padding: 10px 14px; border-radius: 14px; background: #fff7e0; border: 2px dashed #f3c34e; font-size: 15px; line-height: 1.7; }
+.train-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0; }
+.train-card { display: grid; justify-items: center; gap: 4px; padding: 10px 6px; border-radius: 18px; border: 2px solid var(--line); background: var(--card); text-align: center; }
+.train-card.done { border-color: #bfe9d0; background: #f6fdf9; }
+.label-row { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.small-chip { min-height: 40px; padding: 4px 10px; font-size: 15px; }
+.test-panel { margin-top: 14px; }
+.preds { list-style: none; padding: 0; display: grid; gap: 8px; }
+.preds li { display: flex; gap: 10px; align-items: center; padding: 10px; border-radius: 16px; border: 2px solid var(--line); }
+.preds li.ok { border-color: #bfe9d0; background: #f6fdf9; }
+.preds li.bad { border-color: #f5b5a1; background: #fff6f2; }
+.preds li > span:nth-child(2) { flex: 1; line-height: 1.6; }
+.pred-mark { font-size: 24px; }
+.accuracy { font-size: 20px; text-align: center; }
+.by-ai { margin-left: 6px; font-size: 11px; padding: 1px 6px; border-radius: 6px; background: #f3f0ff; color: #6a52c9; }

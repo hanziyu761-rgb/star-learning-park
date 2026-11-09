@@ -45,6 +45,12 @@ export function validateLesson(lesson: Lesson, allLessonIds: Set<string>, allKpI
       for (const kp of s.knowledgePoints) if (!allKpIds.has(kp)) at(`order ${s.id} unknown knowledge point ${kp}`);
     }
   }
+  for (const q of lesson.review ?? []) {
+    if (!q.options.some((o) => o.id === q.answer)) at(`review question ${q.id} answer not among options`);
+    if (!q.knowledgePoints.length) at(`review question ${q.id} has no knowledge point`);
+    for (const kp of q.knowledgePoints) if (!allKpIds.has(kp)) at(`review question ${q.id} unknown knowledge point ${kp}`);
+  }
+  for (const s of lesson.steps) if (s.kind === 'project') for (const kp of s.knowledgePoints ?? []) if (!allKpIds.has(kp)) at(`project ${s.id} unknown knowledge point ${kp}`);
   const text = JSON.stringify(lesson);
   for (const phrase of FORBIDDEN_PHRASES) if (text.includes(phrase)) at(`contains forbidden phrase "${phrase}"`);
   if (!lesson.reviewed) at('not yet reviewed against the accuracy checklist');
@@ -59,6 +65,16 @@ export function validateCurriculum(): string[] {
   const allKps = LESSONS.flatMap((l) => l.knowledgePoints.map((k) => k.id));
   if (new Set(allKps).size !== allKps.length) problems.push('duplicate knowledge point ids');
   for (const lesson of LESSONS) problems.push(...validateLesson(lesson, ids, kpIds));
+  const questionIds = LESSONS.flatMap((l) => [...l.steps.flatMap((s) => (s.kind === 'quiz' ? s.questions.map((q) => q.id) : [])), ...(l.review ?? []).map((q) => q.id)]);
+  const dupQ = questionIds.filter((id, i) => questionIds.indexOf(id) !== i);
+  if (dupQ.length) problems.push(`duplicate question ids: ${dupQ.join(', ')}`);
+  // Creation knowledge points are evidenced by the child's works, not by questions.
+  const creationKps = new Set(LESSONS.flatMap((l) => l.knowledgePoints.filter((k) => k.dimension === 'creation').map((k) => k.id)));
+  for (const kp of kpIds) {
+    if (creationKps.has(kp)) continue;
+    const hasReview = LESSONS.some((l) => (l.review ?? []).some((q) => q.knowledgePoints.includes(kp)) || l.steps.some((s) => s.kind === 'quiz' && s.questions.some((q) => q.knowledgePoints.includes(kp))));
+    if (!hasReview) problems.push(`knowledge point ${kp} has no question, so it can never be reviewed`);
+  }
   for (const plan of GRADE_PLANS) {
     const count = LESSONS.filter((l) => l.grade === plan.grade).length;
     if (plan.available && count !== plan.lessonTitles.length) problems.push(`grade ${plan.grade} is available but has ${count}/${plan.lessonTitles.length} lessons`);

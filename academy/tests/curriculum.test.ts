@@ -16,8 +16,18 @@ describe('curriculum', () => {
     expect(GRADE_PLANS.reduce((n, p) => n + p.lessonTitles.length, 0)).toBe(53);
   });
 
-  it('grades 2–6 are marked unavailable and have no placeholder lessons', () => {
-    for (const g of [2, 3, 4, 5, 6] as const) {
+  it('grade 2 has all 7 lessons and the simulated training project', () => {
+    const g2 = lessonsForGrade(2);
+    expect(g2).toHaveLength(7);
+    expect(g2.some((l) => l.steps.some((s) => s.kind === 'project' && s.editor === 'fruit-trainer'))).toBe(true);
+  });
+
+  it('every lesson in grades 1–2 has review-only questions', () => {
+    for (const l of LESSONS) expect((l.review ?? []).length, l.id).toBeGreaterThanOrEqual(2);
+  });
+
+  it('grades 3–6 are marked unavailable and have no placeholder lessons', () => {
+    for (const g of [3, 4, 5, 6] as const) {
       expect(GRADE_PLANS.find((p) => p.grade === g)!.available).toBe(false);
       expect(LESSONS.filter((l) => l.grade === g)).toHaveLength(0);
     }

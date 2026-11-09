@@ -1,18 +1,21 @@
 import type { Grade, GradePlan, Lesson, KnowledgePoint } from './types';
 import { GRADE1 } from './grade1';
+import { GRADE1_REVIEW } from './grade1-review';
+import { GRADE2 } from './grade2';
+import { GRADE2_REVIEW } from './grade2-review';
 
-export const CURRICULUM_VERSION = '1.0.0';
+export const CURRICULUM_VERSION = '2.0.0-g2';
 
-// The six-year map. Grades 2–6 list their lessons but have no playable content
-// yet (V2.0). They are shown as "即将上线", never with placeholder lessons.
+// The six-year map. Grades 3–6 list their lessons but have no playable content
+// yet (later V2.x rounds). They are shown as "即将上线", never with placeholder lessons.
 export const GRADE_PLANS: GradePlan[] = [
   {
     grade: 1, theme: 'AI 小小探索家', goal: '认识人工智能', project: '设计我的智能机器人', available: true,
     lessonTitles: GRADE1.map((l) => l.title),
   },
   {
-    grade: 2, theme: 'AI 小小训练师', goal: '理解 AI 学习的基本过程', project: '模拟训练水果识别 AI', available: false,
-    lessonTitles: ['数据是什么？', '数据分类', '图片标签', 'AI 如何认识动物？', '语音识别体验', '简单条件判断', '如何给 AI 下指令'],
+    grade: 2, theme: 'AI 小小训练师', goal: '理解 AI 学习的基本过程', project: '模拟训练水果识别 AI', available: true,
+    lessonTitles: GRADE2.map((l) => l.title),
   },
   {
     grade: 3, theme: 'AI 小小应用师', goal: '学会有效使用 AI', project: '制作 AI 故事助手（家长陪同）', available: false,
@@ -32,7 +35,9 @@ export const GRADE_PLANS: GradePlan[] = [
   },
 ];
 
-export const LESSONS: Lesson[] = [...GRADE1];
+const REVIEW: Record<string, Lesson['review']> = { ...GRADE1_REVIEW, ...GRADE2_REVIEW };
+
+export const LESSONS: Lesson[] = [...GRADE1, ...GRADE2].map((l) => ({ ...l, review: REVIEW[l.id] ?? l.review }));
 
 export function lessonsForGrade(grade: Grade): Lesson[] {
   return LESSONS.filter((l) => l.grade === grade).sort((a, b) => a.order - b.order);

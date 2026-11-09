@@ -109,7 +109,9 @@ export interface ProjectActivity {
   title: string;
   instruction: string;
   /** Which built-in project editor to open. */
-  editor: 'robot-designer';
+  editor: 'robot-designer' | 'fruit-trainer';
+  /** Knowledge points this project gives evidence for. */
+  knowledgePoints?: string[];
 }
 
 /** Rubric: what each of the four growth levels looks like for this lesson. */
@@ -139,6 +141,8 @@ export interface Lesson {
   parentGuide: { summary: string; homeActivity: string };
   /** Lessons whose wording passed the accuracy checklist. */
   reviewed: boolean;
+  /** Extra questions used only in review sessions, so review is not just a repeat of the lesson quiz. */
+  review?: QuizQuestion[];
 }
 
 export interface GradePlan {

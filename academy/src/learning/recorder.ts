@@ -59,7 +59,7 @@ export class ActiveTimer {
 export class LessonRecorder {
   constructor(private learnerId: string, private lessonId: string, private timer: ActiveTimer) {}
 
-  async record(e: NewEvent): Promise<LearningEvent> {
+  async record(e: NewEvent, mode: LearningEvent['mode'] = 'local'): Promise<LearningEvent> {
     const full = {
       ...e,
       id: newId(),
@@ -67,7 +67,7 @@ export class LessonRecorder {
       learnerId: this.learnerId,
       lessonId: this.lessonId,
       activeMs: this.timer.take(),
-      mode: 'local',
+      mode,
     } as LearningEvent;
     await appendEvent(full);
     return full;

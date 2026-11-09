@@ -13,6 +13,7 @@ import { OrderView } from '../activities/Order';
 import { QuizView } from '../activities/Quiz';
 import { ThinkView, TaskView } from '../activities/Think';
 import { RobotDesigner } from '../activities/RobotDesigner';
+import { FruitTrainer } from '../activities/FruitTrainer';
 
 export function Player({ id }: { id: string }) {
   const { learner, events, refresh } = useApp();
@@ -84,7 +85,8 @@ export function Player({ id }: { id: string }) {
         {step.kind === 'quiz' && <QuizView step={step} {...props} />}
         {step.kind === 'think' && <ThinkView step={step} {...props} />}
         {step.kind === 'task' && <TaskView step={step} {...props} />}
-        {step.kind === 'project' && <RobotDesigner step={step} {...props} />}
+        {step.kind === 'project' && step.editor === 'robot-designer' && <RobotDesigner step={step} {...props} />}
+        {step.kind === 'project' && step.editor === 'fruit-trainer' && <FruitTrainer step={step} {...props} />}
       </div>
     </Shell>
   );

@@ -4,6 +4,7 @@ import { go } from '../app/router';
 import { allKnowledgePoints, LESSONS } from '../curriculum/catalog';
 import { DIMENSIONS, LEVEL_NAMES, type Grade } from '../curriculum/types';
 import { abilityLevels } from '../learning/abilities';
+import { reviewStates } from '../learning/review';
 import { dailyMinutes, formatMinutes, lessonProgress, totalActiveMs } from '../learning/progress';
 import { exportAll, safetyEvents, saveLearner, saveSettings, setActiveLearnerId } from '../store/db';
 import type { ParentSettings, SafetyEvent } from '../store/types';
@@ -146,6 +147,8 @@ function ParentDashboard() {
         <p className="muted small">计算规则：练习题只算第一次作答；互动实验看是否一次做对；作品只计算孩子自己完成的部分。"创造迁移"在认知、应用等维度需要 V2.0 的迁移任务，目前最高到"独立应用"。</p>
       </section>
 
+      <KnowledgeMap />
+
       <section className="card">
         <h2>安全设置</h2>
         <label className="field inline"><span>每日学习提醒</span>
@@ -191,5 +194,49 @@ function ParentDashboard() {
         <button className="big-btn secondary" onClick={() => void download()}>⬇ 导出学习记录（JSON）</button>
       </section>
     </Shell>
+  );
+}
+
+function KnowledgeMap() {
+  const { events } = useApp();
+  const states = reviewStates(events);
+  const status = (id: string) => {
+    const s = states.get(id);
+    if (!s) return { text: '未学', cls: 'lv0' };
+    if (!s.lastPassed) return { text: '需要巩固', cls: 'lv-weak' };
+    if (s.streak >= 3) return { text: '掌握', cls: 'lv3' };
+    return { text: '学习中', cls: 'lv2' };
+  };
+  const grades = [...new Set(LESSONS.map((l) => l.grade))];
+  const weak = [...states.values()].filter((s) => !s.lastPassed).length;
+  return (
+    <section className="card">
+      <h2>知识点图谱</h2>
+      <p className="muted small">每个知识点都有自己的复习计划：当天首次作答正确率达到 75% 算通过，复习间隔依次拉长为 1、3、7、14、30 天；没通过就第二天再复习。{weak ? `现在有 ${weak} 个知识点需要巩固。` : ''}</p>
+      {grades.map((g) => (
+        <details key={g} className="kp-grade" open={g === grades[0]}>
+          <summary>{g} 年级</summary>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>知识点</th><th>能力</th><th>首次答对</th><th>状态</th><th>下次复习</th></tr></thead>
+              <tbody>
+                {LESSONS.filter((l) => l.grade === g).flatMap((l) => l.knowledgePoints).map((k) => {
+                  const s = states.get(k.id), st = status(k.id);
+                  return (
+                    <tr key={k.id}>
+                      <td>{k.name}</td>
+                      <td>{DIMENSIONS.find((d) => d.id === k.dimension)!.name.replace('能力', '')}</td>
+                      <td>{s ? `${s.correct}/${s.attempts}` : '—'}</td>
+                      <td><span className={'lv ' + st.cls}>{st.text}</span></td>
+                      <td>{s ? s.dueDay.slice(5) : '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      ))}
+    </section>
   );
 }

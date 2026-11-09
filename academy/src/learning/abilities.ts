@@ -76,9 +76,10 @@ function creationLevel(works: Work[]): AbilityResult {
   const own = works.filter((w) => childShare(w) >= 0.5);
   if (!works.length) return { dimension: 'creation', level: 0, reason: '还没有作品', evidence: [] };
   if (!own.length) return { dimension: 'creation', level: 1, reason: '有作品，但孩子自己完成的部分不到一半', evidence: works.map((w) => w.id) };
-  const hasRule = own.filter((w) => w.parts.some((p) => p.field === 'rule' && p.by === 'child'));
+  // A rule the child designed, or an improvement the child made after testing.
+  const hasRule = own.filter((w) => w.parts.some((p) => (p.field === 'rule' || p.field === 'improvement') && p.by === 'child'));
   const hasReason = hasRule.filter((w) => w.parts.some((p) => p.field === 'reason' && p.by === 'child' && p.value.trim().length >= 4));
-  if (hasReason.length) return { dimension: 'creation', level: 4, reason: '独立设计了带规则的作品，并用自己的话说明了理由', evidence: hasReason.map((w) => w.id) };
-  if (hasRule.length) return { dimension: 'creation', level: 3, reason: '独立设计了带"如果……就……"规则的作品', evidence: hasRule.map((w) => w.id) };
+  if (hasReason.length) return { dimension: 'creation', level: 4, reason: '独立设计或改进了作品，并用自己的话说明了理由', evidence: hasReason.map((w) => w.id) };
+  if (hasRule.length) return { dimension: 'creation', level: 3, reason: '独立设计了带规则的作品，或测试后自己改进了作品', evidence: hasRule.map((w) => w.id) };
   return { dimension: 'creation', level: 2, reason: '独立完成了一件作品', evidence: own.map((w) => w.id) };
 }

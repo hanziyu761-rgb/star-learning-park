@@ -1,6 +1,7 @@
 import { useApp } from '../app/state';
 import { go } from '../app/router';
-import { findLesson, findKnowledgePoint, LESSONS } from '../curriculum/catalog';
+import { allKnowledgePoints, findLesson, findKnowledgePoint, LESSONS } from '../curriculum/catalog';
+import { weakPrerequisites } from '../learning/review';
 import { DIMENSIONS, MODULES } from '../curriculum/types';
 import { lessonProgress, missingPrerequisites, formatMinutes } from '../learning/progress';
 import { Shell } from '../ui/Shell';
@@ -13,6 +14,7 @@ export function LessonDetail({ id }: { id: string }) {
   const p = lessonProgress(lesson, events);
   const missing = missingPrerequisites(lesson, LESSONS, events);
   const mod = MODULES.find((m) => m.id === lesson.module)!;
+  const weak = weakPrerequisites(lesson, allKnowledgePoints(), events).filter((w) => w.reason === 'weak');
   const experiments = lesson.steps.filter((s) => s.kind === 'sort' || s.kind === 'order').length;
   const quizCount = lesson.steps.reduce((n, s) => n + (s.kind === 'quiz' ? s.questions.length : 0), 0);
 
@@ -32,6 +34,13 @@ export function LessonDetail({ id }: { id: string }) {
           建议先学：{missing.map((m) => (
             <button key={m.id} className="link" onClick={() => go(`/lesson/${m.id}`)}>「{m.title}」</button>
           ))}。也可以直接开始。
+        </div>
+      )}
+
+      {weak.length > 0 && (
+        <div className="notice">
+          这节课会用到 {weak.map((w) => `「${w.kp.name}」`).join('')}，上次练习还不太稳。
+          <button className="big-btn secondary" onClick={() => go(`/review/${weak.map((w) => w.kp.id).join(',')}`)}>🔥 先热身复习 {weak.length} 个知识点</button>
         </div>
       )}
 

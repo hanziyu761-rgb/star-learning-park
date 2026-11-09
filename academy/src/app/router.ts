@@ -9,7 +9,8 @@ export type Route =
   | { name: 'lesson'; id: string }
   | { name: 'play'; id: string }
   | { name: 'growth' }
-  | { name: 'parent' };
+  | { name: 'parent' }
+  | { name: 'review'; kps: string[] | null };
 
 export function parseRoute(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
@@ -22,6 +23,7 @@ export function parseRoute(hash: string): Route {
     case 'play': return parts[1] ? { name: 'play', id: parts[1] } : { name: 'home' };
     case 'growth': return { name: 'growth' };
     case 'parent': return { name: 'parent' };
+    case 'review': return { name: 'review', kps: parts[1] ? parts[1].split(',').filter(Boolean) : null };
     default: return { name: 'home' };
   }
 }

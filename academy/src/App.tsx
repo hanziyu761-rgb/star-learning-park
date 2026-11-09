@@ -8,6 +8,7 @@ import { LessonDetail } from './pages/LessonDetail';
 import { Player } from './pages/Player';
 import { Growth } from './pages/Growth';
 import { Parent } from './pages/Parent';
+import { Review } from './pages/Review';
 
 function Routes() {
   const route = useRoute();
@@ -27,6 +28,7 @@ function Routes() {
     case 'play': return <Player key={route.id} id={route.id} />;
     case 'growth': return <Growth />;
     case 'parent': return <Parent />;
+    case 'review': return <Review key={(route.kps ?? []).join(',')} kps={route.kps} />;
   }
 }
 

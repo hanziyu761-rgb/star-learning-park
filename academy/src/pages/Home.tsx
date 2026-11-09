@@ -1,6 +1,7 @@
 import { useApp } from '../app/state';
 import { go } from '../app/router';
-import { gradePlan, lessonsForGrade, LESSONS } from '../curriculum/catalog';
+import { GRADE_PLANS, gradePlan, lessonsForGrade, LESSONS } from '../curriculum/catalog';
+import { dueKnowledgePoints } from '../learning/review';
 import { MODULES, LEVEL_NAMES, type Grade } from '../curriculum/types';
 import { activeMsOnDay, completedCount, localDay, nextLesson, formatMinutes } from '../learning/progress';
 import { abilityLevels } from '../learning/abilities';
@@ -12,8 +13,12 @@ export function Home() {
   const { learner, events, works, settings } = useApp();
   if (!learner) return null;
   const plan = gradePlan(learner.grade);
-  // Grade 1 is the only grade with content in V1; other grades start there, said plainly.
-  const studyGrade: Grade = plan.available ? learner.grade : 1;
+  // Grades without content yet start at the lowest available grade the child
+  // hasn't finished (said plainly on screen).
+  const available = GRADE_PLANS.filter((p) => p.available && p.grade <= learner.grade).map((p) => p.grade);
+  const unfinished = available.find((g) => lessonsForGrade(g).some((l) => !events.some((e) => e.type === 'lesson_complete' && e.lessonId === l.id)));
+  const studyGrade: Grade = plan.available ? learner.grade : (unfinished ?? available.at(-1) ?? 1);
+  const due = dueKnowledgePoints(events, localDay(new Date().toISOString()));
   const lessons = lessonsForGrade(studyGrade);
   const next = nextLesson(lessons, events);
   const done = completedCount(LESSONS, events);
@@ -34,7 +39,7 @@ export function Home() {
 
       {!plan.available && (
         <div className="notice">
-          {learner.grade} 年级的课程<b>即将上线</b>。现在可以先学一年级的「AI 小小探索家」，打好基础。
+          {learner.grade} 年级的课程<b>即将上线</b>。现在可以先学{studyGrade} 年级的「{gradePlan(studyGrade).theme}」，打好基础。
         </div>
       )}
 
@@ -46,7 +51,12 @@ export function Home() {
             <span><Txt>{next.resume ? `继续学习：${next.lesson.title}` : `今天学：${next.lesson.title}`}</Txt></span>
           </button>
         ) : (
-          <p><Txt>{`一年级的课全部学完啦！`}</Txt></p>
+          <p><Txt>{`${studyGrade} 年级的课全部学完啦！`}</Txt></p>
+        )}
+        {due.length > 0 && (
+          <button className="big-btn secondary" onClick={() => go('/review')}>
+            <span className="big-icon">🧠</span><span><Txt>{`今日复习：${due.length} 个知识点`}</Txt></span>
+          </button>
         )}
         <p className="muted">今天已学 {formatMinutes(todayMs)}{settings.dailyMinutes ? ` · 家长建议每天 ${settings.dailyMinutes} 分钟` : ''}</p>
       </section>
