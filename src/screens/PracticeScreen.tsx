@@ -32,7 +32,7 @@ import { langForSubject, type FeedbackMessage } from '@/lesson/feedback';
 import type { Exercise, Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
-import { speak, stopSpeaking } from '@/speech/speech';
+import { prefetchSpeech, speak, speakablesOf, stopSpeaking } from '@/speech/speech';
 import { colors, radius, space, subjectTheme } from '@/theme';
 
 interface Round {
@@ -112,6 +112,10 @@ function PracticeSession({ id }: { id: string }) {
   const [teaching, setTeaching] = useState(() => !!slides && !state.results.some((r) => r.lessonId === id));
 
   useEffect(() => () => stopSpeaking(), []);
+  // 提前合成这一题和后面两题的朗读，进题时不用等网络（V4.2）
+  useEffect(() => {
+    prefetchSpeech((round?.exercises ?? []).slice(index, index + 3).flatMap(speakablesOf));
+  }, [round, index]);
 
   if (!round) {
     return (

@@ -59,7 +59,8 @@ with sync_playwright() as p:
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
     page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
     expect(tid(page, "teacher-entry")).to_have_count(0)
-    ok("默认未开启 AI：首页没有“问问星星宝”入口")
+    expect(tid(page, "teacher-setup")).to_contain_text("家长开启")  # V4.2：没开启时显示带锁的入口，点了去家长中心
+    ok("默认未开启 AI：首页“问星星宝”是带锁的入口（家长开启），不能直接提问")
 
     # ---------- 家长开启 AI ----------
     tid(page, "parent-entry").click(); gate(page)

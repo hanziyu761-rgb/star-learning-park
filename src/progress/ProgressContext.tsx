@@ -1,4 +1,4 @@
-import { AI_VOICE, aiTts, DEFAULT_AI_BASE_URL } from '@/ai/client';
+import { AI_VOICE, aiHealth, aiTts, DEFAULT_AI_BASE_URL } from '@/ai/client';
 import { setCloudVoice, setVoicePrefs } from '@/speech/speech';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createEmptyProgress, progressReducer, type ProgressAction, type ProgressState } from './model';
@@ -53,6 +53,8 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     setCloudVoice((item) => aiTts({ enabled: true, baseUrl }, item.text, AI_VOICE, 'normal'));
+    // 先叫醒 AI 服务（云函数平时休眠，第一次请求要多等几秒），孩子进题时就不用等了（V4.2）
+    aiHealth({ enabled: true, baseUrl }).catch(() => undefined);
     return () => setCloudVoice(null);
   }, [s.aiCloudVoice, s.aiBaseUrl]);
 

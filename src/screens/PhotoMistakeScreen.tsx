@@ -94,13 +94,13 @@ function PhotoBody() {
 
   const start = async (from: 'camera' | 'library') => {
     setError(null);
-    const p = await pickPhoto(from);
+    const p = await pickPhoto(from, () => setStep({ s: 'busy', text: '正在识别…' }));
     if (!p.ok) {
+      setStep({ s: 'home' });
       if (p.reason === 'denied') setError(from === 'camera' ? '没有相机权限，请在手机设置里允许本 APP 使用相机。' : '没有相册权限，请在手机设置里允许本 APP 读取照片。');
       else if (p.reason === 'error') setError(`没有拿到照片：${p.message ?? ''}`);
       return;
     }
-    setStep({ s: 'busy', text: '正在识别照片里的题目…（照片只用这一次，不保存）' });
     try {
       const r = await aiPhotoAnalyze(cfg, {
         image: p.dataUrl,
@@ -212,7 +212,7 @@ function SourceTag({ subject }: { subject: KpSubject }) {
     <Text style={styles.small}>同类题由原创出题程序出，答案由程序计算。</Text>
   ) : (
     <Text style={styles.aiTag} testID="photo-ai-label">
-      ⚠️ {AI_LABEL}。请家长先看一遍，发现错误可以删掉重出；这些题不会推给孩子。
+      ⚠️ {AI_LABEL}
     </Text>
   );
 }
@@ -236,11 +236,7 @@ function HomeView({
     <>
       <Card>
         <SectionTitle>拍一道错题</SectionTitle>
-        <Text style={styles.small}>
-          照片会经自家 AI 服务交给阿里云百炼识别，用完即丢，不保存；只保存识别出的文字。拍照前请避开孩子的姓名、学校等信息。
-        </Text>
-        {!cfgOk ? <Notice tone="warn" text="AI 老师还没有打开。请先在家长中心“AI 老师”设置里打开并填写服务地址。" /> : null}
-        <Text style={styles.label}>科目（可以不选，让 AI 判断）</Text>
+        {!cfgOk ? <Notice tone="warn" text="请先在家长中心打开 AI 老师。" /> : null}
         <View style={styles.chips}>
           <Chip label="自动" on={hint === ''} onPress={() => setHint('')} testID="photo-hint-auto" />
           {SUBJECTS.map((s) => (
@@ -255,8 +251,7 @@ function HomeView({
         </View>
       </Card>
       <Card>
-        <SectionTitle>已保存的拍照错题（{list.length}）</SectionTitle>
-        {list.length === 0 ? <Text style={styles.small}>还没有。</Text> : null}
+        <SectionTitle>已保存（{list.length}）</SectionTitle>
         {list.map((m) => (
           <Pressable key={m.id} onPress={() => onOpen(m.id)} style={styles.row} accessibilityRole="button" testID="photo-row">
             <Text style={styles.rowTag}>{SUBJECT_NAME[m.subject]}</Text>
@@ -292,7 +287,6 @@ function ConfirmView({ grade, initial, onCancel, onNext }: { grade: number; init
   return (
     <Card>
       <SectionTitle>核对识别结果</SectionTitle>
-      <Text style={styles.small}>AI 识别可能有错，请对照照片改正后再出题。</Text>
       <Text style={styles.label}>科目</Text>
       <View style={styles.chips}>
         {SUBJECTS.map((s) => (
@@ -301,7 +295,7 @@ function ConfirmView({ grade, initial, onCancel, onNext }: { grade: number; init
       </View>
       <Field label="题目" value={d.question} onChange={(v) => set({ question: v })} multiline testID="photo-question" />
       <Field label="孩子写的答案" value={d.childAnswer} onChange={(v) => set({ childAnswer: v })} testID="photo-child" />
-      <Field label="正确答案（AI 给的，可能不准）" value={d.correctAnswer} onChange={(v) => set({ correctAnswer: v })} testID="photo-correct" />
+      <Field label="正确答案（AI 识别，请核对）" value={d.correctAnswer} onChange={(v) => set({ correctAnswer: v })} testID="photo-correct" />
       <Field label="可能错在哪里" value={d.reason} onChange={(v) => set({ reason: v })} multiline testID="photo-reason" />
       <Text style={styles.label}>知识点（{grade} 年级{SUBJECT_NAME[d.subject]}）</Text>
       <View style={styles.chips}>
@@ -396,7 +390,7 @@ function DetailView({ id, onBack }: { id: string; onBack: () => void }) {
   return (
     <Card>
       <SectionTitle>{SUBJECT_NAME[m.subject]} · {m.kpName || '未选知识点'}</SectionTitle>
-      <Text style={styles.small}>{formatDateTime(m.at)} 拍照录入（照片没有保存）</Text>
+      <Text style={styles.small}>{formatDateTime(m.at)}</Text>
       <Text style={styles.label}>原题</Text>
       <Text style={styles.rowTitle} testID="photo-detail-question">{m.question}</Text>
       {m.childAnswer ? <Text style={styles.small}>孩子写的：{m.childAnswer}</Text> : null}

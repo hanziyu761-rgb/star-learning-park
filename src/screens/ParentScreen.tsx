@@ -107,9 +107,6 @@ function ParentDashboard() {
 
       <Card>
         <SectionTitle>拍照错题</SectionTitle>
-        <Text style={styles.small}>
-          孩子总错同一类题时，拍下错题：AI 识别题目和知识点，您确认后出 5 道同类题，可以打印。数学同类题由原创出题程序出（答案由程序计算）；语文、英语由 AI 出，未经人工审核。照片不保存。
-        </Text>
         <Pressable onPress={() => nav.push({ name: 'photo' })} style={styles.examBtn} accessibilityRole="button" testID="photo-entry">
           <Text style={styles.examBtnText}>📷 拍照错题{state.photoMistakes.length ? `（已存 ${state.photoMistakes.length} 道）` : ''}</Text>
         </Pressable>

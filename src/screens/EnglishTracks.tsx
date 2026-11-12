@@ -25,9 +25,6 @@ export function EnglishTracks({ state }: { state: ProgressState }) {
   const theme = subjectTheme.english;
   return (
     <View style={{ gap: space.lg }} testID="english-tracks">
-      <Text style={styles.note}>
-        一、二年级英语启蒙分三条主线，建议每天各做一点：先交流，再拼读，最后读一本小书。{STARTER_NOTE}
-      </Text>
       {TRACKS.map((t) => {
         const info = TRACK_INFO[t];
         const { total, done, next, lessons } = trackProgress(state, t);
@@ -40,7 +37,6 @@ export function EnglishTracks({ state }: { state: ProgressState }) {
                   {info.name} {info.en}
                 </Text>
                 <Text style={styles.sub}>配合：{info.book}</Text>
-                <Text style={styles.sub}>{info.role}</Text>
               </View>
               <Text style={[styles.count, { color: theme.color }]} testID={`track-progress-${t}`}>
                 {done}/{total}
@@ -75,6 +71,8 @@ export function EnglishTracks({ state }: { state: ProgressState }) {
           </View>
         );
       })}
+      {/* 版权说明：只留这一句，放在最下面 */}
+      <Text style={styles.note}>{STARTER_NOTE}</Text>
     </View>
   );
 }

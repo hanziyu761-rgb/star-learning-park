@@ -102,7 +102,7 @@ with sync_playwright() as p:
     page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
     tid(page, "subject-chinese").click(); page.wait_for_selector('[data-testid="subject-screen-chinese"]')
     entry = tid(page, "subject-mistakes-chinese")
-    expect(entry).to_contain_text("还有 1 道题没掌握")
+    expect(entry).to_have_text(re.compile(r"错题本\s*1$"))  # V4.2：入口只留名字和没掌握的题数
     page.screenshot(path=f"{OUT}/v221-subject-entry.png")
     entry.click(); page.wait_for_selector('[data-testid="mistakes-screen"]')
     expect(tid(page, "mistakes-open-count")).to_have_text("1")

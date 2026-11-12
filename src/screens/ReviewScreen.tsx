@@ -20,7 +20,7 @@ import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { mistakeQueue, reviewQueue, type ReviewItem } from '@/progress/plan';
 import { useProgress } from '@/progress/ProgressContext';
-import { speak, stopSpeaking } from '@/speech/speech';
+import { prefetchSpeech, speak, speakablesOf, stopSpeaking } from '@/speech/speech';
 import { colors, radius, space, subjectTheme } from '@/theme';
 
 export default function ReviewScreen({ subject }: { subject?: Subject } = {}) {
@@ -46,6 +46,10 @@ function ReviewSession({ subject }: { subject?: Subject }) {
   const [finished, setFinished] = useState(false);
 
   useEffect(() => () => stopSpeaking(), []);
+  // 提前合成这一题和后面两题的朗读（V4.2）
+  useEffect(() => {
+    prefetchSpeech(queue.slice(index, index + 3).flatMap((q) => speakablesOf(q.exercise)));
+  }, [queue, index]);
 
   useEffect(() => {
     if (queue.length === 0) speak({ text: '今天没有要复习的题目，你真棒！', lang: 'zh-CN' });

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { getLesson, lessonsFor, LESSONS } from '@/content';
+import { getLesson, LESSONS } from '@/content';
 import { plainText, zh } from '@/content/zh';
 import { Mascot } from '@/components/Mascot';
 import { DisplayTextView } from '@/components/PinyinText';
 import { LoadingView, Notice, Screen } from '@/components/Screen';
 import { BigButton, SpeakerButton, StarBadge, tapFeedback } from '@/components/ui';
-import type { Subject } from '@/lesson/types';
+import type { DisplayText, Subject } from '@/lesson/types';
 import { GREETING } from '@/content/greeting';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
@@ -17,6 +17,7 @@ import { recommendedSubject } from '@/thinking/registry';
 import { dayKey } from '@/progress/srs';
 import { computeMastery } from '@/knowledge/mastery';
 import { recommendKps } from '@/knowledge/recommend';
+import { nextUp } from '@/progress/nextUp';
 import { completedSubjectToday, isSameLocalDay, SUBJECTS } from '@/progress/stats';
 import { speak } from '@/speech/speech';
 import { colors, radius, shadow, space, subjectTheme } from '@/theme';
@@ -27,6 +28,42 @@ const SUBJECT_LABEL: Record<Subject, { text: ReturnType<typeof zh>; say: string 
   english: { text: zh('英语', 'yīng yǔ'), say: '英语' },
 };
 
+/** 首页功能小方块：图标 + 名字（点了先读名字再进入） */
+function Tile({
+  testID,
+  emoji,
+  text,
+  say,
+  color,
+  onPress,
+  children,
+}: {
+  testID: string;
+  emoji: string;
+  text: DisplayText;
+  say: string;
+  color: string;
+  onPress: () => void;
+  children?: React.ReactNode;
+}) {
+  return (
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={say}
+      onPress={() => {
+        tapFeedback();
+        speak({ text: say, lang: 'zh-CN' });
+        onPress();
+      }}
+      style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
+    >
+      <Text style={styles.tileEmoji}>{emoji}</Text>
+      <DisplayTextView text={text} size={19} color={color} nowrap />
+      {children}
+    </Pressable>
+  );
+}
 
 export default function HomeScreen() {
   // 特别窄的手机（宽度 < 350）问候语字小一点，免得“！”单独掉到下一行
@@ -68,16 +105,6 @@ export default function HomeScreen() {
         </Pressable>
         <SpeakerButton item={GREETING} size={narrow ? 40 : 46} color={colors.parent} testID="home-greeting-speak" />
         <StarBadge count={state.totalStars} testID="total-stars" />
-      </View>
-      <View style={styles.welcomeRow}>
-        <Pressable
-          style={{ flex: 1, alignItems: 'flex-start' }}
-          onPress={() => speak(GREETING)}
-          accessibilityRole="button"
-          testID="home-welcome"
-        >
-          <DisplayTextView text={zh('欢迎来到林亨学习乐园！', 'huān yíng lái dào lín hēng xué xí lè yuán')} size={narrow ? 19 : 22} />
-        </Pressable>
       </View>
 
       {loadProblem ? (
@@ -137,98 +164,6 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* 我的知识小地图（一年级数学） */}
-      <Pressable
-        testID="map-entry"
-        accessibilityRole="button"
-        onPress={() => {
-          tapFeedback();
-          speak({ text: '我的知识小地图', lang: 'zh-CN' });
-          nav.push({ name: 'map' });
-        }}
-        style={[styles.continue, { borderColor: subjectTheme.math.color }]}
-      >
-        <Text style={styles.continueEmoji}>🗺️</Text>
-        <View style={{ flex: 1 }}>
-          <DisplayTextView
-            text={zh('我的知识小地图', 'wǒ de zhī shi xiǎo dì tú')}
-            size={20}
-            nowrap
-            color={subjectTheme.math.color}
-          />
-          <Text style={styles.continueSub}>数学 · 看看学会了哪些本领</Text>
-        </View>
-        {mapTodo > 0 ? (
-          <Text style={styles.badge} testID="map-todo-count">
-            {mapTodo}
-          </Text>
-        ) : null}
-        <Text style={styles.play}>▶️</Text>
-      </Pressable>
-
-      {/* 每日挑战：思维题（V2.5） */}
-      <Pressable
-        testID="challenge-entry"
-        accessibilityRole="button"
-        onPress={() => {
-          tapFeedback();
-          speak({ text: '每日挑战', lang: 'zh-CN' });
-          nav.push({ name: 'challenge' });
-        }}
-        style={[styles.continue, { borderColor: '#E07A2E' }]}
-      >
-        <Text style={styles.continueEmoji}>🧩</Text>
-        <View style={{ flex: 1 }}>
-          <DisplayTextView text={zh('每日挑战', 'měi rì tiǎo zhàn')} size={22} color="#E07A2E" />
-          <Text style={styles.continueSub} testID="challenge-status">
-            {thinking.doneToday
-              ? `今天完成了${thinking.streak > 1 ? ` · 连续 ${thinking.streak} 天` : ''}`
-              : `动动脑筋 · 今天推荐${{ math: '数学', chinese: '语文', english: '英语' }[recommendedSubject(dayKey(now))]}`}
-          </Text>
-        </View>
-        {thinking.doneToday ? <Text style={styles.play}>✅</Text> : <Text style={styles.play}>▶️</Text>}
-      </Pressable>
-
-      {/* 游戏乐园（V2.19） */}
-      <Pressable
-        testID="games-entry"
-        accessibilityRole="button"
-        onPress={() => {
-          tapFeedback();
-          speak({ text: '游戏乐园', lang: 'zh-CN' });
-          nav.push({ name: 'games' });
-        }}
-        style={[styles.continue, { borderColor: '#E8772E' }]}
-      >
-        <Text style={{ fontSize: 40 }}>🎮</Text>
-        <View style={{ flex: 1 }}>
-          <DisplayTextView text={zh('游戏乐园', 'yóu xì lè yuán')} size={22} color="#E8772E" />
-          <Text style={styles.continueSub}>凑数小厨房 · 拼音钓鱼 · 拼词泡泡</Text>
-        </View>
-        <Text style={styles.play}>▶️</Text>
-      </Pressable>
-
-      {/* AI 老师入口：家长开启后才显示 */}
-      {state.settings.aiEnabled ? (
-        <Pressable
-          testID="teacher-entry"
-          accessibilityRole="button"
-          onPress={() => {
-            tapFeedback();
-            speak({ text: '问问星星宝', lang: 'zh-CN' });
-            nav.push({ name: 'teacher' });
-          }}
-          style={[styles.continue, { borderColor: colors.parent }]}
-        >
-          <Mascot size={48} bounce={false} />
-          <View style={{ flex: 1 }}>
-            <DisplayTextView text={zh('问问星星宝', 'wèn wen xīng xing bǎo')} size={22} color={colors.parent} />
-            <Text style={styles.continueSub}>AI 老师 · 有问题就问我</Text>
-          </View>
-          <Text style={styles.play}>💬</Text>
-        </Pressable>
-      ) : null}
-
       {/* 今日学习任务 */}
       <View style={styles.panel} testID="today-tasks">
         <View style={styles.panelHead}>
@@ -265,38 +200,60 @@ export default function HomeScreen() {
           </Pressable>
         ) : null}
         {SUBJECTS.map((s) => {
-          const lesson = lessonsFor(s)[0];
+          const next = nextUp(state, s, now);
           const done = completedSubjectToday(state, s, now);
           return (
             <Pressable
               key={s}
               testID={`task-${s}`}
               accessibilityRole="button"
-              onPress={() => lesson && nav.push({ name: 'lesson', id: lesson.id })}
+              onPress={() => next && nav.push(next.route)}
               style={styles.task}
             >
-              <Text style={styles.taskEmoji}>{done ? '✅' : subjectTheme[s].emoji}</Text>
+              <Text style={styles.taskEmoji}>{done ? '✅' : (next?.emoji ?? subjectTheme[s].emoji)}</Text>
               <View style={{ flex: 1 }}>
-                <DisplayTextView text={lesson ? lesson.title : SUBJECT_LABEL[s].text} size={20} />
+                <DisplayTextView text={next ? next.title : SUBJECT_LABEL[s].text} size={20} />
               </View>
-              <DisplayTextView
-                text={done ? zh('完成', 'wán chéng') : zh('去学习', 'qù xué xí')}
-                size={16}
-                color={done ? colors.correct : colors.primary}
-              />
+              <Text style={[styles.go, { color: subjectTheme[s].color }]}>›</Text>
             </Pressable>
           );
         })}
       </View>
 
+      {/* 功能入口：2×2 小方块（V4.2 去掉说明文字，靠图标和名字） */}
+      <View style={styles.tiles}>
+        <Tile testID="map-entry" emoji="🗺️" text={zh('知识地图', 'zhī shi dì tú')} say="我的知识小地图" color={subjectTheme.math.color} onPress={() => nav.push({ name: 'map' })}>
+          {mapTodo > 0 ? (
+            <Text style={styles.badge} testID="map-todo-count">
+              {mapTodo}
+            </Text>
+          ) : null}
+        </Tile>
+        <Tile testID="challenge-entry" emoji={thinking.doneToday ? '✅' : '🧩'} text={zh('每日挑战', 'měi rì tiǎo zhàn')} say="每日挑战" color="#E07A2E" onPress={() => nav.push({ name: 'challenge' })}>
+          <Text style={styles.tileNote} testID="challenge-status">
+            {thinking.doneToday
+              ? `今天完成了${thinking.streak > 1 ? ` · 连续 ${thinking.streak} 天` : ''}`
+              : `今天推荐${{ math: '数学', chinese: '语文', english: '英语' }[recommendedSubject(dayKey(now))]}`}
+          </Text>
+        </Tile>
+        <Tile testID="games-entry" emoji="🎮" text={zh('游戏乐园', 'yóu xì lè yuán')} say="游戏乐园" color="#E8772E" onPress={() => nav.push({ name: 'games' })} />
+        {/* 星星宝（AI 老师）：家长没开启时也显示入口，点了去家长中心开启（V4.2：平板上找不到入口） */}
+        {state.settings.aiEnabled ? (
+          <Tile testID="teacher-entry" emoji="⭐" text={zh('问星星宝', 'wèn xīng xing bǎo')} say="问问星星宝" color={colors.parent} onPress={() => nav.push({ name: 'teacher' })} />
+        ) : (
+          <Tile testID="teacher-setup" emoji="⭐" text={zh('问星星宝', 'wèn xīng xing bǎo')} say="请爸爸妈妈在家长中心打开星星宝" color={colors.parent} onPress={() => nav.push({ name: 'parent' })}>
+            <Text style={styles.tileNote}>🔒 家长开启</Text>
+          </Tile>
+        )}
+      </View>
+
       {/* 学习进度 */}
       <View style={styles.panel} testID="progress-panel">
-        <DisplayTextView text={zh('我的进度', 'wǒ de jìn dù')} size={22} />
         <View style={styles.barBg}>
           <View style={[styles.barFill, { width: `${(completedLessons / LESSONS.length) * 100}%` }]} />
         </View>
         <Text style={styles.progressText} testID="lessons-completed">
-          已学会 {completedLessons} / {LESSONS.length} 节课
+          {completedLessons} / {LESSONS.length} 节课
         </Text>
       </View>
 
@@ -315,7 +272,22 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  welcomeRow: { alignItems: 'flex-start' },
+  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
+  tile: {
+    flexGrow: 1,
+    flexBasis: '40%',
+    minHeight: 116,
+    backgroundColor: '#fff',
+    borderRadius: radius.lg,
+    padding: space.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    ...shadow,
+  },
+  tileEmoji: { fontSize: 38 },
+  tileNote: { fontSize: 12, color: colors.textSoft },
+  go: { fontSize: 30, fontWeight: '900' },
   continue: {
     flexDirection: 'row',
     alignItems: 'center',

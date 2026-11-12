@@ -12,7 +12,7 @@ import { ExerciseView } from '@/exercises/ExerciseView';
 import { AskTeacher } from '@/ai/AskTeacher';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDuration } from '@/progress/stats';
-import { speak, stopSpeaking } from '@/speech/speech';
+import { prefetchSpeech, speak, speakablesOf, stopSpeaking } from '@/speech/speech';
 import { colors, radius, space, subjectTheme } from '@/theme';
 import { langForSubject, type FeedbackMessage } from './feedback';
 import { DialogueStep, PictureBookStep, ReadPassageStep, RepeatStep, TeachCardsStep } from './steps/GeneralSteps';
@@ -52,6 +52,15 @@ export function LessonPlayer({ lesson, resume, onExit, onHome }: Props) {
   }, []);
 
   const step = lesson.steps[index];
+  // 提前合成这一步和后面两步的朗读，进题时不用等网络（V4.2；有预录音频的会自动跳过）
+  useEffect(() => {
+    prefetchSpeech(
+      lesson.steps.slice(index, index + 3).flatMap((st) => [
+        'title' in st ? st.title.speak : undefined,
+        ...(st.kind === 'exercise' ? speakablesOf(st.exercise) : []),
+      ]),
+    );
+  }, [lesson, index]);
 
   const handleDone = useCallback(
     (outcome?: ExerciseOutcome) => {

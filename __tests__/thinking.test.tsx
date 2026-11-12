@@ -5,7 +5,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import type { ChoiceExercise, PuzzleFigure } from '@/lesson/types';
+import type { ChoiceExercise, MultiExercise, PuzzleFigure } from '@/lesson/types';
 import { NavProvider } from '@/nav/Nav';
 import {
   createEmptyProgress,
@@ -488,8 +488,14 @@ describe('每日挑战页面', () => {
       expect(subjectOfType(e.type)).toBe(subj);
       expect(screen.getByTestId('challenge-type').props.children).toBe(CHALLENGE_BY_TYPE[e.type].name);
     }
-    const ex = dailyChallenge(day, 1, 0, 'math') as ChoiceExercise;
-    await fireEvent.press(screen.getByTestId(`option-${ex.answerId}`));
+    // 每年约有 40 天数学挑战是多选题（一题多解），其余是单选题：两种都要能答（原来只按单选写，遇到多选日测试会失败）
+    const ex = dailyChallenge(day, 1, 0, 'math') as ChoiceExercise | MultiExercise;
+    if (ex.kind === 'multi') {
+      for (const id of ex.answerIds) await fireEvent.press(screen.getByTestId(`multi-${id}`));
+      await fireEvent.press(screen.getByTestId('multi-ok'));
+    } else {
+      await fireEvent.press(screen.getByTestId(`option-${ex.answerId}`));
+    }
     expect(await screen.findByTestId('challenge-result')).toBeTruthy();
     expect(screen.getByTestId('challenge-stars').props.children.join('')).toContain('⭐⭐');
     await fireEvent.press(screen.getByTestId('challenge-more'));

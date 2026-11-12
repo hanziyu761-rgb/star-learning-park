@@ -6,7 +6,7 @@
  * 4. 都不行（没网、没配置）时才用手机自带语音（expo-speech），音调调高一点接近童声
  */
 import * as Speech from 'expo-speech';
-import { clipId, playClip, playUri, stopClip } from './clips';
+import { clipId, findClip, playClip, playUri, stopClip } from './clips';
 import { cachedTts, saveTts } from './ttsCache';
 import type { Speakable } from '@/lesson/types';
 
@@ -68,6 +68,50 @@ export function setCloudVoice(f: CloudVoice | null) {
 }
 export const hasCloudVoice = () => cloudVoice !== null;
 
+/* ───── 提前合成（V4.2）：题目还没读到就先把童声准备好，进题时不用等网络 ───── */
+const inflight = new Map<string, Promise<string>>();
+export const PREFETCH_PAUSE_MS = 60_000;
+let prefetchPausedUntil = 0;
+/** 测试用 */
+export const _resetPrefetchPause = () => {
+  prefetchPausedUntil = 0;
+};
+/** 联网合成最多等这么久，超时这一次先用手机语音读（合成好的仍会存下，下次就是童声） */
+export const CLOUD_WAIT_MS = 1500;
+
+function fetchCloud(item: Speakable, cid: string): Promise<string> {
+  const running = inflight.get(cid);
+  if (running) return running;
+  const p = cloudVoice!(item)
+    .then((uri) => {
+      if (!item.cloud) void saveTts(cid, uri); // 后台存到手机里，这次先直接播放
+      return uri;
+    })
+    .finally(() => inflight.delete(cid));
+  inflight.set(cid, p);
+  return p;
+}
+
+/** 后台把接下来要读的句子先合成好存到手机里（已有录音或缓存的跳过）；失败不提示 */
+export function prefetchSpeech(items: (Speakable | undefined)[]): void {
+  // 合成服务刚失败过（没网、没配置、太频繁）：歇一分钟再提前合成，不反复打扰服务
+  if (!cloudVoice || Date.now() < prefetchPausedUntil) return;
+  for (const item of items) {
+    if (!item || item.cloud || !item.text.trim()) continue;
+    if (findClip(item) !== undefined) continue;
+    const cid = clipId(item.lang, item.text.trim());
+    if (cachedTts(cid) || inflight.has(cid)) continue;
+    fetchCloud(item, cid).catch(() => {
+      prefetchPausedUntil = Date.now() + PREFETCH_PAUSE_MS;
+    });
+  }
+}
+
+/** 一道题进题时会读的句子（题目，以及“听一听”的内容） */
+export function speakablesOf(ex: { prompt?: { speak?: Speakable }; listen?: Speakable }): Speakable[] {
+  return [ex.prompt?.speak, ex.listen].filter((x): x is Speakable => !!x);
+}
+
 /** 打断当前朗读，立即朗读新内容 */
 export function speak(item: Speakable, onDone?: () => void, override?: { voice?: string }): void {
   const id = ++speakingId;
@@ -88,16 +132,25 @@ export function speak(item: Speakable, onDone?: () => void, override?: { voice?:
   const cid = clipId(item.lang, item.text.trim());
   const local = cachedTts(cid);
   if (local && playUri(local, finish, () => id === speakingId && phone(), rate)) return;
-  // 3. 联网现念
+  // 3. 联网现念（题目朗读最多等 CLOUD_WAIT_MS；星星宝的回答每次不同，一直等）
   if (cloudVoice) {
-    cloudVoice(item).then(
+    let settled = false;
+    const fallback = () => {
+      if (settled) return;
+      settled = true;
+      if (id === speakingId) phone();
+    };
+    const timer = item.cloud ? null : setTimeout(fallback, CLOUD_WAIT_MS);
+    fetchCloud(item, cid).then(
       (uri) => {
-        if (id !== speakingId) return; // 已经被新的朗读打断
-        if (!item.cloud) void saveTts(cid, uri); // 星星宝每次说的话都不一样，不存
+        if (timer) clearTimeout(timer);
+        if (settled || id !== speakingId) return; // 已经超时改用手机语音，或被新的朗读打断
+        settled = true;
         if (!playUri(uri, finish, () => id === speakingId && phone(), rate)) phone();
       },
       () => {
-        if (id === speakingId) phone();
+        if (timer) clearTimeout(timer);
+        fallback();
       },
     );
     return;
