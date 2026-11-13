@@ -1,8 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
 import type { FeedbackMessage } from '@/lesson/feedback';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { Mascot } from './Mascot';
 import { DisplayTextView } from './PinyinText';
 
@@ -14,7 +14,8 @@ export function FeedbackBar({ message }: { message: FeedbackMessage | null }) {
   const fg = message.kind === 'correct' ? colors.correct : message.kind === 'wrong' ? colors.wrong : colors.text;
   return (
     <Animated.View
-      entering={FadeInDown.duration(250)}
+      entering={FadeInDown.springify().damping(14).stiffness(180)}
+      exiting={FadeOut.duration(120)}
       style={[styles.bar, { backgroundColor: bg }]}
       testID={`feedback-${message.kind}`}
       accessibilityLiveRegion="polite"
@@ -33,15 +34,16 @@ export function FeedbackBar({ message }: { message: FeedbackMessage | null }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: radius.md,
-    paddingVertical: 4,
-    paddingHorizontal: space.sm,
+    borderCurve: 'continuous',
+    paddingVertical: space.sm,
+    paddingHorizontal: space.md,
     gap: space.sm,
   },
   texts: { flex: 1, alignItems: 'center', gap: 2 },
   note: { fontSize: 13, color: colors.textSoft, textAlign: 'center' },
-});
+}));

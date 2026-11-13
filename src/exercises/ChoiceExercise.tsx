@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { VisualView } from '@/components/Figure';
 import { DisplayTextView } from '@/components/PinyinText';
 import { SpeakerButton, tapFeedback } from '@/components/ui';
 import type { ChoiceExercise as ChoiceExerciseData } from '@/lesson/types';
 import { speakSequence } from '@/speech/speech';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 /**
@@ -97,6 +98,8 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
               accessibilityRole="button"
               accessibilityState={{ disabled: isWrong || solved || locked }}
               disabled={isWrong || solved || locked}
+              pop={isRight}
+              shake={isWrong}
               onPress={() => choose(opt.id)}
               style={({ pressed }) => [
                 styles.option,
@@ -130,10 +133,10 @@ export function ChoiceExercise({ exercise, lang, onFeedback, onSolved }: Exercis
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
   listen: { alignItems: 'center', paddingVertical: space.sm },
-  stem: { alignItems: 'center', backgroundColor: '#fff', borderRadius: radius.md, padding: space.md },
+  stem: { alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.md, padding: space.md },
   stemEmoji: { fontSize: 44, textAlign: 'center', letterSpacing: 4 },
   options: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md },
   option: {
@@ -141,9 +144,9 @@ const styles = StyleSheet.create({
     flexBasis: '42%',
     flexGrow: 1,
     minHeight: MIN_TOUCH * 1.6,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
-    borderWidth: 4,
+    borderWidth: 3,
     borderColor: colors.line,
     alignItems: 'center',
     justifyContent: 'center',
@@ -156,5 +159,5 @@ const styles = StyleSheet.create({
   pressed: { transform: [{ scale: 0.96 }] },
   optEmoji: { fontSize: 52 },
   cooldown: { textAlign: 'center', fontSize: 15, fontWeight: '700', color: colors.textSoft },
-  mark: { position: 'absolute', top: 6, right: 12, fontSize: 26, fontWeight: '900', color: colors.wrong },
-});
+  mark: { position: 'absolute', top: 6, right: 12, fontSize: 26, fontWeight: '700', color: colors.wrong },
+}));

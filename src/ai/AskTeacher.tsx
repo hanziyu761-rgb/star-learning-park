@@ -3,14 +3,15 @@
  * 家长没有开启 AI 老师时，这个组件完全不显示。
  */
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { skillLabel } from '@/content';
 import { Mascot } from '@/components/Mascot';
 import { SpeakerButton, tapFeedback } from '@/components/ui';
 import type { Exercise, Subject } from '@/lesson/types';
 import { useProgress } from '@/progress/ProgressContext';
 import { speak } from '@/speech/speech';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { AiError, aiHint, AI_ERROR_TEXT } from './client';
 import { describeExercise } from './describe';
 import { contentGrade } from '@/progress/grade';
@@ -67,30 +68,30 @@ export function AskTeacher({ exercise, subject, solved }: { exercise: Exercise; 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.sm },
   btn: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'center',
     gap: space.sm,
-    backgroundColor: '#EEEDFB',
+    backgroundColor: colors.parentSoft,
     borderRadius: radius.round,
     paddingHorizontal: space.lg,
     paddingVertical: space.xs,
     minHeight: 52,
   },
-  btnText: { fontSize: 17, fontWeight: '800', color: colors.parent },
+  btnText: { fontSize: 17, fontWeight: '600', color: colors.parent },
   bubble: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
-    backgroundColor: '#F7F6FF',
+    backgroundColor: colors.parentSoft,
     borderRadius: radius.md,
     borderWidth: 2,
-    borderColor: '#D9D6FF',
+    borderColor: colors.line,
     padding: space.md,
   },
-  bubbleError: { borderColor: colors.line, backgroundColor: '#FFF8E6' },
+  bubbleError: { borderColor: colors.line, backgroundColor: colors.orangeSoft },
   reply: { flex: 1, fontSize: 18, lineHeight: 26, color: colors.text },
-});
+}));

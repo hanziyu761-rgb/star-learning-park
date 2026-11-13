@@ -4,7 +4,8 @@
  * 三年级起是多音字：显示整句话、这个字标红；答题前不朗读（朗读会把答案说出来），答对后再读整句。
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Animated, Easing, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Platform, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { DisplayTextView } from '@/components/PinyinText';
 import { useLayout } from '@/components/useLayout';
 import { ROUND_SIZE } from '@/games/common';
@@ -12,6 +13,7 @@ import { fishRound } from '@/games/fish';
 import type { GameProps } from '@/screens/GameScreen';
 import { speak } from '@/speech/speech';
 import { gt } from './text';
+import { themed } from '@/theme';
 
 const MAIN = '#1C7FB5';
 const FISH = ['🐟', '🐠', '🐡', '🐟'];
@@ -173,14 +175,14 @@ function SwimmingFish({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 14, gap: 12 },
   tabletCol: { width: '100%', maxWidth: 760, alignSelf: 'center' },
   wideRoot: { flexDirection: 'row', gap: 28, paddingHorizontal: 28 },
   progress: { textAlign: 'center', fontSize: 14, color: '#3A6B85', fontWeight: '700' },
   card: { backgroundColor: '#fff', borderRadius: 24, borderWidth: 3, borderColor: MAIN, padding: 14, alignItems: 'center', gap: 6 },
-  char: { fontSize: 72, fontWeight: '900', color: '#1B2B34' },
-  sentence: { fontSize: 30, fontWeight: '800', color: '#1B2B34', textAlign: 'center', lineHeight: 42 },
+  char: { fontSize: 72, fontWeight: '700', color: '#1B2B34' },
+  sentence: { fontSize: 30, fontWeight: '600', color: '#1B2B34', textAlign: 'center', lineHeight: 42 },
   target: { color: '#E53935', fontSize: 38 },
   speakHint: { fontSize: 13, color: '#6A8FA3' },
   pond: { flex: 1, backgroundColor: '#7EC8E3', borderRadius: 28, padding: 12, justifyContent: 'space-around', minHeight: 260 },
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
   fish: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 28, paddingHorizontal: 18, minHeight: 56 },
   fishCaught: { backgroundColor: '#C8F0D2' },
   fishEmoji: { fontSize: 32 },
-  fishPy: { fontSize: 28, fontWeight: '800', color: '#0F4C6B', minWidth: 80, textAlign: 'center' },
+  fishPy: { fontSize: 28, fontWeight: '600', color: '#0F4C6B', minWidth: 80, textAlign: 'center' },
   status: { minHeight: 34, alignItems: 'center', justifyContent: 'center' },
   nextBtn: { minHeight: 60, borderRadius: 30, backgroundColor: MAIN, alignItems: 'center', justifyContent: 'center' },
-});
+}));

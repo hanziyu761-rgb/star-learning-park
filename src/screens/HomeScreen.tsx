@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { getLesson, LESSONS } from '@/content';
 import { plainText, zh } from '@/content/zh';
 import { Mascot } from '@/components/Mascot';
@@ -20,7 +21,11 @@ import { recommendKps } from '@/knowledge/recommend';
 import { nextUp } from '@/progress/nextUp';
 import { completedSubjectToday, isSameLocalDay, SUBJECTS } from '@/progress/stats';
 import { speak } from '@/speech/speech';
-import { colors, radius, shadow, space, subjectTheme } from '@/theme';
+import { colors, radius, shadow, space, spring, subjectTheme, themed, type } from '@/theme';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+
+/** 首页各块依次轻轻浮上来（弹簧） */
+const enter = (i: number) => FadeInDown.delay(60 * i).springify().damping(spring.release.damping + 8).stiffness(spring.release.stiffness);
 
 const SUBJECT_LABEL: Record<Subject, { text: ReturnType<typeof zh>; say: string }> = {
   math: { text: zh('数学', 'shù xué'), say: '数学' },
@@ -56,7 +61,7 @@ function Tile({
         speak({ text: say, lang: 'zh-CN' });
         onPress();
       }}
-      style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
+      style={styles.tile}
     >
       <Text style={styles.tileEmoji}>{emoji}</Text>
       <DisplayTextView text={text} size={19} color={color} nowrap />
@@ -140,7 +145,7 @@ export default function HomeScreen() {
       ) : null}
 
       {/* 三个学科入口 */}
-      <View style={styles.subjects}>
+      <Animated.View entering={enter(0)} style={styles.subjects}>
         {SUBJECTS.map((s) => (
           <Pressable
             key={s}
@@ -152,20 +157,18 @@ export default function HomeScreen() {
               speak({ text: SUBJECT_LABEL[s].say, lang: 'zh-CN' });
               nav.push({ name: 'subject', subject: s });
             }}
-            style={({ pressed }) => [
-              styles.subject,
-              { backgroundColor: subjectTheme[s].color },
-              pressed && styles.pressed,
-            ]}
+            style={[styles.subject, { backgroundColor: subjectTheme[s].soft }]}
           >
-            <Text style={styles.subjectEmoji}>{subjectTheme[s].emoji}</Text>
-            <DisplayTextView text={SUBJECT_LABEL[s].text} size={30} color="#fff" />
+            <View style={[styles.subjectIcon, { backgroundColor: colors.card }]}>
+              <Text style={styles.subjectEmoji}>{subjectTheme[s].emoji}</Text>
+            </View>
+            <DisplayTextView text={SUBJECT_LABEL[s].text} size={28} color={subjectTheme[s].color} />
           </Pressable>
         ))}
-      </View>
+      </Animated.View>
 
       {/* 今日学习任务 */}
-      <View style={styles.panel} testID="today-tasks">
+      <Animated.View entering={enter(1)} style={styles.panel} testID="today-tasks">
         <View style={styles.panelHead}>
           <DisplayTextView text={zh('今天的任务', 'jīn tiān de rèn wu')} size={22} />
           <Text style={styles.panelCount}>
@@ -214,14 +217,14 @@ export default function HomeScreen() {
               <View style={{ flex: 1 }}>
                 <DisplayTextView text={next ? next.title : SUBJECT_LABEL[s].text} size={20} />
               </View>
-              <Text style={[styles.go, { color: subjectTheme[s].color }]}>›</Text>
+              <Text style={styles.go}>›</Text>
             </Pressable>
           );
         })}
-      </View>
+      </Animated.View>
 
       {/* 功能入口：2×2 小方块（V4.2 去掉说明文字，靠图标和名字） */}
-      <View style={styles.tiles}>
+      <Animated.View entering={enter(2)} style={styles.tiles}>
         <Tile testID="map-entry" emoji="🗺️" text={zh('知识地图', 'zhī shi dì tú')} say="我的知识小地图" color={subjectTheme.math.color} onPress={() => nav.push({ name: 'map' })}>
           {mapTodo > 0 ? (
             <Text style={styles.badge} testID="map-todo-count">
@@ -229,14 +232,14 @@ export default function HomeScreen() {
             </Text>
           ) : null}
         </Tile>
-        <Tile testID="challenge-entry" emoji={thinking.doneToday ? '✅' : '🧩'} text={zh('每日挑战', 'měi rì tiǎo zhàn')} say="每日挑战" color="#E07A2E" onPress={() => nav.push({ name: 'challenge' })}>
+        <Tile testID="challenge-entry" emoji={thinking.doneToday ? '✅' : '🧩'} text={zh('每日挑战', 'měi rì tiǎo zhàn')} say="每日挑战" color={colors.primary} onPress={() => nav.push({ name: 'challenge' })}>
           <Text style={styles.tileNote} testID="challenge-status">
             {thinking.doneToday
               ? `今天完成了${thinking.streak > 1 ? ` · 连续 ${thinking.streak} 天` : ''}`
               : `今天推荐${{ math: '数学', chinese: '语文', english: '英语' }[recommendedSubject(dayKey(now))]}`}
           </Text>
         </Tile>
-        <Tile testID="games-entry" emoji="🎮" text={zh('游戏乐园', 'yóu xì lè yuán')} say="游戏乐园" color="#E8772E" onPress={() => nav.push({ name: 'games' })} />
+        <Tile testID="games-entry" emoji="🎮" text={zh('游戏乐园', 'yóu xì lè yuán')} say="游戏乐园" color={colors.starDeep} onPress={() => nav.push({ name: 'games' })} />
         {/* 星星宝（AI 老师）：家长没开启时也显示入口，点了去家长中心开启（V4.2：平板上找不到入口） */}
         {state.settings.aiEnabled ? (
           <Tile testID="teacher-entry" emoji="⭐" text={zh('问星星宝', 'wèn xīng xing bǎo')} say="问问星星宝" color={colors.parent} onPress={() => nav.push({ name: 'teacher' })} />
@@ -245,7 +248,7 @@ export default function HomeScreen() {
             <Text style={styles.tileNote}>🔒 家长开启</Text>
           </Tile>
         )}
-      </View>
+      </Animated.View>
 
       {/* 学习进度 */}
       <View style={styles.panel} testID="progress-panel">
@@ -270,74 +273,94 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
+  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: space.lg },
   tile: {
     flexGrow: 1,
     flexBasis: '40%',
-    minHeight: 116,
-    backgroundColor: '#fff',
+    minHeight: 128,
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
-    padding: space.md,
+    borderCurve: 'continuous',
+    padding: space.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 6,
     ...shadow,
   },
-  tileEmoji: { fontSize: 38 },
-  tileNote: { fontSize: 12, color: colors.textSoft },
-  go: { fontSize: 30, fontWeight: '900' },
+  tileEmoji: { fontSize: 36 },
+  tileNote: { ...type.caption, color: colors.textSoft },
+  go: { fontSize: 28, fontWeight: '400', color: colors.textFaint },
   continue: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space.md,
-    backgroundColor: '#fff',
+    gap: space.lg,
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
-    padding: space.md,
-    borderWidth: 4,
+    borderCurve: 'continuous',
+    paddingVertical: space.lg,
+    paddingHorizontal: space.xl - 4,
+    borderWidth: 0,
     ...shadow,
   },
-  continueEmoji: { fontSize: 44 },
-  continueSub: { fontSize: 14, color: colors.textSoft, marginTop: 2 },
-  play: { fontSize: 36 },
-  subjects: { flexDirection: 'row', gap: space.md },
+  continueEmoji: { fontSize: 40 },
+  continueSub: { ...type.footnote, color: colors.textSoft, marginTop: 2 },
+  play: { fontSize: 32 },
+  subjects: { flexDirection: 'row', gap: space.lg },
   subject: {
     flex: 1,
-    aspectRatio: 0.8,
-    minHeight: 130,
+    aspectRatio: 0.82,
+    minHeight: 136,
     borderRadius: radius.lg,
+    borderCurve: 'continuous',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: space.sm,
+    gap: space.md,
+  },
+  subjectIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
     ...shadow,
   },
-  subjectEmoji: { fontSize: 46 },
-  pressed: { transform: [{ scale: 0.95 }] },
-  panel: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, gap: space.sm, ...shadow },
-  panelHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  panelCount: { fontSize: 20, fontWeight: '900', color: colors.primary },
+  subjectEmoji: { fontSize: 38 },
+  panel: {
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    borderCurve: 'continuous',
+    paddingVertical: space.lg,
+    paddingHorizontal: space.xl - 4,
+    gap: space.xs,
+    ...shadow,
+  },
+  panelHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: space.sm },
+  panelCount: { ...type.title3, color: colors.textSoft, fontVariant: ['tabular-nums'] },
   task: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
-    minHeight: 64,
-    borderTopWidth: 1,
+    minHeight: 68,
+    borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.line,
   },
-  taskEmoji: { fontSize: 30 },
+  taskEmoji: { fontSize: 28 },
   badge: {
-    minWidth: 26,
-    paddingHorizontal: 6,
-    borderRadius: 13,
+    minWidth: 24,
+    height: 24,
+    lineHeight: 24,
+    paddingHorizontal: 7,
+    borderRadius: 12,
     backgroundColor: colors.wrong,
-    color: '#fff',
-    fontWeight: '900',
-    fontSize: 15,
+    color: colors.onAccent,
+    fontWeight: '700',
+    fontSize: 14,
     textAlign: 'center',
     overflow: 'hidden',
   },
-  barBg: { height: 18, borderRadius: radius.round, backgroundColor: '#F3E9D2', overflow: 'hidden' },
+  barBg: { height: 10, borderRadius: radius.round, backgroundColor: colors.cardAlt, overflow: 'hidden' },
   barFill: { height: '100%', backgroundColor: colors.star, borderRadius: radius.round },
-  progressText: { fontSize: 16, color: colors.textSoft, fontWeight: '700' },
-});
+  progressText: { ...type.subhead, color: colors.textSoft, fontWeight: '600' },
+}));

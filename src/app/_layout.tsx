@@ -7,7 +7,7 @@ import { OrientationGate } from '@/components/OrientationGate';
 import { SplashGate } from '@/components/SplashGate';
 import { NavProvider } from '@/nav/Nav';
 import { expoRouterNav } from '@/nav/expoRouterNav';
-import { ProgressProvider } from '@/progress/ProgressContext';
+import { ProgressProvider, useProgress } from '@/progress/ProgressContext';
 import { colors } from '@/theme';
 
 export default function RootLayout() {
@@ -16,13 +16,31 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ProgressProvider>
           <NavProvider nav={expoRouterNav}>
-            <StatusBar style="dark" />
-            <OrientationGate />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg }, animation: 'slide_from_right' }} />
+            <AppStack />
             <SplashGate />
           </NavProvider>
         </ProgressProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+/** 页面栈：跟着当前配色换底色和状态栏；页面切换用苹果式推入推出（V5.0） */
+function AppStack() {
+  const { scheme } = useProgress();
+  return (
+    <>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <OrientationGate />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.bg },
+          animation: 'ios_from_right',
+          gestureEnabled: true,
+          fullScreenGestureEnabled: true,
+        }}
+      />
+    </>
   );
 }

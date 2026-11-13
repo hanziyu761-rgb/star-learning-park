@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { useProgress } from '@/progress/ProgressContext';
 import { SplashIntro } from './SplashIntro';
+import { colors, themed } from '@/theme';
 
 /**
  * 网页自动化测试（navigator.webdriver 为真）里默认不放动画，免得挡住其他测试的点击；地址加 ?splash=1 时照常播放（测动画本身）。
@@ -39,4 +40,4 @@ export function SplashGate() {
   );
 }
 
-const styles = StyleSheet.create({ cover: { backgroundColor: '#FFF7E0', zIndex: 1000, elevation: 1000 } });
+const styles = themed(() => StyleSheet.create({ cover: { backgroundColor: colors.bg, zIndex: 1000, elevation: 1000 } }));

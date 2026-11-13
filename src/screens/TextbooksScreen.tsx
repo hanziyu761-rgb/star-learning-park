@@ -6,7 +6,8 @@
  * - 课时、知识点、原创课程、练习题、典型例题按实际数量统计；只有目录的教材不算完整
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { Dropdown } from '@/components/Dropdown';
 import { Header, Screen } from '@/components/Screen';
 import { hasGenerator } from '@/knowledge/generators';
@@ -17,7 +18,7 @@ import { useNav } from '@/nav/Nav';
 import { EDITIONS } from '@/textbooks/editions';
 import { completeness, isComplete, summary, volumesFor } from '@/textbooks/registry';
 import type { Term, Volume } from '@/textbooks/types';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { isJunior } from '@/progress/grade';
 
 const SUBJECTS: { id: Subject; name: string }[] = [
@@ -25,12 +26,12 @@ const SUBJECTS: { id: Subject; name: string }[] = [
   { id: 'math', name: '数学' },
   { id: 'english', name: '英语' },
 ];
-const TOC = {
-  verified: { text: '目录已核实', color: '#2E8B57' },
-  original: { text: '原创', color: '#4D9DE0' },
-  pending: { text: '目录待核实', color: '#D9822B' },
-  none: { text: '目录未录入', color: '#999' },
-} as const;
+const TOC = themed(() => ({
+  verified: { text: '目录已核实', color: colors.correct },
+  original: { text: '原创', color: colors.blue },
+  pending: { text: '目录待核实', color: colors.orange },
+  none: { text: '目录未录入', color: colors.textFaint },
+}) as const);
 const STATUS = { current: '现行', historical: '历史版本', upcoming: '即将启用', unknown: '状态待核实' } as const;
 
 const CN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -272,42 +273,42 @@ function VolumeRow({ v }: { v: Volume }) {
 function Chip({ on, text, onPress, testID }: { on: boolean; text: string; onPress: () => void; testID: string }) {
   return (
     <Pressable onPress={onPress} style={[styles.chip, on && styles.chipOn]} accessibilityRole="button" accessibilityState={{ selected: on }} testID={testID}>
-      <Text style={[styles.chipText, on && { color: '#fff' }]}>{text}</Text>
+      <Text style={[styles.chipText, on && { color: colors.onAccent }]}>{text}</Text>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  card: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.md, gap: 6 },
-  h: { fontSize: 17, fontWeight: '900', color: colors.text },
+const styles = themed(() => StyleSheet.create({
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.md, gap: 6 },
+  h: { fontSize: 17, fontWeight: '700', color: colors.text },
   p: { fontSize: 14, color: colors.text, lineHeight: 21 },
   small: { fontSize: 12, color: colors.textSoft, lineHeight: 18 },
-  todo: { fontSize: 12, color: '#B0603A', lineHeight: 18 },
+  todo: { fontSize: 12, color: colors.orange, lineHeight: 18 },
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 },
-  tag: { fontSize: 11, fontWeight: '800', color: colors.textSoft, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 1 },
-  ok: { color: '#2E8B57', borderColor: '#2E8B57' },
-  wait: { color: '#D9822B', borderColor: '#D9822B' },
-  pri: { color: '#7A5AF8', borderColor: '#7A5AF8' },
-  vol: { borderTopWidth: 1, borderTopColor: '#EEE', paddingTop: 8, marginTop: 4, gap: 2 },
-  volName: { fontSize: 14, fontWeight: '800', color: colors.text },
-  link: { fontSize: 13, fontWeight: '800', color: '#4D9DE0', paddingVertical: 4 },
-  toc: { backgroundColor: '#FAFBFD', borderRadius: radius.md, padding: space.sm, gap: 8 },
-  unit: { fontSize: 14, fontWeight: '900', color: '#2E8B57' },
+  tag: { fontSize: 11, fontWeight: '600', color: colors.textSoft, borderWidth: 1, borderColor: colors.disabled, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 1 },
+  ok: { color: colors.correct, borderColor: colors.correct },
+  wait: { color: colors.orange, borderColor: colors.orange },
+  pri: { color: colors.parent, borderColor: colors.parent },
+  vol: { borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 8, marginTop: 4, gap: 2 },
+  volName: { fontSize: 14, fontWeight: '600', color: colors.text },
+  link: { fontSize: 13, fontWeight: '600', color: colors.blue, paddingVertical: 4 },
+  toc: { backgroundColor: colors.cardAlt, borderRadius: radius.md, padding: space.sm, gap: 8 },
+  unit: { fontSize: 14, fontWeight: '700', color: colors.correct },
   lesson: { fontSize: 13, color: colors.text, paddingLeft: 8 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  chip: { borderRadius: radius.round, borderWidth: 2, borderColor: '#4D9DE0', paddingHorizontal: 14, paddingVertical: 6, backgroundColor: '#fff' },
-  chipOn: { backgroundColor: '#4D9DE0' },
-  chipText: { fontSize: 14, fontWeight: '800', color: '#4D9DE0' },
+  chip: { borderRadius: radius.round, borderWidth: 2, borderColor: colors.blue, paddingHorizontal: 14, paddingVertical: 6, backgroundColor: colors.card },
+  chipOn: { backgroundColor: colors.blue },
+  chipText: { fontSize: 14, fontWeight: '600', color: colors.blue },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.xs },
   cell: { flexGrow: 1, flexBasis: 140 },
   bookHead: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: space.md },
-  bookTitle: { fontSize: 18, fontWeight: '900', color: colors.text },
-  notice: { fontSize: 15, color: '#8A5A00', backgroundColor: '#FFF6E0', borderRadius: radius.md, padding: space.sm, lineHeight: 22, marginTop: space.xs },
-  uRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#EEE' },
-  uTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
+  bookTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
+  notice: { fontSize: 15, color: colors.orange, backgroundColor: colors.orangeSoft, borderRadius: radius.md, padding: space.sm, lineHeight: 22, marginTop: space.xs },
+  uRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.line },
+  uTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
   uPage: { fontSize: 12, fontWeight: '400', color: colors.textSoft },
   uLessons: { fontSize: 13, color: colors.textSoft, marginTop: 2, lineHeight: 19 },
-  goBtn: { backgroundColor: '#4D9DE0', borderRadius: radius.md, paddingHorizontal: 12, minHeight: 40, justifyContent: 'center' },
-  goText: { fontSize: 14, fontWeight: '900', color: '#fff' },
+  goBtn: { backgroundColor: colors.blue, borderRadius: radius.md, paddingHorizontal: 12, minHeight: 40, justifyContent: 'center' },
+  goText: { fontSize: 14, fontWeight: '700', color: colors.onAccent },
   detailsBtn: { alignItems: 'center', paddingVertical: space.sm },
-});
+}));

@@ -3,7 +3,8 @@
  * 记住了 / 没记住（隔 3 张再出现，自动收进生词本）；生词本弹窗；听写；“串起来看”关系图。
  */
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header, LoadingView } from '@/components/Screen';
 import { useLayout } from '@/components/useLayout';
@@ -18,6 +19,7 @@ import { WC } from '@/words/ui/theme';
 import { WordCardView } from '@/words/ui/WordCardView';
 import { CelebrateModal, MapModal, WordbookModal } from '@/words/ui/WordModals';
 import { contentGrade } from '@/progress/grade';
+import { colors, themed } from '@/theme';
 
 const BOOKS: { g: number; label: string }[] = [
   { g: 1, label: '启蒙' },
@@ -119,7 +121,7 @@ function WordCards() {
               accessibilityState={{ selected: grade === b.g }}
               testID={`wc-grade-${b.g}`}
             >
-              <Text style={[styles.bookText, grade === b.g && { color: '#fff' }]}>{b.label}</Text>
+              <Text style={[styles.bookText, grade === b.g && { color: colors.onAccent }]}>{b.label}</Text>
             </Pressable>
           ))}
         </View>
@@ -136,7 +138,7 @@ function WordCards() {
               testID={`wc-unit-${u.id}`}
             >
               {u.book !== '启蒙' ? <Text style={[styles.unitBook, u.id === unitId && { color: '#DDEBE2' }]}>{u.book.slice(-2)}</Text> : null}
-              <Text style={[styles.unitText, u.id === unitId && { color: '#fff' }]} numberOfLines={1}>
+              <Text style={[styles.unitText, u.id === unitId && { color: colors.onAccent }]} numberOfLines={1}>
                 {u.title}
               </Text>
             </Pressable>
@@ -351,37 +353,37 @@ function WordCards() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, backgroundColor: WC.bg },
   page: { paddingHorizontal: 16, gap: 14, width: '100%', alignSelf: 'center' },
   wideRow: { flexDirection: 'row', gap: 20, alignItems: 'flex-start' },
   books: { flexDirection: 'row', gap: 6 },
-  book: { flex: 1, alignItems: 'center', minHeight: 44, paddingHorizontal: 2, borderRadius: 22, borderWidth: 2, borderColor: WC.main, backgroundColor: '#fff', justifyContent: 'center' },
+  book: { flex: 1, alignItems: 'center', minHeight: 44, paddingHorizontal: 2, borderRadius: 22, borderWidth: 2, borderColor: WC.mainText, backgroundColor: colors.card, justifyContent: 'center' },
   bookOn: { backgroundColor: WC.main },
-  bookText: { fontSize: 15, fontWeight: '800', color: WC.main },
+  bookText: { fontSize: 15, fontWeight: '600', color: WC.mainText },
   unitBar: { flexGrow: 0, flexShrink: 0, marginHorizontal: -16 },
   units: { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
-  unit: { minHeight: 48, maxWidth: 220, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, backgroundColor: '#fff', borderWidth: 2, borderColor: WC.line, justifyContent: 'center' },
-  unitOn: { backgroundColor: WC.main, borderColor: WC.main },
+  unit: { minHeight: 48, maxWidth: 220, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, backgroundColor: colors.card, borderWidth: 2, borderColor: WC.line, justifyContent: 'center' },
+  unitOn: { backgroundColor: WC.main, borderColor: WC.mainText },
   unitBook: { fontSize: 11, color: WC.muted, fontWeight: '700' },
-  unitText: { fontSize: 15, fontWeight: '800', color: WC.main },
+  unitText: { fontSize: 15, fontWeight: '600', color: WC.mainText },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  progressText: { fontSize: 15, fontWeight: '800', color: WC.main },
+  progressText: { fontSize: 15, fontWeight: '600', color: WC.mainText },
   bar: { height: 14, borderRadius: 7, backgroundColor: '#D9E6DE', overflow: 'hidden' },
   barFill: { height: '100%', backgroundColor: WC.accent, borderRadius: 7 },
   mapBtn: { minHeight: 44, paddingHorizontal: 12, borderRadius: 22, backgroundColor: WC.accent, justifyContent: 'center' },
-  mapText: { fontSize: 15, fontWeight: '900', color: WC.text },
+  mapText: { fontSize: 15, fontWeight: '700', color: WC.text },
   judgeRow: { flexDirection: 'row', gap: 12 },
   judge: { flex: 1, minHeight: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center' },
   forget: { backgroundColor: '#F28B82' },
   remember: { backgroundColor: WC.ok },
-  judgeText: { color: '#fff', fontSize: 20, fontWeight: '900' },
+  judgeText: { color: colors.onAccent, fontSize: 20, fontWeight: '700' },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  action: { flexGrow: 1, flexBasis: 96, minHeight: 52, borderRadius: 18, backgroundColor: '#fff', borderWidth: 2, borderColor: WC.main, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
-  actionText: { fontSize: 16, fontWeight: '800', color: WC.main, textAlign: 'center' },
+  action: { flexGrow: 1, flexBasis: 96, minHeight: 52, borderRadius: 18, backgroundColor: colors.card, borderWidth: 2, borderColor: WC.mainText, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
+  actionText: { fontSize: 16, fontWeight: '600', color: WC.mainText, textAlign: 'center' },
   primary: { minHeight: 56, borderRadius: 28, backgroundColor: WC.main, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
-  primaryText: { color: '#fff', fontSize: 18, fontWeight: '900' },
-  doneCard: { height: 400, borderRadius: 28, backgroundColor: WC.soft, borderWidth: 4, borderColor: WC.main, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 16 },
-  doneText: { fontSize: 26, fontWeight: '900', color: WC.main },
+  primaryText: { color: colors.onAccent, fontSize: 18, fontWeight: '700' },
+  doneCard: { height: 400, borderRadius: 28, backgroundColor: WC.soft, borderWidth: 3, borderColor: WC.mainText, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 16 },
+  doneText: { fontSize: 26, fontWeight: '700', color: WC.mainText },
   source: { fontSize: 12, color: WC.muted, lineHeight: 18 },
-});
+}));

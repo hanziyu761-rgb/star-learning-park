@@ -5,10 +5,12 @@
  * 画面全部用原创图形和文字绘制，没有使用第三方图片。
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Animated, Easing, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { GREETING } from '@/content/greeting';
 import { speak } from '@/speech/speech';
 import { Mascot } from './Mascot';
+import { themed } from '@/theme';
 
 export const SPLASH_MS = 3400;
 const TITLE = [
@@ -200,7 +202,7 @@ export function SplashIntro({ onDone, voice = true }: { onDone: () => void; voic
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { backgroundColor: '#FFF7E0', zIndex: 1000, elevation: 1000, overflow: 'hidden' },
   center: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   ray: { position: 'absolute', top: 0, width: 60, backgroundColor: '#FFE9A8', opacity: 0.55 },
@@ -216,12 +218,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
-  blockLabel: { color: '#fff', fontWeight: '900', textAlign: 'center' },
-  blockName: { color: '#fff', fontWeight: '800', opacity: 0.95 },
+  blockLabel: { color: '#fff', fontWeight: '700', textAlign: 'center' },
+  blockName: { color: '#fff', fontWeight: '600', opacity: 0.95 },
   title: { flexDirection: 'row', gap: 2 },
   letter: { alignItems: 'center' },
   py: { color: '#8A6A50', fontWeight: '700' },
-  char: { fontWeight: '900', textShadowColor: '#fff', textShadowRadius: 6 },
-  sub: { color: '#8A6A50', fontWeight: '800', letterSpacing: 2 },
+  char: { fontWeight: '700', textShadowColor: '#fff', textShadowRadius: 6 },
+  sub: { color: '#8A6A50', fontWeight: '600', letterSpacing: 2 },
   skip: { position: 'absolute', bottom: 36, alignSelf: 'center', color: '#B39A80', fontSize: 13, fontWeight: '700' },
-});
+}));

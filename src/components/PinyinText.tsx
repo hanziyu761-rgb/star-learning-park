@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, type TextStyle } from 'react-native';
 import type { DisplayText, ZhText } from '@/lesson/types';
-import { colors, font } from '@/theme';
+import { colors, font, themed } from '@/theme';
 import { usePinyinOff } from './pinyinMode';
 
 interface PinyinTextProps {
@@ -76,7 +76,7 @@ export function DisplayTextView({ text, size = font.child, color = colors.text, 
   return <PinyinText text={text} size={size} color={color} hidePinyin={hidePinyin} nowrap={nowrap} />;
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end' },
   center: { justifyContent: 'center' },
   nowrap: { flexWrap: 'nowrap' },
@@ -85,4 +85,4 @@ const styles = StyleSheet.create({
   py: { fontWeight: '500', includeFontPadding: false },
   char: { fontWeight: '700', includeFontPadding: false },
   en: { fontWeight: '700', textAlign: 'center' },
-});
+}));

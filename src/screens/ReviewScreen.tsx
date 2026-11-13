@@ -21,7 +21,7 @@ import { useNav } from '@/nav/Nav';
 import { mistakeQueue, reviewQueue, type ReviewItem } from '@/progress/plan';
 import { useProgress } from '@/progress/ProgressContext';
 import { prefetchSpeech, speak, speakablesOf, stopSpeaking } from '@/speech/speech';
-import { colors, radius, space, subjectTheme } from '@/theme';
+import { colors, radius, space, subjectTheme, themed } from '@/theme';
 
 export default function ReviewScreen({ subject }: { subject?: Subject } = {}) {
   const { status } = useProgress();
@@ -159,13 +159,13 @@ function ReviewSession({ subject }: { subject?: Subject }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1 },
   headerWrap: { paddingHorizontal: space.lg, alignSelf: 'stretch' },
   content: { padding: space.lg, gap: space.md, width: '100%', maxWidth: 720, alignSelf: 'center' },
   from: { fontSize: 14, color: colors.textSoft, textAlign: 'center' },
-  count: { fontSize: 18, fontWeight: '800', color: colors.textSoft },
-  bottom: { paddingHorizontal: space.lg, paddingTop: space.sm, gap: space.sm, backgroundColor: 'rgba(255,255,255,0.7)' },
+  count: { fontSize: 18, fontWeight: '600', color: colors.textSoft },
+  bottom: { paddingHorizontal: space.lg, paddingTop: space.sm, gap: space.sm, backgroundColor: colors.glass },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingHorizontal: space.xl, backgroundColor: colors.bg },
-  summary: { fontSize: 20, fontWeight: '700', color: colors.text, backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg },
-});
+  summary: { fontSize: 20, fontWeight: '700', color: colors.text, backgroundColor: colors.card, borderRadius: radius.lg, padding: space.lg },
+}));

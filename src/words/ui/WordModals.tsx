@@ -2,12 +2,14 @@
  * 单词卡的弹窗（V2.18）：生词本、全部记住的庆祝、“串起来看”关系图。
  */
 import React from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { WORDBOOK_CLEAR_STREAK, type WordbookEntry } from '@/progress/model';
 import { firstCardOf, type WordUnit } from '../catalog';
 import { COLOR_WORDS } from '../tricks';
 import { sayWord } from './WordCardView';
 import { WC } from './theme';
+import { colors, themed } from '@/theme';
 
 function Sheet({ visible, onClose, title, testID, children }: { visible: boolean; onClose: () => void; title: string; testID: string; children: React.ReactNode }) {
   return (
@@ -90,7 +92,7 @@ export function CelebrateModal({ visible, onAgain, onDictate, onClose }: { visib
     <Sheet visible={visible} onClose={onClose} title="🎉 本单元全部记住啦！" testID="celebrate">
       <Text style={styles.party}>🌟🎈🏆🎈🌟</Text>
       <Pressable onPress={onAgain} style={[styles.btn, styles.light]} accessibilityRole="button" testID="celebrate-again">
-        <Text style={[styles.btnText, { color: WC.main }]}>🔁 再刷一遍</Text>
+        <Text style={[styles.btnText, { color: WC.mainText }]}>🔁 再刷一遍</Text>
       </Pressable>
       <Pressable onPress={onDictate} style={styles.btn} accessibilityRole="button" testID="celebrate-dictate">
         <Text style={styles.btnText}>✍️ 听写本单元</Text>
@@ -145,7 +147,7 @@ export function MapModal({ visible, unit, onClose, onOpen }: { visible: boolean;
           const c = COLOR_WORDS[w.toLowerCase()];
           return (
             <Pressable key={w} onPress={() => onOpen(w)} style={styles.swatch} accessibilityRole="button" testID={`map-word-${w}`}>
-              <View style={[styles.chip, { backgroundColor: c?.color ?? '#ccc' }]} />
+              <View style={[styles.chip, { backgroundColor: c?.color ?? colors.disabled }]} />
               <Text style={styles.nodeText}>{w}</Text>
             </Pressable>
           );
@@ -184,40 +186,40 @@ export function MapModal({ visible, unit, onClose, onOpen }: { visible: boolean;
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(10,30,22,0.55)', justifyContent: 'center', padding: 16 },
+const styles = themed(() => StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 16 },
   sheet: { backgroundColor: WC.bg, borderRadius: 24, padding: 16, gap: 12, maxHeight: '92%', width: '100%', maxWidth: 640, alignSelf: 'center' },
   head: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { flex: 1, fontSize: 21, fontWeight: '900', color: WC.main },
-  close: { minHeight: 44, paddingHorizontal: 14, borderRadius: 22, backgroundColor: '#fff', justifyContent: 'center', borderWidth: 2, borderColor: WC.line },
-  closeText: { fontSize: 15, fontWeight: '800', color: WC.main },
+  title: { flex: 1, fontSize: 21, fontWeight: '700', color: WC.mainText },
+  close: { minHeight: 44, paddingHorizontal: 14, borderRadius: 22, backgroundColor: colors.card, justifyContent: 'center', borderWidth: 2, borderColor: WC.line },
+  closeText: { fontSize: 15, fontWeight: '600', color: WC.mainText },
   note: { fontSize: 14, color: WC.muted, lineHeight: 20 },
   empty: { fontSize: 16, color: WC.muted, paddingVertical: 12 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: 16, padding: 8 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.card, borderRadius: 16, padding: 8 },
   small: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: WC.soft },
-  word: { fontSize: 20, fontWeight: '900', color: WC.main },
+  word: { fontSize: 20, fontWeight: '700', color: WC.mainText },
   zh: { fontSize: 14, color: WC.muted },
   dots: { flexDirection: 'row', gap: 4 },
   dot: { width: 12, height: 12, borderRadius: 6, borderWidth: 2, borderColor: WC.accentDark },
   dotOn: { backgroundColor: WC.accent },
   remove: { minHeight: 40, paddingHorizontal: 12, borderRadius: 20, borderWidth: 2, borderColor: WC.heart, justifyContent: 'center' },
-  removeText: { color: WC.heart, fontWeight: '800', fontSize: 14 },
+  removeText: { color: WC.heart, fontWeight: '600', fontSize: 14 },
   btn: { minHeight: 56, borderRadius: 28, backgroundColor: WC.main, alignItems: 'center', justifyContent: 'center' },
-  light: { backgroundColor: '#fff', borderWidth: 3, borderColor: WC.main },
-  btnText: { color: '#fff', fontSize: 19, fontWeight: '900' },
+  light: { backgroundColor: colors.card, borderWidth: 3, borderColor: WC.mainText },
+  btnText: { color: '#fff', fontSize: 19, fontWeight: '700' },
   party: { fontSize: 44, textAlign: 'center' },
   node: { borderRadius: 16, backgroundColor: WC.main, paddingHorizontal: 14, paddingVertical: 8, minHeight: 44, justifyContent: 'center' },
   nodeLight: { backgroundColor: WC.mainLight },
-  nodeText: { color: '#fff', fontSize: 17, fontWeight: '800' },
+  nodeText: { color: '#fff', fontSize: 17, fontWeight: '600' },
   genLabel: { fontSize: 13, color: WC.muted, fontWeight: '700' },
   genRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
   branch: { fontSize: 22, color: WC.line, lineHeight: 24 },
   swatches: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center' },
   swatch: { width: 96, borderRadius: 16, backgroundColor: WC.main, padding: 6, alignItems: 'center', gap: 6 },
-  chip: { width: 80, height: 56, borderRadius: 12, borderWidth: 2, borderColor: '#fff' },
+  chip: { width: 80, height: 56, borderRadius: 12, borderWidth: 2, borderColor: colors.card },
   chain: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 4 },
   chainItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  arrow: { fontSize: 20, color: WC.accentDark, fontWeight: '900' },
+  arrow: { fontSize: 20, color: WC.accentDark, fontWeight: '700' },
   hub: { borderRadius: 40, backgroundColor: WC.accent, paddingHorizontal: 18, paddingVertical: 12 },
-  hubText: { fontSize: 18, fontWeight: '900', color: WC.text },
-});
+  hubText: { fontSize: 18, fontWeight: '700', color: WC.text },
+}));

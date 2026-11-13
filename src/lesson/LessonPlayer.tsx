@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { zh } from '@/content/zh';
@@ -13,7 +14,7 @@ import { AskTeacher } from '@/ai/AskTeacher';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDuration } from '@/progress/stats';
 import { prefetchSpeech, speak, speakablesOf, stopSpeaking } from '@/speech/speech';
-import { colors, radius, space, subjectTheme } from '@/theme';
+import { colors, radius, space, subjectTheme, themed } from '@/theme';
 import { langForSubject, type FeedbackMessage } from './feedback';
 import { DialogueStep, PictureBookStep, ReadPassageStep, RepeatStep, TeachCardsStep } from './steps/GeneralSteps';
 import { CombineStep, CountDemoStep, DragBasketStep, OpenBuildStep } from './steps/MathSteps';
@@ -122,7 +123,7 @@ export function LessonPlayer({ lesson, resume, onExit, onHome }: Props) {
           {lesson.steps.map((s, i) => (
             <View
               key={s.id}
-              style={[styles.dot, { backgroundColor: i < index ? theme.color : i === index ? colors.star : '#fff' }]}
+              style={[styles.dot, { backgroundColor: i < index ? theme.color : i === index ? colors.star : colors.cardAlt }]}
             />
           ))}
         </View>
@@ -256,35 +257,35 @@ function LessonSummary({ lesson, onHome }: { lesson: Lesson; onHome: () => void 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1 },
   topBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md, gap: space.sm },
   closeBtn: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  closeText: { fontSize: 24, fontWeight: '900', color: colors.textSoft },
+  closeText: { fontSize: 24, fontWeight: '700', color: colors.textSoft },
   dots: { flex: 1, flexDirection: 'row', gap: 4, alignItems: 'center' },
   dot: { flex: 1, height: 12, borderRadius: radius.round },
-  stepNo: { fontSize: 16, fontWeight: '800', color: colors.textSoft, minWidth: 40, textAlign: 'right' },
+  stepNo: { fontSize: 16, fontWeight: '600', color: colors.textSoft, minWidth: 40, textAlign: 'right' },
   content: { padding: space.lg, paddingBottom: space.xxl, width: '100%', maxWidth: 720, alignSelf: 'center' },
   bottom: {
     paddingHorizontal: space.lg,
     paddingTop: space.sm,
     gap: space.sm,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.glass,
   },
   summary: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingHorizontal: space.xl },
   summaryCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.lg,
     alignSelf: 'stretch',
     gap: space.sm,
   },
   summaryText: { fontSize: 20, fontWeight: '700', color: colors.text, textAlign: 'center' },
-});
+}));

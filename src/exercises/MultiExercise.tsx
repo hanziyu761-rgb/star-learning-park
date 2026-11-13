@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { DisplayTextView } from '@/components/PinyinText';
 import { BigButton, tapFeedback } from '@/components/ui';
 import { zh } from '@/content/zh';
 import type { MultiExercise as MultiData } from '@/lesson/types';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 const MISSING = {
@@ -96,26 +97,26 @@ export function MultiExercise({ exercise, lang, onFeedback, onSolved }: Exercise
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
-  stem: { alignItems: 'center', backgroundColor: '#fff', borderRadius: radius.md, padding: space.md },
-  badge: { textAlign: 'center', fontSize: 15, fontWeight: '800', color: colors.textSoft },
+  stem: { alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.md, padding: space.md },
+  badge: { textAlign: 'center', fontSize: 15, fontWeight: '600', color: colors.textSoft },
   options: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md },
   option: {
     flexBasis: '42%',
     flexGrow: 1,
     minHeight: MIN_TOUCH * 1.4,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
-    borderWidth: 4,
+    borderWidth: 3,
     borderColor: colors.line,
     alignItems: 'center',
     justifyContent: 'center',
     padding: space.sm,
     ...shadow,
   },
-  on: { borderColor: '#4A90D9', backgroundColor: '#EAF3FD' },
+  on: { borderColor: colors.blue, backgroundColor: colors.blueSoft },
   bad: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft, opacity: 0.6 },
   right: { borderColor: colors.correct, backgroundColor: colors.correctSoft },
-  mark: { position: 'absolute', top: 4, right: 10, fontSize: 20, fontWeight: '900', color: colors.textSoft },
-});
+  mark: { position: 'absolute', top: 4, right: 10, fontSize: 20, fontWeight: '700', color: colors.textSoft },
+}));

@@ -3,13 +3,14 @@
  * 支持整数、小数（.）、分数（/）、有余数的除法（“余”键输入 ……）。分数、小数按数值判断，3/4 和 6/8 都算对。
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { VisualView } from '@/components/Figure';
 import { DisplayTextView } from '@/components/PinyinText';
 import { tapFeedback } from '@/components/ui';
 import { zh } from '@/content/zh';
 import type { InputExercise as InputData } from '@/lesson/types';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 /** 把输入或答案换成数值；有余数的除法返回 null（按文字比较） */
@@ -99,30 +100,30 @@ export function InputExercise({ exercise, lang, onFeedback, onSolved }: Exercise
           onPress={submit}
           style={[styles.key, styles.ok, (solved || typed === '') && { opacity: 0.5 }]}
         >
-          <DisplayTextView text={zh('确定', 'què dìng')} size={20} color="#fff" />
+          <DisplayTextView text={zh('确定', 'què dìng')} size={20} color={colors.onAccent} />
         </Pressable>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.md },
-  stem: { alignItems: 'center', backgroundColor: '#fff', borderRadius: radius.md, padding: space.md },
+  stem: { alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.md, padding: space.md },
   display: {
     alignSelf: 'center',
     minWidth: 180,
     minHeight: 60,
     borderRadius: radius.md,
-    borderWidth: 4,
+    borderWidth: 3,
     borderColor: colors.line,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: space.lg,
   },
   displayRight: { borderColor: colors.correct, backgroundColor: colors.correctSoft },
-  displayText: { fontSize: 36, fontWeight: '900', color: colors.text },
+  displayText: { fontSize: 36, fontWeight: '700', color: colors.text },
   placeholder: { color: colors.textSoft },
   keys: {
     flexDirection: 'row',
@@ -136,12 +137,12 @@ const styles = StyleSheet.create({
     width: 96,
     height: MIN_TOUCH,
     borderRadius: radius.md,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadow,
   },
   ok: { backgroundColor: colors.correct },
-  keyText: { fontSize: 26, fontWeight: '900', color: colors.text },
+  keyText: { fontSize: 26, fontWeight: '700', color: colors.text },
   pressed: { transform: [{ scale: 0.95 }] },
-});
+}));

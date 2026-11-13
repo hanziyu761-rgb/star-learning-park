@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import Animated, { ZoomIn } from 'react-native-reanimated';
 import { zh } from '@/content/zh';
 import { DisplayTextView } from '@/components/PinyinText';
@@ -9,7 +10,7 @@ import { PromptHeader, useAttempts, type ExerciseOutcome } from '@/exercises/com
 import type { FeedbackMessage } from '@/lesson/feedback';
 import type { LessonStep, Speakable } from '@/lesson/types';
 import { speak, speakSequence, stopSpeaking } from '@/speech/speech';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed } from '@/theme';
 
 type StepOf<K extends LessonStep['kind']> = Extract<LessonStep, { kind: K }>;
 
@@ -201,9 +202,9 @@ export function CombineStep({ step, onDone, onFeedback }: StepProps<'combine'>) 
           <Text style={styles.basketItems}>{step.emoji.repeat(inBasket)}</Text>
         </DropZone>
         <View style={styles.plates}>
-          {plate(leftLeft, 'L', '#FFE3E3')}
+          {plate(leftLeft, 'L', colors.wrongSoft)}
           <Text style={styles.plus}>+</Text>
-          {plate(rightLeft, 'R', '#E3F1FC')}
+          {plate(rightLeft, 'R', colors.blueSoft)}
         </View>
       </DragArea>
       {allIn ? (
@@ -347,23 +348,23 @@ export function OpenBuildStep({ step, onDone, onFeedback }: StepProps<'open-buil
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
-  stage: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, minHeight: 220, alignItems: 'center', ...shadow },
+  stage: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.lg, minHeight: 220, alignItems: 'center', ...shadow },
   itemsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm, minHeight: 90 },
   demoItem: { alignItems: 'center' },
-  itemNo: { fontSize: 18, fontWeight: '800', color: colors.textSoft },
+  itemNo: { fontSize: 18, fontWeight: '600', color: colors.textSoft },
   bigEmoji: { fontSize: 52 },
   midEmoji: { fontSize: 36 },
-  bigNumber: { fontSize: 84, fontWeight: '900', color: colors.primary },
+  bigNumber: { fontSize: 84, fontWeight: '700', color: colors.primary },
   dragArea: { flexDirection: 'column-reverse', gap: space.lg },
   basket: {
     minHeight: 170,
     borderRadius: radius.lg,
-    borderWidth: 4,
+    borderWidth: 3,
     borderStyle: 'dashed',
-    borderColor: '#D9A55B',
-    backgroundColor: '#FFF1D6',
+    borderColor: colors.star,
+    backgroundColor: colors.orangeSoft,
     alignItems: 'center',
     justifyContent: 'center',
     padding: space.md,
@@ -371,11 +372,11 @@ const styles = StyleSheet.create({
   basketDone: { borderStyle: 'solid', borderColor: colors.correct, backgroundColor: colors.correctSoft },
   basketEmoji: { fontSize: 56 },
   basketItems: { fontSize: 32, textAlign: 'center' },
-  basketCount: { fontSize: 40, fontWeight: '900', color: colors.primary },
+  basketCount: { fontSize: 40, fontWeight: '700', color: colors.primary },
   pile: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md, minHeight: 80 },
   pileItem: { width: MIN_TOUCH + 12, height: MIN_TOUCH + 12, alignItems: 'center', justifyContent: 'center' },
   equation: { alignItems: 'center' },
-  eqText: { fontSize: 44, fontWeight: '900', color: colors.text, letterSpacing: 2 },
+  eqText: { fontSize: 44, fontWeight: '700', color: colors.text, letterSpacing: 2 },
   plates: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
   plate: {
     flex: 1,
@@ -388,14 +389,14 @@ const styles = StyleSheet.create({
     padding: space.sm,
   },
   plateItem: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center' },
-  plus: { fontSize: 40, fontWeight: '900', color: colors.text },
+  plus: { fontSize: 40, fontWeight: '700', color: colors.text },
   numRow: { flexDirection: 'row', justifyContent: 'center', gap: space.md, flexWrap: 'wrap' },
   numBtn: {
     width: 78,
     height: 78,
     borderRadius: 39,
-    backgroundColor: '#fff',
-    borderWidth: 4,
+    backgroundColor: colors.card,
+    borderWidth: 3,
     borderColor: colors.star,
     alignItems: 'center',
     justifyContent: 'center',
@@ -403,8 +404,8 @@ const styles = StyleSheet.create({
   },
   numWrong: { opacity: 0.35, borderColor: colors.wrong },
   numRight: { borderColor: colors.correct, backgroundColor: colors.correctSoft },
-  numText: { fontSize: 36, fontWeight: '900', color: colors.text },
-  bigPlate: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.md, alignItems: 'center', ...shadow },
+  numText: { fontSize: 36, fontWeight: '700', color: colors.text },
+  bigPlate: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.md, alignItems: 'center', ...shadow },
   slots: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm },
   slotCell: {
     width: 58,
@@ -416,14 +417,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  plateCount: { marginTop: space.sm, fontSize: 24, fontWeight: '800', color: colors.primary },
+  plateCount: { marginTop: space.sm, fontSize: 24, fontWeight: '600', color: colors.primary },
   sources: { flexDirection: 'row', justifyContent: 'space-around' },
   source: { alignItems: 'center' },
   sourceBtn: {
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: '#FFF3C4',
+    backgroundColor: colors.highlight,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
@@ -432,4 +433,4 @@ const styles = StyleSheet.create({
   btnRow: { flexDirection: 'row', gap: space.md },
   found: { backgroundColor: colors.correctSoft, borderRadius: radius.md, padding: space.md, gap: 4, alignItems: 'center' },
   foundRow: { fontSize: 26 },
-});
+}));

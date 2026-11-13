@@ -2,7 +2,8 @@
  * 家长中心 · 试卷生成：选择学科、年级、上下册、单元和题量，随时生成一套试卷，预览并打印（或存成 PDF）。
  */
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { editionText, loadBook, unitBadge } from '@/content/bank';
 import { DisplayTextView } from '@/components/PinyinText';
 import { isParentUnlocked, markParentUnlocked, ParentGate } from '@/components/ParentGate';
@@ -16,7 +17,7 @@ import type { KpSubject } from '@/knowledge/graph';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
 const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
@@ -59,7 +60,7 @@ function Chip({ label, on, onPress, testID }: { label: string; on: boolean; onPr
       accessibilityState={{ selected: on }}
       testID={testID}
     >
-      <Text style={[styles.chipText, on && { color: '#fff' }]}>{label}</Text>
+      <Text style={[styles.chipText, on && { color: colors.onAccent }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -292,8 +293,8 @@ function ExamBody() {
   );
 }
 
-const styles = StyleSheet.create({
-  label: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: space.sm },
+const styles = themed(() => StyleSheet.create({
+  label: { fontSize: 15, fontWeight: '600', color: colors.text, marginTop: space.sm },
   small: { fontSize: 12, color: colors.textSoft, marginTop: space.xs },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.xs },
   chip: {
@@ -303,7 +304,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 2,
     borderColor: colors.parent,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     maxWidth: '100%',
     paddingVertical: 6,
   },
@@ -313,14 +314,14 @@ const styles = StyleSheet.create({
   btnRow: { flexDirection: 'row', gap: space.sm, marginTop: space.md },
   section: { marginTop: space.md, gap: space.xs },
   sectionHead: { flexDirection: 'row', alignItems: 'flex-end', gap: 4 },
-  sectionNo: { fontSize: 18, fontWeight: '900', color: colors.text },
+  sectionNo: { fontSize: 18, fontWeight: '700', color: colors.text },
   item: { borderBottomWidth: 1, borderBottomColor: colors.line, paddingVertical: space.xs },
   itemHead: { flexDirection: 'row', gap: space.xs, alignItems: 'flex-start' },
-  no: { fontSize: 16, fontWeight: '800', color: colors.text, minWidth: 26 },
+  no: { fontSize: 16, fontWeight: '600', color: colors.text, minWidth: 26 },
   opts: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
   opt: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  optLetter: { fontSize: 15, fontWeight: '800', color: colors.textSoft },
-  answer: { fontSize: 13, fontWeight: '800', color: colors.correct },
+  optLetter: { fontSize: 15, fontWeight: '600', color: colors.textSoft },
+  answer: { fontSize: 13, fontWeight: '600', color: colors.correct },
   srcTag: {
     fontSize: 11,
     color: colors.textSoft,
@@ -329,4 +330,4 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 4,
   },
-});
+}));

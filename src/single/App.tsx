@@ -8,7 +8,8 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavProvider, type Nav, type Route } from '@/nav/Nav';
-import { ProgressProvider } from '@/progress/ProgressContext';
+import { ProgressProvider, useProgress } from '@/progress/ProgressContext';
+import Animated, { SlideInLeft, SlideInRight } from 'react-native-reanimated';
 import HomeScreen from '@/screens/HomeScreen';
 import LessonScreen from '@/screens/LessonScreen';
 import ParentScreen from '@/screens/ParentScreen';
@@ -72,11 +73,22 @@ export default function SingleApp() {
   // 每次进入页面给一个新编号：同一个页面“返回再进入”（例如“再来一轮”）也会重新开始
   const serial = useRef(0);
   const [stack, setStack] = useState<{ route: Route; key: number }[]>([{ route: { name: 'home' }, key: 0 }]);
+  // 页面切换方向：进入从右边推入，返回从左边推回（V5.0）
+  const [dir, setDir] = useState<'push' | 'back'>('push');
   const nav = useMemo<Nav>(
     () => ({
-      push: (r) => setStack((s) => [...s, { route: r, key: ++serial.current }]),
-      back: () => setStack((s) => (s.length > 1 ? s.slice(0, -1) : s)),
-      home: () => setStack([{ route: { name: 'home' }, key: ++serial.current }]),
+      push: (r) => {
+        setDir('push');
+        setStack((s) => [...s, { route: r, key: ++serial.current }]);
+      },
+      back: () => {
+        setDir('back');
+        setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
+      },
+      home: () => {
+        setDir('back');
+        setStack([{ route: { name: 'home' }, key: ++serial.current }]);
+      },
     }),
     [],
   );
@@ -86,14 +98,29 @@ export default function SingleApp() {
       <SafeAreaProvider>
         <ProgressProvider>
           <NavProvider nav={nav}>
-            <StatusBar style="dark" />
-            <View key={top.key} style={{ flex: 1, backgroundColor: colors.bg }}>
+            <Page pageKey={top.key} dir={dir}>
               {renderRoute(top.route)}
-            </View>
+            </Page>
             <SplashGate />
           </NavProvider>
         </ProgressProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
+  );
+}
+
+/** 一页：跟着配色换底色和状态栏；进场带弹簧推入 */
+function Page({ pageKey, dir, children }: { pageKey: number; dir: 'push' | 'back'; children: React.ReactNode }) {
+  const { scheme } = useProgress();
+  const enter = (dir === 'push' ? SlideInRight : SlideInLeft).springify().damping(22).stiffness(220);
+  return (
+    <>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <View style={{ flex: 1, backgroundColor: colors.bg, overflow: 'hidden' }}>
+        <Animated.View key={pageKey} entering={pageKey === 0 ? undefined : enter} style={{ flex: 1 }}>
+          {children}
+        </Animated.View>
+      </View>
+    </>
   );
 }

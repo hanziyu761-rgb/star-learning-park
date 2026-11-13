@@ -5,7 +5,8 @@
  * - RotateExercise：点一下转 90°，转到和影子一样再放进去
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { ShapeFigure, VisualView } from '@/components/Figure';
 import { DisplayTextView } from '@/components/PinyinText';
 import { BigButton, tapFeedback } from '@/components/ui';
@@ -16,7 +17,7 @@ import type {
   RotateExercise as RotateData,
   ShapePickExercise as ShapePickData,
 } from '@/lesson/types';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 export function ShapePickExercise({ exercise, lang, onFeedback, onSolved }: ExerciseProps<ShapePickData>) {
@@ -225,15 +226,15 @@ export function RotateExercise({ exercise, lang, onFeedback, onSolved }: Exercis
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
-  counter: { textAlign: 'center', fontSize: 16, fontWeight: '800', color: colors.textSoft },
+  counter: { textAlign: 'center', fontSize: 16, fontWeight: '600', color: colors.textSoft },
   figures: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm },
   figBtn: {
     width: 92,
     height: 92,
     borderRadius: radius.md,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderWidth: 3,
     borderColor: colors.line,
     alignItems: 'center',
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
   },
   figOk: { borderColor: colors.correct, backgroundColor: colors.correctSoft },
   figBad: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft, opacity: 0.6 },
-  mark: { position: 'absolute', top: 2, right: 6, fontSize: 20, fontWeight: '900', color: colors.wrong },
+  mark: { position: 'absolute', top: 2, right: 6, fontSize: 20, fontWeight: '700', color: colors.wrong },
   area: { flexDirection: 'column-reverse', gap: space.lg },
   bins: { flexDirection: 'row', gap: space.sm },
   binWrap: { flex: 1 },
@@ -252,12 +253,12 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderStyle: 'dashed',
     borderColor: colors.line,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     padding: space.sm,
     alignItems: 'center',
     gap: space.xs,
   },
-  binHint: { borderColor: colors.parent, backgroundColor: '#F2F1FF' },
+  binHint: { borderColor: colors.parent, backgroundColor: colors.parentSoft },
   binWrong: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft },
   binHead: { alignItems: 'center' },
   binItems: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 2 },
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
     minWidth: 76,
     minHeight: 76,
     borderRadius: radius.md,
-    backgroundColor: '#FFF3C4',
+    backgroundColor: colors.highlight,
     borderWidth: 3,
     borderColor: colors.star,
     alignItems: 'center',
@@ -274,13 +275,13 @@ const styles = StyleSheet.create({
     padding: 4,
     ...shadow,
   },
-  itemSelected: { borderColor: colors.parent, borderWidth: 5, transform: [{ scale: 1.08 }] },
+  itemSelected: { borderColor: colors.parent, borderWidth: 3, transform: [{ scale: 1.08 }] },
   rotateRow: { flexDirection: 'row', justifyContent: 'center', gap: space.xl },
   rotateBox: {
     width: 140,
     minHeight: 150,
     borderRadius: radius.lg,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadow,
@@ -288,4 +289,4 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 20 },
   turnHint: { position: 'absolute', top: 4, right: 8, fontSize: 22 },
   hidden: { height: 0, opacity: 0 },
-});
+}));

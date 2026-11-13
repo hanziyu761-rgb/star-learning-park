@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, MIN_TOUCH, radius, space } from '@/theme';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
+import { colors, MIN_TOUCH, radius, space, themed } from '@/theme';
 
 /** 生成一道一年级孩子还不会的乘法题，作为家长验证 */
 export function makeGateQuestion(rand: () => number = Math.random) {
@@ -54,7 +55,7 @@ export function ParentGate({ onPass, rand }: { onPass: () => void; rand?: () => 
             onPress={() => (k === '⌫' ? setInput((s) => s.slice(0, -1)) : k === '确定' ? submit() : press(k))}
             style={[styles.key, k === '确定' && { backgroundColor: colors.parent }]}
           >
-            <Text style={[styles.keyText, k === '确定' && { color: '#fff', fontSize: 18 }]}>{k}</Text>
+            <Text style={[styles.keyText, k === '确定' && { color: colors.onAccent, fontSize: 18 }]}>{k}</Text>
           </Pressable>
         ))}
       </View>
@@ -62,20 +63,20 @@ export function ParentGate({ onPass, rand }: { onPass: () => void; rand?: () => 
   );
 }
 
-const styles = StyleSheet.create({
-  gate: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.xl, alignItems: 'center', gap: space.md },
-  gateTitle: { fontSize: 24, fontWeight: '900', color: colors.parent },
+const styles = themed(() => StyleSheet.create({
+  gate: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.xl, alignItems: 'center', gap: space.md },
+  gateTitle: { fontSize: 24, fontWeight: '700', color: colors.parent },
   gateDesc: { fontSize: 15, color: colors.textSoft },
-  gateQ: { fontSize: 40, fontWeight: '900', color: colors.text },
+  gateQ: { fontSize: 40, fontWeight: '700', color: colors.text },
   gateError: { color: colors.wrong, fontSize: 15 },
   keys: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm, maxWidth: 280 },
   key: {
     width: 80,
     height: MIN_TOUCH,
     borderRadius: radius.md,
-    backgroundColor: '#EEEDFB',
+    backgroundColor: colors.parentSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  keyText: { fontSize: 26, fontWeight: '800', color: colors.text },
-});
+  keyText: { fontSize: 26, fontWeight: '600', color: colors.text },
+}));

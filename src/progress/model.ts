@@ -115,7 +115,12 @@ export interface Settings {
   splash: boolean;
   /** 教材资源库里家长选的教材版本（V4.1，空 = 自动选第一套已核实目录的版本） */
   textbookEdition: { chinese: string; math: string; english: string };
+  /** 外观（V5.0）：跟随手机系统 / 浅色 / 深色 */
+  appearance: Appearance;
 }
+
+export type Appearance = 'system' | 'light' | 'dark';
+export const APPEARANCES: Appearance[] = ['system', 'light', 'dark'];
 
 export interface ExerciseResult {
   lessonId: string;
@@ -258,6 +263,7 @@ export function createEmptyProgress(): ProgressState {
       aiCloudVoice: true,
       splash: true,
       textbookEdition: { chinese: '', math: '', english: '' },
+      appearance: 'system',
     },
     hidden: [],
     diagnoses: [],
@@ -618,6 +624,8 @@ export function migrateProgress(data: ProgressState, now: number = Date.now()): 
         ...createEmptyProgress().settings.textbookEdition,
         ...(data.settings?.textbookEdition && typeof data.settings.textbookEdition === 'object' ? data.settings.textbookEdition : {}),
       },
+      // V5.0：旧记录没有外观设置，按“跟随系统”；不认识的值也按跟随系统
+      appearance: APPEARANCES.includes(data.settings?.appearance as Appearance) ? (data.settings!.appearance as Appearance) : 'system',
     },
     hidden: Array.isArray(data.hidden) ? data.hidden : [],
     diagnoses: Array.isArray(data.diagnoses) ? data.diagnoses : [],

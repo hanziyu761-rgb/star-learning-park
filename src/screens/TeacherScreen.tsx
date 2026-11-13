@@ -3,7 +3,8 @@
  * 孩子可以点“快捷问题”、点话筒说话提问（V2.17，安卓 APP，家长开启后才有；离线识别，声音不离开手机），也可以由家长帮忙输入；回复会自动朗读。
  */
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AiError, aiChat, AI_ERROR_TEXT, type ChatMessage } from '@/ai/client';
 import { zh } from '@/content/zh';
@@ -17,7 +18,7 @@ import { useProgress } from '@/progress/ProgressContext';
 import { SUBJECTS } from '@/progress/stats';
 import { useVoiceInput, VOICE_PROBLEM_TEXT } from '@/speech/asr';
 import { speak, stopSpeaking } from '@/speech/speech';
-import { colors, MIN_TOUCH, radius, space, subjectTheme } from '@/theme';
+import { colors, MIN_TOUCH, radius, space, subjectTheme, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
 const QUICK: Record<Subject, string[]> = {
@@ -92,7 +93,7 @@ function TeacherChat() {
                 accessibilityRole="button"
                 testID={`teacher-subject-${s}`}
               >
-                <Text style={[styles.tabText, subject === s && { color: '#fff' }]}>
+                <Text style={[styles.tabText, subject === s && { color: colors.onAccent }]}>
                   {subjectTheme[s].emoji} {subjectTheme[s].name}
                 </Text>
               </Pressable>
@@ -183,17 +184,17 @@ function TeacherChat() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#F2F1FF' },
+const styles = themed(() => StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.parentSoft },
   pad: { paddingHorizontal: space.lg },
   tabs: { flexDirection: 'row', gap: space.sm, paddingHorizontal: space.lg, marginTop: space.sm },
-  tab: { flex: 1, minHeight: 48, borderRadius: radius.round, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
-  tabText: { fontSize: 16, fontWeight: '800', color: colors.text },
+  tab: { flex: 1, minHeight: 48, borderRadius: radius.round, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center' },
+  tabText: { fontSize: 16, fontWeight: '600', color: colors.text },
   list: { padding: space.lg, gap: space.sm },
   welcome: { alignItems: 'center', gap: space.md, paddingVertical: space.xl },
   msg: { maxWidth: '88%', borderRadius: radius.md, padding: space.md, flexDirection: 'row', alignItems: 'center', gap: space.sm },
   mine: { alignSelf: 'flex-end', backgroundColor: colors.star },
-  theirs: { alignSelf: 'flex-start', backgroundColor: '#fff' },
+  theirs: { alignSelf: 'flex-start', backgroundColor: colors.card },
   msgText: { flexShrink: 1, fontSize: 18, lineHeight: 26, color: colors.text },
   quickBar: { flexGrow: 0, flexShrink: 0 },
   quick: { paddingHorizontal: space.lg, gap: space.sm, paddingVertical: space.sm, alignItems: 'center' },
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.parent,
     justifyContent: 'center',
   },
-  chipText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  chipText: { color: colors.onAccent, fontSize: 16, fontWeight: '600' },
   micBtn: {
     minHeight: 64,
     borderRadius: radius.round,
@@ -214,14 +215,14 @@ const styles = StyleSheet.create({
     marginBottom: space.sm,
   },
   micOn: { backgroundColor: '#E0453A' },
-  micText: { color: '#fff', fontSize: 22, fontWeight: '900' },
-  listenBox: { backgroundColor: '#fff', borderRadius: radius.md, padding: space.md, marginBottom: space.sm, gap: 4 },
-  listenTitle: { fontSize: 16, fontWeight: '800', color: colors.parent },
+  micText: { color: colors.onAccent, fontSize: 22, fontWeight: '700' },
+  listenBox: { backgroundColor: colors.card, borderRadius: radius.md, padding: space.md, marginBottom: space.sm, gap: 4 },
+  listenTitle: { fontSize: 16, fontWeight: '600', color: colors.parent },
   listenText: { fontSize: 20, color: colors.text, minHeight: 28 },
   voiceTip: { fontSize: 14, color: colors.wrong, marginBottom: space.xs, lineHeight: 20 },
   inputRow: { flexDirection: 'row', gap: space.sm, alignItems: 'center' },
-  input: { flex: 1, minHeight: 48, backgroundColor: '#fff', borderRadius: radius.md, paddingHorizontal: space.md, fontSize: 16 },
+  input: { flex: 1, minHeight: 48, backgroundColor: colors.card, borderRadius: radius.md, paddingHorizontal: space.md, fontSize: 16 },
   sendBtn: { minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.md, backgroundColor: colors.parent, justifyContent: 'center' },
-  sendText: { color: '#fff', fontSize: 16, fontWeight: '800' },
+  sendText: { color: colors.onAccent, fontSize: 16, fontWeight: '600' },
   note: { fontSize: 11, color: colors.textSoft, textAlign: 'center', paddingHorizontal: space.lg, marginTop: 4 },
-});
+}));

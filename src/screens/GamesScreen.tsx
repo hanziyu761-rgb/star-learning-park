@@ -2,7 +2,8 @@
  * 游戏乐园（V2.19）：三个学科各一个游戏。显示今天玩了多久、还能玩多久；到了家长设的时长上限就不能再开新局。
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { DisplayTextView } from '@/components/PinyinText';
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
 import { canStartGame, GAMES, gameLevel, playedToday } from '@/games/common';
@@ -11,6 +12,7 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { GAME_BG, GAME_MAIN } from './GameScreen';
 import { contentGrade } from '@/progress/grade';
+import { themed } from '@/theme';
 
 export default function GamesScreen() {
   const nav = useNav();
@@ -59,11 +61,11 @@ export default function GamesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  time: { fontSize: 15, fontWeight: '800', color: '#8A6A50', textAlign: 'center' },
+const styles = themed(() => StyleSheet.create({
+  time: { fontSize: 15, fontWeight: '600', color: '#8A6A50', textAlign: 'center' },
   card: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 24, borderWidth: 3, padding: 16, minHeight: 120 },
   emoji: { fontSize: 52 },
   intro: { fontSize: 14, color: '#555', lineHeight: 20 },
-  meta: { fontSize: 13, fontWeight: '800' },
+  meta: { fontSize: 13, fontWeight: '600' },
   note: { fontSize: 12, color: '#888', lineHeight: 18 },
-});
+}));

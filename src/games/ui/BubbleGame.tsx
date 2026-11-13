@@ -3,7 +3,8 @@
  * 戳错的泡泡抖一下、不扣分，这个词算没有一次拼对，并放进生词本。
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Animated, Easing, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Platform, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { DisplayTextView } from '@/components/PinyinText';
 import { useLayout } from '@/components/useLayout';
 import { ROUND_SIZE } from '@/games/common';
@@ -13,6 +14,7 @@ import type { GameProps } from '@/screens/GameScreen';
 import { speak } from '@/speech/speech';
 import { clickTime } from '@/words/session';
 import { gt } from './text';
+import { themed } from '@/theme';
 
 const MAIN = '#7A5AF8';
 const COLORS = ['#FFD6E0', '#D6F0FF', '#E2FFD6', '#FFF3C4', '#EBDCFF', '#FFE2CC'];
@@ -149,24 +151,24 @@ function FloatingBubble({ big, index, letter, shaking, onPress, testID }: { big?
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 14, gap: 12 },
   tabletCol: { width: '100%', maxWidth: 760, alignSelf: 'center' },
   wideRoot: { flexDirection: 'row', gap: 28, paddingHorizontal: 28 },
   progress: { textAlign: 'center', fontSize: 14, color: '#6B5BA8', fontWeight: '700' },
   card: { backgroundColor: '#fff', borderRadius: 24, borderWidth: 3, borderColor: MAIN, padding: 14, alignItems: 'center', gap: 10 },
-  zh: { fontSize: 32, fontWeight: '900', color: '#2B2350' },
+  zh: { fontSize: 32, fontWeight: '700', color: '#2B2350' },
   listen: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: 14, borderRadius: 22, backgroundColor: '#F1ECFF' },
   slots: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' },
   slot: { width: 36, height: 46, borderBottomWidth: 4, borderColor: '#C9BEF5', alignItems: 'center', justifyContent: 'flex-end' },
   slotOn: { borderColor: MAIN },
-  slotText: { fontSize: 32, fontWeight: '900', color: MAIN },
+  slotText: { fontSize: 32, fontWeight: '700', color: MAIN },
   sky: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignContent: 'center', gap: 14, minHeight: 240, paddingVertical: 12 },
   bubble: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#7A5AF8', shadowOpacity: 0.25, shadowRadius: 6, elevation: 3 },
   bubbleWrong: { borderColor: '#E53935' },
   bubbleSpace: { width: 72, height: 72 },
-  bubbleText: { fontSize: 34, fontWeight: '900', color: '#2B2350' },
+  bubbleText: { fontSize: 34, fontWeight: '700', color: '#2B2350' },
   status: { alignItems: 'center', gap: 4 },
-  word: { fontSize: 40, fontWeight: '900', color: MAIN },
+  word: { fontSize: 40, fontWeight: '700', color: MAIN },
   nextBtn: { minHeight: 60, borderRadius: 30, backgroundColor: MAIN, alignItems: 'center', justifyContent: 'center' },
-});
+}));

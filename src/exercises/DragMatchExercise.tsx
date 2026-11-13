@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { DisplayTextView } from '@/components/PinyinText';
 import { tapFeedback } from '@/components/ui';
 import { DragArea, Draggable, DropZone, justDragged } from '@/drag/DragArea';
 import type { DragMatchExercise as DragMatchData } from '@/lesson/types';
 import { speak } from '@/speech/speech';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 /**
@@ -115,7 +116,7 @@ export function DragMatchExercise({ exercise, lang, onFeedback, onSolved }: Exer
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
   area: { flexDirection: 'column-reverse', gap: space.xl },
   items: {
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
   item: {
     minWidth: 72,
     minHeight: 72,
-    backgroundColor: '#FFF3C4',
+    backgroundColor: colors.highlight,
     borderRadius: radius.md,
     borderWidth: 3,
     borderColor: colors.star,
@@ -137,12 +138,12 @@ const styles = StyleSheet.create({
     padding: space.sm,
     ...shadow,
   },
-  itemSelected: { borderColor: colors.parent, borderWidth: 5, transform: [{ scale: 1.08 }] },
+  itemSelected: { borderColor: colors.parent, borderWidth: 3, transform: [{ scale: 1.08 }] },
   targets: { flexDirection: 'row', justifyContent: 'center', gap: space.sm },
   targetWrap: { flexGrow: 1 },
   target: {
     minHeight: 120,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     borderWidth: 3,
     borderStyle: 'dashed',
@@ -154,9 +155,9 @@ const styles = StyleSheet.create({
   },
   targetReady: { borderColor: colors.parent },
   targetDone: { borderStyle: 'solid', borderColor: colors.correct, backgroundColor: colors.correctSoft },
-  slot: { width: 40, height: 32, borderRadius: 10, backgroundColor: '#F6EEDC' },
+  slot: { width: 40, height: 32, borderRadius: 10, backgroundColor: colors.cardAlt },
   placedItem: { flexDirection: 'row', alignItems: 'center' },
   emoji: { fontSize: 34, textAlign: 'center' },
   smallEmoji: { fontSize: 28 },
   manyEmoji: { fontSize: 20, lineHeight: 26 },
-});
+}));

@@ -3,23 +3,24 @@
  * 所有结论来自真实练习记录，可展开查看判断依据。
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { Card, SectionTitle } from '@/components/ui';
 import { getKp, KNOWLEDGE_POINTS, kpsFor, kpSubject, type KpSubject } from '@/knowledge/graph';
 import { computeMastery, countByState, MASTERY_LABEL, type MasteryState } from '@/knowledge/mastery';
 import { frequentMistakeTypes, recommendKps, type KpRec } from '@/knowledge/recommend';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
-const STATE_COLOR: Record<MasteryState, string> = {
-  'not-started': '#9C928A',
-  learning: '#E08A1E',
-  emerging: '#3BB273',
-  'needs-review': '#E8505B',
-  stable: '#F5A400',
-};
+const STATE_COLOR: Record<MasteryState, string> = themed(() => ({
+  'not-started': colors.textFaint,
+  learning: colors.orange,
+  emerging: colors.correct,
+  'needs-review': colors.wrong,
+  stable: colors.starDeep,
+}));
 
 const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
 const SUBJECT_NAME: Record<KpSubject, string> = { math: '数学', chinese: '语文', english: '英语' };
@@ -63,7 +64,7 @@ export function KnowledgeCard() {
               accessibilityRole="button"
               testID={`pk-subject-${x}`}
             >
-              <Text style={[styles.tabText, subject === x && { color: '#fff' }]}>{SUBJECT_NAME[x]}</Text>
+              <Text style={[styles.tabText, subject === x && { color: colors.onAccent }]}>{SUBJECT_NAME[x]}</Text>
             </Pressable>
           ))}
         </View>
@@ -97,7 +98,7 @@ export function KnowledgeCard() {
                       : r.kind === 'review'
                         ? colors.wrong
                         : r.kind === 'new'
-                          ? '#4D9DE0'
+                          ? colors.blue
                           : colors.correct,
                 },
               ]}
@@ -197,7 +198,7 @@ function sourceLabel(source: string, lessonId: string): string {
   return '课程';
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   tabs: { flexDirection: 'row', gap: space.sm, marginVertical: space.xs },
   tab: {
     flex: 1,
@@ -208,19 +209,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabOn: { backgroundColor: colors.parent },
-  tabText: { fontSize: 15, fontWeight: '800', color: colors.parent },
+  tabText: { fontSize: 15, fontWeight: '600', color: colors.parent },
   small: { fontSize: 13, color: colors.textSoft, lineHeight: 19 },
   bar: {
     flexDirection: 'row',
     height: 14,
     borderRadius: radius.round,
     overflow: 'hidden',
-    backgroundColor: '#EEE',
+    backgroundColor: colors.line,
     marginTop: space.md,
   },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.xs },
-  legendText: { fontSize: 13, fontWeight: '800' },
-  h: { fontSize: 16, fontWeight: '900', color: colors.text, marginTop: space.lg, marginBottom: space.xs },
+  legendText: { fontSize: 13, fontWeight: '600' },
+  h: { fontSize: 16, fontWeight: '700', color: colors.text, marginTop: space.lg, marginBottom: space.xs },
   empty: { fontSize: 14, color: colors.textSoft },
   row: {
     flexDirection: 'row',
@@ -228,19 +229,19 @@ const styles = StyleSheet.create({
     gap: space.sm,
     paddingVertical: space.sm,
     borderTopWidth: 1,
-    borderTopColor: '#EEE',
+    borderTopColor: colors.line,
   },
   tag: {
-    color: '#fff',
+    color: colors.onAccent,
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '700',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
     overflow: 'hidden',
   },
-  rowTitle: { fontSize: 15, fontWeight: '800', color: colors.text },
+  rowTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
   dot: { fontSize: 16, marginTop: 1 },
   evidence: { fontSize: 12, color: colors.textSoft, marginTop: 2 },
-  bad: { fontSize: 14, fontWeight: '800', color: colors.wrong },
-});
+  bad: { fontSize: 14, fontWeight: '600', color: colors.wrong },
+}));

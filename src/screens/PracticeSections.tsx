@@ -2,7 +2,8 @@
  * 学科页下方的“口算闯关”和“题库闯关”列表。
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { BANK_SOURCE, bankLessonId, booksFor, editionText, loadBook, unitBadge } from '@/content/bank';
 import { oralLessonId, topicsForGrade } from '@/content/oral';
 import { ALL_WRITE_SETS, writeLessonId, writeSetGrade } from '@/content/writing';
@@ -15,7 +16,7 @@ import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import type { ProgressState } from '@/progress/model';
 import { speak } from '@/speech/speech';
-import { colors, MIN_TOUCH, radius, shadow, space, subjectTheme } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, subjectTheme, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
 const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
@@ -99,7 +100,7 @@ export function GraphicsSection({ state }: { state: ProgressState }) {
     <View style={styles.card} testID="graphics-section">
       <View style={styles.titleRow}>
         <DisplayTextView text={zh('图形乐园', 'tú xíng lè yuán')} size={24} />
-        <View style={[styles.gradePill, { backgroundColor: '#FFF1D6' }]}>
+        <View style={[styles.gradePill, { backgroundColor: colors.orangeSoft }]}>
           <Text style={styles.review}>{CONTENT_REVIEW}</Text>
         </View>
       </View>
@@ -223,8 +224,8 @@ export function BankSection({ subject, state }: { subject: Subject; state: Progr
   );
 }
 
-const styles = StyleSheet.create({
-  card: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, gap: space.sm, ...shadow },
+const styles = themed(() => StyleSheet.create({
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.lg, gap: space.sm, ...shadow },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   gradePill: { borderRadius: radius.round, paddingHorizontal: space.md, paddingVertical: 2 },
   meta: { fontSize: 12, color: colors.textSoft },
@@ -235,16 +236,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     minHeight: MIN_TOUCH * 1.6,
     borderRadius: radius.md,
-    backgroundColor: '#E3F1FC',
+    backgroundColor: colors.blueSoft,
     alignItems: 'center',
     justifyContent: 'center',
     padding: space.sm,
     gap: 2,
   },
   tileEmoji: { fontSize: 28 },
-  writeChars: { fontSize: 26, fontWeight: '900', color: colors.text, letterSpacing: 2 },
-  gTile: { backgroundColor: '#FFF6E0', flexBasis: '30%', minWidth: 140 },
-  review: { fontSize: 12, fontWeight: '800', color: '#B26A00' },
+  writeChars: { fontSize: 26, fontWeight: '700', color: colors.text, letterSpacing: 2 },
+  gTile: { backgroundColor: colors.orangeSoft, flexBasis: '30%', minWidth: 140 },
+  review: { fontSize: 12, fontWeight: '600', color: colors.orange },
   bookRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -273,10 +274,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     textAlign: 'center',
     lineHeight: 28,
-    fontWeight: '800',
+    fontWeight: '600',
     color: colors.text,
   },
   unitTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   unitMeta: { fontSize: 12, color: colors.textSoft },
-  go: { fontSize: 18, fontWeight: '900' },
-});
+  go: { fontSize: 18, fontWeight: '700' },
+}));

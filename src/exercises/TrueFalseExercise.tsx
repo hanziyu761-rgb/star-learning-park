@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { plainText, zh } from '@/content/zh';
 import { VisualView } from '@/components/Figure';
 import { DisplayTextView } from '@/components/PinyinText';
 import { SpeakerButton, tapFeedback } from '@/components/ui';
 import type { TrueFalseExercise as TrueFalseData } from '@/lesson/types';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 /** 正误判断：看图听句子，判断对还是不对 */
@@ -55,11 +56,13 @@ export function TrueFalseExercise({ exercise, lang, onFeedback, onSolved }: Exer
               accessibilityRole="button"
               accessibilityLabel={plainText(v ? yes : no)}
               onPress={() => choose(v)}
+              pop={isRight}
+              shake={isWrong}
               style={[
                 styles.btn,
                 { backgroundColor: v ? colors.correctSoft : colors.wrongSoft },
                 isWrong && { opacity: 0.4 },
-                isRight && { borderColor: colors.correct, borderWidth: 5 },
+                isRight && { borderColor: colors.correct, borderWidth: 3 },
               ]}
             >
               <Text style={styles.btnIcon}>{v ? '✅' : '❌'}</Text>
@@ -72,10 +75,10 @@ export function TrueFalseExercise({ exercise, lang, onFeedback, onSolved }: Exer
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
   statement: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.lg,
     alignItems: 'center',
@@ -96,4 +99,4 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   btnIcon: { fontSize: 40 },
-});
+}));

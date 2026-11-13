@@ -3,7 +3,8 @@
  * 每个本领用颜色和小图标表示掌握情况。不展示复杂的先修网络。
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { zh } from '@/content/zh';
 import { Mascot } from '@/components/Mascot';
 import { DisplayTextView } from '@/components/PinyinText';
@@ -17,17 +18,17 @@ import { recommendKps } from '@/knowledge/recommend';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { speak } from '@/speech/speech';
-import { colors, radius, shadow, space } from '@/theme';
+import { colors, radius, shadow, space, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
 /** 给孩子看的状态：颜色 + 图标 + 带拼音的短词 */
-export const KID_STATE: Record<MasteryState, { icon: string; color: string; bg: string; text: string; py: string }> = {
-  'not-started': { icon: '⚪', color: '#9C928A', bg: '#F1EDE7', text: '还没学', py: 'hái méi xué' },
-  learning: { icon: '✏️', color: '#E08A1E', bg: '#FFF1D6', text: '在学习', py: 'zài xué xí' },
-  emerging: { icon: '🌱', color: '#3BB273', bg: '#E3F7EA', text: '学会了', py: 'xué huì le' },
-  'needs-review': { icon: '🔔', color: '#E8505B', bg: '#FDE6E8', text: '要复习', py: 'yào fù xí' },
-  stable: { icon: '⭐', color: '#F5A400', bg: '#FFF6CF', text: '真牢固', py: 'zhēn láo gù' },
-};
+export const KID_STATE: Record<MasteryState, { icon: string; color: string; bg: string; text: string; py: string }> = themed(() => ({
+  'not-started': { icon: '⚪', color: colors.textFaint, bg: colors.cardAlt, text: '还没学', py: 'hái méi xué' },
+  learning: { icon: '✏️', color: colors.orange, bg: colors.orangeSoft, text: '在学习', py: 'zài xué xí' },
+  emerging: { icon: '🌱', color: colors.correct, bg: colors.correctSoft, text: '学会了', py: 'xué huì le' },
+  'needs-review': { icon: '🔔', color: colors.wrong, bg: colors.wrongSoft, text: '要复习', py: 'yào fù xí' },
+  stable: { icon: '⭐', color: colors.starDeep, bg: colors.highlight, text: '真牢固', py: 'zhēn láo gù' },
+}));
 
 export default function KnowledgeMapScreen() {
   const { status } = useProgress();
@@ -81,7 +82,7 @@ function MapBody() {
               testID={`map-subject-${x.id}`}
               style={[styles.tab, subject === x.id && styles.tabOn]}
             >
-              <DisplayTextView text={zh(x.name, x.py)} size={18} color={subject === x.id ? '#fff' : colors.text} />
+              <DisplayTextView text={zh(x.name, x.py)} size={18} color={subject === x.id ? colors.onAccent : colors.text} />
             </Pressable>
           ))}
         </View>
@@ -269,13 +270,13 @@ const SUBJECTS: { id: KpSubject; name: string; py: string }[] = [
   { id: 'english', name: '英语', py: 'yīng yǔ' },
 ];
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   tabs: { flexDirection: 'row', gap: space.sm },
   tab: {
     flex: 1,
     minHeight: 56,
     borderRadius: radius.md,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadow,
@@ -286,7 +287,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadow,
@@ -297,14 +298,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.sm,
     ...shadow,
   },
-  summaryText: { flex: 1, fontSize: 17, fontWeight: '800', color: colors.text },
+  summaryText: { flex: 1, fontSize: 17, fontWeight: '600', color: colors.text },
   todo: {
-    backgroundColor: '#FFF8E6',
+    backgroundColor: colors.orangeSoft,
     borderRadius: radius.lg,
     padding: space.md,
     gap: space.xs,
@@ -316,21 +317,21 @@ const styles = StyleSheet.create({
   legend: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.md,
     padding: space.sm,
   },
   legendItem: { alignItems: 'center' },
   path: { gap: 0 },
   stopRow: { flexDirection: 'row', paddingHorizontal: space.lg },
-  connector: { position: 'absolute', top: -18, width: 6, height: 40, backgroundColor: '#B9D8F0', borderRadius: 3 },
+  connector: { position: 'absolute', top: -18, width: 6, height: 40, backgroundColor: colors.line, borderRadius: 3 },
   connectorL: { left: '45%', transform: [{ rotate: '35deg' }] },
   connectorR: { right: '45%', transform: [{ rotate: '-35deg' }] },
   stop: {
     width: 150,
     minHeight: 110,
     borderRadius: 30,
-    borderWidth: 4,
+    borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
     padding: space.sm,
@@ -344,8 +345,8 @@ const styles = StyleSheet.create({
     top: -12,
     left: -4,
     fontSize: 12,
-    fontWeight: '800',
-    color: '#fff',
+    fontWeight: '600',
+    color: colors.onAccent,
     backgroundColor: colors.parent,
     paddingHorizontal: 6,
     borderRadius: 8,
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.lg,
     gap: space.md,
@@ -372,4 +373,4 @@ const styles = StyleSheet.create({
   cardEmoji: { fontSize: 44 },
   close: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   cardNote: { fontSize: 15, color: colors.textSoft },
-});
+}));

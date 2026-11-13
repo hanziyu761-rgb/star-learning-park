@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { DisplayTextView } from '@/components/PinyinText';
 import { BigButton, SpeakerButton, tapFeedback } from '@/components/ui';
 import { PromptHeader } from '@/exercises/common';
 import { speak } from '@/speech/speech';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed } from '@/theme';
 import type { StepProps } from './MathSteps';
 
 // ---------------- 点卡片听读 ----------------
@@ -245,7 +246,7 @@ export function PictureBookStep({ step, onDone }: StepProps<'picture-book'>) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
   cards: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md },
   card: {
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     maxWidth: 220,
     minHeight: 170,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
   cardEmoji: { fontSize: 54 },
   ear: { position: 'absolute', top: 8, right: 10, fontSize: 20 },
   repeatCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.xl,
     alignItems: 'center',
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   hugeEmoji: { fontSize: 96, textAlign: 'center' },
-  enBig: { fontSize: 32, fontWeight: '800', color: colors.correct },
+  enBig: { fontSize: 32, fontWeight: '600', color: colors.correct },
   progressText: { textAlign: 'center', fontSize: 18, fontWeight: '700', color: colors.textSoft },
   note: { textAlign: 'center', fontSize: 13, color: colors.textSoft },
   lineRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
@@ -290,13 +291,13 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: 'transparent',
   },
-  bubbleLeft: { backgroundColor: '#fff' },
-  bubbleRight: { backgroundColor: '#fff', borderColor: '#BDE8CB' },
-  bubbleActive: { borderColor: colors.star, backgroundColor: '#FFF8DC' },
+  bubbleLeft: { backgroundColor: colors.card },
+  bubbleRight: { backgroundColor: colors.card, borderColor: colors.correct },
+  bubbleActive: { borderColor: colors.star, backgroundColor: colors.highlight },
   bubbleText: { fontSize: 24, fontWeight: '700', color: colors.text },
-  tick: { position: 'absolute', top: 2, right: 6, color: colors.correct, fontWeight: '900' },
+  tick: { position: 'absolute', top: 2, right: 6, color: colors.correct, fontWeight: '700' },
   bookPage: {
-    backgroundColor: '#FFFDF6',
+    backgroundColor: colors.cardAlt,
     borderRadius: radius.lg,
     padding: space.xl,
     alignItems: 'center',
@@ -312,10 +313,10 @@ const styles = StyleSheet.create({
     minHeight: 44,
     justifyContent: 'center',
   },
-  wordText: { fontSize: 30, fontWeight: '800', color: colors.text },
+  wordText: { fontSize: 30, fontWeight: '600', color: colors.text },
   wordlessHint: { fontSize: 18, fontWeight: '700', color: colors.textSoft },
   pager: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-});
+}));
 
 // ---------------- 中文短文阅读（V2.10） ----------------
 
@@ -340,9 +341,9 @@ export function ReadPassageStep({ step, onDone }: StepProps<'read-passage'>) {
   );
 }
 
-const readStyles = StyleSheet.create({
+const readStyles = themed(() => StyleSheet.create({
   page: {
-    backgroundColor: '#FFFDF5',
+    backgroundColor: colors.cardAlt,
     borderRadius: radius.lg,
     padding: space.lg,
     gap: space.sm,
@@ -351,4 +352,4 @@ const readStyles = StyleSheet.create({
   },
   emoji: { fontSize: 56 },
   para: { alignSelf: 'stretch', alignItems: 'flex-start' },
-});
+}));

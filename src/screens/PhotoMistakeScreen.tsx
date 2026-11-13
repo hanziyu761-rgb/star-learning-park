@@ -7,7 +7,8 @@
  * 必须先通过家长验证。
  */
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { aiPhotoAnalyze, aiPhotoSimilar, AiError, type PhotoSimilarItem } from '@/ai/client';
 import { DisplayTextView } from '@/components/PinyinText';
 import { isParentUnlocked, markParentUnlocked, ParentGate } from '@/components/ParentGate';
@@ -22,7 +23,7 @@ import { AI_LABEL, allCandidates, candidatesFor, canMakeMath, mathItem, mathSimi
 import type { PhotoMistake } from '@/progress/model';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
 const SUBJECTS: KpSubject[] = ['math', 'chinese', 'english'];
@@ -59,7 +60,7 @@ function Chip({ label, on, onPress, testID }: { label: string; on: boolean; onPr
       accessibilityState={{ selected: on }}
       testID={testID}
     >
-      <Text style={[styles.chipText, on && { color: '#fff' }]}>{label}</Text>
+      <Text style={[styles.chipText, on && { color: colors.onAccent }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -436,10 +437,10 @@ function DetailView({ id, onBack }: { id: string; onBack: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
-  label: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: space.sm },
+const styles = themed(() => StyleSheet.create({
+  label: { fontSize: 15, fontWeight: '600', color: colors.text, marginTop: space.sm },
   small: { fontSize: 12, color: colors.textSoft, marginTop: space.xs },
-  aiTag: { fontSize: 13, fontWeight: '700', color: '#B45309', backgroundColor: '#FFF4D6', borderRadius: radius.sm, padding: space.xs, marginTop: space.xs },
+  aiTag: { fontSize: 13, fontWeight: '700', color: colors.orange, backgroundColor: colors.orangeSoft, borderRadius: radius.sm, padding: space.xs, marginTop: space.xs },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.xs },
   chip: {
     paddingHorizontal: space.md,
@@ -448,7 +449,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 2,
     borderColor: colors.parent,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     maxWidth: '100%',
     paddingVertical: 6,
   },
@@ -464,14 +465,14 @@ const styles = StyleSheet.create({
     padding: space.sm,
     fontSize: 16,
     color: colors.text,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     marginTop: space.xs,
   },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: space.sm, borderBottomWidth: 1, borderBottomColor: colors.line },
-  rowTag: { fontSize: 12, fontWeight: '800', color: '#fff', backgroundColor: colors.parent, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  rowTag: { fontSize: 12, fontWeight: '600', color: colors.onAccent, backgroundColor: colors.parent, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
   rowTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   item: { flexDirection: 'row', gap: space.xs, borderBottomWidth: 1, borderBottomColor: colors.line, paddingVertical: space.xs },
-  no: { fontSize: 16, fontWeight: '800', color: colors.text, minWidth: 26 },
+  no: { fontSize: 16, fontWeight: '600', color: colors.text, minWidth: 26 },
   opts: { fontSize: 15, color: colors.text, marginTop: 2 },
-  answer: { fontSize: 13, fontWeight: '800', color: colors.correct, marginTop: 2 },
-});
+  answer: { fontSize: 13, fontWeight: '600', color: colors.correct, marginTop: 2 },
+}));

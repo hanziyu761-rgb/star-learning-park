@@ -5,7 +5,7 @@ import { SpeakerButton } from '@/components/ui';
 import { praise, retry, type FeedbackLang, type FeedbackMessage } from '@/lesson/feedback';
 import type { Prompt } from '@/lesson/types';
 import { speak } from '@/speech/speech';
-import { colors, font, radius, space } from '@/theme';
+import { colors, font, radius, space, themed } from '@/theme';
 
 export interface ExerciseOutcome {
   firstTryCorrect: boolean;
@@ -81,12 +81,12 @@ export function PromptHeader({ prompt, autoSpeak = true }: { prompt: Prompt; aut
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.md,
     padding: space.md,
   },
@@ -103,4 +103,4 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     overflow: 'hidden',
   },
-});
+}));

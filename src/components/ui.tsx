@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import * as Haptics from 'expo-haptics';
 import type { DisplayText, Speakable } from '@/lesson/types';
 import { onSpeakingChange, speak } from '@/speech/speech';
-import { colors, font, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed, type } from '@/theme';
 import { DisplayTextView } from './PinyinText';
 
 export function tapFeedback() {
@@ -29,7 +30,7 @@ export function BigButton({
   label,
   emoji,
   color = colors.primary,
-  textColor = '#fff',
+  textColor = colors.onAccent,
   onPress,
   disabled,
   speakOnPress,
@@ -59,7 +60,7 @@ export function BigButton({
       ]}
     >
       {emoji ? <Text style={[styles.btnEmoji, size === 'md' && { fontSize: 24 }]}>{emoji}</Text> : null}
-      {label ? <DisplayTextView text={label} size={size === 'lg' ? 24 : 20} color={textColor} /> : null}
+      {label ? <DisplayTextView text={label} size={size === 'lg' ? 24 : 20} color={disabled ? colors.textSoft : textColor} /> : null}
     </Pressable>
   );
 }
@@ -135,10 +136,11 @@ export function Stars({ value, max = 3, size = 28 }: { value: number; max?: numb
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   bigButton: {
     minHeight: MIN_TOUCH + 8,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
+    borderCurve: 'continuous',
     paddingHorizontal: space.xl,
     paddingVertical: space.md,
     flexDirection: 'row',
@@ -148,22 +150,22 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   bigButtonMd: { minHeight: MIN_TOUCH, paddingHorizontal: space.lg },
-  pressed: { transform: [{ scale: 0.96 }], opacity: 0.9 },
-  btnEmoji: { fontSize: 30 },
+  pressed: { opacity: 0.92 },
+  btnEmoji: { fontSize: 28 },
   speaker: { alignItems: 'center', justifyContent: 'center', ...shadow },
   speakerActive: { transform: [{ scale: 1.08 }] },
   starBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    minHeight: 44,
+    backgroundColor: colors.card,
     borderRadius: radius.round,
-    paddingHorizontal: space.md,
-    paddingVertical: space.xs,
-    borderWidth: 3,
-    borderColor: colors.star,
+    paddingHorizontal: space.md + 2,
+    gap: 4,
+    ...shadow,
   },
-  starEmoji: { fontSize: 22 },
-  starCount: { fontSize: 22, fontWeight: '800', color: colors.starDeep, marginLeft: 4 },
-  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.lg, ...shadow },
-  sectionTitle: { fontSize: font.title - 4, fontWeight: '800', color: colors.text, marginBottom: space.sm },
-});
+  starEmoji: { fontSize: 20 },
+  starCount: { fontSize: 20, fontWeight: '700', color: colors.text, fontVariant: ['tabular-nums'] },
+  card: { backgroundColor: colors.card, borderRadius: radius.md, borderCurve: 'continuous', padding: space.xl - 4, ...shadow },
+  sectionTitle: { ...type.title3, color: colors.text, marginBottom: space.xs },
+}));

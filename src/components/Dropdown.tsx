@@ -3,8 +3,9 @@
  * React Native 没有自带下拉框，这里用 Modal 实现，手机、平板、网页版表现一致。
  */
 import React, { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { colors, radius, space } from '@/theme';
+import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
+import { colors, radius, space, themed, type } from '@/theme';
 
 export interface DropdownOption {
   value: string;
@@ -43,11 +44,11 @@ export function Dropdown({
         <Text style={styles.value} numberOfLines={1}>
           {cur?.label ?? '请选择'}
         </Text>
-        <Text style={styles.arrow}>▼</Text>
+        <Text style={styles.arrow}>⌄</Text>
       </Pressable>
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.mask} onPress={() => setOpen(false)} testID={`${testID}-mask`}>
-          <Pressable style={styles.sheet} onPress={() => undefined}>
+        <Pressable style={styles.mask} scaleTo={1} onPress={() => setOpen(false)} testID={`${testID}-mask`}>
+          <Pressable style={styles.sheet} scaleTo={1} onPress={() => undefined}>
             <Text style={styles.title}>{label}</Text>
             <ScrollView style={{ maxHeight: 440 }}>
               {options.map((o) => (
@@ -63,11 +64,11 @@ export function Dropdown({
                     accessibilityState={{ selected: o.value === value }}
                     testID={`${testID}-opt-${o.value}`}
                   >
-                    <Text style={[styles.itemText, o.value === value && { color: '#fff' }]}>
+                    <Text style={[styles.itemText, o.value === value && styles.itemTextOn]}>
                       {o.value === value ? '✓ ' : ''}
                       {o.label}
                     </Text>
-                    {o.hint ? <Text style={[styles.hint, o.value === value && { color: '#EAF3FC' }]}>{o.hint}</Text> : null}
+                    {o.hint ? <Text style={styles.hint}>{o.hint}</Text> : null}
                   </Pressable>
                 </View>
               ))}
@@ -82,29 +83,45 @@ export function Dropdown({
   );
 }
 
-const BLUE = '#4D9DE0';
-const styles = StyleSheet.create({
-  label: { fontSize: 14, fontWeight: '800', color: colors.textSoft },
+const styles = themed(() => StyleSheet.create({
+  label: { ...type.footnote, fontWeight: '600', color: colors.textSoft, marginLeft: 4 },
   box: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 48,
-    borderWidth: 2,
-    borderColor: BLUE,
-    borderRadius: radius.md,
-    paddingHorizontal: space.md,
-    backgroundColor: '#fff',
+    minHeight: 52,
+    borderRadius: radius.sm,
+    borderCurve: 'continuous',
+    paddingHorizontal: space.lg,
+    backgroundColor: colors.cardAlt,
   },
-  value: { flex: 1, fontSize: 17, fontWeight: '800', color: colors.text },
-  arrow: { fontSize: 13, color: BLUE, marginLeft: 8 },
-  mask: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: space.lg },
-  sheet: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.md, maxWidth: 520, width: '100%', alignSelf: 'center' },
-  title: { fontSize: 18, fontWeight: '900', color: colors.text, marginBottom: space.sm },
-  group: { fontSize: 13, fontWeight: '800', color: colors.textSoft, marginTop: space.sm, marginBottom: 4 },
-  item: { minHeight: 48, justifyContent: 'center', borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 8, marginBottom: 4, backgroundColor: '#F3F7FB' },
-  itemOn: { backgroundColor: BLUE },
-  itemText: { fontSize: 16, fontWeight: '800', color: colors.text },
-  hint: { fontSize: 12, color: colors.textSoft, marginTop: 2 },
-  cancel: { alignItems: 'center', paddingVertical: space.sm, marginTop: space.xs },
-  cancelText: { fontSize: 16, fontWeight: '800', color: BLUE },
-});
+  value: { flex: 1, ...type.headline, color: colors.text },
+  arrow: { fontSize: 20, lineHeight: 20, color: colors.textSoft, marginLeft: 8, marginTop: -8 },
+  mask: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: space.xl },
+  sheet: {
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    borderCurve: 'continuous',
+    padding: space.lg,
+    maxWidth: 520,
+    width: '100%',
+    alignSelf: 'center',
+    boxShadow: '0px 24px 64px rgba(0, 0, 0, 0.18)',
+  },
+  title: { ...type.title3, color: colors.text, marginBottom: space.md, marginLeft: 4 },
+  group: { ...type.footnote, fontWeight: '600', color: colors.textSoft, marginTop: space.md, marginBottom: 6, marginLeft: 4 },
+  item: {
+    minHeight: 52,
+    justifyContent: 'center',
+    borderRadius: radius.sm,
+    borderCurve: 'continuous',
+    paddingHorizontal: space.lg,
+    paddingVertical: 10,
+    marginBottom: 2,
+  },
+  itemOn: { backgroundColor: colors.primarySoft },
+  itemText: { ...type.headline, color: colors.text },
+  itemTextOn: { color: colors.primary },
+  hint: { ...type.caption, color: colors.textSoft, marginTop: 2 },
+  cancel: { alignItems: 'center', justifyContent: 'center', minHeight: 52, marginTop: space.sm },
+  cancelText: { ...type.headline, color: colors.primary },
+}));

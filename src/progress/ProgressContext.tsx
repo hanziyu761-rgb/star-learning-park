@@ -5,6 +5,8 @@ import { createEmptyProgress, progressReducer, type ProgressAction, type Progres
 import { loadProgress, saveProgress } from './storage';
 import { setPinyinOff } from '@/components/pinyinMode';
 import { isJunior } from './grade';
+import { useColorScheme } from 'react-native';
+import { setScheme, type Scheme } from '@/theme';
 
 export type ProgressStatus = 'loading' | 'ready';
 
@@ -16,6 +18,8 @@ interface ProgressContextValue {
   /** 最近一次保存失败 */
   saveFailed: boolean;
   dispatch: (action: ProgressAction) => void;
+  /** 当前配色（V5.0） */
+  scheme: Scheme;
 }
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
@@ -78,9 +82,15 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // 外观（V5.0）：家长选了浅色 / 深色就用它，否则跟随手机系统。
+  // 在渲染时就设好当前配色，子页面这一轮渲染拿到的就是新配色；scheme 放进 value，所有页面都会重新渲染
+  const system = useColorScheme();
+  const scheme: Scheme = s.appearance === 'light' || s.appearance === 'dark' ? s.appearance : system === 'dark' ? 'dark' : 'light';
+  setScheme(scheme);
+
   const value = useMemo(
-    () => ({ status, state, loadProblem, saveFailed, dispatch }),
-    [status, state, loadProblem, saveFailed, dispatch],
+    () => ({ status, state, loadProblem, saveFailed, dispatch, scheme }),
+    [status, state, loadProblem, saveFailed, dispatch, scheme],
   );
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;

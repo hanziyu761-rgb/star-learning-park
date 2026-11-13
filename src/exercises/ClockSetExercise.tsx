@@ -12,7 +12,7 @@ import { DisplayTextView } from '@/components/PinyinText';
 import { BigButton, tapFeedback } from '@/components/ui';
 import { zh } from '@/content/zh';
 import type { ClockSetExercise as ClockSetData } from '@/lesson/types';
-import { colors, radius, shadow, space } from '@/theme';
+import { colors, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 const DAY = 12 * 60;
@@ -193,7 +193,7 @@ export function ClockSetExercise({ exercise, lang, onFeedback, onSolved }: Exerc
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.md },
   scene: { alignItems: 'center', backgroundColor: '#fff', borderRadius: radius.md, padding: space.sm },
   clockRow: { alignItems: 'center' },
@@ -204,4 +204,4 @@ const styles = StyleSheet.create({
   dot: { width: 12, height: 12, borderRadius: 6, marginBottom: 6 },
   btnRow: { flexDirection: 'row', gap: space.sm, justifyContent: 'center' },
   hidden: { height: 0, opacity: 0 },
-});
+}));

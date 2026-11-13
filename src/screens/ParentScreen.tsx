@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { getLesson, LESSONS, skillLabel } from '@/content';
 import { plainText } from '@/content/zh';
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
@@ -9,7 +10,7 @@ import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
-import { AiCard, GradeCard, HiddenCard } from './ParentSettings';
+import { AiCard, AppearanceCard, GradeCard, HiddenCard } from './ParentSettings';
 import { KnowledgeCard } from './ParentKnowledge';
 import { ThinkingCard } from './ParentThinking';
 import { VoiceCheckCard } from './VoiceCheckCard';
@@ -28,7 +29,7 @@ import {
   SUBJECTS,
   weakSkills,
 } from '@/progress/stats';
-import { colors, radius, space, subjectTheme } from '@/theme';
+import { colors, radius, space, subjectTheme, themed } from '@/theme';
 
 export default function ParentScreen() {
   const { status } = useProgress();
@@ -235,6 +236,7 @@ function ParentDashboard() {
       </Card>
 
       <GradeCard />
+      <AppearanceCard />
       <VoiceCheckCard />
       <GameParentCard />
       <AiCard />
@@ -253,7 +255,7 @@ function ParentDashboard() {
         }}
         style={[styles.reset, confirmReset && { backgroundColor: colors.wrong }]}
       >
-        <Text style={[styles.resetText, confirmReset && { color: '#fff' }]}>
+        <Text style={[styles.resetText, confirmReset && { color: colors.onAccent }]}>
           {confirmReset ? '再点一次确认清除（无法恢复）' : '清除全部学习记录'}
         </Text>
       </Pressable>
@@ -299,10 +301,10 @@ function Metric({ label, value, testID }: { label: string; value: string; testID
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   bookRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginVertical: space.sm },
-  bookBtn: { borderWidth: 2, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 10, backgroundColor: '#fff' },
-  bookBtnText: { fontSize: 14, fontWeight: '800' },
+  bookBtn: { borderWidth: 2, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 10, backgroundColor: colors.card },
+  bookBtnText: { fontSize: 14, fontWeight: '600' },
   examBtn: {
     marginTop: space.sm,
     minHeight: 52,
@@ -311,10 +313,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  examBtnText: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  examBtnText: { color: colors.onAccent, fontSize: 18, fontWeight: '600' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  metric: { flexBasis: '46%', flexGrow: 1, backgroundColor: '#F7F6FF', borderRadius: radius.md, padding: space.md },
-  metricValue: { fontSize: 22, fontWeight: '900', color: colors.text },
+  metric: { flexBasis: '46%', flexGrow: 1, backgroundColor: colors.parentSoft, borderRadius: radius.md, padding: space.md },
+  metricValue: { fontSize: 22, fontWeight: '700', color: colors.text },
   metricLabel: { fontSize: 13, color: colors.textSoft, marginTop: 2 },
   empty: { fontSize: 15, color: colors.textSoft, paddingVertical: space.sm },
   small: { fontSize: 13, color: colors.textSoft, marginTop: 2 },
@@ -324,11 +326,11 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingVertical: space.sm,
     borderTopWidth: 1,
-    borderTopColor: '#EEE',
+    borderTopColor: colors.line,
   },
   rowEmoji: { fontSize: 24 },
   rowTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
-  bad: { fontSize: 15, fontWeight: '800', color: colors.wrong },
+  bad: { fontSize: 15, fontWeight: '600', color: colors.wrong },
   reset: {
     borderWidth: 2,
     borderColor: colors.wrong,
@@ -336,6 +338,6 @@ const styles = StyleSheet.create({
     padding: space.md,
     alignItems: 'center',
   },
-  resetText: { color: colors.wrong, fontWeight: '800', fontSize: 16 },
+  resetText: { color: colors.wrong, fontWeight: '600', fontSize: 16 },
   cancel: { alignItems: 'center', padding: space.sm },
-});
+}));

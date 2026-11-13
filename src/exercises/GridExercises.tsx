@@ -4,11 +4,12 @@
  * - GridTapExercise：看简单地图，点出指定的地方
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { tapFeedback } from '@/components/ui';
 import { DragArea, Draggable, DropZone, justDragged } from '@/drag/DragArea';
 import type { GridPlaceExercise as GridPlaceData, GridTapExercise as GridTapData } from '@/lesson/types';
-import { colors, radius, shadow, space } from '@/theme';
+import { colors, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 const cellKey = (r: number, c: number) => `cell-${r}-${c}`;
@@ -156,11 +157,11 @@ export function GridTapExercise({ exercise, lang, onFeedback, onSolved }: Exerci
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
   area: { flexDirection: 'column-reverse', gap: space.lg },
   grid: { gap: space.xs, alignSelf: 'center', width: '100%', maxWidth: 420 },
-  map: { backgroundColor: '#E6F4D9', borderRadius: radius.lg, padding: space.sm },
+  map: { backgroundColor: colors.correctSoft, borderRadius: radius.lg, padding: space.sm },
   row: { flexDirection: 'row', gap: space.xs },
   cellWrap: { flex: 1, aspectRatio: 1 },
   cell: {
@@ -168,23 +169,23 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 3,
     borderColor: colors.line,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mapCell: { backgroundColor: '#F7FBEF', borderColor: '#CFE3B8' },
-  cellHint: { borderColor: colors.parent, borderStyle: 'dashed', backgroundColor: '#F2F1FF' },
+  mapCell: { backgroundColor: colors.cardAlt, borderColor: colors.line },
+  cellHint: { borderColor: colors.parent, borderStyle: 'dashed', backgroundColor: colors.parentSoft },
   cellWrong: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft },
   cellRight: { borderColor: colors.correct, backgroundColor: colors.correctSoft },
   cellEmoji: { fontSize: 38 },
-  mark: { position: 'absolute', top: 2, right: 6, fontSize: 18, fontWeight: '900', color: colors.correct },
+  mark: { position: 'absolute', top: 2, right: 6, fontSize: 18, fontWeight: '700', color: colors.correct },
   moverRow: { alignItems: 'center', minHeight: 96 },
   mover: {
     width: 88,
     height: 88,
     borderRadius: 44,
-    backgroundColor: '#FFF3C4',
-    borderWidth: 4,
+    backgroundColor: colors.highlight,
+    borderWidth: 3,
     borderColor: colors.star,
     alignItems: 'center',
     justifyContent: 'center',
@@ -192,4 +193,4 @@ const styles = StyleSheet.create({
   },
   moverSelected: { borderColor: colors.parent, transform: [{ scale: 1.1 }] },
   moverEmoji: { fontSize: 50 },
-});
+}));

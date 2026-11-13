@@ -3,7 +3,8 @@
  * 结束时按一次做对的题数给星星，难度下一局自动调整。
  */
 import React, { useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DisplayTextView } from '@/components/PinyinText';
 import { LoadingView } from '@/components/Screen';
@@ -21,10 +22,11 @@ import { useProgress } from '@/progress/ProgressContext';
 import { stopSpeaking } from '@/speech/speech';
 import { clickTime } from '@/words/session';
 import { contentGrade } from '@/progress/grade';
+import { colors, themed } from '@/theme';
 
 const LESSON: Record<GameId, string> = { kitchen: KITCHEN_LESSON, fish: FISH_LESSON, bubble: BUBBLE_LESSON };
 export const GAME_BG: Record<GameId, string> = { kitchen: '#FFF3E0', fish: '#E3F4FB', bubble: '#F1ECFF' };
-export const GAME_MAIN: Record<GameId, string> = { kitchen: '#E8772E', fish: '#1C7FB5', bubble: '#7A5AF8' };
+export const GAME_MAIN: Record<GameId, string> = themed(() => ({ kitchen: colors.orange, fish: colors.blue, bubble: colors.parent }));
 
 export interface GameAnswer {
   exerciseId: string;
@@ -159,7 +161,7 @@ function GamePlay({ game }: { game: GameId }) {
             </View>
           ) : (
             <Pressable onPress={playAgain} style={[styles.btn, { backgroundColor: GAME_MAIN[game] }]} accessibilityRole="button" testID="game-again">
-              <DisplayTextView text={gt('again', grade)} size={22} color="#fff" />
+              <DisplayTextView text={gt('again', grade)} size={22} color={colors.onAccent} />
             </Pressable>
           )}
           {!limit && usedMin >= 20 ? (
@@ -190,20 +192,20 @@ function GamePlay({ game }: { game: GameId }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1 },
   top: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, gap: 8, minHeight: 56 },
-  exit: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
-  exitText: { fontSize: 22, fontWeight: '900', color: '#555' },
-  level: { fontSize: 14, fontWeight: '800', minWidth: 48, textAlign: 'right' },
+  exit: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center' },
+  exitText: { fontSize: 22, fontWeight: '700', color: '#555' },
+  level: { fontSize: 14, fontWeight: '600', minWidth: 48, textAlign: 'right' },
   summary: { padding: 20, gap: 16, alignItems: 'center', width: '100%', maxWidth: 640, alignSelf: 'center' },
   stars: { fontSize: 48, color: '#F2B705' },
   score: { fontSize: 18, fontWeight: '700', color: '#333', textAlign: 'center' },
-  wrongBox: { alignSelf: 'stretch', backgroundColor: '#fff', borderRadius: 18, padding: 14, gap: 4 },
+  wrongBox: { alignSelf: 'stretch', backgroundColor: colors.card, borderRadius: 18, padding: 14, gap: 4 },
   wrongTitle: { fontSize: 14, color: '#666' },
   wrongItem: { fontSize: 18, fontWeight: '700', color: '#333' },
   btn: { alignSelf: 'stretch', minHeight: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center' },
-  light: { backgroundColor: '#fff' },
-  restNote: { backgroundColor: '#fff', borderRadius: 18, padding: 14, alignSelf: 'stretch', alignItems: 'center' },
+  light: { backgroundColor: colors.card },
+  restNote: { backgroundColor: colors.card, borderRadius: 18, padding: 14, alignSelf: 'stretch', alignItems: 'center' },
   round: { textAlign: 'center', fontSize: 12, color: '#888' },
-});
+}));

@@ -3,7 +3,8 @@
  * 刚好等于点菜牌上的数 → 做好啦；放多了 → 锅冒烟，这一单算没有一次做对，拿出来一些再凑。
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { DisplayTextView } from '@/components/PinyinText';
 import { useLayout } from '@/components/useLayout';
 import { DragArea, Draggable, DropZone, justDragged } from '@/drag/DragArea';
@@ -12,6 +13,7 @@ import { fmt, makeOrder, orderExerciseId, potState, type Ingredient } from '@/ga
 import type { GameProps } from '@/screens/GameScreen';
 import { speak } from '@/speech/speech';
 import { gt } from './text';
+import { themed } from '@/theme';
 
 const MAIN = '#E8772E';
 const say = (t: string) => speak({ text: t.replace(/\./g, '点'), lang: 'zh-CN' });
@@ -153,7 +155,7 @@ function FoodFace({ it, scale }: { it: Ingredient; scale: number }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 14, gap: 10 },
   tabletCol: { width: '100%', maxWidth: 760, alignSelf: 'center', justifyContent: 'center' },
   wideRoot: { flexDirection: 'row', gap: 28, paddingHorizontal: 28, alignItems: 'stretch' },
@@ -161,23 +163,23 @@ const styles = StyleSheet.create({
   customerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
   customer: { fontSize: 64 },
   orderCard: { backgroundColor: '#fff', borderRadius: 18, borderWidth: 3, borderColor: MAIN, paddingHorizontal: 18, paddingVertical: 8, alignItems: 'center', minWidth: 120 },
-  target: { fontSize: 44, fontWeight: '900', color: MAIN },
+  target: { fontSize: 44, fontWeight: '700', color: MAIN },
   pot: { minHeight: 120, borderRadius: 60, backgroundColor: '#5B4636', alignItems: 'center', justifyContent: 'center', padding: 12, gap: 6 },
   potSmoke: { backgroundColor: '#8E8E8E' },
   potDone: { backgroundColor: '#2E9E4F' },
   potIcon: { fontSize: 40 },
   potItems: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 6 },
-  plus: { color: '#fff', fontSize: 22, fontWeight: '900' },
+  plus: { color: '#fff', fontSize: 22, fontWeight: '700' },
   potChip: { backgroundColor: '#fff', borderRadius: 14, paddingHorizontal: 10, minHeight: 44, justifyContent: 'center' },
-  potChipText: { fontSize: 20, fontWeight: '800', color: '#333' },
+  potChipText: { fontSize: 20, fontWeight: '600', color: '#333' },
   status: { minHeight: 32, alignItems: 'center', justifyContent: 'center' },
-  doneText: { fontSize: 24, fontWeight: '900', color: '#2E9E4F' },
+  doneText: { fontSize: 24, fontWeight: '700', color: '#2E9E4F' },
   nextBtn: { minHeight: 60, borderRadius: 30, backgroundColor: MAIN, alignItems: 'center', justifyContent: 'center' },
   shelf: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center' },
   foodWrap: { width: '30%', minWidth: 96 },
   food: { backgroundColor: '#fff', borderRadius: 18, borderWidth: 2, borderColor: '#F2C9A8', padding: 8, minHeight: 88, alignItems: 'center', justifyContent: 'center' },
   foodDots: { fontSize: 18, textAlign: 'center', lineHeight: 24 },
-  foodNum: { fontSize: 16, fontWeight: '800', color: '#8A6A50' },
+  foodNum: { fontSize: 16, fontWeight: '600', color: '#8A6A50' },
   foodEmoji: { fontSize: 30 },
-  foodNumBig: { fontSize: 26, fontWeight: '900', color: '#333' },
-});
+  foodNumBig: { fontSize: 26, fontWeight: '700', color: '#333' },
+}));

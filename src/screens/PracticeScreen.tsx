@@ -5,7 +5,8 @@
  * 做错的题自动进入“今日复习”。
  */
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BANK_SOURCE, bankExercise, findUnit, pickRound } from '@/content/bank';
 import { ORAL_TOPICS, oralExercise, oralRound } from '@/content/oral';
@@ -33,7 +34,7 @@ import type { Exercise, Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { prefetchSpeech, speak, speakablesOf, stopSpeaking } from '@/speech/speech';
-import { colors, radius, space, subjectTheme } from '@/theme';
+import { colors, radius, space, subjectTheme, themed } from '@/theme';
 
 interface Round {
   subject: Subject;
@@ -308,23 +309,23 @@ function PracticeSession({ id }: { id: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1 },
   headerWrap: { paddingHorizontal: space.lg },
   content: { padding: space.lg, gap: space.md, width: '100%', maxWidth: 720, alignSelf: 'center' },
-  count: { fontSize: 18, fontWeight: '800', color: colors.textSoft },
+  count: { fontSize: 18, fontWeight: '600', color: colors.textSoft },
   bottom: {
     paddingHorizontal: space.lg,
     paddingTop: space.sm,
     gap: space.sm,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.glass,
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingHorizontal: space.xl },
   summary: {
     fontSize: 20,
     fontWeight: '700',
     color: colors.text,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.lg,
   },
@@ -333,4 +334,4 @@ const styles = StyleSheet.create({
   sourceRow: { alignItems: 'center', gap: 4, marginTop: space.sm },
   source: { fontSize: 12, color: colors.textSoft, textAlign: 'center' },
   report: { fontSize: 13, color: colors.textSoft, padding: 4 },
-});
+}));

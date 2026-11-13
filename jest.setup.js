@@ -35,3 +35,11 @@ jest.mock('expo-audio', () => {
   });
   return { createAudioPlayer, __players: players };
 });
+
+// 动画（V5.0 起按钮都带弹簧动画）：测试环境没有原生动画引擎（官方测试替身在这里也加载不了），
+// 用自写的替身 jest/reanimatedMock.js，动画直接跳到结果，只验证界面和逻辑；真实动画在网页端到端测试和真机上看
+jest.mock('react-native-reanimated', () => require('./jest/reanimatedMock'));
+jest.mock('expo-blur', () => {
+  const { View } = require('react-native');
+  return { BlurView: View, BlurTargetView: View };
+});

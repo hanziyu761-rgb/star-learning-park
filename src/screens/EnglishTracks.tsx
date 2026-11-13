@@ -2,14 +2,15 @@
  * 英语乐园：一、二年级启蒙的三条主线（交流 / 拼读 / 分级阅读），每条主线一张卡片、一行一课。
  */
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { lessonsFor } from '@/content';
 import { STARTER_NOTE, TRACK_INFO, type EnglishTrack } from '@/content/englishStarter';
 import { Stars, tapFeedback } from '@/components/ui';
 import { DisplayTextView } from '@/components/PinyinText';
 import { useNav } from '@/nav/Nav';
 import type { ProgressState } from '@/progress/model';
-import { colors, radius, shadow, space, subjectTheme } from '@/theme';
+import { colors, radius, shadow, space, subjectTheme, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
 const TRACKS: EnglishTrack[] = ['talk', 'phonics', 'reading'];
@@ -78,14 +79,14 @@ export function EnglishTracks({ state }: { state: ProgressState }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   note: { fontSize: 13, color: colors.textSoft, lineHeight: 19 },
-  card: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.md, gap: space.sm, ...shadow },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.md, gap: space.sm, ...shadow },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.xs },
   headEmoji: { fontSize: 36 },
-  title: { fontSize: 20, fontWeight: '900', color: colors.text },
+  title: { fontSize: 20, fontWeight: '700', color: colors.text },
   sub: { fontSize: 12, color: colors.textSoft },
-  count: { fontSize: 18, fontWeight: '900' },
+  count: { fontSize: 18, fontWeight: '700' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -98,9 +99,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   rowEmoji: { fontSize: 24 },
-  rowTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
-  go: { fontSize: 15, fontWeight: '800' },
-});
+  rowTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
+  go: { fontSize: 15, fontWeight: '600' },
+}));
 
 /** 语文“阅读小屋”（V2.10）：原创带拼音短文，一行一篇 */
 export function ReadingHouse({ state }: { state: ProgressState }) {

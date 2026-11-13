@@ -4,12 +4,14 @@
  * 生词本里的词拼对一次亮一个小圆点，亮满 3 个自动移出。
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { useProgress } from '@/progress/ProgressContext';
 import type { WordCard } from '../catalog';
 import { isCorrectSpelling, letterTiles, needsSpaceKey, pickDictation } from '../dictation';
 import { sayWord, WordArt } from './WordCardView';
 import { WC } from './theme';
+import { colors, themed } from '@/theme';
 
 type Mode = 'tiles' | 'input';
 
@@ -216,40 +218,40 @@ export function DictationModal({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   root: { flex: 1, backgroundColor: WC.bg, paddingTop: 24 },
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8 },
-  title: { fontSize: 22, fontWeight: '900', color: WC.main, flex: 1 },
-  close: { minHeight: 44, paddingHorizontal: 16, borderRadius: 22, backgroundColor: '#fff', justifyContent: 'center', borderWidth: 2, borderColor: WC.line },
-  closeText: { fontSize: 16, fontWeight: '800', color: WC.main },
+  title: { fontSize: 22, fontWeight: '700', color: WC.mainText, flex: 1 },
+  close: { minHeight: 44, paddingHorizontal: 16, borderRadius: 22, backgroundColor: colors.card, justifyContent: 'center', borderWidth: 2, borderColor: WC.line },
+  closeText: { fontSize: 16, fontWeight: '600', color: WC.mainText },
   empty: { padding: 24, fontSize: 18, color: WC.muted },
   body: { padding: 16, gap: 14 },
   progress: { fontSize: 15, color: WC.muted, fontWeight: '700' },
   promptRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  speak: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: WC.main },
-  zh: { flex: 1, fontSize: 30, fontWeight: '900', color: WC.text },
-  answerBox: { minHeight: 72, borderRadius: 18, borderWidth: 3, borderColor: WC.line, backgroundColor: '#fff', justifyContent: 'center', paddingHorizontal: 16 },
-  okBox: { borderColor: WC.ok, backgroundColor: '#EAF7EE' },
-  badBox: { borderColor: WC.heart, backgroundColor: '#FDECEC' },
-  answerText: { fontSize: 36, fontWeight: '800', color: WC.text, letterSpacing: 2 },
+  speak: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: WC.mainText },
+  zh: { flex: 1, fontSize: 30, fontWeight: '700', color: WC.text },
+  answerBox: { minHeight: 72, borderRadius: 18, borderWidth: 3, borderColor: WC.line, backgroundColor: colors.card, justifyContent: 'center', paddingHorizontal: 16 },
+  okBox: { borderColor: WC.ok, backgroundColor: colors.correctSoft },
+  badBox: { borderColor: WC.heart, backgroundColor: colors.wrongSoft },
+  answerText: { fontSize: 36, fontWeight: '600', color: WC.text, letterSpacing: 2 },
   modeRow: { flexDirection: 'row', gap: 10 },
-  mode: { flex: 1, minHeight: 44, borderRadius: 22, borderWidth: 2, borderColor: WC.main, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' },
+  mode: { flex: 1, minHeight: 44, borderRadius: 22, borderWidth: 2, borderColor: WC.mainText, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card },
   modeOn: { backgroundColor: WC.main },
-  modeText: { fontSize: 15, fontWeight: '800', color: WC.main },
+  modeText: { fontSize: 15, fontWeight: '600', color: WC.mainText },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center' },
-  tile: { width: 58, height: 58, borderRadius: 14, backgroundColor: '#fff', borderWidth: 3, borderColor: WC.main, alignItems: 'center', justifyContent: 'center' },
+  tile: { width: 58, height: 58, borderRadius: 14, backgroundColor: colors.card, borderWidth: 3, borderColor: WC.mainText, alignItems: 'center', justifyContent: 'center' },
   tileUsed: { opacity: 0.25 },
   wide: { width: 124 },
-  tileText: { fontSize: 30, fontWeight: '900', color: WC.main },
-  tileSmall: { fontSize: 17, fontWeight: '800', color: WC.main },
-  input: { minHeight: 60, borderRadius: 16, borderWidth: 3, borderColor: WC.main, backgroundColor: '#fff', fontSize: 28, paddingHorizontal: 14 },
+  tileText: { fontSize: 30, fontWeight: '700', color: WC.mainText },
+  tileSmall: { fontSize: 17, fontWeight: '600', color: WC.mainText },
+  input: { minHeight: 60, borderRadius: 16, borderWidth: 3, borderColor: WC.mainText, backgroundColor: colors.card, fontSize: 28, paddingHorizontal: 14 },
   btn: { minHeight: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
   primary: { backgroundColor: WC.main },
-  btnTextLight: { color: '#fff', fontSize: 19, fontWeight: '900' },
-  verdict: { fontSize: 24, fontWeight: '900' },
-  correctBox: { backgroundColor: '#fff', borderRadius: 18, padding: 8 },
+  btnTextLight: { color: '#fff', fontSize: 19, fontWeight: '700' },
+  verdict: { fontSize: 24, fontWeight: '700' },
+  correctBox: { backgroundColor: colors.card, borderRadius: 18, padding: 8 },
   label: { fontSize: 16, color: WC.text },
-  big: { fontSize: 40, fontWeight: '900', color: WC.main, textAlign: 'center' },
+  big: { fontSize: 40, fontWeight: '700', color: WC.mainText, textAlign: 'center' },
   wrapRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  wrongWord: { fontSize: 20, fontWeight: '800', color: WC.heart, backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, overflow: 'hidden' },
-});
+  wrongWord: { fontSize: 20, fontWeight: '600', color: WC.heart, backgroundColor: colors.card, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, overflow: 'hidden' },
+}));

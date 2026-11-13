@@ -3,12 +3,13 @@
  * 不选也可以直接点“继续”。
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { DisplayTextView } from '@/components/PinyinText';
 import { zh } from '@/content/zh';
 import { useProgress } from '@/progress/ProgressContext';
 import { speak } from '@/speech/speech';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { strategyOptions } from './strategies';
 
 export function StrategyAsk({ kp, lessonId, exerciseId }: { kp: string; lessonId: string; exerciseId: string }) {
@@ -45,7 +46,7 @@ export function StrategyAsk({ kp, lessonId, exerciseId }: { kp: string; lessonId
               style={[styles.opt, on && styles.optOn, chosen !== null && !on && styles.optDim]}
             >
               <Text style={styles.emoji}>{o.emoji}</Text>
-              <DisplayTextView text={o.text} size={18} color={on ? '#fff' : colors.text} />
+              <DisplayTextView text={o.text} size={18} color={on ? colors.onAccent : colors.text} />
             </Pressable>
           );
         })}
@@ -59,15 +60,15 @@ export function StrategyAsk({ kp, lessonId, exerciseId }: { kp: string; lessonId
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.md,
     gap: space.sm,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#E3DEFA',
+    borderColor: colors.line,
   },
   opts: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm },
   opt: {
@@ -77,9 +78,9 @@ const styles = StyleSheet.create({
     minHeight: 56,
     paddingHorizontal: space.md,
     borderRadius: radius.md,
-    backgroundColor: '#F2F0FD',
+    backgroundColor: colors.parentSoft,
   },
   optOn: { backgroundColor: colors.parent },
   optDim: { opacity: 0.45 },
   emoji: { fontSize: 24 },
-});
+}));

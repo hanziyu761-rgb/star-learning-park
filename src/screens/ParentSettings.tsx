@@ -2,7 +2,8 @@
  * 家长中心：孩子年级、AI 老师开关与连接测试、AI 学习分析、题库屏蔽管理。
  */
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { AiError, aiHealth, aiReport, AI_ERROR_TEXT, DEFAULT_AI_BASE_URL } from '@/ai/client';
 import { skillLabel } from '@/content';
 import { mistakeLabel } from '@/content/resolve';
@@ -11,8 +12,9 @@ import { useProgress } from '@/progress/ProgressContext';
 import { getAsr } from '@/speech/asr';
 import { speak } from '@/speech/speech';
 import { openMistakes, weakSkills } from '@/progress/stats';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { ALL_GRADES, GRADE_CN, isJunior } from '@/progress/grade';
+import { Segmented } from '@/components/Segmented';
 
 
 export function GradeCard() {
@@ -29,7 +31,7 @@ export function GradeCard() {
             accessibilityRole="button"
             testID={`grade-${g}`}
           >
-            <Text style={[styles.chipText, state.settings.grade === g && { color: '#fff' }]}>{GRADE_CN[g]}年级</Text>
+            <Text style={[styles.chipText, state.settings.grade === g && { color: colors.onAccent }]}>{GRADE_CN[g]}年级</Text>
           </Pressable>
         ))}
       </View>
@@ -38,6 +40,26 @@ export function GradeCard() {
           初中：不标拼音。目前只有课本目录，没有初中的课程和练习。
         </Text>
       ) : null}
+    </Card>
+  );
+}
+
+/** 外观（V5.0）：跟随手机 / 浅色 / 深色 */
+export function AppearanceCard() {
+  const { state, dispatch } = useProgress();
+  return (
+    <Card>
+      <SectionTitle>外观</SectionTitle>
+      <Segmented
+        testID="appearance"
+        value={state.settings.appearance}
+        onChange={(v) => dispatch({ type: 'settings/set', settings: { appearance: v } })}
+        options={[
+          { value: 'system', label: '跟随手机' },
+          { value: 'light', label: '浅色' },
+          { value: 'dark', label: '深色' },
+        ]}
+      />
     </Card>
   );
 }
@@ -148,7 +170,7 @@ export function AiCard() {
         testID="ai-url"
       />
       <Pressable onPress={test} style={styles.btn} accessibilityRole="button" testID="ai-test">
-        {check.loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>测试连接</Text>}
+        {check.loading ? <ActivityIndicator color={colors.onAccent} /> : <Text style={styles.btnText}>测试连接</Text>}
       </Pressable>
       {check.text ? (
         <Text style={[styles.small, { color: check.ok ? colors.correct : colors.wrong }]} testID="ai-check-result">
@@ -184,7 +206,7 @@ export function AiCard() {
         accessibilityRole="button"
         testID="ai-report"
       >
-        {report.loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>生成 AI 学习分析</Text>}
+        {report.loading ? <ActivityIndicator color={colors.onAccent} /> : <Text style={styles.btnText}>生成 AI 学习分析</Text>}
       </Pressable>
       {report.text ? (
         <View style={[styles.reportBox, report.error && { borderColor: colors.wrong }]} testID="ai-report-text">
@@ -216,25 +238,25 @@ export function HiddenCard() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   small: { fontSize: 13, color: colors.textSoft, marginTop: 2, lineHeight: 19 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.sm },
   chip: {
     paddingHorizontal: space.md,
     minHeight: 44,
     borderRadius: radius.round,
-    backgroundColor: '#EEEDFB',
+    backgroundColor: colors.parentSoft,
     justifyContent: 'center',
   },
   chipOn: { backgroundColor: colors.parent },
-  chipText: { fontSize: 15, fontWeight: '800', color: colors.text },
+  chipText: { fontSize: 15, fontWeight: '600', color: colors.text },
   gradeNote: { fontSize: 13, color: colors.textSoft, marginTop: 8 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: space.sm },
-  label: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: space.sm },
+  label: { fontSize: 16, fontWeight: '600', color: colors.text, marginTop: space.sm },
   input: {
     minHeight: 48,
     borderRadius: radius.md,
-    backgroundColor: '#F7F6FF',
+    backgroundColor: colors.parentSoft,
     paddingHorizontal: space.md,
     fontSize: 15,
     marginTop: 4,
@@ -247,14 +269,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: space.sm,
   },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
-  divider: { height: 1, backgroundColor: '#EEE', marginVertical: space.md },
+  btnText: { color: colors.onAccent, fontSize: 16, fontWeight: '600' },
+  divider: { height: 1, backgroundColor: colors.line, marginVertical: space.md },
   reportBox: {
     borderWidth: 2,
-    borderColor: '#D9D6FF',
+    borderColor: colors.line,
     borderRadius: radius.md,
     padding: space.md,
     marginTop: space.sm,
   },
   reportText: { fontSize: 15, lineHeight: 23, color: colors.text },
-});
+}));

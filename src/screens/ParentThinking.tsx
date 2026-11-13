@@ -10,7 +10,7 @@ import { challengeLevel, LEVEL_NAME } from '@/thinking/adaptive';
 import { THINK_DIMS } from '@/thinking/dims';
 import { MIN_SAMPLES, thinkingProfile } from '@/thinking/profile';
 import { STRATEGIES } from '@/thinking/strategies';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
 const SUBJECT_CN = { math: '数学', chinese: '语文', english: '英语' } as const;
@@ -107,14 +107,14 @@ export function ThinkingCard() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   adaptRow: { flexDirection: 'row', alignItems: 'center', marginTop: space.sm },
   note: { fontSize: 13, color: colors.textSoft, marginTop: space.xs, lineHeight: 19 },
   empty: { fontSize: 15, color: colors.text, marginTop: space.sm, lineHeight: 22 },
   line: { fontSize: 15, color: colors.text, marginTop: space.sm, fontWeight: '700' },
-  dim: { marginTop: space.sm, padding: space.sm, backgroundColor: '#F7F5FF', borderRadius: radius.md, gap: 2 },
-  dimName: { fontSize: 16, fontWeight: '800', color: colors.text },
+  dim: { marginTop: space.sm, padding: space.sm, backgroundColor: colors.parentSoft, borderRadius: radius.md, gap: 2 },
+  dimName: { fontSize: 16, fontWeight: '600', color: colors.text },
   dimDesc: { fontSize: 13, color: colors.textSoft },
   dimStat: { fontSize: 15, color: colors.text },
   advice: { fontSize: 14, color: colors.parent, fontWeight: '700', marginTop: 2 },
-});
+}));

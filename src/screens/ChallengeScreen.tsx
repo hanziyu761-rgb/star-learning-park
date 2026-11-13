@@ -5,7 +5,8 @@
  * - 做完后可以“再玩一道”（不再给星星，但记入思维记录）。
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedbackBar } from '@/components/FeedbackBar';
 import { Mascot } from '@/components/Mascot';
@@ -25,16 +26,14 @@ import { CHALLENGE_BY_TYPE, dailyChallenge, recommendedSubject } from '@/thinkin
 import type { Subject } from '@/lesson/types';
 import { challengeLevel, LEVEL_NAME } from '@/thinking/adaptive';
 import { THINK_DIMS } from '@/thinking/dims';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
-const COLOR = '#E07A2E';
 const SUBJECTS: { id: Subject; label: ReturnType<typeof zh> }[] = [
   { id: 'math', label: zh('数学', 'shù xué') },
   { id: 'chinese', label: zh('语文', 'yǔ wén') },
   { id: 'english', label: zh('英语', 'yīng yǔ') },
 ];
-const SOFT = '#FFF1E3';
 
 export default function ChallengeScreen() {
   const { status } = useProgress();
@@ -121,9 +120,9 @@ function ChallengeSession() {
               }}
               style={[styles.subject, subject === x.id && styles.subjectOn]}
             >
-              <DisplayTextView text={x.label} size={18} color={subject === x.id ? '#fff' : COLOR} />
+              <DisplayTextView text={x.label} size={18} color={subject === x.id ? colors.onAccent : colors.orange} />
               {x.id === recommended ? (
-                <Text style={[styles.rec, subject === x.id && { color: '#fff' }]}>今天推荐</Text>
+                <Text style={[styles.rec, subject === x.id && { color: colors.onAccent }]}>今天推荐</Text>
               ) : null}
             </Pressable>
           ))}
@@ -134,7 +133,7 @@ function ChallengeSession() {
             <DisplayTextView
               text={zh('今天的挑战完成啦！', 'jīn tiān de tiǎo zhàn wán chéng la')}
               size={26}
-              color={COLOR}
+              color={colors.orange}
             />
             {last ? (
               <Text style={styles.meta}>
@@ -179,7 +178,7 @@ function ChallengeSession() {
                       : zh('多想了几次，也做出来了！', 'duō xiǎng le jǐ cì yě zuò chū lái le')
                   }
                   size={20}
-                  color={COLOR}
+                  color={colors.orange}
                 />
                 {solved.stars > 0 ? (
                   <Text style={styles.meta} testID="challenge-stars">
@@ -199,7 +198,7 @@ function ChallengeSession() {
               size="md"
               emoji="🧩"
               label={zh('再玩一道', 'zài wán yí dào')}
-              color={COLOR}
+              color={colors.orange}
               onPress={() => {
                 speak({ text: '再玩一道', lang: 'zh-CN' });
                 playMore();
@@ -221,8 +220,8 @@ function ChallengeSession() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: SOFT },
+const styles = themed(() => StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.orangeSoft },
   headerWrap: { paddingHorizontal: space.lg },
   content: { padding: space.lg, gap: space.md, width: '100%', maxWidth: 720, alignSelf: 'center' },
   subjects: { flexDirection: 'row', gap: space.sm },
@@ -231,26 +230,26 @@ const styles = StyleSheet.create({
     minHeight: 56,
     borderRadius: radius.md,
     borderWidth: 2,
-    borderColor: COLOR,
-    backgroundColor: '#fff',
+    borderColor: colors.orange,
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 4,
   },
-  subjectOn: { backgroundColor: COLOR },
-  rec: { fontSize: 11, color: COLOR, fontWeight: '700' },
+  subjectOn: { backgroundColor: colors.orange },
+  rec: { fontSize: 11, color: colors.orange, fontWeight: '700' },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs, alignItems: 'center' },
-  typeName: { fontSize: 18, fontWeight: '900', color: COLOR, marginRight: space.xs },
+  typeName: { fontSize: 18, fontWeight: '700', color: colors.orange, marginRight: space.xs },
   tag: {
     fontSize: 13,
     color: colors.textSoft,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.round,
     paddingHorizontal: space.sm,
     paddingVertical: 2,
   },
   doneCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.lg,
     alignItems: 'center',
@@ -261,6 +260,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     paddingTop: space.sm,
     gap: space.sm,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.glass,
   },
-});
+}));

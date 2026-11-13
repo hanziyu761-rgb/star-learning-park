@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { DisplayTextView } from '@/components/PinyinText';
 import { tapFeedback } from '@/components/ui';
 import { plainText } from '@/content/zh';
 import type { SortExercise as SortData } from '@/lesson/types';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/theme';
+import { colors, MIN_TOUCH, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 /** 简单排序：按顺序依次点击（例如从小到大） */
@@ -76,7 +77,7 @@ export function SortExercise({ exercise, lang, onFeedback, onSolved }: ExerciseP
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
   answer: { flexDirection: 'row', justifyContent: 'center', gap: space.sm, flexWrap: 'wrap' },
   slot: {
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderStyle: 'dashed',
     borderColor: colors.line,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
     minWidth: MIN_TOUCH + 16,
     minHeight: MIN_TOUCH + 16,
     borderRadius: radius.md,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
     padding: space.sm,
@@ -109,4 +110,4 @@ const styles = StyleSheet.create({
   itemLong: { width: '100%' },
   itemUsed: { opacity: 0.35 },
   itemWrong: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft },
-});
+}));

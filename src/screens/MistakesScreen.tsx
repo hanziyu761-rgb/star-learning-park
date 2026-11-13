@@ -6,7 +6,8 @@
  * 只来自真实答题记录。
  */
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { resolveExercise, mistakeLabel } from '@/content/resolve';
 import { zh } from '@/content/zh';
 import { printHtml } from '@/exam/print';
@@ -19,7 +20,7 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
 import { clickTime } from '@/words/session';
-import { colors, radius, space, subjectTheme } from '@/theme';
+import { colors, radius, space, subjectTheme, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
 const TITLE = {
@@ -94,7 +95,7 @@ export default function MistakesScreen({ subject }: { subject: Subject }) {
           accessibilityRole="button"
           testID="mistakes-print"
         >
-          {printing ? <ActivityIndicator color="#fff" /> : <Text style={styles.actionText}>🖨️ 打印错题</Text>}
+          {printing ? <ActivityIndicator color={colors.onAccent} /> : <Text style={styles.actionText}>🖨️ 打印错题</Text>}
         </Pressable>
       </View>
       <View style={styles.answerRow}>
@@ -120,7 +121,7 @@ export default function MistakesScreen({ subject }: { subject: Subject }) {
             accessibilityState={{ selected: tab === t }}
             testID={`mistakes-tab-${t}`}
           >
-            <Text style={[styles.tabText, tab === t && { color: '#fff' }]}>
+            <Text style={[styles.tabText, tab === t && { color: colors.onAccent }]}>
               {t === 'open' ? `还没掌握（${book.open.length}）` : `已经掌握（${book.mastered.length}）`}
             </Text>
           </Pressable>
@@ -161,36 +162,36 @@ function EntryCard({ en, color }: { en: BookEntry; color: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   summary: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     borderWidth: 3,
     paddingVertical: space.md,
   },
   stat: { flex: 1, alignItems: 'center' },
-  num: { fontSize: 40, fontWeight: '900' },
-  statLabel: { fontSize: 15, fontWeight: '800', color: colors.textSoft },
+  num: { fontSize: 40, fontWeight: '700' },
+  statLabel: { fontSize: 15, fontWeight: '600', color: colors.textSoft },
   actions: { flexDirection: 'row', gap: space.md },
   action: { flex: 1, minHeight: 60, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center' },
-  printBtn: { backgroundColor: '#7A5AF8' },
+  printBtn: { backgroundColor: colors.parent },
   disabled: { opacity: 0.4 },
-  actionText: { color: '#fff', fontSize: 18, fontWeight: '900' },
+  actionText: { color: colors.onAccent, fontSize: 18, fontWeight: '700' },
   answerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
-  tabs: { flexDirection: 'row', gap: space.sm, backgroundColor: '#fff', borderRadius: radius.round, padding: 4 },
+  tabs: { flexDirection: 'row', gap: space.sm, backgroundColor: colors.card, borderRadius: radius.round, padding: 4 },
   tab: { flex: 1, borderRadius: radius.round, paddingVertical: 10, alignItems: 'center' },
-  tabText: { fontSize: 15, fontWeight: '800', color: colors.text },
+  tabText: { fontSize: 15, fontWeight: '600', color: colors.text },
   empty: { alignItems: 'center', gap: space.sm, paddingVertical: space.xl },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.md,
     borderLeftWidth: 6,
     padding: space.md,
     gap: 4,
   },
-  cardTitle: { fontSize: 17, fontWeight: '800', color: colors.text, lineHeight: 24 },
+  cardTitle: { fontSize: 17, fontWeight: '600', color: colors.text, lineHeight: 24 },
   small: { fontSize: 13, color: colors.textSoft, lineHeight: 19, flexShrink: 1 },
-  tag: { fontSize: 12, fontWeight: '800' },
+  tag: { fontSize: 12, fontWeight: '600' },
   note: { fontSize: 12, color: '#888', lineHeight: 18 },
-});
+}));

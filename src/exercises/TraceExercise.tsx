@@ -10,7 +10,7 @@ import Svg, { Circle, Line, Polyline, Rect } from 'react-native-svg';
 import { DisplayTextView } from '@/components/PinyinText';
 import { zh } from '@/content/zh';
 import type { TraceExercise as TraceData } from '@/lesson/types';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 const SIZE = 280;
@@ -160,11 +160,11 @@ export function TraceExercise({ exercise, lang, onFeedback, onSolved }: Exercise
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.md, alignItems: 'stretch' },
   info: { alignItems: 'center' },
   row: { flexDirection: 'row', alignItems: 'flex-end', gap: 4 },
-  stepText: { fontSize: 16, fontWeight: '800', color: colors.text },
+  stepText: { fontSize: 16, fontWeight: '600', color: colors.text },
   canvas: { alignSelf: 'center', width: SIZE, height: SIZE, borderRadius: radius.sm, overflow: 'hidden' },
   note: { textAlign: 'center', fontSize: 13, color: colors.textSoft },
-});
+}));

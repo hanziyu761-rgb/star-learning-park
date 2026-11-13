@@ -2,11 +2,12 @@
  * 家长中心 · 游戏乐园（V2.19）：每天最多玩多久（默认 15 分钟）、今天玩了多久、最近 7 天每个游戏的情况。
  */
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { Card, SectionTitle } from '@/components/ui';
 import { GAME_MINUTE_CHOICES, GAMES, gameLevel, playedToday } from '@/games/common';
 import { useProgress } from '@/progress/ProgressContext';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 
 const WEEK = 7 * 24 * 3600 * 1000;
 
@@ -58,12 +59,12 @@ export function GameParentCard() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   small: { fontSize: 13, color: colors.textSoft, lineHeight: 19 },
-  label: { fontSize: 14, fontWeight: '800', color: colors.text, marginTop: space.md },
+  label: { fontSize: 14, fontWeight: '600', color: colors.text, marginTop: space.md },
   line: { fontSize: 14, color: colors.text, marginTop: space.xs },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.sm },
   chip: { borderRadius: radius.lg, borderWidth: 2, borderColor: colors.line, paddingHorizontal: space.md, paddingVertical: 8 },
   chipOn: { borderColor: '#E8772E', backgroundColor: '#E8772E' },
   chipText: { fontSize: 15, fontWeight: '700', color: colors.text },
-});
+}));

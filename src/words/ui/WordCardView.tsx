@@ -3,13 +3,15 @@
  * 背面：中文意思、例句、记忆窍门（藏词、拼读家族、别搞混、形状窍门），窍门里的词可以点，点了跳到那张卡。
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Animated, Platform, Pressable, ScrollView, StyleSheet, Text, View, type TextStyle } from 'react-native';
+import { Animated, Platform, ScrollView, StyleSheet, Text, View, type TextStyle } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { DisplayTextView } from '@/components/PinyinText';
 import { zh } from '@/content/zh';
 import { speak } from '@/speech/speech';
 import type { WordCard } from '../catalog';
 import { COLOR_WORDS, confusables, families, hiddenWords, LOOK_WORDS, segments, SHAPE_TIPS, type WordLook } from '../tricks';
-import { WC } from './theme';
+import { WC_CARD } from './theme';
+import { themed } from '@/theme';
 
 const SEG_COLORS = ['#1E7F5C', '#E07A1F', '#2F6FD6', '#B83280', '#7A5AF8'];
 
@@ -20,7 +22,7 @@ const LOOK_STYLE: Record<WordLook, TextStyle> = {
   fast: { transform: [{ skewX: '-18deg' }], fontStyle: 'italic' },
   long: { transform: [{ scaleX: 1.35 }], letterSpacing: 4 },
   short: { transform: [{ scaleY: 0.6 }] },
-  fat: { transform: [{ scaleX: 1.3 }], fontWeight: '900' },
+  fat: { transform: [{ scaleX: 1.3 }], fontWeight: '700' },
   thin: { transform: [{ scaleX: 0.7 }], fontWeight: '300' },
 };
 
@@ -35,7 +37,7 @@ export function WordArt({ w, size = 56 }: { w: string; size?: number }) {
   const color = COLOR_WORDS[lw];
   const look = LOOK_WORDS[lw];
   const segs = segments(w);
-  const base: TextStyle = { fontSize: Math.min(size, Math.max(30, longCap)), fontWeight: '900' };
+  const base: TextStyle = { fontSize: Math.min(size, Math.max(30, longCap)), fontWeight: '700' };
   const outline: TextStyle | undefined = color?.outline
     ? { textShadowColor: '#4A3A00', textShadowRadius: 2, textShadowOffset: { width: 1, height: 1 } }
     : undefined;
@@ -255,7 +257,7 @@ function TopBar({
         accessibilityState={{ selected: saved }}
         testID="wc-heart"
       >
-        <Text style={[styles.icon, { color: saved ? WC.heart : '#9AA5A0' }]}>{saved ? '♥' : '♡'}</Text>
+        <Text style={[styles.icon, { color: saved ? WC_CARD.heart : '#9AA5A0' }]}>{saved ? '♥' : '♡'}</Text>
       </Pressable>
     </View>
   );
@@ -281,7 +283,7 @@ function WordLink({ w, onJump, mark }: { w: string; onJump: (w: string) => void;
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { height: 400, marginHorizontal: 4 },
   face: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
@@ -294,37 +296,37 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 6,
   },
-  front: { backgroundColor: '#FFFDF7', borderWidth: 4, borderColor: WC.main },
-  backFace: { backgroundColor: WC.soft, borderWidth: 4, borderColor: WC.main },
+  front: { backgroundColor: '#FFFDF7', borderWidth: 4, borderColor: WC_CARD.main },
+  backFace: { backgroundColor: WC_CARD.soft, borderWidth: 4, borderColor: WC_CARD.main },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  iconBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: WC.line },
+  iconBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: WC_CARD.line },
   icon: { fontSize: 28 },
-  times: { fontSize: 15, fontWeight: '800', color: '#fff', backgroundColor: WC.accentDark, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 14, overflow: 'hidden' },
+  times: { fontSize: 15, fontWeight: '600', color: '#fff', backgroundColor: WC_CARD.accentDark, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 14, overflow: 'hidden' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
   artRow: { minHeight: 110, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
   segBar: { color: '#B8C4BE' },
-  ipa: { fontSize: 22, color: WC.main, fontWeight: '600' },
-  ipaTag: { fontSize: 13, color: WC.muted },
-  hint: { fontSize: 13, color: WC.muted },
+  ipa: { fontSize: 22, color: WC_CARD.main, fontWeight: '600' },
+  ipaTag: { fontSize: 13, color: WC_CARD.muted },
+  hint: { fontSize: 13, color: WC_CARD.muted },
   backBody: { gap: 12, paddingBottom: 8 },
-  backWord: { fontSize: 26, fontWeight: '900', color: WC.main, textAlign: 'center' },
-  zh: { fontSize: 30, fontWeight: '800', color: WC.text, textAlign: 'center' },
+  backWord: { fontSize: 26, fontWeight: '700', color: WC_CARD.main, textAlign: 'center' },
+  zh: { fontSize: 30, fontWeight: '600', color: WC_CARD.text, textAlign: 'center' },
   example: { backgroundColor: '#fff', borderRadius: 16, padding: 12, gap: 4 },
-  exEn: { fontSize: 18, fontWeight: '700', color: WC.text },
-  exZh: { fontSize: 15, color: WC.muted },
+  exEn: { fontSize: 18, fontWeight: '700', color: WC_CARD.text },
+  exZh: { fontSize: 15, color: WC_CARD.muted },
   tricks: { backgroundColor: '#fff', borderRadius: 16, padding: 12, gap: 8 },
-  tricksTitle: { fontSize: 17, fontWeight: '900', color: WC.accentDark },
+  tricksTitle: { fontSize: 17, fontWeight: '700', color: WC_CARD.accentDark },
   trickBlock: { gap: 6 },
-  trickHead: { fontSize: 14, fontWeight: '800', color: WC.main },
+  trickHead: { fontSize: 14, fontWeight: '600', color: WC_CARD.main },
   trickRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
-  trickWord: { fontSize: 20, fontWeight: '700', color: WC.text },
-  hidden: { fontSize: 26, fontWeight: '900', color: '#E07A1F' },
-  trickText: { fontSize: 15, color: WC.text, lineHeight: 21 },
-  trickLine: { fontSize: 15, color: WC.text, lineHeight: 21 },
+  trickWord: { fontSize: 20, fontWeight: '700', color: WC_CARD.text },
+  hidden: { fontSize: 26, fontWeight: '700', color: '#E07A1F' },
+  trickText: { fontSize: 15, color: WC_CARD.text, lineHeight: 21 },
+  trickLine: { fontSize: 15, color: WC_CARD.text, lineHeight: 21 },
   linkWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  link: { borderRadius: 14, borderWidth: 2, borderColor: WC.line, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: WC.soft, minHeight: 36, justifyContent: 'center' },
-  linkText: { fontSize: 17, fontWeight: '700', color: WC.main },
-  linkSub: { fontSize: 12, color: WC.muted },
-  markPart: { color: '#E07A1F', fontWeight: '900' },
-  red: { color: WC.heart, fontWeight: '900' },
-});
+  link: { borderRadius: 14, borderWidth: 2, borderColor: WC_CARD.line, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: WC_CARD.soft, minHeight: 36, justifyContent: 'center' },
+  linkText: { fontSize: 17, fontWeight: '700', color: WC_CARD.main },
+  linkSub: { fontSize: 12, color: WC_CARD.muted },
+  markPart: { color: '#E07A1F', fontWeight: '700' },
+  red: { color: WC_CARD.heart, fontWeight: '700' },
+}));

@@ -22,7 +22,7 @@ import type { Exercise } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { speak, stopSpeaking } from '@/speech/speech';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 
 export default function DiagnoseScreen({ kp }: { kp: string | undefined }) {
   const { status } = useProgress();
@@ -235,16 +235,16 @@ function DiagnoseGame({ target }: { target: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#F2F1FF' },
+const styles = themed(() => StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.parentSoft },
   pad: { paddingHorizontal: space.lg },
   content: { padding: space.lg, width: '100%', maxWidth: 720, alignSelf: 'center' },
-  count: { fontSize: 16, fontWeight: '800', color: colors.textSoft },
+  count: { fontSize: 16, fontWeight: '600', color: colors.textSoft },
   bottom: {
     paddingHorizontal: space.lg,
     paddingTop: space.sm,
     gap: space.sm,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.glass,
   },
   center: {
     flex: 1,
@@ -252,15 +252,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: space.lg,
     paddingHorizontal: space.xl,
-    backgroundColor: '#F2F1FF',
+    backgroundColor: colors.parentSoft,
   },
   found: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.lg,
   },
   small: { fontSize: 13, color: colors.textSoft },
-});
+}));

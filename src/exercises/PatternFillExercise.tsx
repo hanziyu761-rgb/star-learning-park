@@ -3,12 +3,13 @@
  * 按空格从左到右依次判断，放对的留在格子里，放错的弹回并提示。
  */
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { VisualView } from '@/components/Figure';
 import { tapFeedback } from '@/components/ui';
 import { DragArea, Draggable, DropZone, justDragged } from '@/drag/DragArea';
 import type { PatternExercise, PatternToken } from '@/lesson/types';
-import { colors, radius, shadow, space } from '@/theme';
+import { colors, radius, shadow, space, themed } from '@/theme';
 import { PromptHeader, useAttempts, type ExerciseProps } from './common';
 
 function Token({ token, size = 40 }: { token: PatternToken; size?: number }) {
@@ -117,7 +118,7 @@ export function PatternFillExercise({ exercise, lang, onFeedback, onSolved }: Ex
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
   area: { flexDirection: 'column-reverse', gap: space.xl },
   seq: {
@@ -125,29 +126,29 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: space.xs,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: space.sm,
     ...shadow,
   },
   cell: { width: 62, height: 62, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm },
-  slot: { borderWidth: 3, borderStyle: 'dashed', borderColor: colors.line, backgroundColor: '#FFFBEF' },
-  slotHint: { borderColor: colors.parent, backgroundColor: '#F2F1FF' },
+  slot: { borderWidth: 3, borderStyle: 'dashed', borderColor: colors.line, backgroundColor: colors.cardAlt },
+  slotHint: { borderColor: colors.parent, backgroundColor: colors.parentSoft },
   slotWrong: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft },
   slotOk: { borderStyle: 'solid', borderColor: colors.correct, backgroundColor: colors.correctSoft },
-  q: { fontSize: 28, fontWeight: '900', color: colors.textSoft },
-  tokenText: { fontWeight: '900', color: colors.text },
+  q: { fontSize: 28, fontWeight: '700', color: colors.textSoft },
+  tokenText: { fontWeight: '700', color: colors.text },
   palette: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md },
   paletteItem: {
     width: 80,
     height: 80,
     borderRadius: radius.md,
-    backgroundColor: '#FFF3C4',
+    backgroundColor: colors.highlight,
     borderWidth: 3,
     borderColor: colors.star,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadow,
   },
-  paletteSelected: { borderColor: colors.parent, borderWidth: 5, transform: [{ scale: 1.08 }] },
-});
+  paletteSelected: { borderColor: colors.parent, borderWidth: 3, transform: [{ scale: 1.08 }] },
+}));

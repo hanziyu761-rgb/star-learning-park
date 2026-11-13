@@ -5,7 +5,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Rect } from 'react-native-svg';
 import type { PuzzleFigure } from '@/lesson/types';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 
 export function PuzzleView({ puzzle, alt }: { puzzle: PuzzleFigure; alt: string }) {
   if (puzzle.kind === 'grid') {
@@ -69,7 +69,7 @@ export function PuzzleView({ puzzle, alt }: { puzzle: PuzzleFigure; alt: string 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   grid: { borderWidth: 3, borderColor: colors.text, borderRadius: radius.sm, overflow: 'hidden' },
   gridRow: { flexDirection: 'row' },
   cell: {
@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
   },
   side: { fontSize: 30, minWidth: 40, textAlign: 'center' },
   scale: { fontSize: 30 },
-});
+}));

@@ -8,7 +8,7 @@ import { BigButton, SpeakerButton } from '@/components/ui';
 import { zh } from '@/content/zh';
 import type { TeachSlide } from '@/knowledge/teach';
 import { speak } from '@/speech/speech';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 
 export function TeachPanel({ slides, color, onDone }: { slides: TeachSlide[]; color: string; onDone: () => void }) {
   const [i, setI] = useState(0);
@@ -52,9 +52,9 @@ export function TeachPanel({ slides, color, onDone }: { slides: TeachSlide[]; co
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.md, alignItems: 'stretch' },
-  card: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, alignItems: 'center', gap: space.md },
-  show: { fontSize: 44, fontWeight: '900', color: colors.text, textAlign: 'center', lineHeight: 60 },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.lg, alignItems: 'center', gap: space.md },
+  show: { fontSize: 44, fontWeight: '700', color: colors.text, textAlign: 'center', lineHeight: 60 },
   page: { textAlign: 'center', color: colors.textSoft, fontWeight: '700' },
-});
+}));

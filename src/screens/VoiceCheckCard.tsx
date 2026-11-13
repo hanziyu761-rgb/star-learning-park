@@ -3,12 +3,13 @@
  * 这里可以调语速、试听；下面的“没网时的备用声音”是手机自带的文字转语音，只在没网又没有录音时使用。
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { Card, SectionTitle } from '@/components/ui';
 import { useProgress } from '@/progress/ProgressContext';
 import type { Settings } from '@/progress/model';
 import { getVoices, speak, summarizeVoices, type VoiceInfo } from '@/speech/speech';
-import { colors, radius, space } from '@/theme';
+import { colors, radius, space, themed } from '@/theme';
 import { APP_VERSION } from '@/version';
 
 const SAMPLE = {
@@ -125,7 +126,7 @@ export function VoiceCheckCard() {
                       testID={`voice-use-${lang}-${i}`}
                       onPress={() => set(lang === 'zh-CN' ? { voiceZh: v.id } : { voiceEn: v.id })}
                     >
-                      <Text style={[styles.small2Text, { color: '#fff' }]}>用这个</Text>
+                      <Text style={[styles.small2Text, { color: colors.onAccent }]}>用这个</Text>
                     </Pressable>
                   </View>
                 );
@@ -154,9 +155,9 @@ export function VoiceCheckCard() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   small: { fontSize: 13, color: colors.textSoft, lineHeight: 19 },
-  label: { fontSize: 14, fontWeight: '800', color: colors.text, marginTop: space.md },
+  label: { fontSize: 14, fontWeight: '600', color: colors.text, marginTop: space.md },
   line: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: space.md },
   note: { fontSize: 13, color: colors.textSoft, marginTop: space.xs, lineHeight: 19 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.sm },
@@ -167,17 +168,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: 8,
   },
-  chipOn: { borderColor: '#4A90D9', backgroundColor: '#EAF3FD' },
+  chipOn: { borderColor: colors.blue, backgroundColor: colors.blueSoft },
   chipText: { fontSize: 15, fontWeight: '700', color: colors.text },
-  chipTextOn: { color: '#1F5FA8' },
+  chipTextOn: { color: colors.blue },
   btn: {
     flex: 1,
-    backgroundColor: '#4A90D9',
+    backgroundColor: colors.blue,
     borderRadius: radius.md,
     paddingVertical: space.sm,
     alignItems: 'center',
   },
-  btnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  btnText: { color: colors.onAccent, fontWeight: '600', fontSize: 15 },
   voice: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -188,21 +189,21 @@ const styles = StyleSheet.create({
     padding: space.sm,
     marginTop: space.xs,
   },
-  voiceOn: { borderColor: '#4A90D9', backgroundColor: '#EAF3FD' },
+  voiceOn: { borderColor: colors.blue, backgroundColor: colors.blueSoft },
   voiceName: { flex: 1, fontSize: 14, color: colors.text },
   small2: {
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: '#4A90D9',
+    borderColor: colors.blue,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
-  small2Text: { fontSize: 13, fontWeight: '700', color: '#1F5FA8' },
-  use: { backgroundColor: '#4A90D9' },
+  small2Text: { fontSize: 13, fontWeight: '700', color: colors.blue },
+  use: { backgroundColor: colors.blue },
   tip: {
     fontSize: 13,
     color: colors.text,
-    backgroundColor: '#FFF4CC',
+    backgroundColor: colors.highlight,
     borderRadius: radius.md,
     padding: space.sm,
     marginTop: space.sm,
@@ -210,4 +211,4 @@ const styles = StyleSheet.create({
   },
   splashRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.sm },
   version: { fontSize: 12, color: colors.textSoft, marginTop: space.md, textAlign: 'right' },
-});
+}));

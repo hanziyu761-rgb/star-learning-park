@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from '@/components/Tappable';
 import { lessonsFor } from '@/content';
 import { zh } from '@/content/zh';
 import { DisplayTextView } from '@/components/PinyinText';
@@ -13,7 +14,7 @@ import { useProgress } from '@/progress/ProgressContext';
 import { BankSection, GraphicsSection, OralSection, WriteSection } from './PracticeSections';
 import { EnglishTracks, ReadingHouse } from './EnglishTracks';
 import { GAME_BY_ID } from '@/games/common';
-import { colors, radius, shadow, space, subjectTheme } from '@/theme';
+import { colors, radius, shadow, space, subjectTheme, themed } from '@/theme';
 
 const GAME_OF = { math: 'kitchen', chinese: 'fish', english: 'bubble' } as const;
 
@@ -149,12 +150,12 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   tiles: { flexDirection: 'row', gap: space.md },
   tile: {
     flex: 1,
     minHeight: 92,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -163,15 +164,15 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   tileEmoji: { fontSize: 34 },
-  tileText: { fontSize: 16, fontWeight: '800', color: colors.text },
+  tileText: { fontSize: 16, fontWeight: '600', color: colors.text },
   badge: { position: 'absolute', top: 8, right: 8, minWidth: 26, height: 26, borderRadius: 13, backgroundColor: colors.wrong, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
-  badgeText: { color: '#fff', fontWeight: '900', fontSize: 14 },
-  card: { backgroundColor: '#fff', borderRadius: radius.lg, padding: space.lg, gap: space.md, ...shadow },
+  badgeText: { color: colors.onAccent, fontWeight: '700', fontSize: 14 },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.lg, gap: space.md, ...shadow },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   emoji: { fontSize: 56 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: '#fff', borderRadius: radius.lg, padding: space.md, ...shadow },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: colors.card, borderRadius: radius.lg, padding: space.md, ...shadow },
   rowEmoji: { fontSize: 36 },
   pill: { minHeight: 44, minWidth: 64, paddingHorizontal: space.md, borderRadius: radius.round, alignItems: 'center', justifyContent: 'center' },
   pillGhost: { backgroundColor: '#F4F4F6' },
-  pillText: { fontSize: 16, fontWeight: '900', color: '#fff' },
-});
+  pillText: { fontSize: 16, fontWeight: '700', color: colors.onAccent },
+}));
