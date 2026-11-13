@@ -47,7 +47,7 @@ export function VoiceCheckCard() {
       <View testID="voice-check">
         <SectionTitle>🔊 声音设置</SectionTitle>
         <Text style={styles.small} testID="voice-gender-note">
-          全 APP 统一用“星星宝童声”（中文、英语是同一个声音）。课程、讲解、短文、单词卡已经提前录好，没网也能听；随机出的题联网时用同一个童声现念，念过的存在手机里。没网又没念过的句子，才用下面的手机备用声音。
+          星星宝童声 · 没网时用手机自带声音
         </Text>
         <Text style={styles.label}>语速</Text>
         <View style={styles.row}>
@@ -64,7 +64,7 @@ export function VoiceCheckCard() {
               style={[styles.chip, s.speechRate === r && styles.chipOn]}
             >
               <Text style={[styles.chipText, s.speechRate === r && styles.chipTextOn]}>
-                {r === 'slow' ? '🐢 慢一点（推荐低年级）' : '🚶 正常'}
+                {r === 'slow' ? '🐢 慢一点' : '🚶 正常'}
               </Text>
             </Pressable>
           ))}
@@ -143,7 +143,6 @@ export function VoiceCheckCard() {
         <View style={styles.splashRow}>
           <View style={{ flex: 1 }}>
             <Text style={styles.label}>开机动画</Text>
-            <Text style={styles.note}>打开 APP 时播放约 3 秒的小动画，最后星星宝说欢迎语；点一下就能跳过。</Text>
           </View>
           <Switch value={s.splash} onValueChange={(v) => set({ splash: v })} testID="splash-switch" />
         </View>

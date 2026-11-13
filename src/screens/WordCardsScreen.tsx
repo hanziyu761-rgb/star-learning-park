@@ -227,13 +227,10 @@ function WordCards() {
           accessibilityRole="button"
           testID="wc-dictation"
         >
-          <Text style={styles.primaryText}>✍️ 开始听写（本单元随机 10 个）</Text>
+          <Text style={styles.primaryText}>✍️ 听写</Text>
         </Pressable>
         <Text style={styles.source} testID="wc-source">
-          {unit.source === 'original'
-            ? '启蒙单词：本 APP 英语启蒙课程里的单词，例句为原创。'
-            : '单词按通行的人教版 PEP 单词表整理，未逐一核对课本原书；中文意思和例句为原创。'}
-          音标由程序按 CMU 发音词典自动生成（美式）。
+          {unit.source === 'original' ? '' : '单词表未逐一核对课本原书 · '}音标由程序生成（美式）
         </Text>
             </View>
           </View>
@@ -318,13 +315,10 @@ function WordCards() {
           accessibilityRole="button"
           testID="wc-dictation"
         >
-          <Text style={styles.primaryText}>✍️ 开始听写（本单元随机 10 个）</Text>
+          <Text style={styles.primaryText}>✍️ 听写</Text>
         </Pressable>
         <Text style={styles.source} testID="wc-source">
-          {unit.source === 'original'
-            ? '启蒙单词：本 APP 英语启蒙课程里的单词，例句为原创。'
-            : '单词按通行的人教版 PEP 单词表整理，未逐一核对课本原书；中文意思和例句为原创。'}
-          音标由程序按 CMU 发音词典自动生成（美式）。
+          {unit.source === 'original' ? '' : '单词表未逐一核对课本原书 · '}音标由程序生成（美式）
         </Text>
           </>
         )}

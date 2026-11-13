@@ -144,7 +144,7 @@ function GamePlay({ game }: { game: GameId }) {
           </Text>
           {summary.wrong.length ? (
             <View style={styles.wrongBox}>
-              <Text style={styles.wrongTitle}>还要再练（已放进错题本，今日复习里会再出现）：</Text>
+              <Text style={styles.wrongTitle}>还要再练：</Text>
               {summary.wrong.map((w, i) => (
                 <Text key={i} style={styles.wrongItem}>
                   · {w}

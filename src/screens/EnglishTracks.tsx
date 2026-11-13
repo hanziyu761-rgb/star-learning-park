@@ -115,9 +115,6 @@ export function ReadingHouse({ state }: { state: ProgressState }) {
         <Text style={styles.headEmoji}>🏡</Text>
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>阅读小屋</Text>
-          <Text style={styles.sub}>
-            {grade}年级原创短文{grade <= 2 ? '，全文注音' : ''}；先听或自己读，再回答问题
-          </Text>
         </View>
         <Text style={[styles.count, { color: theme.color }]} testID="reading-progress">
           {done}/{lessons.length}

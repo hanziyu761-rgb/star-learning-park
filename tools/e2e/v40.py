@@ -39,7 +39,7 @@ with sync_playwright() as p:
         expect(tid(page, "tb-book-title")).to_have_text("北师大版 · 二年级上册")
         assert page.locator('[data-testid="tb-unit"]').count() >= 5
         tid(page, "tb-dd-edition").click(); tid(page, "tb-dd-edition-opt-math.hujiao").click()
-        expect(tid(page, "tb-not-ready")).to_contain_text("照常能用")
+        expect(tid(page, "tb-not-ready")).to_contain_text("没有这一册的资料")  # V4.2.1 精简了提示
         tid(page, "tb-dd-subject").click(); tid(page, "tb-dd-subject-opt-english").click()
         tid(page, "tb-dd-grade").click()
         assert page.locator('[data-testid="tb-dd-grade-opt-1"]').count() == 0  # 英语三年级起

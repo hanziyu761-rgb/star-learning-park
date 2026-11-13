@@ -30,7 +30,6 @@ export function OralSection({ state }: { state: ProgressState }) {
   return (
     <View style={styles.card} testID="oral-section">
       <DisplayTextView text={zh('口算闯关', 'kǒu suàn chuǎng guān')} size={24} />
-      <Text style={styles.meta}>每轮 10 题，一半选一选、一半自己填数，题目由程序生成，答案保证正确</Text>
       <View style={styles.grid}>
         {topics.map((t) => {
           const id = oralLessonId(t.id);
@@ -64,7 +63,6 @@ export function WriteSection({ state }: { state: ProgressState }) {
   return (
     <View style={styles.card} testID="write-section">
       <DisplayTextView text={zh('描红写字', 'miáo hóng xiě zì')} size={24} />
-      <Text style={styles.meta}>每组 4 个字，从红点开始按笔顺描，程序检查笔顺和方向（不评判字的好看程度）</Text>
       <View style={styles.grid}>
         {ALL_WRITE_SETS.map((set, i) => {
           // 一年级只显示一年级的 4 组；二年级起 8 组都显示（V2.14）
@@ -104,7 +102,6 @@ export function GraphicsSection({ state }: { state: ProgressState }) {
           <Text style={styles.review}>{CONTENT_REVIEW}</Text>
         </View>
       </View>
-      <Text style={styles.meta}>拖一拖、点一点、拨一拨：位置、图形、钟表、分类、找规律（本项目原创题）</Text>
       <View style={styles.grid}>
         {GRAPHICS_KPS.map((kpId) => {
           const k = getKp(kpId)!;
@@ -160,13 +157,13 @@ export function BankSection({ subject, state }: { subject: Subject; state: Progr
       {books.length === 0 ? (
         <Text style={styles.empty} testID="bank-empty">
           {subject === 'english'
-            ? `${GRADE_CN[grade]}年级暂无英语题库（题库从三年级开始）。可以先学上面的英语课。`
+            ? '英语题库从三年级开始'
             : `${GRADE_CN[grade]}年级暂无题库。`}
         </Text>
       ) : (
         <>
           <Text style={styles.meta}>
-            共 {total} 题 · 年级由家长在家长中心设置 · {BANK_SOURCE}
+            {total} 题 · {BANK_SOURCE}
           </Text>
           {books.map((b) => {
             const open = openBook === b.id;

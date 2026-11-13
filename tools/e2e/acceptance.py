@@ -82,7 +82,7 @@ with sync_playwright() as p:
     for d in str(a*b): tid(page, f"key-{d}").click()
     tid(page, "key-确定").click()
     page.wait_for_selector('[data-testid="parent-dashboard"]')
-    expect(page.get_by_text("还没有学习记录。孩子完成课程")).to_be_visible()
+    expect(page.get_by_text("还没有学习记录").first).to_be_visible()
     page.screenshot(path=f"{OUT}/02-parent-empty.png", full_page=True)
     ok("家长中心空状态（无假数据）")
     tid(page, "back").click(); page.wait_for_selector('[data-testid="home"]')

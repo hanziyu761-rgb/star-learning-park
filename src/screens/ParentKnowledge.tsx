@@ -67,8 +67,7 @@ export function KnowledgeCard() {
           ))}
         </View>
         <Text style={styles.small} testID="pk-total">
-          本年级共 {gradeKps.length} 个知识点（年级在上方“孩子年级”中设置）。掌握状态按真实练习计算：最近 5
-          题的第一次答对率、练习次数、练习天数和距今时间。知识点及其先后关系为本项目原创，尚未经一线教师审核。
+          共 {gradeKps.length} 个知识点，按真实练习计算 · 知识点为原创，尚未经教师审核
         </Text>
         <View style={styles.bar}>
           {(Object.keys(counts) as MasteryState[]).map((s) =>
@@ -145,7 +144,7 @@ export function KnowledgeCard() {
         <Text style={styles.h}>前置知识薄弱点（找原因的结果）</Text>
         {diags.length === 0 ? (
           <Text style={styles.empty}>
-            还没有做过“找原因”。孩子在某个知识点反复出错时，知识小地图上会出现“找找原因”。
+            暂无
           </Text>
         ) : null}
         {diags.map((d, i) => (

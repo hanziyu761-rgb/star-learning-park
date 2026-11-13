@@ -20,10 +20,6 @@ export function GradeCard() {
   return (
     <Card>
       <SectionTitle>孩子年级</SectionTitle>
-      <Text style={styles.small}>
-        决定“题库闯关”“口算闯关”和“知识小地图”默认显示哪个年级，推荐的新知识也按这个年级；也会告诉 AI
-        老师用多简单的话讲解。
-      </Text>
       <View style={styles.chips}>
         {[1, 2, 3, 4, 5, 6].map((g) => (
           <Pressable
@@ -99,10 +95,7 @@ export function AiCard() {
   return (
     <Card>
       <SectionTitle>AI 老师（星星宝）</SectionTitle>
-      <Text style={styles.small}>
-        开启后，孩子可以在做题时请星星宝给提示（不直接给答案）、答对后听讲解，也可以在首页“问问星星宝”。AI 使用 DeepSeek
-        大模型，只发送题目内容和孩子的提问，不发送任何个人信息；回答可能出错，仅供参考。
-      </Text>
+      <Text style={styles.small}>只发送题目内容和孩子的提问，不发送个人信息；回答可能出错。</Text>
       <View style={styles.row}>
         <Text style={styles.label}>开启 AI 老师</Text>
         <Switch
@@ -134,10 +127,7 @@ export function AiCard() {
               testID="voice-input-switch"
             />
           </View>
-          <Text style={styles.small}>
-            打开后，“问问星星宝”里会出现“点我说话”按钮。声音在手机里直接识别成文字（离线，不录音保存、不上传），只把识别出的文字发给
-            AI 老师。目前只能识别普通话，英语单词识别不好。
-          </Text>
+          <Text style={styles.small}>声音在手机里识别成文字，不保存、不上传。只识别普通话。</Text>
           {micNote ? <Text style={[styles.small, { color: colors.wrong }]}>{micNote}</Text> : null}
         </View>
       ) : null}
@@ -169,9 +159,7 @@ export function AiCard() {
           testID="ai-voice-switch"
         />
       </View>
-      <Text style={styles.small}>
-        打开后，没有提前录好的句子（随机出的题、星星宝的回答）联网用星星宝童声朗读，和课程里的录音是同一个声音（只发送要朗读的文字，按字数计费，同一句念过就存在手机里不再收费）。关掉或连不上时改用手机自带语音。
-      </Text>
+      <Text style={styles.small}>没有录音的句子联网用童声朗读，只发送要朗读的文字，按字数计费。</Text>
       <Pressable
         onPress={() => speak({ text: '小朋友你好，我是星星宝！有不会的题就来问我吧。', lang: 'zh-CN', cloud: true })}
         disabled={!aiCloudVoice}
@@ -184,7 +172,6 @@ export function AiCard() {
 
       <View style={styles.divider} />
       <Text style={styles.label}>AI 学习分析</Text>
-      <Text style={styles.small}>根据薄弱知识点和错题，生成给家长看的分析和在家可以做的建议。</Text>
       <Pressable
         onPress={analyze}
         disabled={!aiEnabled || report.loading}
@@ -210,7 +197,7 @@ export function HiddenCard() {
     <Card>
       <SectionTitle>已屏蔽的题目</SectionTitle>
       <Text style={styles.small}>
-        孩子或家长在题库中长按“这题有问题”屏蔽了 {state.hidden.length} 道题，它们不会再出现。
+        {state.hidden.length} 道
       </Text>
       <Pressable
         onPress={() => dispatch({ type: 'bank/unhide-all' })}

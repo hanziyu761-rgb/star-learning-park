@@ -165,7 +165,7 @@ function TeacherChat() {
             <TextInput
               value={input}
               onChangeText={setInput}
-              placeholder="也可以请爸爸妈妈帮忙打字提问"
+              placeholder="打字提问"
               maxLength={100}
               style={styles.input}
               onSubmitEditing={() => send(input)}
@@ -175,7 +175,7 @@ function TeacherChat() {
               <Text style={styles.sendText}>发送</Text>
             </Pressable>
           </View>
-          <Text style={styles.note}>AI 回答由 DeepSeek 生成，可能出错，仅供学习参考。不会记录孩子的个人信息。</Text>
+          <Text style={styles.note}>AI 回答可能出错</Text>
         </>
       )}
     </View>

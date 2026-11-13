@@ -117,7 +117,7 @@ function MapBody() {
         </View>
         {kps.length === 0 ? (
           <Text style={styles.emptyNote} testID="map-empty">
-            英语知识地图从三年级开始（人教版 PEP 三年级起点）。一、二年级可以先学 APP 里的英语启蒙课。
+            英语从三年级开始
           </Text>
         ) : null}
 
@@ -225,7 +225,7 @@ function KpCard({
       {hasGenerator(k.id) ? (
         <>
           {!hasOriginalGenerator(k.id) ? (
-            <Text style={styles.cardNote}>题目来自题库（AI 生成，未逐题人工审核）。</Text>
+            <Text style={styles.cardNote}>题库题 · AI 生成，未逐题人工审核</Text>
           ) : null}
           <BigButton
             emoji="✏️"
@@ -247,7 +247,6 @@ function KpCard({
         </>
       ) : (
         <>
-          <Text style={styles.cardNote}>这个本领在“题库闯关”里练习。</Text>
           <BigButton
             emoji="📚"
             label={zh('去数学乐园', 'qù shù xué lè yuán')}

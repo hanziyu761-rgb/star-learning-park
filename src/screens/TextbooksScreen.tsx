@@ -42,7 +42,7 @@ export default function TextbooksScreen() {
       <Header title="教材资源库" onBack={nav.back} />
       <SimpleView />
       <Pressable onPress={() => setDetails(!details)} style={styles.detailsBtn} accessibilityRole="button" testID="tb-details-toggle">
-        <Text style={styles.link}>{details ? '收起详细资料' : '详细资料（各版本核对情况，给老师看）'}</Text>
+        <Text style={styles.link}>{details ? '收起详细资料' : '详细资料'}</Text>
       </Pressable>
       {details ? <DetailsView /> : null}
     </Screen>
@@ -66,8 +66,7 @@ function SimpleView() {
 
   return (
     <View style={styles.card} testID="tb-simple">
-      <Text style={styles.h}>选孩子用的课本</Text>
-      <Text style={styles.small}>选好后会记住版本，下次打开直接显示。</Text>
+      <Text style={styles.h}>课本</Text>
       <View style={styles.grid}>
         <View style={styles.cell}>
           <Dropdown
@@ -123,7 +122,6 @@ function SimpleView() {
           {vol
             ? '这一册的目录还没有对照官方电子课本核对，暂时不显示单元。'
             : '这套书目前没有这一册的资料。'}
-          孩子的课程、练习、错题复习都照常能用，不受影响。
         </Text>
       ) : (
         <View style={{ gap: 2 }} testID="tb-units">
@@ -151,7 +149,7 @@ function SimpleView() {
             );
           })}
           <Text style={styles.small}>
-            “去练习”的题目是本 APP 原创或开源题库里的题，不是课本原题；没有按钮的单元还没有对应练习。
+            练习题是原创或开源题库题，不是课本原题
           </Text>
         </View>
       )}

@@ -5,7 +5,7 @@ V2.19 游戏乐园端到端验收（网页版 / 单文件 HTML 版）：
 3. 拼音钓鱼（一年级）：钓错一次再钓对；玩完 6 题
 4. 拼音钓鱼（三年级）：多音字句子，钓出句中读音
 5. 拼词泡泡（三年级）：按顺序戳字母拼出单词，玩完 6 个
-6. 家长中心把每天上限设成 10 分钟，游戏乐园显示“每天最多 10 分钟”
+6. 家长中心把每天上限设成 10 分钟，游戏乐园显示“已玩 / 10 分钟”
 """
 import itertools
 import json
@@ -171,9 +171,9 @@ with sync_playwright() as p:
     expect(tid(page, "parent-games-kitchen")).to_contain_text("1 局")
     page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
     tid(page, "games-entry").click(); page.wait_for_selector('[data-testid="games-screen"]')
-    expect(tid(page, "games-time")).to_contain_text("每天最多 10 分钟")
+    expect(tid(page, "games-time")).to_contain_text("/ 10 分钟")  # V4.2.1：精简成“已玩 / 上限 分钟”
     page.screenshot(path=f"{OUT}/g-hub.png", full_page=True)
-    ok("家长中心设成每天 10 分钟、能看到各游戏玩了几局；游戏乐园显示“每天最多 10 分钟”")
+    ok("家长中心设成每天 10 分钟、能看到各游戏玩了几局；游戏乐园显示“已玩 / 10 分钟”")
 
     real = [e for e in errors if "React DevTools" not in e]
     print(json.dumps({"errors": real, "pass": len(RESULTS)}, ensure_ascii=False))

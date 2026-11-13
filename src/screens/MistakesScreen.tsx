@@ -97,14 +97,14 @@ export default function MistakesScreen({ subject }: { subject: Subject }) {
         </Pressable>
       </View>
       <View style={styles.answerRow}>
-        <Text style={styles.small}>打印时附答案页（另起一页，家长批改用）</Text>
+        <Text style={styles.small}>打印附答案</Text>
         <Switch value={withAnswers} onValueChange={setWithAnswers} testID="mistakes-with-answers" />
       </View>
       {error ? <Notice text={error} /> : null}
       {state.photoMistakes.some((m) => m.subject === subject) ? (
         <Pressable onPress={() => nav.push({ name: 'photo' })} accessibilityRole="button" testID="mistakes-photo-link">
           <Text style={styles.small}>
-            📷 家长拍照录入的{SUBJECT_CN[subject]}错题 {state.photoMistakes.filter((m) => m.subject === subject).length} 道（在家长中心“拍照错题”里查看，需要家长验证）
+            📷 拍照错题 {state.photoMistakes.filter((m) => m.subject === subject).length} 道 ›
           </Text>
         </Pressable>
       ) : null}
@@ -131,17 +131,11 @@ export default function MistakesScreen({ subject }: { subject: Subject }) {
           <Mascot size={100} mood="cheer" />
           {tab === 'open' ? (
             <DisplayTextView text={zh('没有要重做的错题，真棒！', 'méi yǒu yào chóng zuò de cuò tí zhēn bàng')} size={22} />
-          ) : (
-            <Text style={styles.small}>错题连续答对 2 次就会出现在这里。</Text>
-          )}
+          ) : null}
         </View>
       ) : (
         list.map((en) => <EntryCard key={en.mistake.key} en={en} color={theme.color} />)
       )}
-
-      <Text style={styles.note}>
-        做错的题会自动记进错题本，并在“今日复习”里按 1 天、3 天的间隔再练；连续答对 2 次就算掌握。打印出来的错题单只包含“还没掌握”的题。
-      </Text>
     </Screen>
   );
 }

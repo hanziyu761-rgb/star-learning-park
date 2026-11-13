@@ -25,7 +25,7 @@ export function ThinkingCard() {
       <View testID="pt-section">
         <SectionTitle>🧠 思维能力</SectionTitle>
         <Text style={styles.note}>
-          统计孩子做“每日挑战”（数学、语文、英语）和数学练习中选“是怎么想的”的真实记录，不是心理或智力测评。题目为原创，待教师审核。
+          真实做题记录，不是心理或智力测评 · 题目为原创，待教师审核
         </Text>
         <View style={styles.adaptRow}>
           <Text style={[styles.dimName, { flex: 1 }]}>挑战难度跟着孩子调整</Text>
@@ -49,7 +49,7 @@ export function ThinkingCard() {
         </Text>
         {empty ? (
           <Text style={styles.empty} testID="pt-empty">
-            还没有记录。孩子在首页做“每日挑战”，或在数学练习中答对后选择“你是怎么想的”，这里就会出现统计。
+            还没有记录
           </Text>
         ) : (
           <>

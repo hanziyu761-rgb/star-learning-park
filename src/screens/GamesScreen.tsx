@@ -25,11 +25,11 @@ export default function GamesScreen() {
     <Screen bg="#FFF8EC" testID="games-screen">
       <Header title={gt('hub', grade)} onBack={nav.back} />
       <Text style={styles.time} testID="games-time">
-        {limit ? `今天玩了 ${used} 分钟 / 每天最多 ${limit} 分钟` : `今天玩了 ${used} 分钟`}
+        {limit ? `${used} / ${limit} 分钟` : `${used} 分钟`}
       </Text>
       {!can ? (
         <View testID="games-locked">
-          <Notice text="今天玩够啦，明天再来吧！可以去学科里学一学，或者读一本小书。" />
+          <Notice text="今天玩够啦，明天再来吧！" />
         </View>
       ) : null}
       {GAMES.map((g) => {
@@ -47,17 +47,13 @@ export default function GamesScreen() {
             <Text style={styles.emoji}>{g.emoji}</Text>
             <View style={{ flex: 1, gap: 4 }}>
               <DisplayTextView text={grade >= 3 ? g.namePlain : g.name} size={24} />
-              <Text style={styles.intro}>{g.intro}</Text>
               <Text style={[styles.meta, { color: GAME_MAIN[g.id] }]} testID={`games-meta-${g.id}`}>
-                现在第 {gameLevel(state.games, g.id, grade)} 档 · 玩过 {mine.length} 局{best ? ` · 最好 ${'⭐'.repeat(best)}` : ''}
+                第 {gameLevel(state.games, g.id, grade)} 档{best ? ` · ${'⭐'.repeat(best)}` : ''}
               </Text>
             </View>
           </Pressable>
         );
       })}
-      <Text style={styles.note}>
-        每局约 2 分钟。游戏里做错的题会进错题本，今日复习时再练一练。家长可以在家长中心设置每天最多玩多久。
-      </Text>
     </Screen>
   );
 }

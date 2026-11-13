@@ -69,7 +69,7 @@ function ParentDashboard() {
 
   return (
     <View style={{ gap: space.lg }} testID="parent-dashboard">
-      {!hasData ? <Notice text="还没有学习记录。孩子完成课程或练习后，这里会显示真实的学习情况。" /> : null}
+      {!hasData ? <Notice text="还没有学习记录" /> : null}
 
       <Card>
         <SectionTitle>总览</SectionTitle>
@@ -83,7 +83,6 @@ function ParentDashboard() {
 
       <Card>
         <SectionTitle>下一步学习建议</SectionTitle>
-        <Text style={styles.small}>根据真实学习记录自动生成：先完成未学完的课，再复习到期错题，再巩固薄弱知识点</Text>
         {suggestions.map((sg, i) => (
           <View key={i} style={styles.row} testID="suggestion-row">
             <Text style={styles.rowEmoji}>{['①', '②', '③'][i]}</Text>
@@ -94,7 +93,6 @@ function ParentDashboard() {
 
       <Card>
         <SectionTitle>试卷生成</SectionTitle>
-        <Text style={styles.small}>按年级、上下册和单元随时生成一套试卷，可以打印或存成 PDF，附参考答案。</Text>
         <Pressable
           onPress={() => nav.push({ name: 'exam' })}
           style={styles.examBtn}
@@ -185,7 +183,7 @@ function ParentDashboard() {
 
       <Card>
         <SectionTitle>薄弱知识点</SectionTitle>
-        <Text style={styles.small}>至少练习 2 题、一次答对率低于 70% 的知识点</Text>
+        <Text style={styles.small}>练过 2 题以上、一次答对率低于 70%</Text>
         {weak.length === 0 ? <Text style={styles.empty}>{hasData ? '暂无，继续保持' : '暂无'}</Text> : null}
         {weak.map((w) => (
           <View key={w.skill} style={styles.row} testID="weak-row">
@@ -201,8 +199,7 @@ function ParentDashboard() {
       <Card>
         <SectionTitle>错题（尚未掌握）</SectionTitle>
         <Text style={styles.small}>
-          第一次答错的题目会进入“今日复习”，按 1 天、3 天的间隔再练，连续答对 2 次视为掌握。已掌握 {mastered} 道 ·
-          完成复习 {state.reviews.length} 次
+          已掌握 {mastered} 道 · 完成复习 {state.reviews.length} 次
         </Text>
         <View style={styles.bookRow}>
           {(['math', 'chinese', 'english'] as const).map((sub) => (
@@ -219,9 +216,8 @@ function ParentDashboard() {
             </Pressable>
           ))}
         </View>
-        <Text style={styles.small}>点开可以看每一科的错题、马上重做，或打印成错题单。</Text>
         <Pressable onPress={() => nav.push({ name: 'textbooks' })} style={styles.bookBtn} accessibilityRole="button" testID="parent-textbooks">
-          <Text style={styles.bookBtnText}>📚 教材资源库：各版本教材建设情况</Text>
+          <Text style={styles.bookBtnText}>📚 教材资源库</Text>
         </Pressable>
         {mistakes.length === 0 ? <Text style={styles.empty}>暂无错题</Text> : null}
         {mistakes.map((m) => (
@@ -244,7 +240,7 @@ function ParentDashboard() {
       <AiCard />
       <HiddenCard />
 
-      <Notice text="说明：学习数据只保存在这台设备上；开启 AI 老师后，只有题目内容和孩子的提问会发送到 AI 服务，不会上传个人信息。学习时长按完成的课程和练习统计（单次最多计 60 分钟），中途退出的课程不计时长。" />
+      <Notice text="学习数据只保存在这台设备上。开启 AI 老师后，只发送题目内容和孩子的提问，不上传个人信息。" />
 
       <Pressable
         accessibilityRole="button"

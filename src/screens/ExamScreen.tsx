@@ -3,7 +3,7 @@
  */
 import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
-import { BANK_INDEX, editionText, loadBook, unitBadge } from '@/content/bank';
+import { editionText, loadBook, unitBadge } from '@/content/bank';
 import { DisplayTextView } from '@/components/PinyinText';
 import { isParentUnlocked, markParentUnlocked, ParentGate } from '@/components/ParentGate';
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
@@ -147,7 +147,7 @@ function ExamBody() {
         </View>
         {available && book ? (
           <>
-            <Text style={styles.label}>范围（不选 = 全册，可以多选单元）</Text>
+            <Text style={styles.label}>范围</Text>
             <Text style={styles.small} testID="exam-edition">
               单元编排：{editionText(bookIdOf(cfgBase))}
             </Text>
@@ -184,7 +184,7 @@ function ExamBody() {
               ))}
             </View>
             <View style={styles.switchRow}>
-              <Text style={styles.label}>打印时附参考答案（另起一页）</Text>
+              <Text style={styles.label}>附参考答案</Text>
               <Switch value={withAnswers} onValueChange={setWithAnswers} testID="exam-with-answers" />
             </View>
             <BigButton
@@ -205,8 +205,7 @@ function ExamBody() {
           />
         )}
         <Text style={styles.small}>
-          数学：原创题（答案由程序计算）+ 题库题；语文、英语：题库题。题库题为 AI 生成、已自动质检、未逐题人工审核，
-          打印前请家长或老师过目。家长屏蔽的题目不会出现在试卷里。题库共 {BANK_INDEX.length} 册。
+          题库题为 AI 生成，未逐题人工审核，打印前请过目
         </Text>
       </Card>
 
