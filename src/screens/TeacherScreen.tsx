@@ -18,6 +18,7 @@ import { SUBJECTS } from '@/progress/stats';
 import { useVoiceInput, VOICE_PROBLEM_TEXT } from '@/speech/asr';
 import { speak, stopSpeaking } from '@/speech/speech';
 import { colors, MIN_TOUCH, radius, space, subjectTheme } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 const QUICK: Record<Subject, string[]> = {
   math: ['加法是什么意思？', '怎样比大小？', '给我出一道口算题', '讲一个数学小故事'],
@@ -54,7 +55,7 @@ function TeacherChat() {
     setError(null);
     setLoading(true);
     try {
-      const reply = await aiChat({ enabled: aiEnabled, baseUrl: aiBaseUrl }, { subject, grade, messages: next });
+      const reply = await aiChat({ enabled: aiEnabled, baseUrl: aiBaseUrl }, { subject, grade: contentGrade(grade), messages: next });
       setMessages([...next, { role: 'assistant', content: reply }]);
       speak({ text: reply, lang: subject === 'english' && /^[\x00-\x7F\s]+$/.test(reply) ? 'en-US' : 'zh-CN', cloud: true });
     } catch (e) {

@@ -26,6 +26,7 @@ import type { Subject } from '@/lesson/types';
 import { challengeLevel, LEVEL_NAME } from '@/thinking/adaptive';
 import { THINK_DIMS } from '@/thinking/dims';
 import { colors, radius, space } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 const COLOR = '#E07A2E';
 const SUBJECTS: { id: Subject; label: ReturnType<typeof zh> }[] = [
@@ -58,13 +59,14 @@ function ChallengeSession() {
   useEffect(() => () => stopSpeaking(), []);
 
   // 难度跟着孩子走（V2.11）：出题时按这一科最近的作答定难度档；做完这道题不会让眼前的题变掉
+  const grade = contentGrade(state.settings.grade);
   const adapt = useMemo(
     () => challengeLevel(state, subject),
-    [extra, state.settings.grade, subject], // eslint-disable-line react-hooks/exhaustive-deps
+    [extra, grade, subject], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const ex = useMemo(
-    () => (extra === null ? null : dailyChallenge(today, state.settings.grade, extra, subject, adapt.level)),
-    [extra, today, state.settings.grade, subject, adapt.level],
+    () => (extra === null ? null : dailyChallenge(today, grade, extra, subject, adapt.level)),
+    [extra, today, grade, subject, adapt.level],
   );
 
   // 这道题出现时今天是否还没做过每日挑战（做过的话这道是“再玩一道”，不计星星）

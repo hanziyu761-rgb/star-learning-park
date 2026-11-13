@@ -24,10 +24,12 @@ export function editionOptions(subject: Subj): { value: string; label: string; h
   ];
 }
 
-/** 家长没选过时用这一科第一套已核实的版本 */
-export function defaultEdition(subject: Subj, saved?: string): string {
+/** 家长没选过时用这一科第一套已核实的版本；给了年级时优先选有这个年级的版本（初中生默认看初中课本） */
+export function defaultEdition(subject: Subj, saved?: string, grade?: number): string {
   if (saved && EDITIONS.some((e) => e.id === saved && e.subject === subject)) return saved;
-  return EDITIONS.find((e) => e.subject === subject && hasVerifiedToc(e.id))?.id ?? EDITIONS.find((e) => e.subject === subject)!.id;
+  const ok = EDITIONS.filter((e) => e.subject === subject && hasVerifiedToc(e.id));
+  const fit = grade ? ok.find((e) => bookVolumes(e.id).some((v) => v.grade === grade)) : undefined;
+  return (fit ?? ok[0] ?? EDITIONS.find((e) => e.subject === subject)!).id;
 }
 
 /** 这套书有哪些年级（英语多数三年级起） */

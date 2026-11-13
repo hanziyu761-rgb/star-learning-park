@@ -357,6 +357,64 @@ export const EDITIONS: Edition[] = [
       },
     ],
   },
+  /* ───── 初中（V4.3）：只有教材目录，没有课程和练习 ───── */
+  {
+    id: 'chinese.tongbian-jh',
+    subject: 'chinese',
+    name: '统编版（初中）',
+    aliases: [],
+    publisher: '人民教育出版社',
+    priority: 1,
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台提供统编版初中语文电子课本。已核对 6 册：七年级上册～九年级上册修订版；九年级下册平台现有为未修订版，另行登记。目前只有目录，没有课程和练习。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 统编版初中语文电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: '2026-11-13',
+        note: '在 APP 所有者已登录的浏览器里查看平台电子课本页面，逐册对照目录页录入。',
+      },
+    ],
+  },
+  {
+    id: 'math.pep-jh',
+    subject: 'math',
+    name: '人教版（初中）',
+    aliases: [],
+    publisher: '人民教育出版社',
+    priority: 1,
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台提供人教版初中数学电子课本。已核对 6 册：七年级上册～九年级上册修订版；九年级下册平台现有为未修订版，另行登记。各地选用情况待核实。目前只有目录，没有课程和练习。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 人教版初中数学电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: '2026-11-13',
+        note: '在 APP 所有者已登录的浏览器里查看平台电子课本页面，逐册对照目录页录入。',
+      },
+    ],
+  },
+  {
+    id: 'english.jijiao-jh',
+    subject: 'english',
+    name: '冀教版（初中）',
+    aliases: [],
+    publisher: '河北教育出版社',
+    priority: 1,
+    status: 'unknown',
+    statusNote: '国家中小学智慧教育平台提供冀教版初中英语电子课本。已核对 5 册修订版：七、八年级上下册和九年级上册；平台目前没有九年级下册。各地选用情况待核实。目前只有目录，没有课程和练习。',
+    sources: [
+      {
+        title: '国家中小学智慧教育平台 冀教版初中英语电子课本',
+        url: 'https://basic.smartedu.cn/tchMaterial',
+        kind: 'official',
+        checkedAt: '2026-11-13',
+        note: '在 APP 所有者已登录的浏览器里查看平台电子课本页面，逐册对照目录页录入。',
+      },
+    ],
+  },
 ];
 
 export const EDITION_BY_ID: Record<string, Edition> = Object.fromEntries(EDITIONS.map((e) => [e.id, e]));

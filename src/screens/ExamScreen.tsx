@@ -17,6 +17,7 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
 import { colors, radius, space } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
 const SUBJECTS: { id: KpSubject; name: string }[] = [
@@ -66,7 +67,7 @@ function Chip({ label, on, onPress, testID }: { label: string; on: boolean; onPr
 function ExamBody() {
   const { state } = useProgress();
   const [subject, setSubject] = useState<KpSubject>('math');
-  const [grade, setGrade] = useState(state.settings.grade ?? 1);
+  const [grade, setGrade] = useState(contentGrade(state.settings.grade));
   const [term, setTerm] = useState<'上' | '下'>('上');
   const [units, setUnits] = useState<string[]>([]);
   const [size, setSize] = useState<ExamSize>(25);

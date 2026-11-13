@@ -20,6 +20,18 @@ describe('教材资源库简单视图', () => {
     expect(defaultEdition('math', 'english.pep')).toBe('math.pep');
   });
 
+  it('初中（V4.3）：孩子是七～九年级时默认看初中课本；小学不受影响', () => {
+    expect(defaultEdition('chinese', '', 7)).toBe('chinese.tongbian-jh');
+    expect(defaultEdition('math', '', 8)).toBe('math.pep-jh');
+    expect(defaultEdition('english', '', 9)).toBe('english.jijiao-jh');
+    expect(defaultEdition('chinese', '', 3)).toBe('chinese.tongbian');
+    expect(defaultEdition('math', 'math.bsd', 7)).toBe('math.bsd'); // 家长选过的优先
+    expect(gradesOf('math.pep-jh')).toEqual([7, 8, 9]);
+    expect(pickVolume('math.pep-jh', 9, '下')!.revision).toBeNull();
+    expect(pickVolume('english.jijiao-jh', 9, '下')).toBeNull(); // 平台没有这一册
+    expect(editionOptions('math').map((o) => o.label)).toContain('人教版（初中）');
+  });
+
   it('选册：统编一年级上册是已核实目录；英语三年级起', () => {
     const v = pickVolume('chinese.tongbian', 1, '上')!;
     expect(v.id).toBe('chinese.tongbian.2024.g1a');

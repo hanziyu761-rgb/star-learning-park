@@ -8,6 +8,7 @@ import type { Subject } from '@/lesson/types';
 import type { ChallengeRecord, ProgressState } from '@/progress/model';
 import { levelOfGrade, type Level } from './challenges';
 import { subjectOfType } from './registry';
+import { contentGrade } from '@/progress/grade';
 
 export const RECENT = 5;
 
@@ -49,8 +50,8 @@ export const LEVEL_NAME: Record<Level, string> = {
 /** 实际使用的难度档：家长关掉“跟着孩子调整”时固定按年级 */
 export function challengeLevel(state: ProgressState, subject: Subject): AdaptiveLevel {
   if (state.settings.adaptiveChallenge === false) {
-    const base = levelOfGrade(state.settings.grade);
+    const base = levelOfGrade(contentGrade(state.settings.grade));
     return { level: base, base, change: 'keep', recent: 0, recentCorrect: 0 };
   }
-  return adaptiveLevel(state.settings.grade, state.challenges, subject);
+  return adaptiveLevel(contentGrade(state.settings.grade), state.challenges, subject);
 }

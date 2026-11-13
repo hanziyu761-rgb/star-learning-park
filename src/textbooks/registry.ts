@@ -14,6 +14,9 @@ import { ENGLISH_FLTRP_LIU } from './data/englishFltrpLiu';
 import { ENGLISH_FLTRP_ZHANG } from './data/englishFltrpZhang';
 import { ENGLISH_HUJIAO } from './data/englishHujiao';
 import { ENGLISH_JIJIAO } from './data/englishJijiao';
+import { ENGLISH_JIJIAO_JUNIOR } from './data/englishJijiaoJunior';
+import { CHINESE_TONGBIAN_JUNIOR } from './data/chineseTongbianJunior';
+import { MATH_PEP_JUNIOR } from './data/mathPepJunior';
 import { ENGLISH_XIANGSHAO } from './data/englishXiangshao';
 import { ENGLISH_YILIN } from './data/englishYilin';
 import { MATH_QINGDAO } from './data/mathQingdao';
@@ -29,7 +32,7 @@ import { IMPORTED } from './data/imported';
 
 let cached: Volume[] | null = null;
 export function allVolumes(): Volume[] {
-  cached ??= [...TONGBIAN_2024, ...TONGBIAN_LEGACY, ...MATH_PEP_2024, ...MATH_PEP_LEGACY, ...MATH_BSD_2024, ...MATH_BSD_LEGACY, ...MATH_SUJIAO_2024, ...MATH_SUJIAO_LEGACY, ...MATH_JIJIAO_2024, ...MATH_JIJIAO_LEGACY, ...MATH_BEIJING_2024, ...MATH_BEIJING_LEGACY, ...MATH_QINGDAO, ...MATH_XISHI, ...ENGLISH_PEP_2024, ...ENGLISH_PEP_LEGACY, ...ENGLISH_FLTRP_2024, ...ENGLISH_FLTRP_LIU, ...ENGLISH_FLTRP_ZHANG, ...ENGLISH_YILIN, ...ENGLISH_BSD, ...ENGLISH_HUJIAO, ...ENGLISH_JIJIAO, ...ENGLISH_XIANGSHAO, ...IMPORTED, ...bankVolumes()];
+  cached ??= [...TONGBIAN_2024, ...TONGBIAN_LEGACY, ...MATH_PEP_2024, ...MATH_PEP_LEGACY, ...MATH_BSD_2024, ...MATH_BSD_LEGACY, ...MATH_SUJIAO_2024, ...MATH_SUJIAO_LEGACY, ...MATH_JIJIAO_2024, ...MATH_JIJIAO_LEGACY, ...MATH_BEIJING_2024, ...MATH_BEIJING_LEGACY, ...MATH_QINGDAO, ...MATH_XISHI, ...ENGLISH_PEP_2024, ...ENGLISH_PEP_LEGACY, ...ENGLISH_FLTRP_2024, ...ENGLISH_FLTRP_LIU, ...ENGLISH_FLTRP_ZHANG, ...ENGLISH_YILIN, ...ENGLISH_BSD, ...ENGLISH_HUJIAO, ...ENGLISH_JIJIAO, ...ENGLISH_XIANGSHAO, ...CHINESE_TONGBIAN_JUNIOR, ...MATH_PEP_JUNIOR, ...ENGLISH_JIJIAO_JUNIOR, ...IMPORTED, ...bankVolumes()];
   return cached;
 }
 
@@ -107,7 +110,7 @@ export function validateVolume(v: Volume, editions: Record<string, Edition> = ED
   const err = (where: string, msg: string) => out.push({ level: 'error', where, msg });
   if (!editions[v.editionId]) err(v.id, `教材版本 ${v.editionId} 不在版本清单里`);
   else if (editions[v.editionId].subject !== v.subject) err(v.id, '学科与教材版本不一致');
-  if (!(v.grade >= 1 && v.grade <= 6)) err(v.id, '年级必须是 1～6');
+  if (!(v.grade >= 1 && v.grade <= 9)) err(v.id, '年级必须是 1～9');
   if (v.term !== '上' && v.term !== '下') err(v.id, '册次必须是 上 / 下');
   if (!v.officialName) err(v.id, '缺少正式名称');
   if (!v.copyright) err(v.id, '缺少版权说明');

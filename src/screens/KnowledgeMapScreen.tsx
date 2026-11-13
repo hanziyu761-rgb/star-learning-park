@@ -18,6 +18,7 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { speak } from '@/speech/speech';
 import { colors, radius, shadow, space } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 /** 给孩子看的状态：颜色 + 图标 + 带拼音的短词 */
 export const KID_STATE: Record<MasteryState, { icon: string; color: string; bg: string; text: string; py: string }> = {
@@ -41,7 +42,7 @@ function MapBody() {
   const mastery = computeMastery(state, now);
   const [selected, setSelected] = useState<KnowledgePoint | null>(null);
   const [subject, setSubject] = useState<KpSubject>('math');
-  const [grade, setGrade] = useState(state.settings.grade ?? 1);
+  const [grade, setGrade] = useState(contentGrade(state.settings.grade));
   const kps = kpsFor(subject, grade);
   const todo = recommendKps(state, mastery, now, 3, { grade, subject }).filter(
     (r) => r.kind === 'review' || r.kind === 'diagnose',

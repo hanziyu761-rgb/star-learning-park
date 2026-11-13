@@ -20,9 +20,10 @@ const template = (): Volume => {
 };
 
 describe('版本清单', () => {
-  it('用户需求列出的全部候选版本都已登记（语文 6、数学 8、英语 7 + 平台上另外两套外研社版 = 9）', () => {
+  it('用户需求列出的全部候选版本都已登记（语文 6、数学 8、英语 7 + 平台上另外两套外研社版 = 9）；V4.3 初中三科各加 1 套', () => {
     const n = (s: string) => EDITIONS.filter((e) => e.subject === s).length;
-    expect([n('chinese'), n('math'), n('english')]).toEqual([6, 8, 9]);
+    expect([n('chinese'), n('math'), n('english')]).toEqual([7, 9, 10]);
+    expect(EDITIONS.filter((e) => e.id.endsWith('-jh')).map((e) => e.name)).toEqual(['统编版（初中）', '人教版（初中）', '冀教版（初中）']);
   });
   it('没有来源的版本不写现行 / 历史状态；部编版与统编版不重复登记', () => {
     for (const e of EDITIONS) if (e.status !== 'unknown') expect(e.sources.length).toBeGreaterThan(0);
@@ -200,10 +201,10 @@ describe('数据校验', () => {
 
 it('汇总数字（汇报用）', () => {
   const s = summary();
-  expect(s.volumes).toBe(170);
+  expect(s.volumes).toBe(187);
   expect(s.bankVolumes).toBe(BANK_INDEX.length);
-  expect(s.verifiedVolumes).toBe(164);
-  expect(s.verifiedUnits).toBe(1833);
+  expect(s.verifiedVolumes).toBe(181);
+  expect(s.verifiedUnits).toBe(1988);
   expect(s.lessons.verified).toBe(782);
   // 没有遗留的“待补”
   expect(allVolumes().flatMap((v) => v.units.flatMap((u) => [u.note ?? '', ...u.lessons.map((l) => l.note ?? '')])).filter((n) => n.includes('待补'))).toEqual([]);
@@ -538,5 +539,48 @@ describe('第五批（补）：译林、北师大、沪教、冀教、湘少、�
   it('不同主编的外研社版分开登记，不混在一起', () => {
     const names = EDITIONS.filter((e) => e.id.startsWith('english.fltrp')).map((e) => e.id).sort();
     expect(names).toEqual(['english.fltrp', 'english.fltrp-liu', 'english.fltrp-zhang']);
+  });
+});
+
+describe('第七批：初中教材（V4.3）——统编版语文、人教版数学、冀教版英语', () => {
+  const of = (id: string) => volumesFor({ editionId: id });
+  it('语文 6 册、数学 6 册：九年级下册是平台现有的未修订版', () => {
+    for (const id of ['chinese.tongbian-jh', 'math.pep-jh']) {
+      const vs = of(id);
+      expect(vs.map((v) => `${v.grade}${v.term}`)).toEqual(['7上', '7下', '8上', '8下', '9上', '9下']);
+      expect(vs.filter((v) => v.revision === null).map((v) => `${v.grade}${v.term}`)).toEqual(['9下']);
+      for (const v of vs) {
+        expect(v.tocProvenance).toBe('verified');
+        expect(v.sources[0].note).toMatch(/教材 → 初中 →/);
+        expect(v.sources[0].title).toMatch(/人民教育出版社/);
+        expect(v.bankBookId).toBeUndefined();
+        expect(v.units.every((u) => u.lessons.length === 0 && u.kpIds.length === 0 && u.bankUnitIds.length === 0)).toBe(true);
+      }
+    }
+    expect(of('chinese.tongbian-jh')[0].officialName).toBe('（根据2022年版课程标准修订）义务教育教科书·语文 七年级上册');
+    expect(of('chinese.tongbian-jh').at(-1)!.officialName).toMatch(/九年级下册（未修订版）/);
+  });
+  it('英语 5 册修订版；平台没有九年级下册，不登记', () => {
+    const vs = of('english.jijiao-jh');
+    expect(vs.map((v) => `${v.grade}${v.term}`)).toEqual(['7上', '7下', '8上', '8下', '9上']);
+    expect(vs.every((v) => v.revision === 2024)).toBe(true);
+    expect(vs.map((v) => v.units.length)).toEqual([8, 8, 8, 8, 6]);
+    expect(vs[0].units[0]).toMatchObject({ title: 'Unit 1 New school, new beginning!', page: 1 });
+  });
+  it('目录抽查', () => {
+    const zh = of('chinese.tongbian-jh')[0];
+    expect(zh.units[0]).toMatchObject({ title: '第一单元——春；济南的冬天；雨的四季；古代诗歌四首；写作：热爱写作，学会观察', page: 1 });
+    expect(zh.units.filter((u) => u.note).map((u) => u.title)).toContain('整本书阅读：《西游记》');
+    const m = of('math.pep-jh');
+    expect(m[0].units.map((u) => `${u.title.split('——')[0]}@${u.page}`)).toEqual([
+      '第一章 有理数@1', '第二章 有理数的运算@24', '综合与实践 进位制的认识与探究@63', '第三章 代数式@68',
+      '第四章 整式的加减@88', '第五章 一元一次方程@110', '第六章 几何图形初步@149', '综合与实践 设计学校田径运动会比赛场地@189',
+    ]);
+    expect(m.at(-1)!.units.map((u) => u.title.split('——')[0])).toEqual(['第二十六章 反比例函数', '第二十七章 相似', '第二十八章 锐角三角函数', '第二十九章 投影与视图', '部分中英文词汇索引']);
+  });
+  it('初中版本单独登记，不改动小学版本的册次', () => {
+    expect(of('chinese.tongbian').every((v) => v.grade <= 6)).toBe(true);
+    expect(of('math.pep').every((v) => v.grade <= 6)).toBe(true);
+    expect(of('english.jijiao').every((v) => v.grade <= 6)).toBe(true);
   });
 });

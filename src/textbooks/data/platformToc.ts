@@ -13,7 +13,7 @@
  */
 import type { SourceRef, Term, Unit, Volume } from '../types';
 
-const CN = ['', '一', '二', '三', '四', '五', '六'];
+const CN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 
 export interface PlatformPlan {
   grade: number;
@@ -37,6 +37,8 @@ export interface PlatformEditionInfo {
   /** 科目中文名 */
   subjectName: string;
   checkedAt: string;
+  /** 学段，不填是小学（V4.3 起有初中） */
+  stage?: '小学' | '初中';
 }
 
 /** 把目录文本转成单元；格式不对直接报错（测试会发现） */
@@ -66,7 +68,7 @@ function source(info: PlatformEditionInfo, p: PlatformPlan): SourceRef {
     url: 'https://basic.smartedu.cn/tchMaterial',
     kind: 'official',
     checkedAt: info.checkedAt,
-    note: `在平台“教材 → 小学 → ${info.subjectName} → ${info.platformName}”下查看电子课本页面，逐条对照目录页录入（APP 所有者的已登录浏览器，Claude 查看）。`,
+    note: `在平台“教材 → ${info.stage ?? '小学'} → ${info.subjectName} → ${info.platformName}”下查看电子课本页面，逐条对照目录页录入（APP 所有者的已登录浏览器，Claude 查看）。`,
   };
 }
 

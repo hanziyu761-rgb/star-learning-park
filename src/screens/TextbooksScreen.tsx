@@ -18,6 +18,7 @@ import { EDITIONS } from '@/textbooks/editions';
 import { completeness, isComplete, summary, volumesFor } from '@/textbooks/registry';
 import type { Term, Volume } from '@/textbooks/types';
 import { colors, radius, space } from '@/theme';
+import { isJunior } from '@/progress/grade';
 
 const SUBJECTS: { id: Subject; name: string }[] = [
   { id: 'chinese', name: '语文' },
@@ -32,7 +33,7 @@ const TOC = {
 } as const;
 const STATUS = { current: '现行', historical: '历史版本', upcoming: '即将启用', unknown: '状态待核实' } as const;
 
-const CN = ['', '一', '二', '三', '四', '五', '六'];
+const CN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 
 export default function TextbooksScreen() {
   const nav = useNav();
@@ -55,7 +56,7 @@ function SimpleView() {
   const { state, dispatch } = useProgress();
   const saved = state.settings.textbookEdition;
   const [subject, setSubject] = useState<Subject>('chinese');
-  const editionId = defaultEdition(subject, saved[subject]);
+  const editionId = defaultEdition(subject, saved[subject], state.settings.grade);
   const grades = gradesOf(editionId);
   const [grade, setGrade] = useState(state.settings.grade ?? 1);
   const g = grades.includes(grade) ? grade : grades[0];
@@ -149,7 +150,11 @@ function SimpleView() {
             );
           })}
           <Text style={styles.small}>
-            练习题是原创或开源题库题，不是课本原题
+            {vol!.units.some((u) => unitPracticeId(u, hasGenerator))
+              ? '练习题是原创或开源题库题，不是课本原题'
+              : isJunior(vol!.grade)
+                ? '初中目前只有目录，没有课程和练习'
+                : '这一册目前只有目录，还没有配套练习'}
           </Text>
         </View>
       )}
@@ -183,7 +188,7 @@ function DetailsView() {
         ))}
       </View>
       <View style={styles.chips}>
-        {[0, 1, 2, 3, 4, 5, 6].map((g) => (
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => (
           <Chip key={g} on={grade === g} text={g ? `${g}年级` : '全部'} onPress={() => setGrade(g)} testID={`tb-grade-${g}`} />
         ))}
       </View>

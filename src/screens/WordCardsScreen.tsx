@@ -17,6 +17,7 @@ import { DictationModal } from '@/words/ui/DictationModal';
 import { WC } from '@/words/ui/theme';
 import { WordCardView } from '@/words/ui/WordCardView';
 import { CelebrateModal, MapModal, WordbookModal } from '@/words/ui/WordModals';
+import { contentGrade } from '@/progress/grade';
 
 const BOOKS: { g: number; label: string }[] = [
   { g: 1, label: '启蒙' },
@@ -39,7 +40,7 @@ function WordCards() {
   const insets = useSafeAreaInsets();
   const L = useLayout();
   const { state, dispatch } = useProgress();
-  const startGrade = state.settings.grade <= 2 ? 1 : state.settings.grade;
+  const startGrade = contentGrade(state.settings.grade) <= 2 ? 1 : contentGrade(state.settings.grade);
   const [grade, setGrade] = useState(startGrade);
   const [unitId, setUnitId] = useState(unitsOf(startGrade)[0].id);
   const unit = UNIT_BY_ID.get(unitId)!;

@@ -11,6 +11,7 @@ import { frequentMistakeTypes, recommendKps, type KpRec } from '@/knowledge/reco
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
 import { colors, radius, space } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 const STATE_COLOR: Record<MasteryState, string> = {
   'not-started': '#9C928A',
@@ -35,7 +36,7 @@ export function KnowledgeCard() {
   const [now] = useState(() => Date.now());
   const [openKp, setOpenKp] = useState<string | null>(null);
   const [subject, setSubject] = useState<KpSubject>('math');
-  const grade = state.settings.grade ?? 1;
+  const grade = contentGrade(state.settings.grade);
   const mastery = computeMastery(state, now);
   const gradeKps = kpsFor(subject, grade);
   const counts = countByState(Object.fromEntries(gradeKps.map((k) => [k.id, mastery[k.id]])));

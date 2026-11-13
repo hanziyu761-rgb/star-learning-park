@@ -16,6 +16,7 @@ import { useNav } from '@/nav/Nav';
 import type { ProgressState } from '@/progress/model';
 import { speak } from '@/speech/speech';
 import { colors, MIN_TOUCH, radius, shadow, space, subjectTheme } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
 const GRADE_PY = ['', 'yī', 'èr', 'sān', 'sì', 'wǔ', 'liù'];
@@ -26,7 +27,7 @@ function doneCount(state: ProgressState, lessonId: string): number {
 
 export function OralSection({ state }: { state: ProgressState }) {
   const nav = useNav();
-  const topics = topicsForGrade(state.settings.grade);
+  const topics = topicsForGrade(contentGrade(state.settings.grade));
   return (
     <View style={styles.card} testID="oral-section">
       <DisplayTextView text={zh('口算闯关', 'kǒu suàn chuǎng guān')} size={24} />
@@ -66,7 +67,7 @@ export function WriteSection({ state }: { state: ProgressState }) {
       <View style={styles.grid}>
         {ALL_WRITE_SETS.map((set, i) => {
           // 一年级只显示一年级的 4 组；二年级起 8 组都显示（V2.14）
-          if (writeSetGrade(i + 1) > Math.max(1, Math.min(state.settings.grade, 2))) return null;
+          if (writeSetGrade(i + 1) > Math.max(1, Math.min(contentGrade(state.settings.grade), 2))) return null;
           const id = writeLessonId(i + 1);
           const best = state.lessons[id]?.bestStars ?? 0;
           return (
@@ -136,7 +137,7 @@ export function GraphicsSection({ state }: { state: ProgressState }) {
 
 export function BankSection({ subject, state }: { subject: Subject; state: ProgressState }) {
   const nav = useNav();
-  const grade = state.settings.grade;
+  const grade = contentGrade(state.settings.grade);
   const books = booksFor(subject, grade);
   const [openBook, setOpenBook] = useState<string | null>(books[0]?.id ?? null);
   const theme = subjectTheme[subject];

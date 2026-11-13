@@ -10,6 +10,7 @@ import { DisplayTextView } from '@/components/PinyinText';
 import { useNav } from '@/nav/Nav';
 import type { ProgressState } from '@/progress/model';
 import { colors, radius, shadow, space, subjectTheme } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 const TRACKS: EnglishTrack[] = ['talk', 'phonics', 'reading'];
 
@@ -106,7 +107,7 @@ export function ReadingHouse({ state }: { state: ProgressState }) {
   const nav = useNav();
   const theme = subjectTheme.chinese;
   // 按家长设的年级显示这一年级的短文（V2.14）
-  const grade = state.settings.grade;
+  const grade = contentGrade(state.settings.grade);
   const lessons = lessonsFor('chinese').filter((l) => l.track === 'zhread' && (l.grade ?? 1) === grade);
   const done = lessons.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
   return (

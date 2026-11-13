@@ -1,8 +1,10 @@
 import { AI_VOICE, aiHealth, aiTts, DEFAULT_AI_BASE_URL } from '@/ai/client';
 import { setCloudVoice, setVoicePrefs } from '@/speech/speech';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createEmptyProgress, progressReducer, type ProgressAction, type ProgressState } from './model';
 import { loadProgress, saveProgress } from './storage';
+import { setPinyinOff } from '@/components/pinyinMode';
+import { isJunior } from './grade';
 
 export type ProgressStatus = 'loading' | 'ready';
 
@@ -44,6 +46,10 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setVoicePrefs({ gender: 'child', zh: s.voiceZh, en: s.voiceEn, rate: s.speechRate });
   }, [s.voiceZh, s.voiceEn, s.speechRate]);
+  // 初中（七年级及以上）全部不标拼音（V4.3）
+  useLayoutEffect(() => {
+    setPinyinOff(isJunior(s.grade));
+  }, [s.grade]);
   // 云端童声（V2.21）：没有预录的句子联网用星星宝童声现念。只发送要朗读的文字。
   // 星星宝的回答（AI 老师）仍需家长先开启 AI 老师；题目朗读只要“联网童声”开关打开就用
   useEffect(() => {

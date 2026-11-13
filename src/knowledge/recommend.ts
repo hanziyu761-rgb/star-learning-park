@@ -8,6 +8,7 @@ import { hasGenerator } from './generators';
 import { isMastered, type KpMastery } from './mastery';
 import { isStruggling } from './diagnose';
 import { kpForRecord } from './mapping';
+import { contentGrade } from '@/progress/grade';
 
 export type KpRec =
   | { kind: 'diagnose'; kpId: string; reason: string }
@@ -36,7 +37,7 @@ export function recommendKps(
   limit = 6,
   scope: RecScope = {},
 ): KpRec[] {
-  const grade = scope.grade ?? state.settings.grade ?? 1;
+  const grade = scope.grade ?? contentGrade(state.settings.grade);
   const out: KpRec[] = [];
   const used = new Set<string>();
   const add = (r: KpRec) => {

@@ -10,13 +10,14 @@ import { gt } from '@/games/ui/text';
 import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { GAME_BG, GAME_MAIN } from './GameScreen';
+import { contentGrade } from '@/progress/grade';
 
 export default function GamesScreen() {
   const nav = useNav();
   const { status, state } = useProgress();
   const [now] = useState(() => Date.now());
   if (status === 'loading') return <LoadingView />;
-  const grade = state.settings.grade;
+  const grade = contentGrade(state.settings.grade);
   const used = Math.floor(playedToday(state, now) / 60);
   const limit = state.settings.gameMinutes;
   const can = canStartGame(state, now);

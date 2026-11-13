@@ -20,6 +20,7 @@ import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
 import { clickTime } from '@/words/session';
 import { colors, radius, space, subjectTheme } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 const TITLE = {
   math: zh('数学错题本', 'shù xué cuò tí běn'),
@@ -43,7 +44,7 @@ export default function MistakesScreen({ subject }: { subject: Subject }) {
   const theme = subjectTheme[subject] ?? subjectTheme.math;
   const book = mistakeBook(state, subject, resolveExercise);
   const list = tab === 'open' ? book.open : book.mastered;
-  const grade = state.settings.grade;
+  const grade = contentGrade(state.settings.grade);
 
   const print = async () => {
     setError(null);

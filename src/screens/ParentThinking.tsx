@@ -11,6 +11,7 @@ import { THINK_DIMS } from '@/thinking/dims';
 import { MIN_SAMPLES, thinkingProfile } from '@/thinking/profile';
 import { STRATEGIES } from '@/thinking/strategies';
 import { colors, radius, space } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 const SUBJECT_CN = { math: '数学', chinese: '语文', english: '英语' } as const;
 
@@ -37,7 +38,7 @@ export function ThinkingCard() {
         </View>
         <Text style={styles.dimStat} testID="pt-levels">
           {state.settings.adaptiveChallenge === false
-            ? `已关闭：三科都按家长设的${state.settings.grade}年级出题。`
+            ? `已关闭：三科都按家长设的${contentGrade(state.settings.grade)}年级出题。`
             : (['math', 'chinese', 'english'] as const)
                 .map((s) => {
                   const a = challengeLevel(state, s);

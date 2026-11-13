@@ -12,8 +12,8 @@ import { getAsr } from '@/speech/asr';
 import { speak } from '@/speech/speech';
 import { openMistakes, weakSkills } from '@/progress/stats';
 import { colors, radius, space } from '@/theme';
+import { ALL_GRADES, GRADE_CN, isJunior } from '@/progress/grade';
 
-const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
 
 export function GradeCard() {
   const { state, dispatch } = useProgress();
@@ -21,7 +21,7 @@ export function GradeCard() {
     <Card>
       <SectionTitle>孩子年级</SectionTitle>
       <View style={styles.chips}>
-        {[1, 2, 3, 4, 5, 6].map((g) => (
+        {ALL_GRADES.map((g) => (
           <Pressable
             key={g}
             onPress={() => dispatch({ type: 'settings/set', settings: { grade: g } })}
@@ -33,6 +33,11 @@ export function GradeCard() {
           </Pressable>
         ))}
       </View>
+      {isJunior(state.settings.grade) ? (
+        <Text style={styles.gradeNote} testID="grade-junior-note">
+          初中：不标拼音。目前只有课本目录，没有初中的课程和练习。
+        </Text>
+      ) : null}
     </Card>
   );
 }
@@ -223,6 +228,7 @@ const styles = StyleSheet.create({
   },
   chipOn: { backgroundColor: colors.parent },
   chipText: { fontSize: 15, fontWeight: '800', color: colors.text },
+  gradeNote: { fontSize: 13, color: colors.textSoft, marginTop: 8 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: space.sm },
   label: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: space.sm },
   input: {

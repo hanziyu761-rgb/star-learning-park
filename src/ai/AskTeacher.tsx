@@ -13,6 +13,7 @@ import { speak } from '@/speech/speech';
 import { colors, radius, space } from '@/theme';
 import { AiError, aiHint, AI_ERROR_TEXT } from './client';
 import { describeExercise } from './describe';
+import { contentGrade } from '@/progress/grade';
 
 export function AskTeacher({ exercise, subject, solved }: { exercise: Exercise; subject: Subject; solved: boolean }) {
   const { state } = useProgress();
@@ -30,7 +31,7 @@ export function AskTeacher({ exercise, subject, solved }: { exercise: Exercise; 
       const d = describeExercise(exercise);
       const text = await aiHint(
         { enabled: aiEnabled, baseUrl: aiBaseUrl },
-        { subject, grade, mode, ...d, knowledgePoint: skillLabel(exercise.skill) },
+        { subject, grade: contentGrade(grade), mode, ...d, knowledgePoint: skillLabel(exercise.skill) },
       );
       setReply({ text, error: false });
       speak({ text, lang: 'zh-CN', cloud: true });

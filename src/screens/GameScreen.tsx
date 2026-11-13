@@ -20,6 +20,7 @@ import type { GameId } from '@/progress/model';
 import { useProgress } from '@/progress/ProgressContext';
 import { stopSpeaking } from '@/speech/speech';
 import { clickTime } from '@/words/session';
+import { contentGrade } from '@/progress/grade';
 
 const LESSON: Record<GameId, string> = { kitchen: KITCHEN_LESSON, fish: FISH_LESSON, bubble: BUBBLE_LESSON };
 export const GAME_BG: Record<GameId, string> = { kitchen: '#FFF3E0', fish: '#E3F4FB', bubble: '#F1ECFF' };
@@ -51,7 +52,7 @@ function GamePlay({ game }: { game: GameId }) {
   const nav = useNav();
   const insets = useSafeAreaInsets();
   const { state, dispatch } = useProgress();
-  const grade = state.settings.grade;
+  const grade = contentGrade(state.settings.grade);
   const info = GAME_BY_ID[game];
   // 每一局开始时定下难度档和开始时间（玩完后下一局重新计算）
   const [round, setRound] = useState(() => ({ n: 0, level: gameLevel(state.games, game, grade), startedAt: clickTime() }));

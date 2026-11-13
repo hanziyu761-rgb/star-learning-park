@@ -23,6 +23,7 @@ import type { PhotoMistake } from '@/progress/model';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
 import { colors, radius, space } from '@/theme';
+import { contentGrade } from '@/progress/grade';
 
 const SUBJECTS: KpSubject[] = ['math', 'chinese', 'english'];
 const LETTERS = 'ABCD';
@@ -86,7 +87,7 @@ function errText(e: unknown): string {
 
 function PhotoBody() {
   const { state, dispatch } = useProgress();
-  const grade = state.settings.grade ?? 1;
+  const grade = contentGrade(state.settings.grade);
   const cfg = { enabled: state.settings.aiEnabled, baseUrl: state.settings.aiBaseUrl };
   const [hint, setHint] = useState<KpSubject | ''>('');
   const [step, setStep] = useState<Step>({ s: 'home' });

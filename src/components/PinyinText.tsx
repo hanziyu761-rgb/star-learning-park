@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, type TextStyle } from 'react-native';
 import type { DisplayText, ZhText } from '@/lesson/types';
 import { colors, font } from '@/theme';
+import { usePinyinOff } from './pinyinMode';
 
 interface PinyinTextProps {
   text: ZhText;
@@ -18,7 +19,9 @@ interface PinyinTextProps {
  * 上注音组件：拼音显示在每个汉字正上方。
  * 用于儿童阅读的中文：课程内容、题目和主要操作提示。
  */
-export function PinyinText({ text, size = font.child, color = colors.text, hidePinyin, center = true, nowrap }: PinyinTextProps) {
+export function PinyinText({ text, size = font.child, color = colors.text, hidePinyin: hideProp, center = true, nowrap }: PinyinTextProps) {
+  // 初中（七年级及以上）全部不标拼音
+  const hidePinyin = usePinyinOff() || hideProp;
   const pySize = Math.max(12, Math.round(size * 0.5));
   const label = text.map((s) => s.char).join('');
   return (
