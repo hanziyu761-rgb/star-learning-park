@@ -59,7 +59,7 @@ src/app/            Expo Router 路由（只做参数读取，转给 src/screens
 src/screens/        页面：首页、学科页、课程页、家长中心（跳转只用 useNav()，不要直接用 router）
 src/nav/            跳转抽象；src/single/ 单文件 HTML 版入口（内存页面栈）
 src/thinking/       思维训练：每日挑战题（challenges.ts 数学、challengesLang.ts 语文和英语、challengesUpper.ts + contentUpper.ts 三～六年级、challengesJunior.ts 初中第 5 档、registry.ts 总表/分档/三科轮换）、答对后选思路、家长中心统计
-src/knowledge/      知识图谱（原创）：一年级数学 graph.ts + curriculum/（二～六年级数学、一～六年级语文、三～六年级英语；junior.ts 七～九年级三科）、映射、题目生成器（genUpper.ts 二～六年级数学；genJunior.ts 初中数学；genJuniorLang.ts 初中语文英语）、掌握度、诊断、推荐
+src/knowledge/      知识图谱（原创）：一年级数学 graph.ts + curriculum/（二～六年级数学、一～六年级语文、三～六年级英语；junior.ts 七～九年级三科）、映射、题目生成器（genUpper.ts 二～六年级数学；genJunior.ts 初中数学；genJuniorLang.ts 初中语文英语；juniorZhData.ts + genJuniorZh.ts 初中语文积累资料程序出题）、掌握度、诊断、推荐
 src/ai/             AI 老师客户端（只连自家服务，无密钥）
 server/ai-worker/   AI 老师服务（Cloudflare Worker + DeepSeek）
 src/content/        课程数据（只写数据，不写界面）；zh.ts 拼音工具；index.ts 课程目录与知识点名称；bank/edition.ts 新版教材单元编排（V2.4：一年级）

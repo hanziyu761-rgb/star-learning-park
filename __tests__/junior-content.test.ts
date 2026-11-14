@@ -447,3 +447,182 @@ describe('V5.2.3 选初中后各模块按年级出内容', () => {
     expect(dailyMix(s, 'math', 3, days[0], NOW).every((e: { id: string }) => KP_BY_ID[e.id.split(':')[1]]?.grade === 3)).toBe(true);
   });
 });
+
+describe('V5.2.4 语文积累资料出题', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { zhDataSigs, buildZhData } = require('@/knowledge/genJuniorZh');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { ZH_DATA, ZH_IDIOMS } = require('@/knowledge/juniorZhData');
+  const units = Object.keys(ZH_DATA);
+  const works = units.flatMap((u) =>
+    (ZH_DATA[u].works ?? '')
+      .trim()
+      .split('\n')
+      .filter(Boolean)
+      .map((l: string) => l.trim().split('|')),
+  );
+  const lines = units.flatMap((u) =>
+    (ZH_DATA[u].lines ?? '')
+      .trim()
+      .split('\n')
+      .filter(Boolean)
+      .map((l: string) => l.trim().split('|')),
+  );
+
+  it('36 个单元都有资料题，每道都能出、答案在选项里、选项不重复', () => {
+    expect(units.sort()).toEqual(CHINESE_JUNIOR.map((k) => k.id).sort());
+    let n = 0;
+    for (const u of units)
+      for (const sig of zhDataSigs(u)) {
+        const b = buildZhData(u, sig);
+        expect(b).not.toBeNull();
+        const ids = b.options.map((o: { id: string }) => o.id);
+        expect(ids).toContain(b.answerId);
+        expect(new Set(ids).size).toBe(ids.length);
+        expect(ids.length).toBeGreaterThanOrEqual(3);
+        for (const t of [b.prompt.text, ...ids]) expect(t).not.toMatch(/undefined|NaN|\$\{/);
+        // 由题目 id 能还原出同一道题
+        expect(exerciseFromKpId(`kp:${u}:${sig}`)?.id).toBe(`kp:${u}:${sig}`);
+        n++;
+      }
+    expect(n).toBeGreaterThan(1200);
+  });
+
+  it('每个单元（含原来的小题库）至少 25 道不同的题', () => {
+    for (const u of units) {
+      const g = JUNIOR_LANG_GENERATORS[u];
+      const r = seeded(11);
+      const sigs = new Set<string>();
+      for (let i = 0; i < 4000; i++) sigs.add(g.make(r));
+      expect([u, sigs.size >= 25]).toEqual([u, true]);
+    }
+  });
+
+  it('“哪一篇是某人的作品”：干扰项都不是这个作者的', () => {
+    for (const u of units)
+      for (const sig of zhDataSigs(u).filter((s: string) => /^w:\d+:1$/.test(s))) {
+        const b = buildZhData(u, sig);
+        const author = /是(.+)的作品/.exec(b.prompt.text)![1];
+        for (const o of b.options) {
+          const t = o.id.replace(/^《|》$/g, '');
+          const by = works.filter((w: string[]) => w[0] === t).map((w: string[]) => w[1]);
+          expect([o.id, by.includes(author)]).toEqual([o.id, o.id === b.answerId]);
+        }
+      }
+  });
+
+  it('“作者是谁”：答案就是表里的作者，干扰项不是这篇的作者', () => {
+    for (const u of units)
+      for (const sig of zhDataSigs(u).filter((s: string) => /^w:\d+:0$/.test(s))) {
+        const b = buildZhData(u, sig);
+        const t = /^《(.+)》(的|选自)/.exec(b.prompt.text)![1];
+        const by = works.filter((w: string[]) => w[0] === t).map((w: string[]) => w[1]);
+        expect(by).toContain(b.answerId);
+        for (const o of b.options) if (o.id !== b.answerId) expect(by).not.toContain(o.id);
+      }
+  });
+
+  it('名句：同一个上句只有一个下句，选项里没有“也对”的句子', () => {
+    const next = new Map<string, Set<string>>();
+    const prev = new Map<string, Set<string>>();
+    for (const [up, down] of lines) {
+      next.set(up, (next.get(up) ?? new Set()).add(down));
+      prev.set(down, (prev.get(down) ?? new Set()).add(up));
+    }
+    for (const v of [...next.values(), ...prev.values()]) expect(v.size).toBe(1);
+    for (const u of units)
+      for (const sig of zhDataSigs(u).filter((s: string) => s.startsWith('l:'))) {
+        const b = buildZhData(u, sig);
+        const form = sig.split(':')[2];
+        const quoted = /“(.+?)”/.exec(b.prompt.text)![1];
+        if (form === '0') expect([...next.get(quoted)!]).toEqual([b.answerId]);
+        if (form === '1') expect([...prev.get(quoted)!]).toEqual([b.answerId]);
+        if (form === '2') {
+          // 出自整部书（《论语》等）的名句，选项都是书名；出自单篇的，选项都是篇名
+          const books = ['《论语》', '《孟子》', '《礼记》', '《庄子》', '《老子》'];
+          const isBook = books.includes(b.answerId);
+          for (const o of b.options) expect(books.includes(o.id)).toBe(isBook);
+        }
+      }
+  });
+
+  it('时代题：干扰项和答案不会“都算对”（先秦/战国、明末清初/清代、三国/东汉）', () => {
+    for (const u of units)
+      for (const sig of zhDataSigs(u).filter((s: string) => /^w:\d+:2$/.test(s))) {
+        const b = buildZhData(u, sig);
+        for (const o of b.options) {
+          if (o.id === b.answerId) continue;
+          const pair = [b.answerId, o.id];
+          const preQin = ['先秦', '春秋', '战国'];
+          expect(preQin.includes(pair[0]) && preQin.includes(pair[1])).toBe(false);
+          for (const ch of '秦汉晋宋唐元明清') expect(pair[0].includes(ch) && pair[1].includes(ch)).toBe(false);
+          expect(['俄国', '苏联'].includes(pair[0]) && ['俄国', '苏联'].includes(pair[1])).toBe(false);
+        }
+      }
+  });
+
+  it('成语题：干扰项不是意思相近（同一类）的成语', () => {
+    const rows = ZH_IDIOMS.trim()
+      .split('\n')
+      .map((l: string) => l.trim().split('|'));
+    expect(new Set(rows.map((r: string[]) => r[0])).size).toBe(rows.length);
+    const cls = new Map(rows.map((r: string[]) => [r[1], r[2]]));
+    for (const u of units)
+      for (const sig of zhDataSigs(u).filter((s: string) => s.startsWith('k:'))) {
+        const b = buildZhData(u, sig);
+        if (!b.prompt.text.startsWith('成语')) continue;
+        for (const o of b.options) if (o.id !== b.answerId) expect(cls.get(o.id)).not.toBe(cls.get(b.answerId));
+      }
+  });
+
+  it('同一年级里，知识例句和成语不分给两个单元（免得同一年级出重样的题）', () => {
+    for (const g of [7, 8, 9]) {
+      const texts = kpsFor('chinese', g).flatMap((k) =>
+        zhDataSigs(k.id)
+          .filter((s: string) => s.startsWith('k:'))
+          .map((s: string) => buildZhData(k.id, s).prompt.text),
+      );
+      expect(new Set(texts).size).toBe(texts.length);
+    }
+  });
+
+  it('不摘录仍在版权保护期内的现代诗文原句', () => {
+    const modern = new Set(works.filter((w: string[]) => ['现代', '当代', '近代'].includes(w[2])).map((w: string[]) => w[0]));
+    for (const [, , src] of lines) expect(modern.has(src.replace(/^《|》$/g, ''))).toBe(false);
+  });
+});
+
+describe('V5.2.4 英语词表 + 句型组合题', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { numWord, ordWord } = require('@/knowledge/genJuniorLang');
+  it('数词、序数词', () => {
+    expect([1, 12, 20, 21, 45, 99, 100].map(numWord)).toEqual(['one', 'twelve', 'twenty', 'twenty-one', 'forty-five', 'ninety-nine', 'one hundred']);
+    expect([1, 2, 3, 5, 8, 9, 12, 20, 21, 30].map(ordWord)).toEqual(['first', 'second', 'third', 'fifth', 'eighth', 'ninth', 'twelfth', 'twentieth', 'twenty-first', 'thirtieth']);
+  });
+  const ans = (id: string, sig: string) => (kpExercise(id, sig) as ChoiceExercise).answerId;
+  it('抽查答案', () => {
+    expect(ans('e7.a6', 'c:0:11:8')).toBe('twenty-one'); // 12 + 9
+    expect(ans('e7.a6', 'c:1:8')).toBe('ninth'); // September
+    expect(ans('e7.a1', 'c:0:10:0')).toBe('children');
+    expect(ans('e7.a2', 'c:2:8')).toBe('ours'); // Lucy and me → ours
+    expect(ans('e8.b5', 'c:0:0')).toBe("aren't I");
+    expect(ans('e8.b6', 'c:0:0:0:1')).toBe('am'); // Neither Tom nor I am
+    expect(ans('e8.a2', 'c:0:7:0')).toBe('best');
+    expect(ans('e9.a4', 'c:0:0:2')).toBe('had already begun');
+  });
+  it('每个英语知识点都能出至少 40 道不同的题，指令都是英文', () => {
+    for (const k of ENGLISH_JUNIOR) {
+      const g = JUNIOR_LANG_GENERATORS[k.id];
+      const r = seeded(5);
+      const sigs = new Set<string>();
+      for (let i = 0; i < 4000; i++) sigs.add(g.make(r));
+      expect([k.id, sigs.size >= 40 || k.id === 'e8.a6' ? true : sigs.size]).toEqual([k.id, true]);
+      for (const s of [...sigs].slice(0, 50)) {
+        const e = kpExercise(k.id, s) as ChoiceExercise;
+        expect(plainText(e.prompt.text)).toMatch(/^[A-Za-z]/);
+        expect(e.stem?.text ?? '').not.toMatch(/[\u4e00-\u9fff]/);
+        for (const o of e.options) expect(o.text).not.toMatch(/[\u4e00-\u9fff]/);
+      }
+    }
+  });
+});

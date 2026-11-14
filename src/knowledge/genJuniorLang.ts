@@ -8,6 +8,7 @@
  * 状态：待教师审核；未核对教材原题。
  */
 import type { UpperGen } from './genUpper';
+import { withZhData } from './genJuniorZh';
 
 type Rand = () => number;
 type Built = ReturnType<UpperGen['build']>;
@@ -25,13 +26,14 @@ function arrange(answer: string, wrongs: string[], seed: number): string[] {
 /* ═══════════════ 语文 ═══════════════ */
 
 /** 每行：题目|答案|干扰项（用 / 分隔）|讲解 */
-function zhPool(lines: string): UpperGen {
+function zhPool(lines: string): UpperGen & { n: number } {
   const items = lines
     .trim()
     .split('\n')
     .map((l) => l.trim().split('|'));
   for (const it of items) if (it.length !== 4) throw new Error(`语文题格式错误：${it.join('|')}`);
   return {
+    n: items.length,
     make: (rand) => `z:${pickI(rand, items.length)}`,
     build: (sig) => {
       const i = Number(sig.split(':')[1]);
@@ -48,7 +50,7 @@ function zhPool(lines: string): UpperGen {
   };
 }
 
-const CHINESE: Record<string, UpperGen> = {
+const CHINESE_POOLS: Record<string, UpperGen & { n: number }> = {
   /* ── 七年级上册 ── */
   'c7.a1': zhPool(`
 散文《春》的作者是谁？|朱自清|老舍/冰心/鲁迅|朱自清，现代散文家，代表作还有《背影》《荷塘月色》。
@@ -479,6 +481,11 @@ const CHINESE: Record<string, UpperGen> = {
 `),
 };
 
+/** 每个单元：原来的小题库 + 积累资料程序出题（V5.2.4） */
+const CHINESE: Record<string, UpperGen> = Object.fromEntries(
+  Object.entries(CHINESE_POOLS).map(([k, p]) => [k, withZhData(k, p)]),
+);
+
 /* ═══════════════ 英语 ═══════════════ */
 
 /** 动词表：原形|三单|过去式|过去分词|-ing */
@@ -503,6 +510,15 @@ clean|cleans|cleaned|cleaned|cleaning
 help|helps|helped|helped|helping
 fly|flies|flew|flown|flying
 stop|stops|stopped|stopped|stopping
+open|opens|opened|opened|opening
+close|closes|closed|closed|closing
+turn|turns|turned|turned|turning
+put|puts|put|put|putting
+finish|finishes|finished|finished|finishing
+start|starts|started|started|starting
+leave|leaves|left|left|leaving
+begin|begins|began|begun|beginning
+end|ends|ended|ended|ending
 `
   .trim()
   .split('\n')
@@ -939,4 +955,736 @@ He had ___ little money that he couldn't buy a ticket.|so|such/too/very|little �
 `),
 };
 
-export const JUNIOR_LANG_GENERATORS: Record<string, UpperGen> = { ...CHINESE, ...ENGLISH };
+
+/* ═══════════════ 英语：词表 + 句型组合（V5.2.4） ═══════════════
+ * 签名 c:句型编号:下标…，答案由词表算出，干扰项都是确定错误的形式。
+ */
+type Dims = number[];
+type CombFn = (ix: number[]) => EnItem | null;
+function enComb(list: [Dims, CombFn][]): UpperGen {
+  const at = (sig: string) => {
+    const [, t, ...ix] = sig.split(':').map(Number);
+    const it = list[t]?.[1](ix);
+    if (!it) throw new Error(`没有这道英语题：${sig}`);
+    return it;
+  };
+  return {
+    make: (rand) => {
+      for (let k = 0; k < 30; k++) {
+        const t = pickI(rand, list.length);
+        const ix = list[t][0].map((n) => pickI(rand, n));
+        if (list[t][1](ix)) return `c:${t}:${ix.join(':')}`;
+      }
+      return `c:0:${list[0][0].map(() => 0).join(':')}`;
+    },
+    build: (sig) => {
+      const it = at(sig);
+      let h = 0;
+      for (const ch of sig) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      return enBuilt(it, h);
+    },
+  };
+}
+/** 原来的题 + 组合题：组合题能出的题多，抽到的机会大一些 */
+function withComb(base: UpperGen | undefined, comb: UpperGen): UpperGen {
+  if (!base) return comb;
+  return {
+    make: (rand) => (rand() < 0.65 ? comb.make(rand) : base.make(rand)),
+    build: (sig) => (sig.startsWith('c:') ? comb.build(sig) : base.build(sig)),
+  };
+}
+const cap = (t: string) => t[0].toUpperCase() + t.slice(1);
+const tbl = (block: string) =>
+  block
+    .trim()
+    .split('\n')
+    .map((l) => l.trim().split('|'));
+/** 不含 my 的活动（间接引语里 my 要跟着变，单独出题） */
+const ACTS_NO_MY = ACTS.filter((a) => !a[1].includes('my'));
+const ACTS_NO_GO = ACTS.filter((a) => !['go', 'swim', 'visit', 'help'].includes(a[0]));
+
+/* 人称：[主格, 宾格, 形容词性物主代词, 名词性物主代词, 反身代词, 第三人称单数] */
+type Per = [string, string, string, string, string, boolean];
+const PER: Per[] = [
+  ['I', 'me', 'my', 'mine', 'myself', false],
+  ['he', 'him', 'his', 'his', 'himself', true],
+  ['she', 'her', 'her', 'hers', 'herself', true],
+  ['we', 'us', 'our', 'ours', 'ourselves', false],
+  ['they', 'them', 'their', 'theirs', 'themselves', false],
+];
+/** [主语, 作宾语时, 人称编号] */
+const WHO: [string, string, number][] = [
+  ['I', 'me', 0],
+  ['He', 'him', 1],
+  ['She', 'her', 2],
+  ['We', 'us', 3],
+  ['They', 'them', 4],
+  ['Lucy', 'Lucy', 2],
+  ['Tom', 'Tom', 1],
+  ['Tom and Jim', 'Tom and Jim', 4],
+  ['Lucy and I', 'Lucy and me', 3],
+];
+/** SUBJECTS 对应的人称代词（My brother → he） */
+const perOf = (s: (typeof SUBJECTS)[number]) => PER[{ I: 0, He: 1, She: 2, We: 3, They: 4, 'My brother': 1, 'Tom and Lily': 4 }[s[0]] ?? 0];
+const pronOf = (s: (typeof SUBJECTS)[number]) => perOf(s)[0];
+const notWord = (be: string) => (be === 'am' ? "aren't" : `${be}n't`);
+
+/* 名词：单数|复数|冠词|错误复数 */
+const NOUNS = tbl(`
+book|books|a|bookes/book
+box|boxes|a|boxs/boxies
+bus|buses|a|bus/buss
+watch|watches|a|watchs/watch
+city|cities|a|citys/cityes
+baby|babies|a|babys/babyes
+knife|knives|a|knifes/knife
+leaf|leaves|a|leafs/leafes
+tomato|tomatoes|a|tomatos/tomato
+potato|potatoes|a|potatos/potato
+child|children|a|childs/childrens
+man|men|a|mans/mens
+woman|women|a|womans/womens
+foot|feet|a|foots/feets
+tooth|teeth|a|tooths/teeths
+mouse|mice|a|mouses/mices
+toy|toys|a|toies/toyes
+key|keys|a|kies/keyes
+dish|dishes|a|dishs/dish
+story|stories|a|storys/storyes
+egg|eggs|an|egges/egg
+apple|apples|an|applees/apple
+orange|oranges|an|orangees/orange
+umbrella|umbrellas|an|umbrellaes/umbrella
+elephant|elephants|an|elephantes/elephant
+`);
+/** 冠词：名词短语|冠词|讲解 */
+const ARTS = tbl(`
+uniform|a|uniform 以辅音音素 /j/ 开头，用 a。
+useful book|a|useful 以辅音音素 /j/ 开头，用 a。
+university|a|university 以辅音音素 /j/ 开头，用 a。
+honest boy|an|honest 的 h 不发音，以元音音素开头，用 an。
+old man|an|old 以元音音素开头，用 an。
+interesting film|an|interesting 以元音音素开头，用 an。
+English book|an|English 以元音音素开头，用 an。
+ugly duck|an|ugly 以元音音素开头，用 an。
+empty box|an|empty 以元音音素开头，用 an。
+big apple|a|big 以辅音音素开头，用 a（看紧跟的词，不看 apple）。
+horse|a|horse 的 h 发音，以辅音音素开头，用 a。
+elephant|an|elephant 以元音音素开头，用 an。
+egg|an|egg 以元音音素开头，用 an。
+orange|an|orange 以元音音素开头，用 an。
+`);
+const UNCOUNT = ['water', 'milk', 'bread', 'juice', 'rice', 'meat'];
+
+/* 数词 */
+const ONES = 'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen'.split(' ');
+const TENS = ' ten twenty thirty forty fifty sixty seventy eighty ninety'.split(' ');
+const ORD1 = 'zeroth first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth'.split(' ');
+const ORD10 = ' tenth twentieth thirtieth fortieth fiftieth sixtieth seventieth eightieth ninetieth'.split(' ');
+export const numWord = (n: number): string =>
+  n === 100 ? 'one hundred' : n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? `-${ONES[n % 10]}` : '');
+export const ordWord = (n: number): string =>
+  n < 20 ? ORD1[n] : n % 10 ? `${TENS[Math.floor(n / 10)]}-${ORD1[n % 10]}` : ORD10[n / 10];
+const BAD_ORD: Record<number, string> = { 1: 'oneth', 2: 'twoth', 3: 'threeth', 5: 'fiveth', 8: 'eightth', 9: 'nineth', 12: 'twelveth', 20: 'twentyth' };
+const ordWrongs = (n: number, max: number) => [numWord(n), BAD_ORD[n] ?? ordWord(n < max ? n + 1 : n - 2), ordWord(n > 1 ? n - 1 : n + 1)];
+const MONTHS = 'January February March April May June July August September October November December'.split(' ');
+
+/* 时间介词：短语|介词 */
+const TIMES: [string, string][] = [
+  ...MONTHS.map((m) => [m, 'in'] as [string, string]),
+  ...['spring', 'summer', 'autumn', 'winter', 'the morning', 'the afternoon', 'the evening'].map((t) => [t, 'in'] as [string, string]),
+  ...['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'May 1st', 'October 2nd', 'Sunday morning', 'Friday evening', "Children's Day"].map((t) => [t, 'on'] as [string, string]),
+  ...["seven o'clock", 'half past six', 'noon', 'night', '8:30'].map((t) => [t, 'at'] as [string, string]),
+];
+const PREP_EX: Record<string, string> = {
+  in: '月份、季节、年份，以及 in the morning / afternoon / evening 用 in。',
+  on: '具体某一天（星期、日期、节日、某天的上午下午）用 on。',
+  at: '具体钟点、noon、night 用 at。',
+};
+
+/* 形容词：原级|比较级|最高级|错误比较级|错误最高级|名词（这个…比那个…） */
+const ADJS = tbl(`
+heavy|heavier|heaviest|heavyer|heavyest|box/bag
+big|bigger|biggest|biger|bigest|room/apple
+long|longer|longest|more long|most long|river/ruler
+cheap|cheaper|cheapest|more cheap|most cheap|bike/coat
+large|larger|largest|largeer|largeest|room/garden
+nice|nicer|nicest|more nice|most nice|cake/picture
+easy|easier|easiest|easyer|easyest|question/test
+good|better|best|gooder|goodest|idea/plan
+bad|worse|worst|badder|baddest|film/idea
+expensive|more expensive|most expensive|expensiver|expensivest|bike/coat
+interesting|more interesting|most interesting|interestinger|interestingest|book/film
+difficult|more difficult|most difficult|difficulter|difficultest|question/test
+beautiful|more beautiful|most beautiful|beautifuller|beautifullest|picture/garden
+important|more important|most important|importanter|importantest|meeting/test
+`);
+/** 说人的形容词 */
+const PADJS = tbl(`
+tall|taller|tallest|more tall|most tall
+short|shorter|shortest|more short|most short
+young|younger|youngest|more young|most young
+happy|happier|happiest|happyer|happyest
+thin|thinner|thinnest|thiner|thinest
+careful|more careful|most careful|carefuler|carefulest
+popular|more popular|most popular|popularer|popularest
+`);
+const NAMES = ['Tom', 'Lucy', 'Jack', 'Amy', 'Mike', 'Lily'];
+/** 名字和代词 */
+const NAMEP: [string, Per][] = [
+  ['Tom', PER[1]],
+  ['Lucy', PER[2]],
+  ['Mike', PER[1]],
+  ['Amy', PER[2]],
+  ['Jack', PER[1]],
+  ['Lily', PER[2]],
+];
+
+/* 感叹句：形容词|冠词|名词|复数 */
+const EXCL = tbl(`
+interesting|an|book|books
+exciting|an|game|games
+old|an|house|houses
+easy|an|question|questions
+amazing|an|story|stories
+expensive|an|coat|coats
+beautiful|a|picture|pictures
+useful|a|book|books
+big|a|cake|cakes
+funny|a|film|films
+clever|a|boy|boys
+lovely|a|dog|dogs
+`);
+const IMPS: [string, string][] = [
+  ['open', 'the window'],
+  ['close', 'the door'],
+  ['turn', 'off the lights'],
+  ['clean', 'the blackboard'],
+  ['read', 'the text aloud'],
+  ['write', 'your name here'],
+  ['take', 'out your books'],
+  ['put', 'away your toys'],
+];
+
+/* 构词 */
+const DOERS = tbl(`
+play|player|playing/plays/playman
+swim|swimmer|swimer/swimming/swimist
+run|runner|runer/running/runist
+write|writer|writter/writing/writist
+read|reader|readder/reading/readist
+sing|singer|singging/singist/song
+dance|dancer|danceer/dancing/dancist
+teach|teacher|teachor/teaching/teachist
+paint|painter|paintor/painting/paintist
+drive|driver|driveer/driving/drivist
+`);
+const DOER_SAY: Record<string, string> = {
+  play: 'play football', swim: 'swim', run: 'run', write: 'write', read: 'read', sing: 'sing', dance: 'dance', teach: 'teach', paint: 'paint', drive: 'drive',
+};
+const ADVS = tbl(`
+careful|carefully|carefuly/carefulness/careful
+happy|happily|happyly/happiness/happy
+quiet|quietly|quiety/quietness/quiet
+quick|quickly|quickily/quickness/quick
+slow|slowly|slowily/slowness/slow
+`);
+const UNS = tbl(`
+happy|unhappy|dishappy/inhappy/happily
+kind|unkind|diskind/imkind/kindness
+like|dislike|nolike/inlike/likely
+agree|disagree|unagree/inagree/agreement
+friendly|unfriendly|disfriendly/infriendly/friendship
+honest|dishonest|unhonest/inhonest/honestly
+`);
+/** 句子|答案|干扰|讲解 */
+const FULS = tbl(`
+This dictionary is very ___. (use)|useful|useless/usely/useness|“有用的”：use + -ful。
+The man often helps others. He is very ___. (help)|helpful|helpless/helply/helpness|“乐于助人的”：help + -ful。
+Don't be ___. Check your answers again. (care)|careless|careful/carely/careness|“粗心的”：care + -less（-less 表示“没有”）。
+Please be ___ when you cross the road. (care)|careful|careless/carely/careness|“小心的”：care + -ful。
+This old phone is ___. It doesn't work at all. (use)|useless|useful/usely/useness|“没用的”：use + -less。
+`);
+
+/* 宾语从句、定语从句 */
+const PEOPLE = ['boy', 'girl', 'man', 'woman', 'teacher'];
+const THINGS: [string, string][] = [
+  ['book', 'is on the desk'],
+  ['bike', 'I bought last week'],
+  ['bag', 'has a red cover'],
+  ['photo', 'was taken in Beijing'],
+  ['song', 'we sang yesterday'],
+];
+/* 过去完成时：场所|事件主语|动词 */
+const EVENTS: [string, string, string][] = [
+  ['the cinema', 'the film', 'start'],
+  ['the station', 'the train', 'leave'],
+  ['school', 'the class', 'begin'],
+  ['the shop', 'the shop', 'close'],
+  ['the bus stop', 'the bus', 'leave'],
+  ['the meeting room', 'the meeting', 'end'],
+];
+/* 被动 + 情态：主语|动词 */
+/** 主语|过去分词|-ing */
+const PASS = [
+  ...(
+    [
+      ['The classroom', 'clean'],
+      ['The letter', 'write'],
+      ['The windows', 'close'],
+      ['The door', 'open'],
+      ['The model plane', 'make'],
+      ['The homework', 'finish'],
+      ['The museum', 'visit'],
+      ['The text', 'read'],
+    ] as [string, string][]
+  ).map(([sub, v]) => [sub, V[v][3], V[v][4]]),
+  ['The new bridge', 'built', 'building'],
+  ['The trees', 'planted', 'planting'],
+  ['The plants', 'watered', 'watering'],
+  ['The library books', 'returned', 'returning'],
+  ['The walls', 'painted', 'painting'],
+  ['The lights', 'turned off', 'turning off'],
+];
+const MODAL_TAIL: [string, string][] = [
+  ['must', 'today'],
+  ['can', 'in an hour'],
+  ['should', 'right now'],
+  ['will', 'tomorrow'],
+];
+/* 推测：证据|结论|must 还是 can't（${N} 名字，${P} 代词） */
+const GUESS = tbl(`
+\${N}'s bike is outside the shop.|be in the shop|must
+The lights in \${N}'s room are on.|be at home|must
+\${N} has worked all day.|be tired|must
+\${N} got full marks in the test.|be very happy|must
+\${N} is sitting in our classroom now.|be at home|can't
+\${N} has just eaten a big meal.|be hungry|can't
+\${N} slept for ten hours last night.|be tired|can't
+\${N} lost the game.|be happy|can't
+\${N} answered all the hard questions.|be very clever|must
+\${N} has a lot of English books.|like English very much|must
+\${N} is smiling at the letter.|be happy|must
+\${N} is only six years old.|be a university student|can't
+\${N} is shaking with cold.|be warm|can't
+`);
+/* so / such：形容词|冠词|名词 */
+const SOS = tbl(`
+interesting|an|film
+exciting|an|game
+nice|a|day
+beautiful|a|park
+funny|a|story
+wonderful|a|trip
+delicious|a|meal
+amazing|an|show
+great|a|party
+lovely|a|song
+exciting|an|match
+relaxing|a|holiday
+useful|a|lesson
+`);
+const PURPOSES = ['catch the first bus', 'get to school on time', 'see the sunrise', 'have breakfast with the family'];
+const INDEF_ADJ = ['interesting', 'new', 'important', 'special', 'funny', 'exciting'];
+const INDEFS = ['Everyone', 'Everybody', 'Nobody', 'No one', 'Someone', 'Somebody'];
+const WH_ACTS = ACTS.filter((a) => ['play', 'study', 'read', 'eat', 'make', 'watch'].includes(a[0]));
+/** 每种活动合适的地点 */
+const WHERE: Record<string, string[]> = {
+  play: ['In the park.', 'At school.', 'In the gym.'],
+  study: ['At school.', 'At home.', 'In the library.'],
+  read: ['In the library.', 'At home.', 'In the park.'],
+  eat: ['At home.', 'In the dining hall.', 'At a small restaurant.'],
+  make: ['At home.', 'In the classroom.', 'In the science club.'],
+  watch: ['At home.', 'In the living room.', "At my grandma's."],
+};
+
+const COMB: Record<string, UpperGen> = {
+  /* 名词与冠词 */
+  'e7.a1': enComb([
+    [[NOUNS.length, 9], ([i, n]) => {
+      const [sg, pl, , w] = NOUNS[i];
+      return { stem: `I can see ${numWord(n + 2)} ___ in the picture.`, ans: pl, wrongs: [...w.split('/'), sg], ex: `数量是 ${numWord(n + 2)}，用复数：${sg} → ${pl}。` };
+    }],
+    [[NOUNS.length], ([i]) => {
+      const [sg, , art] = NOUNS[i];
+      return { stem: `I can see ___ ${sg} in the picture.`, ans: art, wrongs: [art === 'a' ? 'an' : 'a', 'many'], ex: art === 'an' ? `${sg} 以元音音素开头，用 an。` : `${sg} 以辅音音素开头，用 a。` };
+    }],
+    [[ARTS.length], ([i]) => {
+      const [ph, art, ex] = ARTS[i];
+      return { stem: `This is ___ ${ph}.`, ans: art, wrongs: [art === 'a' ? 'an' : 'a', 'many'], ex };
+    }],
+  ]),
+  /* 代词 */
+  'e7.a2': enComb(([
+    [[WHO.length], ([i]) => {
+      const [sub, , p] = WHO[i];
+      const per = PER[p];
+      return { stem: `${sub} ${per[5] ? 'likes' : 'like'} music. Music makes ___ happy.`, ans: per[1], wrongs: [per[0], per[2], per[3], per[4]], ex: '动词 make 后面作宾语，用宾格。' };
+    }],
+    [[WHO.length], ([i]) => {
+      const [sub, , p] = WHO[i];
+      const per = PER[p];
+      return { stem: `${sub} can't find ___ keys.`, ans: per[2], wrongs: [per[0], per[1], per[3], per[4]], ex: '名词 keys 前面用形容词性物主代词。' };
+    }],
+    [[WHO.length], ([i]) => {
+      const [, obj, p] = WHO[i];
+      const per = PER[p];
+      return { stem: `The red bag belongs to ${obj}. It is ___.`, ans: per[3], wrongs: [per[2], per[1], per[0], per[4]], ex: '后面没有名词，用名词性物主代词。' };
+    }],
+    [[WHO.length], ([i]) => {
+      const [sub, , p] = WHO[i];
+      const per = PER[p];
+      return { stem: `${sub} taught ___ to swim last summer.`, ans: per[4], wrongs: [per[1], per[2], per[3], per[0]], ex: '自己教自己，用反身代词。' };
+    }],
+    [[WHO.length], ([i]) => {
+      const [sub, , p] = WHO[i];
+      const per = PER[p];
+      const be = p === 0 ? 'am' : p >= 3 ? 'are' : 'is';
+      return { stem: `${sub} ${be} your friend${p >= 3 ? 's' : ''}. Please give ___ the book.`, ans: per[1], wrongs: [per[0], per[2], per[3], per[4]], ex: 'give 后面的人作宾语，用宾格。' };
+    }],
+  ] as [Dims, CombFn][]).map(([d, f]) => [d, (ix: number[]) => {
+    const it = f(ix)!;
+    return { ...it, wrongs: [...new Set(it.wrongs.filter((w) => w !== it.ans))].slice(0, 3) };
+  }] as [Dims, CombFn])),
+  /* There be */
+  'e7.a3': enComb([
+    [[NOUNS.length, 9], ([i, n]) => ({ stem: `There ___ ${numWord(n + 2)} ${NOUNS[i][1]} in the picture.`, ans: 'are', wrongs: ['is', 'am', 'be'], ex: '后面是复数名词，用 There are。' })],
+    [[NOUNS.length], ([i]) => ({ stem: `There ___ ${NOUNS[i][2]} ${NOUNS[i][0]} in the picture.`, ans: 'is', wrongs: ['are', 'am', 'be'], ex: '后面是单数名词，用 There is。' })],
+    [[UNCOUNT.length], ([i]) => ({ stem: `There ___ some ${UNCOUNT[i]} in the fridge.`, ans: 'is', wrongs: ['are', 'am', 'be'], ex: `${UNCOUNT[i]} 是不可数名词，用 There is。` })],
+    [[NOUNS.length], ([i]) => ({ stem: `___ there any ${NOUNS[i][1]} in the picture?`, ans: 'Are', wrongs: ['Is', 'Do', 'Does'], ex: '后面是复数名词，问句用 Are there …?' })],
+  ]),
+  /* 时间介词 */
+  'e7.a5': enComb([
+    [[SUBJECTS.length, ACTS_NO_GO.length, TIMES.length], ([s, a, t]) => {
+      const [time, prep] = TIMES[t];
+      const act = ACTS_NO_GO[a];
+      return { stem: `${SUBJECTS[s][0]} ${v3(SUBJECTS[s], act[0])} ${act[1]} ___ ${time}.`, ans: prep, wrongs: ['in', 'on', 'at', 'to'].filter((x) => x !== prep), ex: PREP_EX[prep] };
+    }],
+  ]),
+  /* 数词 */
+  'e7.a6': enComb([
+    [[40, 40], ([a, b]) => {
+      const x = a + 1;
+      const y = b + 1;
+      const z = x + y;
+      return { stem: `${cap(numWord(x))} plus ${numWord(y)} is ___.`, ans: numWord(z), wrongs: [numWord(z + 1), numWord(z - 1), numWord(z > 20 ? z - 10 : z + 10)], ex: `${x} + ${y} = ${z}，英文是 ${numWord(z)}。` };
+    }],
+    [[12], ([m]) => ({ stem: `${MONTHS[m]} is the ___ month of the year.`, ans: ordWord(m + 1), wrongs: ordWrongs(m + 1, 12), ex: `${MONTHS[m]} 是第 ${m + 1} 个月，序数词是 ${ordWord(m + 1)}。` })],
+    [[15], ([k]) => ({ stem: `Today is my ___ birthday. I am ${numWord(k + 6)} years old now.`, ans: ordWord(k + 6), wrongs: ordWrongs(k + 6, 30), ex: `${k + 6} 岁生日是第 ${k + 6} 个生日：${ordWord(k + 6)}。` })],
+    [[20, NAMES.length], ([k, n]) => ({ stem: `${NAMES[n]}'s home is on Floor ${k + 1}. ${NAMES[n]} lives on the ___ floor.`, ans: ordWord(k + 1), wrongs: ordWrongs(k + 1, 30), ex: `表示“第几”用序数词：${ordWord(k + 1)}。` })],
+  ]),
+  /* 情态动词后面用原形 */
+  'e7.b3': enComb([
+    [[SUBJECTS.length, 4, ACTS.length], ([s, m, a]) => {
+      const modal = ['can', 'must', 'should', 'may'][m];
+      const act = ACTS[a];
+      return { stem: `${SUBJECTS[s][0]} ${modal} ___ ${act[1]} after school.`, ans: act[0], wrongs: [V[act[0]][1], V[act[0]][4], `to ${act[0]}`], ex: `${modal} 是情态动词，后面用动词原形。` };
+    }],
+  ]),
+  /* 感叹句、祈使句 */
+  'e7.b4': enComb([
+    [[EXCL.length], ([i]) => {
+      const [adj, art, n] = EXCL[i];
+      return { stem: `___ ${adj} ${n} it is!`, ans: `What ${art}`, wrongs: [`What ${art === 'a' ? 'an' : 'a'}`, 'How', 'What'], ex: `What + ${art} + 形容词 + 单数名词！${adj} 前面用 ${art}。` };
+    }],
+    [[EXCL.length], ([i]) => {
+      const [adj, art, n] = EXCL[i];
+      return { stem: `___ ${adj} the ${n} is!`, ans: 'How', wrongs: ['What', `What ${art}`, `How ${art}`], ex: 'How + 形容词 + 主语 + 谓语！' };
+    }],
+    [[EXCL.length], ([i]) => {
+      const [adj, , , pl] = EXCL[i];
+      return { stem: `___ ${adj} ${pl} they are!`, ans: 'What', wrongs: ['What a', 'How', 'How a'], ex: 'What + 形容词 + 复数名词！复数前不用 a / an。' };
+    }],
+    [[IMPS.length, 2], ([i, k]) => {
+      const [v, o] = IMPS[i];
+      return { stem: k ? `Don't ___ ${o}.` : `Please ___ ${o}.`, ans: v, wrongs: [V[v][1], V[v][4], `to ${v}`], ex: k ? '否定祈使句：Don’t + 动词原形。' : '祈使句用动词原形开头。' };
+    }],
+  ]),
+  /* 特殊疑问词 */
+  'e7.b6': enComb([
+    [[SUBJECTS.length, WH_ACTS.length, 3], ([s, a, k]) => {
+      const S = SUBJECTS[s];
+      const act = WH_ACTS[a];
+      const ansText = WHERE[act[0]][k];
+      return { stem: `— ___ ${S[1] ? 'does' : 'do'} ${subjQ(S)} usually ${act[0]} ${act[1]}? — ${ansText}`, ans: 'Where', wrongs: ['When', 'Why', 'How'], ex: '回答是地点，问句用 Where。' };
+    }],
+    [[SUBJECTS.length, WH_ACTS.length, 4], ([s, a, k]) => {
+      const S = SUBJECTS[s];
+      const act = WH_ACTS[a];
+      const ansText = ['After school.', 'In the evening.', 'On Saturday afternoon.', 'After dinner.'][k];
+      return { stem: `— ___ ${S[1] ? 'does' : 'do'} ${subjQ(S)} usually ${act[0]} ${act[1]}? — ${ansText}`, ans: 'When', wrongs: ['Where', 'Why', 'How many'], ex: '回答是时间，问句用 When。' };
+    }],
+    [[SUBJECTS.length, 4], ([s, k]) => {
+      const S = SUBJECTS[s];
+      const ansText = ['By bike.', 'By bus.', 'On foot.', 'By subway.'][k];
+      return { stem: `— ___ ${S[1] ? 'does' : 'do'} ${subjQ(S)} go to school? — ${ansText}`, ans: 'How', wrongs: ['What', 'Why', 'When'], ex: '回答是交通方式，问句用 How。' };
+    }],
+    [[SUBJECTS.length, WH_ACTS.length, 4], ([s, a, k]) => {
+      const S = SUBJECTS[s];
+      const act = WH_ACTS[a];
+      const ansText = ['Twice a week.', 'Every day.', 'Once a month.', 'Three times a week.'][k];
+      return { stem: `— ___ ${S[1] ? 'does' : 'do'} ${subjQ(S)} ${act[0]} ${act[1]}? — ${ansText}`, ans: 'How often', wrongs: ['How long', 'How many', 'How much'], ex: '回答是频率（一周两次等），问句用 How often。' };
+    }],
+    [[SUBJECTS.length, WH_ACTS.length, 3], ([s, a, k]) => {
+      const S = SUBJECTS[s];
+      const act = WH_ACTS[a];
+      const ansText = ['For two hours.', 'For half an hour.', 'For about an hour.'][k];
+      return { stem: `— ___ ${S[1] ? 'does' : 'do'} ${subjQ(S)} ${act[0]} ${act[1]} every day? — ${ansText}`, ans: 'How long', wrongs: ['How often', 'How many', 'Where'], ex: '回答是一段时间（for …），问句用 How long。' };
+    }],
+  ]),
+  /* 比较级 */
+  'e8.a1': enComb([
+    [[ADJS.length, 2], ([i, k]) => {
+      const [a, c, , wc, , ns] = ADJS[i];
+      const n = ns.split('/')[k];
+      return { stem: `This ${n} is ___ than that one.`, ans: c, wrongs: [a, wc, ADJS[i][2]], ex: `than 前面用比较级：${a} → ${c}。` };
+    }],
+    [[PADJS.length, NAMES.length, NAMES.length], ([i, x, y]) => {
+      if (x === y) return null;
+      const [a, c, su, wc] = PADJS[i];
+      return { stem: `${NAMES[x]} is ___ than ${NAMES[y]}.`, ans: c, wrongs: [a, wc, su], ex: `两个人比较用比较级：${a} → ${c}。` };
+    }],
+  ]),
+  /* 最高级 */
+  'e8.a2': enComb([
+    [[ADJS.length, 2], ([i, k]) => {
+      const [a, c, su, , ws, ns] = ADJS[i];
+      const n = ns.split('/')[k];
+      return { stem: `This is the ___ ${n} of all.`, ans: su, wrongs: [c, a, ws], ex: `三者以上比较、the … of all 用最高级：${a} → ${su}。` };
+    }],
+    [[PADJS.length, NAMES.length], ([i, x]) => {
+      const [a, c, su, , ws] = PADJS[i];
+      return { stem: `${NAMES[x]} is the ___ student in our class.`, ans: su, wrongs: [c, a, ws], ex: `在全班里比较用最高级：${a} → ${su}。` };
+    }],
+  ]),
+  /* 频度副词 */
+  'e8.a3': enComb([
+    [[SUBJECTS.length, ACTS.length, 2], ([s, a, k]) => {
+      const S = SUBJECTS[s];
+      const act = ACTS[a];
+      const P = cap(pronOf(S));
+      return k
+        ? { stem: `${S[0]} ${v3(S, act[0])} ${act[1]} every day. ${P} ___ ${v3(S, act[0])} ${act[1]}.`, ans: 'always', wrongs: ['never', 'sometimes', 'hardly ever'], ex: '每天都做，用 always（总是）。' }
+        : { stem: `${S[0]} ${S[1] ? "doesn't" : "don't"} ${act[0]} ${act[1]} on any day of the week. ${P} ___ ${v3(S, act[0])} ${act[1]}.`, ans: 'never', wrongs: ['always', 'usually', 'often'], ex: '一周里哪天都不做，用 never（从不）。' };
+    }],
+  ]),
+  /* 不定式 */
+  'e8.a4': enComb([
+    [[SUBJECTS.length, 3, ACTS.length], ([s, k, a]) => {
+      const S = SUBJECTS[s];
+      const act = ACTS[a];
+      const verb = ['want', 'hope', 'plan'][k];
+      return { stem: `${S[0]} ${S[1] ? `${verb}s` : verb} ___ ${act[1]} this weekend.`, ans: `to ${act[0]}`, wrongs: [act[0], V[act[0]][4], V[act[0]][1]], ex: `${verb} to do：${verb} 后面用动词不定式。` };
+    }],
+    [[SUBJECTS.length, ACTS.length], ([s, a]) => ({ stem: `${SUBJECTS[s][0]} decided ___ ${ACTS[a][1]} last week.`, ans: `to ${ACTS[a][0]}`, wrongs: [ACTS[a][0], V[ACTS[a][0]][4], V[ACTS[a][0]][2]], ex: 'decide to do：决定做某事。' })],
+    [[SUBJECTS.length, ACTS_NO_GO.length], ([s, a]) => ({ stem: `${SUBJECTS[s][0]} ${SUBJECTS[s][2]} too tired ___ ${ACTS_NO_GO[a][1]} now.`, ans: `to ${ACTS_NO_GO[a][0]}`, wrongs: [ACTS_NO_GO[a][0], V[ACTS_NO_GO[a][0]][4], V[ACTS_NO_GO[a][0]][1]], ex: 'too … to do：太……而不能做。' })],
+  ]),
+  /* 动名词 */
+  'e8.a5': enComb([
+    [[SUBJECTS.length, ACTS.length], ([s, a]) => ({ stem: `${SUBJECTS[s][0]} ${SUBJECTS[s][1] ? 'enjoys' : 'enjoy'} ___ ${ACTS[a][1]}.`, ans: V[ACTS[a][0]][4], wrongs: [`to ${ACTS[a][0]}`, ACTS[a][0], V[ACTS[a][0]][1]], ex: 'enjoy doing：喜欢做某事，后面用动名词。' })],
+    [[SUBJECTS.length, ACTS_NO_GO.length], ([s, a]) => ({ stem: `${SUBJECTS[s][0]} finished ___ ${ACTS_NO_GO[a][1]} an hour ago.`, ans: V[ACTS_NO_GO[a][0]][4], wrongs: [`to ${ACTS_NO_GO[a][0]}`, ACTS_NO_GO[a][0], V[ACTS_NO_GO[a][0]][2]], ex: 'finish doing：做完某事。' })],
+    [[SUBJECTS.length, ACTS_NO_GO.length], ([s, a]) => ({ stem: `${SUBJECTS[s][0]} ${SUBJECTS[s][2]} good at ___ ${ACTS_NO_GO[a][1]}.`, ans: V[ACTS_NO_GO[a][0]][4], wrongs: [`to ${ACTS_NO_GO[a][0]}`, ACTS_NO_GO[a][0], V[ACTS_NO_GO[a][0]][1]], ex: 'be good at doing：介词 at 后面用动名词。' })],
+    [[ACTS.length], ([a]) => ({ stem: `How about ___ ${ACTS[a][1]} this afternoon?`, ans: V[ACTS[a][0]][4], wrongs: [`to ${ACTS[a][0]}`, ACTS[a][0], V[ACTS[a][0]][1]], ex: 'How about doing …? 介词 about 后面用动名词。' })],
+  ]),
+  /* 不定代词 */
+  'e8.a6': enComb([
+    [[INDEF_ADJ.length, 3], ([i, k]) => {
+      const a = INDEF_ADJ[i];
+      const stem = ['There is ___ in today\'s newspaper.', 'I have ___ to tell you.', 'I want to buy ___ for my mother.'][k];
+      return { stem, ans: `something ${a}`, wrongs: [`${a} something`, `anything ${a}`, `${a} anything`], ex: '形容词修饰 something 等不定代词时放在后面；肯定句用 something。' };
+    }],
+    [[INDEF_ADJ.length, 2], ([i, k]) => {
+      const a = INDEF_ADJ[i];
+      const stem = ["I don't have ___ to tell you.", "There isn't ___ in today's newspaper."][k];
+      return { stem, ans: `anything ${a}`, wrongs: [`${a} anything`, `something ${a}`, `${a} something`], ex: '形容词放在不定代词后面；否定句一般用 anything。' };
+    }],
+    [[INDEFS.length, 4], ([i, k]) => ({ stem: `${INDEFS[i]} ___ ${['here now', 'in the classroom', 'ready for the trip', 'at the party'][k]}.`, ans: 'is', wrongs: ['are', 'am', 'be'], ex: `${INDEFS[i]} 作主语时看作单数，谓语用 is。` })],
+  ]),
+  /* 宾语从句：用陈述语序 */
+  'e8.b3': enComb([
+    [[SUBJECTS.length, ACTS_NO_GO.length, 2], ([s, a, k]) => {
+      const S = SUBJECTS[s];
+      const act = ACTS_NO_GO[a];
+      const sq = subjQ(S);
+      const wh = ['when', 'where'][k];
+      return {
+        stem: `Could you tell me ${wh} ___ ${act[1]}?`,
+        ans: `${sq} ${v3(S, act[0])}`,
+        wrongs: [`${S[1] ? 'does' : 'do'} ${sq} ${act[0]}`, `${S[1] ? 'does' : 'do'} ${sq} ${v3(S, act[0])}`, `${sq} ${V[act[0]][4]}`],
+        ex: '宾语从句用陈述语序：疑问词 + 主语 + 谓语，不用 do / does。',
+      };
+    }],
+    [[SUBJECTS.length, ACTS_NO_GO.length], ([s, a]) => {
+      const S = SUBJECTS[s];
+      const act = ACTS_NO_GO[a];
+      const sq = subjQ(S);
+      return {
+        stem: `I wonder if ___ ${act[1]} yesterday.`,
+        ans: `${sq} ${V[act[0]][2]}`,
+        wrongs: [`did ${sq} ${act[0]}`, `did ${sq} ${V[act[0]][2]}`, `${sq} ${act[0] === V[act[0]][1] ? V[act[0]][4] : V[act[0]][1]}`],
+        ex: 'if 引导的宾语从句用陈述语序；yesterday 用一般过去时。',
+      };
+    }],
+  ]),
+  /* 条件状语从句：主将从现 */
+  'e8.b4': enComb([
+    [[SUBJECTS.length, ACTS.length, 3], ([s, a, k]) => {
+      const S = SUBJECTS[s];
+      const act = ACTS[a];
+      const when = ['tomorrow', 'this weekend', 'next Sunday'][k];
+      return { stem: `If ${S[0] === 'I' ? 'I' : S[0].replace(/^(He|She|We|They|My)\b/, (m) => m.toLowerCase())} ___ ${act[1]} ${when}, ${pronOf(S)} will be very happy.`, ans: v3(S, act[0]), wrongs: [`will ${act[0]}`, V[act[0]][2], V[act[0]][4]], ex: 'if 引导条件状语从句，主句用将来时，从句用一般现在时（主将从现）。' };
+    }],
+  ]),
+  /* 反意疑问句 */
+  'e8.b5': enComb([
+    [[SUBJECTS.length], ([s]) => {
+      const S = SUBJECTS[s];
+      const p = pronOf(S);
+      return { stem: `${S[0]} ${S[2]} ${plural(S) ? 'good students' : 'a good student'}, ___?`, ans: `${notWord(S[2])} ${p}`, wrongs: [`${S[2]} ${p}`, `${S[1] ? "doesn't" : "don't"} ${p}`, `${S[3]}n't ${p}`], ex: S[0] === 'I' ? '前肯后否；I am … 的反意疑问句用 aren’t I。' : '前肯后否：前面用 be 动词，后面用它的否定 + 代词。' };
+    }],
+    [[SUBJECTS.length, ACTS.length], ([s, a]) => {
+      const S = SUBJECTS[s];
+      const p = pronOf(S);
+      return { stem: `${S[0]} ${v3(S, ACTS[a][0])} ${ACTS[a][1]} every day, ___?`, ans: `${S[1] ? "doesn't" : "don't"} ${p}`, wrongs: [`${notWord(S[2])} ${p}`, `${S[1] ? 'does' : 'do'} ${p}`, `didn't ${p}`], ex: '前肯后否；一般现在时的实义动词，用 don’t / doesn’t。' };
+    }],
+    [[SUBJECTS.length, ACTS.length], ([s, a]) => {
+      const S = SUBJECTS[s];
+      const p = pronOf(S);
+      return { stem: `${S[0]} ${V[ACTS[a][0]][2]} ${ACTS[a][1]} yesterday, ___?`, ans: `didn't ${p}`, wrongs: [`${S[1] ? "doesn't" : "don't"} ${p}`, `did ${p}`, `${S[3]}n't ${p}`], ex: '前肯后否；一般过去时用 didn’t。' };
+    }],
+    [[SUBJECTS.length, ACTS.length], ([s, a]) => {
+      const S = SUBJECTS[s];
+      const p = pronOf(S);
+      return { stem: `${S[0]} can't ${ACTS[a][0]} ${ACTS[a][1]}, ___?`, ans: `can ${p}`, wrongs: [`can't ${p}`, `${S[1] ? 'does' : 'do'} ${p}`, `${S[1] ? "doesn't" : "don't"} ${p}`], ex: '前否后肯：can’t … , can + 代词？' };
+    }],
+  ]),
+  /* 并列连词：就近原则 */
+  'e8.b6': enComb([
+    [[NAMES.length, 7, 2], ([n, b, k]) => {
+      const [B, be] = [['I', 'am'], ['he', 'is'], ['she', 'is'], ['we', 'are'], ['they', 'are'], ['my parents', 'are'], ['my sister', 'is']][b];
+      const head = k ? `Neither ${NAMES[n]} nor ${B}` : `Either ${NAMES[n]} or ${B}`;
+      return { stem: `${head} ___ at home now.`, ans: be, wrongs: ['am', 'is', 'are', 'be'].filter((x) => x !== be), ex: 'either … or、neither … nor 连接主语时，谓语和离它最近的主语一致（就近原则）。' };
+    }],
+    [[NAMES.length, NAMES.length], ([x, y]) => (x === y ? null : { stem: `Both ${NAMES[x]} and ${NAMES[y]} ___ good at English.`, ans: 'are', wrongs: ['is', 'am', 'be'], ex: 'both … and 连接两个主语，谓语用复数。' })],
+  ]),
+  /* 定语从句 */
+  'e9.a2': enComb([
+    [[PEOPLE.length, ACTS.length], ([i, a]) => ({ stem: `The ${PEOPLE[i]} ___ ${V[ACTS[a][0]][1]} ${ACTS[a][1]} every day is my friend.`, ans: 'who', wrongs: ['which', 'where', 'when'], ex: `先行词 ${PEOPLE[i]} 指人，用 who（也可以用 that）。` })],
+    [[THINGS.length, 2], ([i, k]) => ({ stem: `The ${THINGS[i][0]} ___ ${THINGS[i][1]} is ${k ? 'very nice' : 'mine'}.`, ans: 'which', wrongs: ['who', 'where', 'what'], ex: `先行词 ${THINGS[i][0]} 指物，用 which（也可以用 that）。` })],
+  ]),
+  /* 推测 */
+  'e9.a3': enComb([
+    [[GUESS.length, NAMEP.length], ([g, n]) => {
+      const [ev, concl, m] = GUESS[g];
+      const [N, P] = NAMEP[n];
+      return { stem: `${ev.replace('${N}', N)} ${cap(P[0])} ___ ${concl}.`, ans: m, wrongs: m === 'must' ? ["can't", "mustn't", "needn't"] : ['must', "mustn't", "needn't"], ex: m === 'must' ? '有把握的肯定推测用 must（一定）。' : '有把握的否定推测用 can’t（不可能）。' };
+    }],
+  ]),
+  /* 过去完成时 */
+  'e9.a4': enComb([
+    [[SUBJECTS.length, EVENTS.length], ([s, e]) => {
+      const [place, ev, v] = EVENTS[e];
+      return { stem: `When ${SUBJECTS[s][0] === 'I' ? 'I' : SUBJECTS[s][0].replace(/^(He|She|We|They|My)\b/, (m) => m.toLowerCase())} got to ${place}, ${ev} ___.`, ans: `had already ${V[v][3]}`, wrongs: [`has already ${V[v][3]}`, `already ${V[v][1]}`, `is already ${V[v][4]}`], ex: '“到达”是过去的事，在它之前已经发生的事用过去完成时 had + 过去分词。' };
+    }],
+    [[SUBJECTS.length, 2, 4], ([s, k, n]) => {
+      const num = ['500', '800', '1,000', '1,200'][n];
+      const [what, pp, base] = k ? [`${num} English words`, 'learned', 'learn'] : [`${['ten', 'twenty', 'thirty', 'fifty'][n]} books`, 'read', 'read'];
+      return { stem: `By the end of last term, ${SUBJECTS[s][0] === 'I' ? 'I' : SUBJECTS[s][0].replace(/^(He|She|We|They|My)\b/, (m) => m.toLowerCase())} ___ ${what}.`, ans: `had ${pp}`, wrongs: [`has ${pp}`, `will ${base}`, `${SUBJECTS[s][1] ? `${base}s` : base}`], ex: 'by the end of last term（到上学期末为止）表示到过去某时已经完成，用过去完成时。' };
+    }],
+  ]),
+  /* used to */
+  'e9.a5': enComb([
+    [[SUBJECTS.length, ACTS.length], ([s, a]) => {
+      const S = SUBJECTS[s];
+      return { stem: `${S[0]} used to ___ ${ACTS[a][1]} when ${pronOf(S)} ${perOf(S)[5] || pronOf(S) === 'I' ? 'was' : 'were'} young.`, ans: ACTS[a][0], wrongs: [V[ACTS[a][0]][4], V[ACTS[a][0]][2] === ACTS[a][0] ? V[ACTS[a][0]][1] : V[ACTS[a][0]][2], `to ${ACTS[a][0]}`], ex: 'used to do：过去常常做，后面用动词原形。' };
+    }],
+    [[SUBJECTS.length, ACTS_NO_GO.length], ([s, a]) => {
+      const S = SUBJECTS[s];
+      const act = ACTS_NO_GO[a];
+      return { stem: `${S[0]} ${S[2]} used to ___ ${act[1]} now.`, ans: V[act[0]][4], wrongs: [act[0], V[act[0]][1], V[act[0]][2] === act[0] ? `to ${act[0]}` : V[act[0]][2]], ex: 'be used to doing：习惯于做某事，to 是介词，后面用动名词。' };
+    }],
+  ]),
+  /* 时态综合 */
+  'e9.a6': enComb([
+    [[SUBJECTS.length, ACTS.length, 4], ([s, a, k]) => {
+      const S = SUBJECTS[s];
+      const [v, o] = ACTS[a];
+      const forms = { past: V[v][2], pres: v3(S, v), prog: `${S[2]} ${V[v][4]}`, fut: `will ${v}` };
+      const [tail, key, ex] = (
+        [
+          ['yesterday', 'past', 'yesterday 表示过去，用一般过去时。'],
+          ['every day', 'pres', 'every day 表示经常，用一般现在时。'],
+          ['now', 'prog', 'now 表示此刻正在做，用现在进行时。'],
+          ['tomorrow', 'fut', 'tomorrow 表示将来，用一般将来时。'],
+        ] as const
+      )[k];
+      const ans = forms[key];
+      const wrongs = Object.values(forms).filter((x) => x !== ans);
+      return wrongs.length < 2 ? null : { stem: `${S[0]} ___ ${o} ${tail}.`, ans, wrongs, ex };
+    }],
+  ]),
+  /* 含情态动词、将来时的被动语态 */
+  'e9.b1': enComb([
+    [[PASS.length, MODAL_TAIL.length], ([i, m]) => {
+      const [sub, pp, ing] = PASS[i];
+      const [modal, tail] = MODAL_TAIL[m];
+      return { stem: `${sub} ${modal} ___ ${tail}.`, ans: `be ${pp}`, wrongs: [pp, `be ${ing}`, `been ${pp}`], ex: `含情态动词或 will 的被动语态：${modal} + be + 过去分词（${pp}）。` };
+    }],
+  ]),
+  /* 间接引语 */
+  'e9.b2': enComb([
+    [[NAMEP.length, ACTS_NO_MY.length, 3], ([n, a, k]) => {
+      const [N, P] = NAMEP[n];
+      const [v, o] = ACTS_NO_MY[a];
+      if (k === 0)
+        return { stem: `${N} said, "I can ${v} ${o}." → ${N} said that ${P[0]} ___ ${o}.`, ans: `could ${v}`, wrongs: [`can ${V[v][1]}`, `could ${V[v][1]}`, `will ${v}`], ex: '主句是 said（过去时），间接引语里的 can 后退成 could，I 改成 he / she。' };
+      if (k === 1)
+        return { stem: `${N} said, "I am ${V[v][4]} ${o}." → ${N} said that ${P[0]} ___ ${o}.`, ans: `was ${V[v][4]}`, wrongs: [`is ${V[v][4]}`, `am ${V[v][4]}`, V[v][1]], ex: '现在进行时变间接引语后退成过去进行时：am → was。' };
+      return { stem: `${N} said, "I will ${v} ${o}." → ${N} said that ${P[0]} ___ ${o}.`, ans: `would ${v}`, wrongs: [`will ${v}`, `would ${V[v][1]}`, V[v][1]], ex: 'will 变间接引语后退成 would。' };
+    }],
+  ]),
+  /* 构词 */
+  'e9.b3': enComb([
+    [[DOERS.length, NAMEP.length], ([i, n]) => {
+      const [v, noun, w] = DOERS[i];
+      const [N, P] = NAMEP[n];
+      return { stem: `${N} can ${DOER_SAY[v]} very well. ${cap(P[0])} is a good ___.`, ans: noun, wrongs: w.split('/'), ex: `动词 ${v} 加 -er 变成“做这件事的人”：${noun}。` };
+    }],
+    [[ADVS.length, SUBJECTS.length], ([i, s]) => {
+      const [adj, adv, w] = ADVS[i];
+      const S = SUBJECTS[s];
+      return { stem: `${S[0]} ${S[2]} ${adj}. ${cap(pronOf(S))} ${S[1] ? 'does' : 'do'} the homework ___.`, ans: adv, wrongs: w.split('/'), ex: `修饰动词用副词：${adj} → ${adv}。` };
+    }],
+    [[UNS.length], ([i]) => {
+      const [w0, ans, w] = UNS[i];
+      return { stem: `What is the opposite of "${w0}"?`, ans, wrongs: w.split('/'), ex: `${w0} 的反义词：${ans}。前缀 un- / dis- 表示“不”。` };
+    }],
+    [[FULS.length], ([i]) => {
+      const [stem, ans, w, ex] = FULS[i];
+      return { stem, ans, wrongs: w.split('/'), ex };
+    }],
+  ]),
+  /* so / such … that */
+  'e9.b4': enComb([
+    [[SOS.length], ([i]) => {
+      const [adj, art, n] = SOS[i];
+      return { stem: `It was ___ ${art} ${adj} ${n} that we all liked it.`, ans: 'such', wrongs: ['so', 'very', 'too'], ex: 'such + a / an + 形容词 + 名词 + that …' };
+    }],
+    [[SOS.length], ([i]) => {
+      const [adj, art, n] = SOS[i];
+      return { stem: `The ${n} was ___ ${adj} that we all liked it.`, ans: 'so', wrongs: ['such', `such ${art}`, 'very'], ex: 'so + 形容词 + that …' };
+    }],
+    [[SUBJECTS.length, PURPOSES.length], ([s, k]) => {
+      const S = SUBJECTS[s];
+      return { stem: `${S[0]} got up early ___ ${pronOf(S)} could ${PURPOSES[k]}.`, ans: 'so that', wrongs: ['such that', 'so as', 'in order'], ex: 'so that 引导目的状语从句，“以便、为了”。' };
+    }],
+  ]),
+};
+
+/** 每个英语知识点：原来的题 + 组合题 */
+const ENGLISH_ALL: Record<string, UpperGen> = Object.fromEntries(
+  Object.entries(ENGLISH).map(([k, g]) => [k, COMB[k] ? withComb(g, COMB[k]) : g]),
+);
+
+export const JUNIOR_LANG_GENERATORS: Record<string, UpperGen> = { ...CHINESE, ...ENGLISH_ALL };
+
