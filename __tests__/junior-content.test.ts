@@ -316,3 +316,134 @@ it('英语错题只显示句子，不带统一的英文指令', () => {
   const { mistakeLabel } = require('@/content/resolve');
   expect(mistakeLabel('kp:e8.a1', 'kp:e8.a1:p:0')).toBe('This box is ___ than that one.');
 });
+
+describe('V5.2.3 选初中后各模块按年级出内容', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createEmptyProgress } = require('@/progress/model');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { nextUp } = require('@/progress/nextUp');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { recommendKps } = require('@/knowledge/recommend');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { computeMastery } = require('@/knowledge/mastery');
+  const NOW = new Date(2026, 10, 14, 10).getTime();
+  /** 一年级“数到5”做错过（需要复习）的七年级孩子 */
+  const withPrimaryMistakes = () => {
+    const s = createEmptyProgress();
+    s.settings.grade = 7;
+    for (let i = 0; i < 6; i++)
+      s.results.push({ lessonId: 'kp:m1.count5', exerciseId: `kp:m1.count5:x${i}`, skill: 'm1.count5', subject: 'math', correct: i % 2 === 0, firstTry: i % 2 === 0, at: NOW - 86400000 * 3 });
+    return s;
+  };
+  it('“接着学”和推荐只给初中知识点，不再推荐一年级的复习', () => {
+    const s = withPrimaryMistakes();
+    const n = nextUp(s, 'math', NOW);
+    expect(n.route.id).toMatch(/^kp:m7\./);
+    const recs = recommendKps(s, computeMastery(s, NOW), NOW, 20, { subject: 'math' });
+    expect(recs.length).toBeGreaterThan(0);
+    for (const r of recs) expect(KP_BY_ID[r.kpId].grade).toBeGreaterThanOrEqual(7);
+    // 小学不受影响：二年级孩子仍会推荐一年级要复习的
+    s.settings.grade = 2;
+    const recs2 = recommendKps(s, computeMastery(s, NOW), NOW, 20, { subject: 'math' });
+    expect(recs2.some((r: { kpId: string }) => KP_BY_ID[r.kpId].grade === 1)).toBe(true);
+  });
+
+  it('游戏：初中档位、凑数小厨房平方凑平方、拼音钓鱼易读错的字、拼词泡泡只用初中单词', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { LEVEL_RANGE } = require('@/games/common');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { makeOrder, solvable, fmt, kitchenExercise, orderExerciseId } = require('@/games/kitchen');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { fishRound, fishExercise } = require('@/games/fish');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { bubbleWords } = require('@/games/bubble');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { UNIT_BY_ID } = require('@/words/catalog');
+    expect(LEVEL_RANGE.kitchen(8)).toEqual([9, 10]);
+    expect(LEVEL_RANGE.fish(7)).toEqual([5, 5]);
+    expect(LEVEL_RANGE.kitchen(6)).toEqual([5, 8]); // 小学不变
+    const rand = seeded(8);
+    for (const lv of [9, 10])
+      for (let i = 0; i < 100; i++) {
+        const o = makeOrder(lv, rand, i);
+        expect(o.scale).toBe(2);
+        expect(solvable(o)).toBe(true);
+        expect(o.solution.reduce((a: number, b: number) => a + b, 0)).toBe(o.target);
+        for (const it of o.items) expect(Number.isInteger(Math.sqrt(it.units))).toBe(true);
+        // 只有一种凑法（干扰食材凑不出目标数）
+        const vals = o.items.map((x: { units: number }) => x.units);
+        let ways = 0;
+        for (let m = 1; m < 1 << vals.length; m++) if (vals.reduce((s: number, v: number, k: number) => s + (m & (1 << k) ? v : 0), 0) === o.target) ways++;
+        expect(ways).toBe(1);
+        const e = kitchenExercise(orderExerciseId(o));
+        expect(e.options.map((x: { id: string }) => x.id)).toContain(e.answerId);
+        expect(e.prompt.speak.text).not.toMatch(/²/);
+      }
+    expect(fmt(25, 2)).toBe('5²');
+    const qs = fishRound(5, seeded(2), 6);
+    expect(qs).toHaveLength(6);
+    for (const q of qs) {
+      expect(q.sentence).toBeTruthy();
+      expect(q.options).toContain(q.answer);
+      expect(fishExercise(q.id)?.answerId).toBe(q.answer);
+    }
+    const words = bubbleWords(8, 3);
+    expect(words.length).toBeGreaterThan(5);
+    for (const w of words) expect(UNIT_BY_ID.get(w.unitId).grade).toBeGreaterThanOrEqual(7);
+  });
+
+  it('易读错的字：读音与词库在整句中的读音一致（词库有误的 2 个按《现代汉语词典》登记）', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { pinyin } = require('pinyin-pro');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { MISREAD } = require('@/games/data/misread');
+    // 词库判断有误：滂沱读 pāng tuó；屏住呼吸的“屏”读 bǐng（《现代汉语词典》）
+    const ACCEPTED: Record<string, string> = { '滂:pāng': 'páng', '屏:bǐng': 'píng' };
+    const bad: string[] = [];
+    for (const m of MISREAD) {
+      const chars = [...m.sentence];
+      expect(chars.filter((c) => c === m.char)).toHaveLength(1);
+      expect(m.wrong).not.toBe(m.py);
+      const at = chars.slice(0, chars.indexOf(m.char)).filter((c) => /\p{Script=Han}/u.test(c)).length;
+      const got = pinyin(m.sentence, { type: 'array', nonZh: 'removed' })[at];
+      if (got !== m.py && ACCEPTED[`${m.char}:${m.py}`] !== got) bad.push(`${m.char} ${m.py}/${got}`);
+    }
+    expect(bad).toEqual([]);
+    expect(MISREAD.length).toBeGreaterThanOrEqual(30);
+  });
+
+  it('教材资源库：记住的是小学课本、孩子是七年级时，打开初中课本', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { defaultEdition } = require('@/textbooks/pick');
+    expect(defaultEdition('chinese', 'chinese.tongbian', 7)).toBe('chinese.tongbian-jh');
+    expect(defaultEdition('chinese', 'chinese.tongbian', 3)).toBe('chinese.tongbian');
+    expect(defaultEdition('math', 'math.pep', 9)).toBe('math.pep-jh');
+  });
+
+  it('今日一练：只出本年级的题，每天不一样，同一天是同一套，记录归到知识点', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { dailyMix, dailyMixId, parseDailyMixId } = require('@/knowledge/dailyMix');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { kpForRecord } = require('@/knowledge/mapping');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { resolveExercise } = require('@/content/resolve');
+    const s = createEmptyProgress();
+    s.settings.grade = 8;
+    const days = ['2026-11-14', '2026-11-15', '2026-11-16', '2026-11-17'];
+    const sets = days.map((d) => dailyMix(s, 'math', 8, d, NOW).map((e: { id: string }) => e.id));
+    for (const ids of sets) {
+      expect(ids).toHaveLength(10);
+      for (const id of ids) expect(KP_BY_ID[id.split(':')[1]].grade).toBe(8);
+    }
+    for (let i = 1; i < sets.length; i++) expect(sets[i]).not.toEqual(sets[i - 1]);
+    expect(dailyMix(s, 'math', 8, days[0], NOW).map((e: { id: string }) => e.id)).toEqual(sets[0]);
+    for (const subj of ['chinese', 'english']) expect(dailyMix(s, subj, 8, days[0], NOW).length).toBeGreaterThanOrEqual(8);
+    const id = dailyMixId('math', 8, days[0]);
+    expect(parseDailyMixId(id)).toEqual({ subject: 'math', grade: 8, day: days[0] });
+    const ex = sets[0][0];
+    expect(kpForRecord(id, ex, ex.split(':')[1])).toBe(ex.split(':')[1]);
+    expect(resolveExercise(id, ex.replace(/:in$/, ''))?.exercise.id).toBeTruthy();
+    // 小学也能用（按所选年级）
+    expect(dailyMix(s, 'math', 3, days[0], NOW).every((e: { id: string }) => KP_BY_ID[e.id.split(':')[1]]?.grade === 3)).toBe(true);
+  });
+});

@@ -78,7 +78,8 @@ export function kpForBankLabel(label: string, question: string): string | null {
  * 一条练习记录属于哪个知识点；不属于知识图谱的返回 null。
  */
 export function kpForRecord(lessonId: string, exerciseId: string, skill: string): string | null {
-  if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:')) {
+  // 今日一练（mix:，V5.2.3）的题目 id 也是 kp:知识点:签名
+  if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:') || lessonId.startsWith('mix:')) {
     const m = exerciseId.match(/^kp:([a-z]\d\.[\w]+):/);
     return m ? m[1] : null;
   }
@@ -86,7 +87,8 @@ export function kpForRecord(lessonId: string, exerciseId: string, skill: string)
   // 游戏乐园（V2.19）：一年级凑数归到“10 以内分与合 / 20 以内进位加”，拼音钓鱼归到汉语拼音
   if (lessonId === 'game:kitchen') {
     const lv = Number(/^kitchen:(\d+):/.exec(exerciseId)?.[1]);
-    return lv <= 2 ? 'm1.compose10' : lv === 3 ? 'm1.carry20' : null;
+    // 初中平方凑平方（勾股数，V5.2.3）归到“勾股定理”
+    return lv <= 2 ? 'm1.compose10' : lv === 3 ? 'm1.carry20' : lv >= 9 ? 'm8.b2' : null;
   }
   if (lessonId === 'game:fish') return /^fish:.:[^:]+$/u.test(exerciseId) ? 'c1.a4' : null;
   if (lessonId.startsWith('bank:math-g1')) {

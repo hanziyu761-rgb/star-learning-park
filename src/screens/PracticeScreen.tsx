@@ -13,6 +13,8 @@ import { ORAL_TOPICS, oralExercise, oralRound } from '@/content/oral';
 import { sourceName } from '@/content/resolve';
 import { ALL_WRITE_SETS, isWriteLessonId, traceExercise } from '@/content/writing';
 import { kpRound } from '@/knowledge/generators';
+import { dailyMix, parseDailyMixId } from '@/knowledge/dailyMix';
+import type { ProgressState } from '@/progress/model';
 import { zh } from '@/content/zh';
 import { FeedbackBar } from '@/components/FeedbackBar';
 import { Mascot } from '@/components/Mascot';
@@ -49,7 +51,13 @@ export default function PracticeScreen({ id }: { id: string | undefined }) {
   return <PracticeSession id={String(id ?? '')} />;
 }
 
-function buildRound(id: string, done: Set<string>, hidden: Set<string>): Round | null {
+function buildRound(id: string, done: Set<string>, hidden: Set<string>, state: ProgressState, now: number): Round | null {
+  // 今日一练（V5.2.3）：按年级每天组一套混合练习
+  const mix = parseDailyMixId(id);
+  if (mix) {
+    const exercises = dailyMix(state, mix.subject, mix.grade, mix.day, now);
+    return exercises.length ? { subject: mix.subject, title: '今日一练', isBank: false, exercises } : null;
+  }
   if (id.startsWith('bank:')) {
     const f = findUnit(id.slice(5));
     if (!f) return null;
@@ -97,7 +105,7 @@ function PracticeSession({ id }: { id: string }) {
   const [startedAt] = useState(() => Date.now());
   const [round] = useState<Round | null>(() => {
     const done = new Set(state.results.filter((r) => r.lessonId === id).map((r) => r.exerciseId));
-    return buildRound(id, done, new Set(state.hidden));
+    return buildRound(id, done, new Set(state.hidden), state, Date.now());
   });
   const [index, setIndex] = useState(0);
   const [skipped, setSkipped] = useState<number[]>([]);

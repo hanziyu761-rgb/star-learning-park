@@ -57,7 +57,9 @@ function SimpleView() {
   const { state, dispatch } = useProgress();
   const saved = state.settings.textbookEdition;
   const [subject, setSubject] = useState<Subject>('chinese');
-  const editionId = defaultEdition(subject, saved[subject], state.settings.grade);
+  // 打开时按孩子的年级选版本（V5.2.3）；家长在这一页里改了版本，就按家长选的
+  const [picked, setPicked] = useState<Partial<Record<Subject, string>>>({});
+  const editionId = picked[subject] ?? defaultEdition(subject, saved[subject], state.settings.grade);
   const grades = gradesOf(editionId);
   const [grade, setGrade] = useState(state.settings.grade ?? 1);
   const g = grades.includes(grade) ? grade : grades[0];
@@ -84,7 +86,10 @@ function SimpleView() {
             label="教材版本"
             value={editionId}
             options={editionOptions(subject)}
-            onChange={(v) => dispatch({ type: 'settings/set', settings: { textbookEdition: { ...saved, [subject]: v } } })}
+            onChange={(v) => {
+              setPicked((x) => ({ ...x, [subject]: v }));
+              dispatch({ type: 'settings/set', settings: { textbookEdition: { ...saved, [subject]: v } } });
+            }}
             testID="tb-dd-edition"
           />
         </View>

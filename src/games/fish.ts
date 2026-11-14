@@ -4,12 +4,14 @@
  *   1 档：声调不同（mā / má / mǎ / mà）  2 档：再加前后鼻音（in / ing、en / eng、an / ang）
  *   3 档：再加平翘舌、n / l、f / h、b / p、d / t、g / k
  * 三年级起（4 档）：多音字——给一句话，钓出这个字在句子里的读音。
+ * 初中（5 档，V5.2.3）：易读错的字——给一句话，钓出这个字的正确读音（干扰鱼是最常见的误读）。
  */
 import { zh } from '@/content/zh';
 import type { ChoiceExercise } from '@/lesson/types';
 import { safeId } from './common';
 import { CHAR_POOL } from './data/charPool.gen';
 import { POLY_LINES } from './data/poly';
+import { MISREAD } from './data/misread';
 import { SYLLABLES } from './data/syllables.gen';
 
 const MARKS: Record<string, string[]> = {
@@ -118,6 +120,22 @@ function shuffle<T>(a: T[], rand: () => number): T[] {
 
 /** 一局的题：一、二年级从字表抽，三年级起从多音字句子抽；每题 3～4 条鱼 */
 export function fishRound(level: number, rand: () => number, n: number): FishQuestion[] {
+  if (level >= 5) {
+    return shuffle(MISREAD, rand)
+      .slice(0, n)
+      .map((m) => {
+        const extra = confusablePinyin(m.py, 1).filter((x) => x !== m.py && x !== m.wrong);
+        return {
+          id: safeId(`fish:${m.char}:${m.py}:${m.sentence}`),
+          char: m.char,
+          sentence: m.sentence,
+          at: [...m.sentence].indexOf(m.char),
+          answer: m.py,
+          options: shuffle([...new Set([m.py, m.wrong, ...extra.slice(0, 1)])], rand),
+          level,
+        };
+      });
+  }
   if (level >= 4) {
     return shuffle(POLY, rand)
       .slice(0, n)
@@ -153,6 +171,20 @@ export function fishExercise(exerciseId: string): ChoiceExercise | null {
   if (!m) return null;
   const [, char, py, sentence] = m;
   if (sentence) {
+    // 初中易读错的字（V5.2.3）
+    const mr = MISREAD.find((x) => x.char === char && x.py === py && x.sentence === sentence);
+    if (mr) {
+      return {
+        kind: 'choice',
+        id: exerciseId,
+        skill: 'game.fish',
+        prompt: { text: `“${sentence}”里的“${char}”怎么读？`, speak: { text: `${sentence}这句话里，${char}字怎么读？`, lang: 'zh-CN' } },
+        stem: { text: sentence },
+        options: [py, mr.wrong].sort().map((r) => ({ id: r, text: r })),
+        answerId: py,
+        wrongHint: { text: '这个字很容易读错，查查字典记一记', speak: { text: '这个字很容易读错，查查字典记一记', lang: 'zh-CN' } },
+      };
+    }
     const p = POLY.find((x) => x.char === char && x.py === py && x.sentence === sentence);
     if (!p) return null;
     const readings = [...new Set(POLY.filter((x) => x.char === char).map((x) => x.py))];

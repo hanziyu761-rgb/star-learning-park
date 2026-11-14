@@ -11,7 +11,7 @@ import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { NEXT_LABEL, nextUp } from '@/progress/nextUp';
 import { useProgress } from '@/progress/ProgressContext';
-import { BankSection, GraphicsSection, JuniorKpSection, OralSection, WriteSection } from './PracticeSections';
+import { BankSection, DailyMixCard, GraphicsSection, JuniorKpSection, OralSection, WriteSection } from './PracticeSections';
 import { contentGrade } from '@/progress/grade';
 import { EnglishTracks, ReadingHouse } from './EnglishTracks';
 import { GAME_BY_ID } from '@/games/common';
@@ -75,6 +75,8 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
           />
         </View>
       ) : null}
+      {/* 今日一练：按年级每天自动组题（V5.2.3） */}
+      <DailyMixCard subject={subject} state={state} />
       <View style={styles.tiles}>
         <Pressable
           onPress={() => nav.push({ name: 'game', id: GAME_OF[subject] })}

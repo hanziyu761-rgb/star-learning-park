@@ -5,6 +5,7 @@ V5.2 端到端验收（网页版）：七～九年级练习
 3. 八年级语文：“单元练习”、阅读小屋 4 篇八年级短文（读完一篇做题）；《山水古文与唐诗》练一整轮
 4. 八年级英语：“语法闯关”，《Comparatives》讲解读英语、练一整轮（指令是英文）
 5. 九年级：知识地图显示九年级；单词卡有“九年级”；每日挑战能做；试卷九年级上册数学按章选《一元二次方程》生成
+6. V5.2.3：学科页“接着学”不推荐一年级的复习；“今日一练”出本年级的题；游戏乐园三个游戏用初中内容；教材资源库打开初中课本
 每次都检查页面不超出屏幕宽度、没有页面报错
 """
 import os, re
@@ -208,6 +209,34 @@ with sync_playwright() as p:
         no_overflow(page)
         page.screenshot(path=f"{OUT}/v52-exam9-{w}.png", full_page=True)
         ok(f"{w}×{h}：试卷九年级上册数学，按章选《一元二次方程》，生成 20 题")
+
+        # 6. V5.2.3：按年级出内容
+        page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
+        tid(page, "subject-math").click(); page.wait_for_selector('[data-testid="daily-mix-math"]')
+        expect(tid(page, "next-math")).not_to_contain_text("数到")
+        expect(tid(page, "daily-mix-math")).to_contain_text("九年级")
+        tid(page, "daily-mix-math").click()
+        page.wait_for_selector('[data-testid^="practice-exercise-"]')
+        ex_id = page.locator('[data-testid^="practice-exercise-"]').last.get_attribute("data-testid")[len("practice-exercise-"):]
+        assert ex_id.startswith("kp:m9."), ex_id
+        expect(tid(page, "practice-screen")).to_contain_text("今日一练")
+        ok(f"{w}×{h}：九年级数学“接着学”是九年级内容；“今日一练”出九年级的题（{ex_id}）")
+        page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
+        tid(page, "games-entry").click(); page.wait_for_selector('[data-testid="games-screen"]')
+        expect(tid(page, "games-meta-kitchen")).to_contain_text("第 9 档")
+        expect(tid(page, "games-meta-fish")).to_contain_text("第 5 档")
+        tid(page, "games-start-kitchen").click(); page.wait_for_selector('[data-testid="kitchen-target"]')
+        assert "²" in tid(page, "kitchen-target").inner_text()
+        page.screenshot(path=f"{OUT}/v523-kitchen-{w}.png")
+        page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
+        tid(page, "games-entry").click(); page.wait_for_selector('[data-testid="games-screen"]')
+        tid(page, "games-start-fish").click(); page.wait_for_selector('[data-testid="fish-sentence"]')
+        page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
+        gate(page)
+        tid(page, "parent-textbooks").scroll_into_view_if_needed(); tid(page, "parent-textbooks").click()
+        page.wait_for_selector('[data-testid="textbooks-screen"]')
+        expect(tid(page, "tb-book-title")).to_contain_text("（初中） · 九年级")
+        ok(f"{w}×{h}：游戏乐园初中档（小厨房平方凑平方、钓鱼易读错的字）；教材资源库直接打开初中九年级课本")
         ctx.close()
     assert not errors, errors
     b.close()

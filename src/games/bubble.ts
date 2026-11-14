@@ -13,7 +13,10 @@ const EXTRA: Record<number, number> = { 1: 2, 2: 3, 3: 4 };
 
 /** 这个年级能用的单词（同一个词只取一次） */
 export function bubbleWords(grade: number, level: number): WordCard[] {
-  const units = WORD_UNITS.filter((u) => (grade <= 2 ? u.book === '启蒙' : u.book !== '启蒙' && u.grade <= grade));
+  // 初中（V5.2.3）只用初中话题单元的词（本年级及以下的初中单元）；小学不变
+  const units = WORD_UNITS.filter((u) =>
+    grade <= 2 ? u.book === '启蒙' : grade >= 7 ? u.grade >= 7 && u.grade <= grade : u.book !== '启蒙' && u.grade <= grade,
+  );
   const [lo, hi] = LEN[level] ?? LEN[1];
   const seen = new Set<string>();
   const out: WordCard[] = [];

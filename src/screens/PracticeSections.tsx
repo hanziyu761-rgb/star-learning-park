@@ -9,6 +9,8 @@ import { oralLessonId, topicsForGrade } from '@/content/oral';
 import { ALL_WRITE_SETS, writeLessonId, writeSetGrade } from '@/content/writing';
 import { kpLabel, getKp, kpsFor } from '@/knowledge/graph';
 import { computeMastery, type MasteryState } from '@/knowledge/mastery';
+import { DAILY_COUNT, dailyMixId, dailyMixKps } from '@/knowledge/dailyMix';
+import { dayKey } from '@/progress/srs';
 import { CONTENT_REVIEW, GRAPHICS_GENERATORS, GRAPHICS_KPS } from '@/knowledge/graphics';
 import { zh } from '@/content/zh';
 import { DisplayTextView } from '@/components/PinyinText';
@@ -351,4 +353,45 @@ const jStyles = themed(() => StyleSheet.create({
   jTitle: { fontSize: 22, fontWeight: '700', color: colors.text },
   jPill: { fontSize: 15, fontWeight: '600', color: colors.text },
   jTerm: { fontSize: 15, fontWeight: '700', marginTop: space.sm, color: colors.text },
+}));
+
+/**
+ * 今日一练（V5.2.3）：按家长选的年级，每天自动组一套这一科的混合练习，每天不同。
+ */
+export function DailyMixCard({ subject, state }: { subject: Subject; state: ProgressState }) {
+  const nav = useNav();
+  const [now] = useState(() => Date.now());
+  const grade = contentGrade(state.settings.grade);
+  const day = dayKey(now);
+  const id = dailyMixId(subject, grade, day);
+  const theme = subjectTheme[subject];
+  if (!dailyMixKps(state, subject, grade, day, now).length) return null;
+  const doneToday = state.results.some((r) => r.lessonId === id);
+  const plain = grade >= 3;
+  return (
+    <Pressable
+      onPress={() => {
+        tapFeedback();
+        nav.push({ name: 'practice', id });
+      }}
+      style={[styles.card, mixStyles.row]}
+      accessibilityRole="button"
+      accessibilityLabel={`今日一练，${GRADE_CN[grade]}年级`}
+      testID={`daily-mix-${subject}`}
+    >
+      <Text style={mixStyles.emoji}>📅</Text>
+      <View style={{ flex: 1, gap: 2 }}>
+        <DisplayTextView text={plain ? '今日一练' : zh('今日一练', 'jīn rì yí liàn')} size={22} />
+        <Text style={styles.meta}>
+          {GRADE_CN[grade]}年级 · {DAILY_COUNT} 题 · 每天自动换题{doneToday ? ' · 今天已练 ✓' : ''}
+        </Text>
+      </View>
+      <Text style={[styles.go, { color: theme.color }]}>▶</Text>
+    </Pressable>
+  );
+}
+
+const mixStyles = themed(() => StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  emoji: { fontSize: 34, color: colors.text },
 }));

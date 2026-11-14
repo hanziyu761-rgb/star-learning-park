@@ -192,6 +192,7 @@ function sourceLabel(source: string, lessonId: string): string {
   if (source === 'review') return '今日复习';
   if (source === 'game' || lessonId.startsWith('game:')) return '游戏乐园';
   if (lessonId.startsWith('kp:')) return '知识点练习';
+  if (lessonId.startsWith('mix:')) return '今日一练';
   if (lessonId.startsWith('oral:')) return '口算闯关';
   if (lessonId.startsWith('bank:')) return '题库闯关';
   return '课程';

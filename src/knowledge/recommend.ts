@@ -46,7 +46,8 @@ export function recommendKps(
     out.push(r);
   };
   const ordered = KNOWLEDGE_POINTS.filter(
-    (k) => k.grade <= grade && (!scope.subject || kpSubject(k) === scope.subject),
+    // 初中（V5.2.3）只推荐七年级起的知识点；小学推荐本年级及以下
+    (k) => k.grade <= grade && (grade < 7 || k.grade >= 7) && (!scope.subject || kpSubject(k) === scope.subject),
   ).sort((a, b) => a.grade - b.grade || TERM_RANK[a.term] - TERM_RANK[b.term] || a.order - b.order);
   const recentDiag = (kpId: string) => state.diagnoses.some((d) => d.target === kpId && now - d.at < 3 * DAY);
 

@@ -26,7 +26,9 @@ export function editionOptions(subject: Subj): { value: string; label: string; h
 
 /** 家长没选过时用这一科第一套已核实的版本；给了年级时优先选有这个年级的版本（初中生默认看初中课本） */
 export function defaultEdition(subject: Subj, saved?: string, grade?: number): string {
-  if (saved && EDITIONS.some((e) => e.id === saved && e.subject === subject)) return saved;
+  // 记住的版本里没有孩子现在的年级（例如以前选的小学课本、现在是七年级）时，改开有这个年级的版本（V5.2.3）
+  const savedOk = saved && EDITIONS.some((e) => e.id === saved && e.subject === subject);
+  if (savedOk && (!grade || bookVolumes(saved).some((v) => v.grade === grade))) return saved;
   const ok = EDITIONS.filter((e) => e.subject === subject && hasVerifiedToc(e.id));
   const fit = grade ? ok.find((e) => bookVolumes(e.id).some((v) => v.grade === grade)) : undefined;
   return (fit ?? ok[0] ?? EDITIONS.find((e) => e.subject === subject)!).id;

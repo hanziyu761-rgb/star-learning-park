@@ -30,7 +30,7 @@ export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProp
   const target = fmt(order.target, order.scale);
 
   useEffect(() => {
-    say(`我要${target}`);
+    say(`我要${target}`.replace(/(\d+)²/g, "$1的平方"));
   }, [target, q]);
 
   const inPot = pot.map((id) => order.items.find((i) => i.id === id)!).filter(Boolean);
@@ -48,7 +48,7 @@ export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProp
       setDone(true);
       const expr = next.map((x) => fmt(x.units, order.scale)).join(' + ');
       onAnswer({ exerciseId: orderExerciseId(order), correct: !overflowed, label: `${expr} = ${target}` });
-      say(`做好啦！${expr.replace(/\+/g, '加')}等于${target}`);
+      say(`做好啦！${expr.replace(/\+/g, '加')}等于${target}`.replace(/(\d+)²/g, '$1的平方'));
     }
   };
   const takeOut = (id: string) => {
@@ -74,7 +74,7 @@ export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProp
       </Text>
       <View style={styles.customerRow}>
         <Text style={[styles.customer, L.tablet && { fontSize: 84 }]}>{order.customer}</Text>
-        <Pressable onPress={() => say(`我要${target}`)} style={styles.orderCard} accessibilityRole="button" testID="kitchen-order">
+        <Pressable onPress={() => say(`我要${target}`.replace(/(\d+)²/g, "$1的平方"))} style={styles.orderCard} accessibilityRole="button" testID="kitchen-order">
           <DisplayTextView text={gt('iWant', grade)} size={18} />
           <Text style={[styles.target, L.tablet && { fontSize: 60 }]} testID="kitchen-target">
             {target}

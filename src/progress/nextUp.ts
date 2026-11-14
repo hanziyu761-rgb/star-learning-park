@@ -7,7 +7,7 @@
  */
 import { lessonsFor } from '@/content';
 import { zh } from '@/content/zh';
-import { getKp } from '@/knowledge/graph';
+import { getKp, kpsFor } from '@/knowledge/graph';
 import { computeMastery } from '@/knowledge/mastery';
 import { recommendKps } from '@/knowledge/recommend';
 import type { DisplayText, Subject } from '@/lesson/types';
@@ -42,7 +42,10 @@ export function nextUp(state: ProgressState, subject: Subject, now: number): Nex
   const fresh = lessons.find((l) => !(state.lessons[l.id]?.completedCount ?? 0));
   if (fresh) return { kind: 'lesson', emoji: fresh.emoji, title: fresh.title, route: { name: 'lesson', id: fresh.id } };
 
-  const recs = recommendKps(state, computeMastery(state, now), now, 12, { subject });
+  // 初中（V5.2.3）只推荐初中的知识点，不再推荐小学知识点的复习（如一年级“数到5”）
+  const recs = recommendKps(state, computeMastery(state, now), now, 12, { subject }).filter(
+    (r) => grade < 7 || (getKp(r.kpId)?.grade ?? 1) >= 7,
+  );
   const rec = recs.find((r) => r.kind === 'review' || r.kind === 'consolidate') ?? recs.find((r) => r.kind === 'new');
   const kp = rec && getKp(rec.kpId);
   if (rec && kp) {
@@ -52,6 +55,11 @@ export function nextUp(state: ProgressState, subject: Subject, now: number): Nex
       title: kp.kidPy ? zh(kp.kidName, kp.kidPy) : kp.kidName,
       route: { name: 'practice', id: `kp:${kp.id}` },
     };
+  }
+  // 初中：本年级没有推荐时，给本年级第一个知识点
+  if (grade >= 7) {
+    const k = kpsFor(subject, grade)[0];
+    if (k) return { kind: 'again', emoji: k.emoji, title: k.kidName, route: { name: 'practice', id: `kp:${k.id}` } };
   }
   const first = lessons[0];
   return first ? { kind: 'again', emoji: first.emoji, title: first.title, route: { name: 'lesson', id: first.id } } : null;

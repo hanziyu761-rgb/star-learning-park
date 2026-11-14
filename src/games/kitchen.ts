@@ -4,6 +4,8 @@
  * 题目和答案都由程序算：小数按“百分之一”为单位用整数计算，不会有 0.1 + 0.2 的误差。
  *
  * 难度档：1 凑 10（两样） 2 凑 10（三样） 3 凑 20 4 凑 100（整十） 5 凑 100 6 小数凑 1 7 小数凑 1（三样 / 两位小数） 8 凑整百
+ * 初中（V5.2.3）：9 平方凑平方（勾股数 3² + 4² = 5²） 10 更大的勾股数（5² + 12² = 13²、8² + 15² = 17² …）。
+ *   这两档 scale = 2，表示“食材和菜牌都写成平方”，units 是平方后的值。
  */
 import { zh } from '@/content/zh';
 import type { ChoiceExercise } from '@/lesson/types';
@@ -34,6 +36,8 @@ const int = (rand: () => number, lo: number, hi: number) => lo + Math.floor(rand
 
 export function fmt(units: number, scale: number): string {
   if (scale === 1) return String(units);
+  if (scale === 2) return `${Math.round(Math.sqrt(units))}²`; // 初中：平方
+
   const s = (units / scale).toFixed(2);
   return s.replace(/0$/, '').replace(/\.0$/, '');
 }
@@ -75,7 +79,66 @@ const SPEC: Record<number, LevelSpec> = {
   8: { target: (r) => int(r, 2, 9) * 100, scale: 1, parts: 2, min: 10, step: 10, distract: (r, t) => int(r, 1, t / 10 - 1) * 10 },
 };
 
+/** 勾股数：9 档用小的，10 档用大的 */
+const TRIPLES_SMALL = [
+  [3, 4, 5],
+  [6, 8, 10],
+  [5, 12, 13],
+  [9, 12, 15],
+];
+const TRIPLES_BIG = [
+  [8, 15, 17],
+  [7, 24, 25],
+  [20, 21, 29],
+  [12, 16, 20],
+  [9, 40, 41],
+  [12, 35, 37],
+];
+
+/** 有几种凑法正好等于目标数 */
+function ways(vals: number[], target: number): number {
+  let n = 0;
+  for (let mask = 1; mask < 1 << vals.length; mask++) {
+    let sum = 0;
+    for (let i = 0; i < vals.length; i++) if (mask & (1 << i)) sum += vals[i];
+    if (sum === target) n++;
+  }
+  return n;
+}
+
+/** 初中：平方凑平方（a² + b² = c²），干扰食材是别的平方数，保证只有一种凑法 */
+function squareOrder(level: number, rand: () => number, seq: number): Order {
+  const list = level >= 10 ? TRIPLES_BIG : TRIPLES_SMALL;
+  for (let tries = 0; ; tries++) {
+    const [a, b, c] = list[int(rand, 0, list.length - 1)];
+    const solution = [a * a, b * b];
+    const values = [...solution];
+    // 干扰：1² 到 (c + 2)² 里的其他平方数（比目标大的也可以，放进锅里就会“太多”）
+    const pool = Array.from({ length: c + 2 }, (_, i) => (i + 1) ** 2).filter((v) => !values.includes(v) && v !== c * c);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    values.push(...pool.slice(0, 2));
+    if (ways(values, c * c) !== 1 && tries < 50) continue;
+    for (let i = values.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [values[i], values[j]] = [values[j], values[i]];
+    }
+    const food = FOODS[int(rand, 0, FOODS.length - 1)];
+    return {
+      level,
+      target: c * c,
+      scale: 2,
+      solution,
+      customer: CUSTOMERS[seq % CUSTOMERS.length],
+      items: values.map((units, i) => ({ id: `i${seq}-${i}`, units, emoji: FOODS[(FOODS.indexOf(food) + i) % FOODS.length] })),
+    };
+  }
+}
+
 export function makeOrder(level: number, rand: () => number, seq = 0): Order {
+  if (level >= 9) return squareOrder(Math.min(10, level), rand, seq);
   const spec = SPEC[Math.min(8, Math.max(1, level))];
   const target = spec.target(rand);
   let solution = split(rand, target, spec.parts, spec.min, spec.step);
@@ -145,7 +208,11 @@ export function kitchenExercise(exerciseId: string): ChoiceExercise | null {
   const answer = sol[sol.length - 1];
   const step = scale === 100 ? 10 : level >= 4 ? 10 : 1;
   const opts = new Set([answer]);
-  for (const d of [step, -step, 2 * step, -2 * step, 3 * step]) if (opts.size < 4 && answer + d > 0) opts.add(answer + d);
+  if (scale === 2) {
+    // 平方：选项是相邻几个数的平方
+    const r = Math.round(Math.sqrt(answer));
+    for (const d of [1, -1, 2, -2, 3]) if (opts.size < 4 && r + d > 0) opts.add((r + d) ** 2);
+  } else for (const d of [step, -step, 2 * step, -2 * step, 3 * step]) if (opts.size < 4 && answer + d > 0) opts.add(answer + d);
   const options = [...opts].sort((a, b) => a - b).map((u) => fmt(u, scale));
   const plain = level >= 4;
   const expr = `${known.map((u) => fmt(u, scale)).join(' + ')} + ? = ${fmt(target, scale)}`;
@@ -155,7 +222,7 @@ export function kitchenExercise(exerciseId: string): ChoiceExercise | null {
     skill: 'game.kitchen',
     prompt: {
       text: plain ? '还差多少？' : zh('还差多少？', 'hái chà duō shao'),
-      speak: { text: `${known.map((u) => fmt(u, scale)).join('加')}，再加多少等于${fmt(target, scale)}？`.replace(/\./g, '点'), lang: 'zh-CN' },
+      speak: { text: `${known.map((u) => fmt(u, scale)).join('加')}，再加多少等于${fmt(target, scale)}？`.replace(/\./g, '点').replace(/(\d+)²/g, '$1的平方'), lang: 'zh-CN' },
     },
     stem: { text: expr },
     options: options.map((t) => ({ id: t, text: t })),

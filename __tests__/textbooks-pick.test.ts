@@ -25,7 +25,9 @@ describe('教材资源库简单视图', () => {
     expect(defaultEdition('math', '', 8)).toBe('math.pep-jh');
     expect(defaultEdition('english', '', 9)).toBe('english.jijiao-jh');
     expect(defaultEdition('chinese', '', 3)).toBe('chinese.tongbian');
-    expect(defaultEdition('math', 'math.bsd', 7)).toBe('math.bsd'); // 家长选过的优先
+    // V5.2.3：家长选过的版本有这个年级时优先；没有这个年级（小学课本、孩子七年级）时打开有这个年级的版本
+    expect(defaultEdition('math', 'math.bsd', 3)).toBe('math.bsd');
+    expect(defaultEdition('math', 'math.bsd', 7)).toBe('math.pep-jh');
     expect(gradesOf('math.pep-jh')).toEqual([7, 8, 9]);
     expect(pickVolume('math.pep-jh', 9, '下')!.revision).toBeNull();
     expect(pickVolume('english.jijiao-jh', 9, '下')).toBeNull(); // 平台没有这一册

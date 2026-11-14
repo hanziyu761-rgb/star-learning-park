@@ -54,11 +54,13 @@ export const GAME_BY_ID = Object.fromEntries(GAMES.map((g) => [g.id, g])) as Rec
 /** 每个游戏、每个年级可用的难度档范围 */
 export const LEVEL_RANGE: Record<GameId, (grade: number) => [number, number]> = {
   // 1 凑10两样 2 凑10三样 3 凑20 4 凑100整十 5 凑100 6 小数凑1 7 小数凑1三样 8 凑整百
-  kitchen: (g) => (g <= 1 ? [1, 3] : g === 2 ? [3, 5] : g === 3 ? [4, 6] : [5, 8]),
+  // 9 平方凑平方（勾股数） 10 更大的勾股数（初中，V5.2.3）
+  kitchen: (g) => (g <= 1 ? [1, 3] : g === 2 ? [3, 5] : g === 3 ? [4, 6] : g <= 6 ? [5, 8] : [9, 10]),
   // 1 声调 2 声调+韵母 3 声调+韵母+声母（一、二年级）；4 多音字（三年级起）
-  fish: (g) => (g <= 2 ? [1, 3] : [4, 4]),
+  // 5 易读错的字（初中，V5.2.3）
+  fish: (g) => (g <= 2 ? [1, 3] : g <= 6 ? [4, 4] : [5, 5]),
   // 1 3~4 个字母 2 5~6 个 3 7 个以上
-  bubble: (g) => (g <= 2 ? [1, 2] : g <= 4 ? [1, 3] : [2, 3]),
+  bubble: (g) => (g <= 2 ? [1, 2] : g <= 4 ? [1, 3] : g <= 6 ? [2, 3] : [3, 3]),
 };
 
 export function gameLevel(records: GameRecord[], game: GameId, grade: number): number {
