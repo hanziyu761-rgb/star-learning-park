@@ -32,7 +32,7 @@ npm test            # Jest 单元/组件测试
 npx expo export --platform android --output-dir dist-android   # 验证安卓包能编译
 ```
 
-网页端到端验收（需要 Python + Playwright）：先 `npx expo export --platform web`，在 dist 目录起静态服务（端口 8081），再运行 `python tools/e2e/acceptance.py` 与 `python tools/e2e/full_lessons.py`。
+网页端到端验收（需要 Python + Playwright）：先 `EXPO_PUBLIC_AI_BASE_URL=http://tts.e2e.invalid npx expo export --platform web`（V5.1 起朗读只用云端童声，测试用假服务地址，由 `tools/e2e/tts_spy.py` 在页面里拦截并记录要读的文字；**这个地址只用于测试，不能用于打包 APP**），在 dist 目录起静态服务（端口 8081），再运行 `python tools/e2e/acceptance.py` 与 `python tools/e2e/full_lessons.py`。
 
 ## 教师审核表
 
@@ -62,7 +62,7 @@ src/lesson/         课程数据类型、课程播放器、各类环节（演示
 src/exercises/      可复用练习组件：选择、正误判断、拖动配对、排序；V2.1 图形互动：拖到方格、地图点选、点选图形、分类篮、旋转、拨钟、找规律
 src/drag/           拖动与放置区（gesture-handler + reanimated）
 src/progress/       学习记录：数据模型（纯函数）、本地存储、统计、React Context
-src/speech/         发音（expo-speech，设备系统语音引擎）
+src/speech/         发音（V5.1 起只用星星宝童声：预录音 + 阿里云联网合成，不用手机自带语音；读不出时 SpeechNotice 提示）
 src/components/     通用界面组件：上注音、按钮、吉祥物、反馈条、家长验证
 src/theme.ts        统一配色、字号、圆角、间距
 docs/               PRD、架构、开发计划、测试报告、更新记录

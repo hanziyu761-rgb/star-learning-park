@@ -9,6 +9,9 @@ import json
 import os
 import re
 
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from tts_spy import tts_spy
 from playwright.sync_api import expect, sync_playwright
 
 BASE = os.environ.get("BASE", "http://localhost:8081")
@@ -18,12 +21,7 @@ def ok(m): RESULTS.append(m); print("PASS", m, flush=True)
 def tid(page, t): return page.locator(f'[data-testid="{t}"]').first
 def han(s): return "".join(re.findall(r"[一-鿿]", s))
 
-SPY = """
-window.__spoken = [];
-if (window.speechSynthesis) {
-  window.speechSynthesis.speak = (u) => { window.__spoken.push(u.text); setTimeout(() => { try { u.onend && u.onend(new Event('end')); } catch(e){} }, 20); };
-}
-"""
+SPY = tts_spy("text")  # V5.1：朗读走云端童声，记录要读的文字（见 tts_spy.py）
 
 def answer_current(page):
     """选择/判断题：依次点选项直到答对（等待选错冷却）"""

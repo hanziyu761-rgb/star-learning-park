@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { BackHandler, StyleSheet, Switch, Text, View } from 'react-native';
+import { ListGroup, ListRow } from '@/components/List';
+import { GRADE_CN, pinyinHidden } from '@/progress/grade';
 import { Pressable } from '@/components/Tappable';
 import { getLesson, LESSONS, skillLabel } from '@/content';
 import { plainText } from '@/content/zh';
@@ -10,7 +12,7 @@ import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
-import { AiCard, AppearanceCard, GradeCard, HiddenCard } from './ParentSettings';
+import { AiCard, AiReportCard, AppearanceCard, GradeCard, HiddenCard } from './ParentSettings';
 import { KnowledgeCard } from './ParentKnowledge';
 import { ThinkingCard } from './ParentThinking';
 import { VoiceCheckCard } from './VoiceCheckCard';
@@ -29,59 +31,119 @@ import {
   SUBJECTS,
   weakSkills,
 } from '@/progress/stats';
-import { colors, radius, space, subjectTheme, themed } from '@/theme';
+import { colors, radius, shadow, space, subjectTheme, themed } from '@/theme';
+
+/** 家长中心的几页（V5.1 简化）：首页是一个短列表，详细内容各放一页 */
+type Section = 'home' | 'report' | 'mistakes' | 'settings';
+const SECTION_TITLE: Record<Section, string> = { home: '家长中心', report: '学习报告', mistakes: '错题', settings: '设置' };
 
 export default function ParentScreen() {
   const { status } = useProgress();
   const [passed, setPassed] = useState(false);
+  const [section, setSection] = useState<Section>('home');
   const nav = useNav();
-  const goBack = nav.back;
+  // 在某一页里时，“返回”先回到家长中心首页
+  const goBack = () => (section === 'home' ? nav.back() : setSection('home'));
+  useEffect(() => {
+    if (section === 'home') return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      setSection('home');
+      return true;
+    });
+    return () => sub.remove();
+  }, [section]);
 
   if (status === 'loading') return <LoadingView />;
   return (
-    <Screen bg={colors.bg} testID="parent-screen">
-      <Header title="家长中心" onBack={goBack} />
-      {passed ? (
-        <ParentDashboard />
-      ) : (
+    <Screen bg={colors.bg} testID="parent-screen" key={section}>
+      <Header title={SECTION_TITLE[section]} onBack={goBack} />
+      {!passed ? (
         <ParentGate
           onPass={() => {
             markParentUnlocked();
             setPassed(true);
           }}
         />
+      ) : section === 'home' ? (
+        <ParentHome open={setSection} />
+      ) : section === 'report' ? (
+        <ReportPage />
+      ) : section === 'mistakes' ? (
+        <MistakesPage />
+      ) : (
+        <SettingsPage />
       )}
     </Screen>
   );
 }
 
-function ParentDashboard() {
+/** 首页：总览 + 一个短列表 */
+function ParentHome({ open }: { open: (s: Section) => void }) {
   const nav = useNav();
   const { state, dispatch } = useProgress();
-  const [confirmReset, setConfirmReset] = useState(false);
+  const [now] = useState(() => Date.now());
+  const hasData = state.results.length > 0 || state.sessions.length > 0;
+  const completedLessons = LESSONS.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
+  const open_ = openMistakes(state).length;
+  const showPinyin = !pinyinHidden(state.settings);
+
+  return (
+    <View style={{ gap: space.xl }} testID="parent-dashboard">
+      {!hasData ? <Notice text="还没有学习记录" /> : null}
+
+      <View style={styles.grid}>
+        <Metric label="累计星星" value={String(state.totalStars)} testID="m-stars" />
+        <Metric label="学会的课程" value={`${completedLessons} 节`} testID="m-lessons" />
+        <Metric label="今天学习" value={formatDuration(studySecOnDay(state, now))} testID="m-today" />
+        <Metric label="近 7 天学习" value={`${activeDaysLast7(state, now)} 天`} testID="m-days" />
+      </View>
+
+      <ListGroup>
+        <ListRow icon="📊" title="学习报告" onPress={() => open('report')} testID="pc-report" />
+        <ListRow icon="📕" title="错题" detail={open_ ? `${open_} 道没掌握` : '没有'} onPress={() => open('mistakes')} testID="pc-mistakes" />
+        <ListRow icon="📝" title="生成试卷" onPress={() => nav.push({ name: 'exam' })} testID="exam-entry" />
+        <ListRow
+          icon="📷"
+          title="拍照错题"
+          detail={state.photoMistakes.length ? `已存 ${state.photoMistakes.length} 道` : undefined}
+          onPress={() => nav.push({ name: 'photo' })}
+          testID="photo-entry"
+        />
+        <ListRow icon="📚" title="教材资源库" onPress={() => nav.push({ name: 'textbooks' })} testID="parent-textbooks" />
+      </ListGroup>
+
+      <ListGroup>
+        <ListRow
+          icon="🔤"
+          title="显示拼音"
+          right={
+            <Switch
+              value={showPinyin}
+              trackColor={{ true: colors.correct, false: colors.disabled }}
+              thumbColor="#FFFFFF"
+              onValueChange={(v) => dispatch({ type: 'settings/set', settings: { pinyin: v ? 'on' : 'off' } })}
+              testID="pinyin-switch"
+            />
+          }
+          testID="pinyin-row"
+        />
+        <ListRow icon="⚙️" title="设置" detail={`${GRADE_CN[state.settings.grade] ?? ''}年级`} onPress={() => open('settings')} testID="pc-settings" />
+      </ListGroup>
+    </View>
+  );
+}
+
+/** 学习报告：建议、各科情况、知识点、思维训练、英语主线、最近学习、薄弱点、AI 分析 */
+function ReportPage() {
+  const { state } = useProgress();
   const [now] = useState(() => Date.now());
   const sessions = recentSessions(state, 10);
   const weak = weakSkills(state);
-  const mistakes = openMistakes(state);
   const hasData = state.results.length > 0 || state.sessions.length > 0;
-  const completedLessons = LESSONS.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
   const suggestions = suggestNext(state, LESSONS, resolveExercise, now, 3);
-  const mastered = Object.values(state.mistakes).filter((m) => m.resolved).length;
 
   return (
-    <View style={{ gap: space.lg }} testID="parent-dashboard">
-      {!hasData ? <Notice text="还没有学习记录" /> : null}
-
-      <Card>
-        <SectionTitle>总览</SectionTitle>
-        <View style={styles.grid}>
-          <Metric label="累计星星" value={String(state.totalStars)} testID="m-stars" />
-          <Metric label="学会的课程" value={`${completedLessons} 节`} testID="m-lessons" />
-          <Metric label="今天学习" value={formatDuration(studySecOnDay(state, now))} testID="m-today" />
-          <Metric label="近 7 天学习" value={`${activeDaysLast7(state, now)} 天`} testID="m-days" />
-        </View>
-      </Card>
-
+    <View style={{ gap: space.lg }} testID="parent-report">
       <Card>
         <SectionTitle>下一步学习建议</SectionTitle>
         {suggestions.map((sg, i) => (
@@ -92,24 +154,34 @@ function ParentDashboard() {
         ))}
       </Card>
 
-      <Card>
-        <SectionTitle>试卷生成</SectionTitle>
-        <Pressable
-          onPress={() => nav.push({ name: 'exam' })}
-          style={styles.examBtn}
-          accessibilityRole="button"
-          testID="exam-entry"
-        >
-          <Text style={styles.examBtnText}>📝 生成试卷</Text>
-        </Pressable>
-      </Card>
-
-      <Card>
-        <SectionTitle>拍照错题</SectionTitle>
-        <Pressable onPress={() => nav.push({ name: 'photo' })} style={styles.examBtn} accessibilityRole="button" testID="photo-entry">
-          <Text style={styles.examBtnText}>📷 拍照错题{state.photoMistakes.length ? `（已存 ${state.photoMistakes.length} 道）` : ''}</Text>
-        </Pressable>
-      </Card>
+      {SUBJECTS.map((s) => {
+        const st = subjectStats(state, s);
+        return (
+          <Card key={s}>
+            <View testID={`stats-${s}`}>
+              <SectionTitle>
+                {subjectTheme[s].emoji} {subjectTheme[s].name}
+              </SectionTitle>
+              {st.sessions === 0 && st.exercises === 0 ? (
+                <Text style={styles.empty}>还没有学习记录</Text>
+              ) : (
+                <View style={styles.grid}>
+                  <Metric flat label="完成课程" value={`${st.completedLessons} 节`} />
+                  <Metric flat label="完成次数" value={`${st.sessions} 次`} />
+                  <Metric
+                    flat
+                    label="一次答对率"
+                    value={st.accuracy === null ? '—' : `${st.accuracy}%`}
+                    testID={`acc-${s}`}
+                  />
+                  <Metric flat label="学习时长" value={formatDuration(st.studySec)} />
+                </View>
+              )}
+              {st.lastStudiedAt ? <Text style={styles.small}>最近学习：{formatDateTime(st.lastStudiedAt)}</Text> : null}
+            </View>
+          </Card>
+        );
+      })}
 
       <KnowledgeCard />
       <ThinkingCard />
@@ -134,52 +206,22 @@ function ParentDashboard() {
         })}
       </Card>
 
-      {SUBJECTS.map((s) => {
-        const st = subjectStats(state, s);
-        return (
-          <Card key={s} style={{ borderLeftWidth: 8, borderLeftColor: subjectTheme[s].color }}>
-            <View testID={`stats-${s}`}>
-              <SectionTitle>
-                {subjectTheme[s].emoji} {subjectTheme[s].name}
-              </SectionTitle>
-              {st.sessions === 0 && st.exercises === 0 ? (
-                <Text style={styles.empty}>还没有学习记录</Text>
-              ) : (
-                <View style={styles.grid}>
-                  <Metric label="完成课程" value={`${st.completedLessons} 节`} />
-                  <Metric label="完成次数" value={`${st.sessions} 次`} />
-                  <Metric
-                    label="一次答对率"
-                    value={st.accuracy === null ? '—' : `${st.accuracy}%`}
-                    testID={`acc-${s}`}
-                  />
-                  <Metric label="学习时长" value={formatDuration(st.studySec)} />
-                </View>
-              )}
-              {st.lastStudiedAt ? <Text style={styles.small}>最近学习：{formatDateTime(st.lastStudiedAt)}</Text> : null}
-            </View>
-          </Card>
-        );
-      })}
-
       <Card>
         <SectionTitle>最近完成的课程</SectionTitle>
         {sessions.length === 0 ? <Text style={styles.empty}>暂无</Text> : null}
-        {sessions.map((x, i) => {
-          return (
-            <View key={`${x.endedAt}-${i}`} style={styles.row} testID="session-row">
-              <Text style={styles.rowEmoji}>{subjectTheme[x.subject].emoji}</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.rowTitle}>{sourceName(x.lessonId)}</Text>
-                <Text style={styles.small}>
-                  {formatDateTime(x.endedAt)} · 用时 {formatDuration(x.durationSec)}
-                  {x.exerciseCount > 0 ? ` · 一次答对 ${x.firstTryCorrect}/${x.exerciseCount}` : ''}
-                </Text>
-              </View>
-              <Stars value={x.stars} size={16} />
+        {sessions.map((x, i) => (
+          <View key={`${x.endedAt}-${i}`} style={styles.row} testID="session-row">
+            <Text style={styles.rowEmoji}>{subjectTheme[x.subject].emoji}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.rowTitle}>{sourceName(x.lessonId)}</Text>
+              <Text style={styles.small}>
+                {formatDateTime(x.endedAt)} · 用时 {formatDuration(x.durationSec)}
+                {x.exerciseCount > 0 ? ` · 一次答对 ${x.firstTryCorrect}/${x.exerciseCount}` : ''}
+              </Text>
             </View>
-          );
-        })}
+            <Stars value={x.stars} size={16} />
+          </View>
+        ))}
       </Card>
 
       <Card>
@@ -197,29 +239,36 @@ function ParentDashboard() {
         ))}
       </Card>
 
+      <AiReportCard />
+    </View>
+  );
+}
+
+/** 错题：三科错题本入口 + 还没掌握的错题 */
+function MistakesPage() {
+  const nav = useNav();
+  const { state } = useProgress();
+  const mistakes = openMistakes(state);
+  const mastered = Object.values(state.mistakes).filter((m) => m.resolved).length;
+  return (
+    <View style={{ gap: space.lg }} testID="parent-mistakes">
+      <ListGroup>
+        {(['math', 'chinese', 'english'] as const).map((sub) => (
+          <ListRow
+            key={sub}
+            icon={subjectTheme[sub].emoji}
+            title={`${subjectTheme[sub].name}错题本`}
+            detail={`${openCount(state, sub)} 道`}
+            onPress={() => nav.push({ name: 'mistakes', subject: sub })}
+            testID={`parent-mistakes-${sub}`}
+          />
+        ))}
+      </ListGroup>
       <Card>
-        <SectionTitle>错题（尚未掌握）</SectionTitle>
+        <SectionTitle>还没掌握的错题</SectionTitle>
         <Text style={styles.small}>
           已掌握 {mastered} 道 · 完成复习 {state.reviews.length} 次
         </Text>
-        <View style={styles.bookRow}>
-          {(['math', 'chinese', 'english'] as const).map((sub) => (
-            <Pressable
-              key={sub}
-              onPress={() => nav.push({ name: 'mistakes', subject: sub })}
-              style={[styles.bookBtn, { borderColor: subjectTheme[sub].color }]}
-              accessibilityRole="button"
-              testID={`parent-mistakes-${sub}`}
-            >
-              <Text style={[styles.bookBtnText, { color: subjectTheme[sub].color }]}>
-                {subjectTheme[sub].emoji} {subjectTheme[sub].name}错题本（{openCount(state, sub)}）
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        <Pressable onPress={() => nav.push({ name: 'textbooks' })} style={styles.bookBtn} accessibilityRole="button" testID="parent-textbooks">
-          <Text style={styles.bookBtnText}>📚 教材资源库</Text>
-        </Pressable>
         {mistakes.length === 0 ? <Text style={styles.empty}>暂无错题</Text> : null}
         {mistakes.map((m) => (
           <View key={m.key} style={styles.row} testID="mistake-row">
@@ -234,7 +283,16 @@ function ParentDashboard() {
           </View>
         ))}
       </Card>
+    </View>
+  );
+}
 
+/** 设置：年级、外观、声音、游戏、AI 老师、屏蔽的题、清除记录 */
+function SettingsPage() {
+  const { dispatch } = useProgress();
+  const [confirmReset, setConfirmReset] = useState(false);
+  return (
+    <View style={{ gap: space.lg }} testID="parent-settings">
       <GradeCard />
       <AppearanceCard />
       <VoiceCheckCard />
@@ -242,7 +300,7 @@ function ParentDashboard() {
       <AiCard />
       <HiddenCard />
 
-      <Notice text="学习数据只保存在这台设备上。开启 AI 老师后，只发送题目内容和孩子的提问，不上传个人信息。" />
+      <Notice text="学习数据只保存在这台设备上。朗读和 AI 老师只发送要朗读的文字、题目内容和孩子的提问，不上传个人信息。" />
 
       <Pressable
         accessibilityRole="button"
@@ -290,9 +348,9 @@ function describeSuggestion(s: Suggestion): string {
   }
 }
 
-function Metric({ label, value, testID }: { label: string; value: string; testID?: string }) {
+function Metric({ label, value, testID, flat }: { label: string; value: string; testID?: string; flat?: boolean }) {
   return (
-    <View style={styles.metric}>
+    <View style={[styles.metric, flat && styles.metricFlat]}>
       <Text style={styles.metricValue} testID={testID}>
         {value}
       </Text>
@@ -302,21 +360,10 @@ function Metric({ label, value, testID }: { label: string; value: string; testID
 }
 
 const styles = themed(() => StyleSheet.create({
-  bookRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginVertical: space.sm },
-  bookBtn: { borderWidth: 2, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 10, backgroundColor: colors.card },
-  bookBtnText: { fontSize: 14, fontWeight: '600', color: colors.text },
-  examBtn: {
-    marginTop: space.sm,
-    minHeight: 52,
-    borderRadius: radius.md,
-    backgroundColor: colors.parent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  examBtnText: { color: colors.onAccent, fontSize: 18, fontWeight: '600' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  metric: { flexBasis: '46%', flexGrow: 1, backgroundColor: colors.parentSoft, borderRadius: radius.md, padding: space.md },
-  metricValue: { fontSize: 22, fontWeight: '700', color: colors.text },
+  metric: { flexBasis: '46%', flexGrow: 1, backgroundColor: colors.card, borderRadius: radius.md, borderCurve: 'continuous', padding: space.lg, ...shadow },
+  metricFlat: { backgroundColor: colors.cardAlt, boxShadow: 'none', padding: space.md },
+  metricValue: { fontSize: 24, fontWeight: '700', color: colors.text, fontVariant: ['tabular-nums'] },
   metricLabel: { fontSize: 13, color: colors.textSoft, marginTop: 2 },
   empty: { fontSize: 15, color: colors.textSoft, paddingVertical: space.sm },
   small: { fontSize: 13, color: colors.textSoft, marginTop: 2 },

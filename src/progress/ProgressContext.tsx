@@ -4,7 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useLayoutEffe
 import { createEmptyProgress, progressReducer, type ProgressAction, type ProgressState } from './model';
 import { loadProgress, saveProgress } from './storage';
 import { setPinyinOff } from '@/components/pinyinMode';
-import { isJunior } from './grade';
+import { pinyinHidden } from './grade';
 import { useColorScheme } from 'react-native';
 import { setScheme, type Scheme } from '@/theme';
 
@@ -50,15 +50,15 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setVoicePrefs({ gender: 'child', zh: s.voiceZh, en: s.voiceEn, rate: s.speechRate });
   }, [s.voiceZh, s.voiceEn, s.speechRate]);
-  // 初中（七年级及以上）全部不标拼音（V4.3）
+  // 拼音：家长中心可以开关（V5.1）；没设置过时初中（七年级及以上）不标（V4.3）
   useLayoutEffect(() => {
-    setPinyinOff(isJunior(s.grade));
-  }, [s.grade]);
+    setPinyinOff(pinyinHidden(s));
+  }, [s.grade, s.pinyin]); // eslint-disable-line react-hooks/exhaustive-deps
   // 云端童声（V2.21）：没有预录的句子联网用星星宝童声现念。只发送要朗读的文字。
-  // 星星宝的回答（AI 老师）仍需家长先开启 AI 老师；题目朗读只要“联网童声”开关打开就用
+  // V5.1 起一直用（不再有手机语音可退），设置里的 aiCloudVoice 开关不再使用；星星宝的回答仍需家长先开启 AI 老师
   useEffect(() => {
     const baseUrl = s.aiBaseUrl || DEFAULT_AI_BASE_URL;
-    if (!s.aiCloudVoice || !baseUrl) {
+    if (!baseUrl) {
       setCloudVoice(null);
       return;
     }
@@ -66,7 +66,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     // 先叫醒 AI 服务（云函数平时休眠，第一次请求要多等几秒），孩子进题时就不用等了（V4.2）
     aiHealth({ enabled: true, baseUrl }).catch(() => undefined);
     return () => setCloudVoice(null);
-  }, [s.aiCloudVoice, s.aiBaseUrl]);
+  }, [s.aiBaseUrl]);
 
   const dispatch = useCallback((action: ProgressAction) => {
     if (!loaded.current) return; // 读取完成之前不允许写入，防止覆盖已有进度

@@ -9,6 +9,9 @@ import json
 import os
 import re
 
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import tts_spy  # noqa: F401  V5.1：朗读走云端童声，页面里拦截假服务地址
 from playwright.sync_api import expect, sync_playwright
 
 BASE = os.environ.get("BASE", "http://localhost:8081")
@@ -124,6 +127,7 @@ with sync_playwright() as p:
     a, c = map(int, re.findall(r"\d+", tid(page, "gate-question").inner_text())[:2])
     for d in str(a * c): tid(page, f"key-{d}").click()
     tid(page, "key-确定").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')
+    tid(page, "pc-report").click(); page.wait_for_selector('[data-testid="parent-report"]')  # V5.1
     tid(page, "parent-track-reading").scroll_into_view_if_needed()
     expect(tid(page, "parent-track-talk")).to_contain_text("已学 1/9")
     expect(tid(page, "parent-track-reading")).to_contain_text("已学 2/7")

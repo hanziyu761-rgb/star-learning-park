@@ -9,6 +9,9 @@ import json
 import os
 import re
 
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from tts_spy import tts_spy
 from playwright.sync_api import expect, sync_playwright
 
 BASE = os.environ.get("BASE", "http://localhost:8081")
@@ -23,12 +26,7 @@ def url(q=""):
 
 POOL = dict(x.split("|") for x in re.search(r"CHAR_POOL = '([^']+)'", open(os.path.join(ROOT, "src/games/data/charPool.gen.ts"), encoding="utf-8").read()).group(1).split(" "))
 
-SPY = """
-window.__spoken = [];
-if (window.speechSynthesis) {
-  window.speechSynthesis.speak = (u) => { window.__spoken.push({text: u.text, lang: u.lang}); setTimeout(() => { try { u.onend && u.onend(new Event('end')); } catch(e){} }, 20); };
-}
-"""
+SPY = tts_spy("obj")  # V5.1：朗读走云端童声，记录要读的文字（见 tts_spy.py）
 
 def parent(page):
     page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
@@ -72,7 +70,7 @@ with sync_playwright() as p:
     ok("点一下跳过开机动画")
 
     # 2. 家长中心关掉开机动画
-    parent(page)
+    parent(page); tid(page, "pc-settings").click(); page.wait_for_selector('[data-testid="parent-settings"]')  # V5.1 家长中心分页
     expect(tid(page, "voice-gender-note")).to_contain_text("星星宝童声")
     assert page.locator('[data-testid="voice-gender-male"]').count() == 0 and page.locator('[data-testid="voice-gender-female"]').count() == 0
     sw = tid(page, "splash-switch"); sw.scroll_into_view_if_needed(); sw.click(); page.wait_for_timeout(300)
@@ -122,11 +120,13 @@ with sync_playwright() as p:
     page.screenshot(path=f"{OUT}/v221-redo.png")
     ok("错题本“重做错题”进入只有这一道语文错题的复习")
 
-    # 4. 家长中心三科入口
+    # 4. 家长中心三科入口（V5.1 在“错题”页）
     parent(page)
+    expect(tid(page, "pc-mistakes")).to_contain_text("1 道没掌握")
+    tid(page, "pc-mistakes").click(); page.wait_for_selector('[data-testid="parent-mistakes"]')  # V5.1 家长中心分页
     for sub in ["math", "chinese", "english"]:
         expect(tid(page, f"parent-mistakes-{sub}")).to_be_visible()
-    expect(tid(page, "parent-mistakes-chinese")).to_contain_text("（1）")
+    expect(tid(page, "parent-mistakes-chinese")).to_contain_text("1 道")
     tid(page, "parent-mistakes-math").click(); page.wait_for_selector('[data-testid="mistakes-screen"]')
     expect(tid(page, "mistakes-empty")).to_be_visible()
     ok("家长中心有数学、语文、英语三本错题本入口；数学没有错题时显示鼓励")

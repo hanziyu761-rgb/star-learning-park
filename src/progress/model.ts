@@ -117,7 +117,12 @@ export interface Settings {
   textbookEdition: { chinese: string; math: string; english: string };
   /** 外观（V5.0）：跟随手机系统 / 浅色 / 深色 */
   appearance: Appearance;
+  /** 拼音（V5.1）：auto = 小学标、初中不标；on = 一直标；off = 都不标 */
+  pinyin: PinyinMode;
 }
+
+export type PinyinMode = 'auto' | 'on' | 'off';
+export const PINYIN_MODES: PinyinMode[] = ['auto', 'on', 'off'];
 
 export type Appearance = 'system' | 'light' | 'dark';
 export const APPEARANCES: Appearance[] = ['system', 'light', 'dark'];
@@ -264,6 +269,7 @@ export function createEmptyProgress(): ProgressState {
       splash: true,
       textbookEdition: { chinese: '', math: '', english: '' },
       appearance: 'system',
+      pinyin: 'auto',
     },
     hidden: [],
     diagnoses: [],
@@ -626,6 +632,8 @@ export function migrateProgress(data: ProgressState, now: number = Date.now()): 
       },
       // V5.0：旧记录没有外观设置，按“跟随系统”；不认识的值也按跟随系统
       appearance: APPEARANCES.includes(data.settings?.appearance as Appearance) ? (data.settings!.appearance as Appearance) : 'system',
+      // V5.1：旧记录没有拼音设置，按“自动”（和以前一样：小学标、初中不标）
+      pinyin: PINYIN_MODES.includes(data.settings?.pinyin as PinyinMode) ? (data.settings!.pinyin as PinyinMode) : 'auto',
     },
     hidden: Array.isArray(data.hidden) ? data.hidden : [],
     diagnoses: Array.isArray(data.diagnoses) ? data.diagnoses : [],

@@ -13,7 +13,7 @@ import { getAsr } from '@/speech/asr';
 import { speak } from '@/speech/speech';
 import { openMistakes, weakSkills } from '@/progress/stats';
 import { colors, radius, space, themed } from '@/theme';
-import { ALL_GRADES, GRADE_CN, isJunior } from '@/progress/grade';
+import { ALL_GRADES, GRADE_CN, isJunior, pinyinHidden } from '@/progress/grade';
 import { Segmented } from '@/components/Segmented';
 
 
@@ -37,7 +37,7 @@ export function GradeCard() {
       </View>
       {isJunior(state.settings.grade) ? (
         <Text style={styles.gradeNote} testID="grade-junior-note">
-          初中：不标拼音。目前只有课本目录，没有初中的课程和练习。
+          {`初中：${pinyinHidden(state.settings) ? '不标拼音' : '标拼音（家长打开了拼音）'}。目前只有课本目录，没有初中的课程和练习。`}
         </Text>
       ) : null}
     </Card>
@@ -66,12 +66,11 @@ export function AppearanceCard() {
 
 export function AiCard() {
   const { state, dispatch } = useProgress();
-  const { aiEnabled, aiBaseUrl, grade, voiceInput, aiCloudVoice } = state.settings;
+  const { aiEnabled, aiBaseUrl, voiceInput } = state.settings;
   const asr = getAsr();
   const [micNote, setMicNote] = useState('');
   const [url, setUrl] = useState(aiBaseUrl || DEFAULT_AI_BASE_URL);
   const [check, setCheck] = useState<{ loading: boolean; text?: string; ok?: boolean }>({ loading: false });
-  const [report, setReport] = useState<{ loading: boolean; text?: string; error?: boolean }>({ loading: false });
 
   const cfg = { enabled: true, baseUrl: url.trim() };
 
@@ -87,35 +86,12 @@ export function AiCard() {
           ? {
               loading: false,
               ok: true,
-              text: `连接成功：服务正常，模型 ${h.model}。${h.tts ? '自然语音已开通。' : '自然语音还没开通（服务端没有配置阿里云百炼密钥），星星宝先用手机语音朗读。'}`,
+              text: `连接成功：服务正常，模型 ${h.model}。${h.tts ? '自然语音已开通。' : '朗读声音还没开通（服务端没有配置阿里云百炼密钥），现在题目读不出声音。'}`,
             }
           : { loading: false, ok: false, text: '服务能连上，但服务端还没有配置 DeepSeek 密钥。' },
       );
     } catch (e) {
       setCheck({ loading: false, ok: false, text: e instanceof AiError ? e.message : AI_ERROR_TEXT.SERVER });
-    }
-  };
-
-  const analyze = async () => {
-    setReport({ loading: true });
-    try {
-      const text = await aiReport(
-        { enabled: aiEnabled, baseUrl: aiBaseUrl },
-        {
-          grade,
-          weakSkills: weakSkills(state).map((w) => ({
-            label: skillLabel(w.skill),
-            accuracy: w.accuracy,
-            total: w.total,
-          })),
-          mistakes: openMistakes(state)
-            .slice(0, 8)
-            .map((m) => mistakeLabel(m.lessonId, m.exerciseId).slice(0, 100)),
-        },
-      );
-      setReport({ loading: false, text });
-    } catch (e) {
-      setReport({ loading: false, error: true, text: e instanceof AiError ? e.message : AI_ERROR_TEXT.SERVER });
     }
   };
 
@@ -178,41 +154,16 @@ export function AiCard() {
         </Text>
       ) : null}
 
-      <View style={styles.row}>
-        <Text style={[styles.label, { flex: 1 }]}>联网童声朗读</Text>
-        <Switch
-          value={aiCloudVoice}
-          onValueChange={(v) => dispatch({ type: 'settings/set', settings: { aiCloudVoice: v } })}
-          testID="ai-voice-switch"
-        />
-      </View>
-      <Text style={styles.small}>没有录音的句子联网用童声朗读，只发送要朗读的文字，按字数计费。</Text>
+      <Text style={styles.small}>题目朗读也用这个服务（阿里云星星宝童声）：只发送要朗读的文字，按字数计费。</Text>
       <Pressable
         onPress={() => speak({ text: '小朋友你好，我是星星宝！有不会的题就来问我吧。', lang: 'zh-CN', cloud: true })}
-        disabled={!aiCloudVoice}
-        style={[styles.btn, !aiCloudVoice && { opacity: 0.4 }]}
+        style={styles.btn}
         accessibilityRole="button"
         testID="ai-voice-try"
       >
         <Text style={styles.btnText}>试听星星宝的声音</Text>
       </Pressable>
 
-      <View style={styles.divider} />
-      <Text style={styles.label}>AI 学习分析</Text>
-      <Pressable
-        onPress={analyze}
-        disabled={!aiEnabled || report.loading}
-        style={[styles.btn, !aiEnabled && { opacity: 0.4 }]}
-        accessibilityRole="button"
-        testID="ai-report"
-      >
-        {report.loading ? <ActivityIndicator color={colors.onAccent} /> : <Text style={styles.btnText}>生成 AI 学习分析</Text>}
-      </Pressable>
-      {report.text ? (
-        <View style={[styles.reportBox, report.error && { borderColor: colors.wrong }]} testID="ai-report-text">
-          <Text style={styles.reportText}>{report.text}</Text>
-        </View>
-      ) : null}
     </Card>
   );
 }
@@ -234,6 +185,57 @@ export function HiddenCard() {
       >
         <Text style={styles.btnText}>全部恢复</Text>
       </Pressable>
+    </Card>
+  );
+}
+
+/** AI 学习分析（V5.1 从 AI 老师设置里移到“学习报告”） */
+export function AiReportCard() {
+  const { state } = useProgress();
+  const { aiEnabled, aiBaseUrl, grade } = state.settings;
+  const [report, setReport] = useState<{ loading: boolean; text?: string; error?: boolean }>({ loading: false });
+
+  const analyze = async () => {
+    setReport({ loading: true });
+    try {
+      const text = await aiReport(
+        { enabled: aiEnabled, baseUrl: aiBaseUrl },
+        {
+          grade,
+          weakSkills: weakSkills(state).map((w) => ({
+            label: skillLabel(w.skill),
+            accuracy: w.accuracy,
+            total: w.total,
+          })),
+          mistakes: openMistakes(state)
+            .slice(0, 8)
+            .map((m) => mistakeLabel(m.lessonId, m.exerciseId).slice(0, 100)),
+        },
+      );
+      setReport({ loading: false, text });
+    } catch (e) {
+      setReport({ loading: false, error: true, text: e instanceof AiError ? e.message : AI_ERROR_TEXT.SERVER });
+    }
+  };
+
+  return (
+    <Card>
+      <SectionTitle>AI 学习分析</SectionTitle>
+      {!aiEnabled ? <Text style={styles.small}>在“设置 → AI 老师”里开启后可用</Text> : null}
+      <Pressable
+        onPress={analyze}
+        disabled={!aiEnabled || report.loading}
+        style={[styles.btn, !aiEnabled && { opacity: 0.4 }]}
+        accessibilityRole="button"
+        testID="ai-report"
+      >
+        {report.loading ? <ActivityIndicator color={colors.onAccent} /> : <Text style={styles.btnText}>生成 AI 学习分析</Text>}
+      </Pressable>
+      {report.text ? (
+        <View style={[styles.reportBox, report.error && { borderColor: colors.wrong }]} testID="ai-report-text">
+          <Text style={styles.reportText}>{report.text}</Text>
+        </View>
+      ) : null}
     </Card>
   );
 }

@@ -3,6 +3,9 @@
 真实点击、真实鼠标拖动，并记录语音合成调用。
 """
 import os, re, sys, time, json
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from tts_spy import tts_spy
 from playwright.sync_api import sync_playwright, expect
 
 BASE = os.environ.get("BASE", "http://localhost:8081")
@@ -14,17 +17,7 @@ log = []
 def ok(msg):
     log.append("PASS " + msg); print("PASS", msg, flush=True)
 
-SPY = """
-window.__spoken = [];
-const orig = window.speechSynthesis && window.speechSynthesis.speak.bind(window.speechSynthesis);
-if (window.speechSynthesis) {
-  window.speechSynthesis.speak = (u) => {
-    window.__spoken.push({text: u.text, lang: u.lang});
-    // 无头浏览器没有发音引擎：立即触发结束回调，模拟朗读完成
-    setTimeout(() => { try { u.onend && u.onend(new Event('end')); } catch(e){} }, 50);
-  };
-}
-"""
+SPY = tts_spy("obj")  # V5.1：朗读走云端童声，记录要读的文字（见 tts_spy.py）
 
 def tid(page, t):
     return page.locator(f'[data-testid="{t}"]').first
@@ -223,13 +216,19 @@ with sync_playwright() as p:
     tid(page, "key-确定").click()
     page.wait_for_selector('[data-testid="parent-dashboard"]')
     page.wait_for_timeout(300)
+    page.screenshot(path=f"{OUT}/16-parent-home.png", full_page=True)
+    # V5.1：家长中心首页是短列表，学习报告、错题各一页
+    tid(page, "pc-report").click(); page.wait_for_selector('[data-testid="parent-report"]')
     page.screenshot(path=f"{OUT}/16-parent-data.png", full_page=True)
     acc = tid(page, "acc-math").inner_text()
     sessions = page.locator('[data-testid="session-row"]').count()
+    sug = page.locator('[data-testid="suggestion-row"]').all_inner_texts()
+    tid(page, "back").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')
+    tid(page, "pc-mistakes").click(); page.wait_for_selector('[data-testid="parent-mistakes"]')
     mistakes = page.locator('[data-testid="mistake-row"]').count()
+    tid(page, "back").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')
     ok(f"家长中心：数学一次答对率 {acc}，最近课程 {sessions} 条，错题 {mistakes} 条")
     assert sessions == 1, sessions
-    sug = page.locator('[data-testid="suggestion-row"]').all_inner_texts()
     ok("家长中心学习建议：" + " / ".join(x.replace("\n", " ") for x in sug))
 
     # ---------- V2：今日复习（间隔复习） ----------

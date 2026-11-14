@@ -12,6 +12,9 @@ import json
 import os
 import re
 
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+from tts_spy import tts_spy
 from playwright.sync_api import expect, sync_playwright
 
 BASE = os.environ.get("BASE", "http://localhost:8081")
@@ -26,12 +29,7 @@ POLY = {}
 for line in re.search(r"POLY_LINES = `([\s\S]*?)`", open(os.path.join(ROOT, "src/games/data/poly.ts"), encoding="utf-8").read()).group(1).strip().splitlines():
     c, py, sent = line.split("|"); POLY[sent] = py
 
-SPY = """
-window.__spoken = [];
-if (window.speechSynthesis) {
-  window.speechSynthesis.speak = (u) => { window.__spoken.push({text: u.text, lang: u.lang}); setTimeout(() => { try { u.onend && u.onend(new Event('end')); } catch(e){} }, 20); };
-}
-"""
+SPY = tts_spy("obj")  # V5.1：朗读走云端童声，记录要读的文字（见 tts_spy.py）
 
 def parent(page):
     page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
@@ -41,7 +39,7 @@ def parent(page):
     tid(page, "key-确定").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')
 
 def set_grade(page, g):
-    parent(page)
+    parent(page); tid(page, "pc-settings").click(); page.wait_for_selector('[data-testid="parent-settings"]')  # V5.1 家长中心分页
     tid(page, f"grade-{g}").scroll_into_view_if_needed(); tid(page, f"grade-{g}").click(); page.wait_for_timeout(300)
 
 def open_game(page, gid):
@@ -166,7 +164,7 @@ with sync_playwright() as p:
     page.wait_for_selector('[data-testid="game-summary"]'); page.screenshot(path=f"{OUT}/g-bubble-summary.png")
     ok(f"拼词泡泡（三年级）：6 个单词按顺序拼对；{tid(page, 'game-score').inner_text()}")
 
-    parent(page)
+    parent(page); tid(page, "pc-settings").click(); page.wait_for_selector('[data-testid="parent-settings"]')  # V5.1 家长中心分页
     tid(page, "game-limit-10").scroll_into_view_if_needed(); tid(page, "game-limit-10").click(); page.wait_for_timeout(200)
     expect(tid(page, "parent-games-kitchen")).to_contain_text("1 局")
     page.goto(BASE); page.wait_for_selector('[data-testid="home"]')

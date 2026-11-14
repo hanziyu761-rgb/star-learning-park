@@ -5,6 +5,9 @@ V4.0 端到端验收（网页版 / 单文件 HTML 版）：家长中心 → 教�
 3. 数学、英语切换；按年级筛选；手机和平板横屏不超出屏幕
 """
 import os, re
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import tts_spy  # noqa: F401  V5.1：朗读走云端童声，页面里拦截假服务地址
 from playwright.sync_api import expect, sync_playwright
 
 BASE = os.environ.get("BASE", "http://localhost:8081")

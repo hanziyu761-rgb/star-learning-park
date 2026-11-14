@@ -6,6 +6,9 @@ AI 服务使用本地 MOCK 模式（server/ai-worker: MOCK_LLM=1 node dev-server
 只验证 APP 与服务之间的接通和界面流程，不代表真实 DeepSeek 回答质量。
 """
 import json, os, re, sys
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import tts_spy  # noqa: F401  V5.1：朗读走云端童声，页面里拦截假服务地址
 from playwright.sync_api import sync_playwright, expect
 
 BASE = os.environ.get("BASE", "http://localhost:8081")
@@ -64,6 +67,7 @@ with sync_playwright() as p:
 
     # ---------- 家长开启 AI ----------
     tid(page, "parent-entry").click(); gate(page)
+    tid(page, "pc-settings").click(); page.wait_for_selector('[data-testid="parent-settings"]')  # V5.1 家长中心分页
     tid(page, "ai-url").fill(AI)
     tid(page, "ai-test").click()
     expect(tid(page, "ai-check-result")).to_contain_text("连接成功")
@@ -71,6 +75,7 @@ with sync_playwright() as p:
     page.wait_for_timeout(300)
     page.screenshot(path=f"{OUT}/v2-01-parent-ai.png", full_page=True)
     ok("家长中心：填写 AI 服务地址、测试连接成功、开启 AI 老师")
+    tid(page, "back").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')  # V5.1：先回到家长中心首页
     tid(page, "back").click(); page.wait_for_selector('[data-testid="home"]')
 
     # ---------- 问问星星宝 ----------
@@ -148,10 +153,13 @@ with sync_playwright() as p:
 
     # ---------- 家长中心 ----------
     tid(page, "parent-entry").click(); gate(page)
-    expect(page.get_by_text(re.compile("已屏蔽的题目"))).to_be_visible()
-    tid(page, "ai-report").click()
+    tid(page, "pc-report").click(); page.wait_for_selector('[data-testid="parent-report"]')  # V5.1 家长中心分页
+    tid(page, "ai-report").scroll_into_view_if_needed(); tid(page, "ai-report").click()
     expect(tid(page, "ai-report-text")).to_contain_text("测试回复")
     page.screenshot(path=f"{OUT}/v2-05-parent-report.png", full_page=True)
+    tid(page, "back").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')
+    tid(page, "pc-settings").click(); page.wait_for_selector('[data-testid="parent-settings"]')  # V5.1 家长中心分页
+    expect(page.get_by_text(re.compile("已屏蔽的题目"))).to_be_visible()
     ok("家长中心：AI 学习分析返回结果；显示已屏蔽题目，可一键恢复")
     tid(page, "unhide-all").click()
     expect(page.get_by_text(re.compile("已屏蔽的题目"))).to_have_count(0)

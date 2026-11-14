@@ -1,20 +1,17 @@
 /**
- * 发音（V2.21 全 APP 统一“星星宝童声”）：
+ * 发音（V5.1 只用星星宝童声，不再用手机自带语音）：
  * 1. 预先录好的童声录音（固定内容，没网也能听）
  * 2. 手机里存过的云端童声（随机出的题，第一次联网合成后存下）
- * 3. 联网用云端童声现念（阿里云百炼 CosyVoice 龙呼呼，经自家 AI 服务，APP 里没有密钥）
- * 4. 都不行（没网、没配置）时才用手机自带语音（expo-speech），音调调高一点接近童声
+ * 3. 联网用云端童声现念（阿里云百炼，经自家 AI 服务，APP 里没有密钥）
+ * 3 也不行（没网、没设置 AI 服务、服务出错）时不出声，并发出“朗读出问题”通知，页面上提示一句（SpeechNotice）。
  */
-import * as Speech from 'expo-speech';
 import { clipId, findClip, playClip, playUri, stopClip } from './clips';
 import { cachedTts, saveTts } from './ttsCache';
 import type { Speakable } from '@/lesson/types';
 
-/* ───── 朗读声音：V2.21 起只有童声；这里的设置只影响语速和没网时备用的手机语音 ───── */
+/* ───── 朗读设置：只剩语速（gender、zh、en 是旧版手机语音的设置，保留字段兼容旧记录，不再使用） ───── */
 export interface VoicePrefs {
-  /** V2.21 起固定为童声（保留字段兼容旧记录）；手机语音用女声调高音调 */
   gender: 'female' | 'male' | 'child';
-  /** 指定的中文、英语声音（手机语音引擎里的声音编号；空 = 用默认声音） */
   zh: string;
   en: string;
   rate: 'slow' | 'normal';
@@ -22,29 +19,6 @@ export interface VoicePrefs {
 let prefs: VoicePrefs = { gender: 'child', zh: '', en: '', rate: 'slow' };
 export function setVoicePrefs(p: VoicePrefs) {
   prefs = p;
-}
-export const getVoicePrefs = () => prefs;
-
-/** 语速：慢一点更适合低年级孩子 */
-const RATE: Record<VoicePrefs['rate'], Record<Speakable['lang'], number>> = {
-  slow: { 'zh-CN': 0.78, 'en-US': 0.72 },
-  normal: { 'zh-CN': 0.9, 'en-US': 0.85 },
-};
-/** 音调：女声稍亮一点显得亲切；男声用自然音调（没有男声音色的手机上稍低一点） */
-export function pitchFor(p: VoicePrefs, lang: Speakable['lang']): number {
-  const picked = lang === 'zh-CN' ? p.zh : p.en;
-  if (p.gender === 'child') return 1.3;
-  if (p.gender === 'female') return 1.12;
-  return picked ? 1.0 : 0.82;
-}
-export function speechOptions(item: Speakable, p: VoicePrefs = prefs) {
-  const voice = item.lang === 'zh-CN' ? p.zh : p.en;
-  return {
-    language: item.lang,
-    rate: RATE[p.rate][item.lang],
-    pitch: pitchFor(p, item.lang),
-    ...(voice ? { voice } : {}),
-  };
 }
 
 type Listener = (speaking: boolean) => void;
@@ -60,7 +34,19 @@ export function onSpeakingChange(listener: Listener): () => void {
   return () => listeners.delete(listener);
 }
 
-/* ───── 云端童声（V2.18 星星宝；V2.21 起所有没有预录的句子都用它）；没开启、没网或出错时改用手机语音 ───── */
+/* ───── 朗读出问题（V5.1）：没网或没设置 AI 服务时，页面上提示一句 ───── */
+export type SpeechProblem = 'offline' | 'no-service';
+type ProblemListener = (p: SpeechProblem) => void;
+const problemListeners = new Set<ProblemListener>();
+export function onSpeechProblem(l: ProblemListener): () => void {
+  problemListeners.add(l);
+  return () => problemListeners.delete(l);
+}
+function problem(p: SpeechProblem) {
+  problemListeners.forEach((l) => l(p));
+}
+
+/* ───── 云端童声（V2.18 星星宝；V2.21 起所有没有预录的句子都用它） ───── */
 type CloudVoice = (item: Speakable) => Promise<string>;
 let cloudVoice: CloudVoice | null = null;
 export function setCloudVoice(f: CloudVoice | null) {
@@ -76,8 +62,8 @@ let prefetchPausedUntil = 0;
 export const _resetPrefetchPause = () => {
   prefetchPausedUntil = 0;
 };
-/** 联网合成最多等这么久，超时这一次先用手机语音读（合成好的仍会存下，下次就是童声） */
-export const CLOUD_WAIT_MS = 1500;
+/** 联网合成最多等这么久（云函数刚醒时第一次要几秒）；超时算没连上，不出声 */
+export const CLOUD_WAIT_MS = 15_000;
 
 function fetchCloud(item: Speakable, cid: string): Promise<string> {
   const running = inflight.get(cid);
@@ -113,69 +99,49 @@ export function speakablesOf(ex: { prompt?: { speak?: Speakable }; listen?: Spea
 }
 
 /** 打断当前朗读，立即朗读新内容 */
-export function speak(item: Speakable, onDone?: () => void, override?: { voice?: string }): void {
+export function speak(item: Speakable, onDone?: () => void): void {
   const id = ++speakingId;
-  Speech.stop();
   stopClip();
   notify(true);
   const finish = () => {
     if (id === speakingId) notify(false);
     onDone?.();
   };
-  const phone = () => phoneSpeak(item, id, finish, override);
-  // 试听手机里的某个声音：直接用手机语音
-  if (override?.voice) return phone();
+  /** 读不出来：不出声，提示一句，照常往下走（不卡住课程） */
+  const fail = (p: SpeechProblem) => {
+    if (id !== speakingId) return;
+    problem(p);
+    finish();
+  };
   const rate = prefs.rate === 'slow' ? 1 : 1.12; // 录音是正常语速：慢一点 = 原速，正常 = 稍快播放
   // 1. 预先录好的童声
   if (!item.cloud && playClip(item, rate, finish)) return;
   // 2. 手机里存过的云端童声
   const cid = clipId(item.lang, item.text.trim());
   const local = cachedTts(cid);
-  if (local && playUri(local, finish, () => id === speakingId && phone(), rate)) return;
-  // 3. 联网现念（题目朗读最多等 CLOUD_WAIT_MS；星星宝的回答每次不同，一直等）
-  if (cloudVoice) {
-    let settled = false;
-    const fallback = () => {
+  if (local && playUri(local, finish, () => fail('offline'), rate)) return;
+  // 3. 联网现念
+  if (!cloudVoice) return fail('no-service');
+  let settled = false;
+  const timer = setTimeout(() => {
+    if (settled) return;
+    settled = true;
+    fail('offline');
+  }, CLOUD_WAIT_MS);
+  fetchCloud(item, cid).then(
+    (uri) => {
+      clearTimeout(timer);
+      if (settled || id !== speakingId) return; // 已经超时，或被新的朗读打断
+      settled = true;
+      if (!playUri(uri, finish, () => fail('offline'), rate)) fail('offline');
+    },
+    () => {
+      clearTimeout(timer);
       if (settled) return;
       settled = true;
-      if (id === speakingId) phone();
-    };
-    const timer = item.cloud ? null : setTimeout(fallback, CLOUD_WAIT_MS);
-    fetchCloud(item, cid).then(
-      (uri) => {
-        if (timer) clearTimeout(timer);
-        if (settled || id !== speakingId) return; // 已经超时改用手机语音，或被新的朗读打断
-        settled = true;
-        if (!playUri(uri, finish, () => id === speakingId && phone(), rate)) phone();
-      },
-      () => {
-        if (timer) clearTimeout(timer);
-        fallback();
-      },
-    );
-    return;
-  }
-  // 4. 手机语音
-  phone();
-}
-
-function phoneSpeak(item: Speakable, id: number, finish: () => void, override?: { voice?: string }) {
-  try {
-    Speech.speak(item.text, {
-      ...speechOptions(item),
-      // 试听某个声音时临时指定
-      ...(override?.voice
-        ? { voice: override.voice, pitch: prefs.gender === 'male' ? 1.0 : prefs.gender === 'child' ? 1.3 : 1.12 }
-        : {}),
-      onDone: finish,
-      onStopped: () => {
-        if (id === speakingId) notify(false);
-      },
-      onError: finish,
-    });
-  } catch {
-    finish();
-  }
+      fail('offline');
+    },
+  );
 }
 
 /** 依次朗读多段内容 */
@@ -195,96 +161,9 @@ export function speakSequence(items: Speakable[], onDone?: () => void): void {
 
 export function stopSpeaking(): void {
   speakingId++;
-  Speech.stop();
   stopClip();
   notify(false);
 }
 
 export const zhSpeak = (text: string): Speakable => ({ text, lang: 'zh-CN' });
 export const enSpeak = (text: string): Speakable => ({ text, lang: 'en-US' });
-
-/** 声音检查（V2.15）：本机有没有中文、英语的语音。部分安卓手机检测不准，所以还要配合“试听”按钮 */
-export interface VoiceCheck {
-  total: number;
-  zh: boolean;
-  en: boolean;
-}
-
-export function summarizeVoices(voices: { language?: string }[]): VoiceCheck {
-  const langs = voices.map((v) => (v.language ?? '').toLowerCase().replace('_', '-'));
-  return {
-    total: voices.length,
-    zh: langs.some((l) => l.startsWith('zh') || l.startsWith('cmn')),
-    en: langs.some((l) => l.startsWith('en')),
-  };
-}
-
-export async function checkVoices(): Promise<VoiceCheck> {
-  try {
-    // 有的浏览器、手机一直不返回语音列表：最多等 3 秒，按“没检测到”处理（仍可点试听确认）
-    const timeout = new Promise<{ language?: string }[]>((resolve) => setTimeout(() => resolve([]), 3000));
-    return summarizeVoices(await Promise.race([Speech.getAvailableVoicesAsync(), timeout]));
-  } catch {
-    return { total: 0, zh: false, en: false };
-  }
-}
-
-/* ───── 手机里有哪些声音、是男声还是女声 ───── */
-export interface VoiceInfo {
-  id: string;
-  name: string;
-  lang: 'zh-CN' | 'en-US';
-  /** 根据声音名字推测的性别（推测不出为 unknown，需要试听） */
-  gender: 'female' | 'male' | 'unknown';
-  /** 需要联网的声音 */
-  network: boolean;
-}
-
-/*
- * 常见语音引擎的命名：三星 SMTf（女）/ SMTm（男）；谷歌离线声音代号（据公开资料整理，可能随版本变化，所以界面上写“可能是”并提供试听）。
- */
-const GOOGLE_FEMALE = ['ccc', 'cce', 'ssa', 'sfg', 'iog', 'tpc', 'tpf', 'iob'];
-const GOOGLE_MALE = ['ccd', 'iom', 'iol', 'tpd'];
-
-export function guessGender(v: { identifier?: string; name?: string }): VoiceInfo['gender'] {
-  const s = `${v.identifier ?? ''} ${v.name ?? ''}`.toLowerCase();
-  if (/female|woman|girl|smtf|#f\b|[-_]f\d{2}/.test(s)) return 'female';
-  if (/\bmale|\bman\b|boy|smtm|#m\b|[-_]m\d{2}/.test(s)) return 'male';
-  const code = s.match(/-x-([a-z]{3})/)?.[1];
-  if (code && GOOGLE_FEMALE.includes(code)) return 'female';
-  if (code && GOOGLE_MALE.includes(code)) return 'male';
-  return 'unknown';
-}
-
-export function listVoices(raw: { identifier: string; name: string; language: string }[]): VoiceInfo[] {
-  const out: VoiceInfo[] = [];
-  for (const v of raw) {
-    const l = (v.language ?? '').toLowerCase().replace('_', '-');
-    const lang = l.startsWith('zh') || l.startsWith('cmn') ? 'zh-CN' : l.startsWith('en') ? 'en-US' : null;
-    // 只要普通话和美式/英式英语（粤语、台湾腔等先不列）
-    if (!lang || /yue|hk|tw/.test(l)) continue;
-    out.push({
-      id: v.identifier,
-      name: v.name,
-      lang,
-      gender: guessGender(v),
-      network: /network/i.test(`${v.identifier} ${v.name}`),
-    });
-  }
-  // 离线声音排前面（不用网络也能读）
-  return out.sort((a, b) => Number(a.network) - Number(b.network));
-}
-
-/** 按“女声 / 男声”自动挑一个声音；推测不出性别时返回空（用默认声音） */
-export function pickVoice(voices: VoiceInfo[], lang: VoiceInfo['lang'], gender: 'female' | 'male'): string {
-  return voices.find((v) => v.lang === lang && v.gender === gender)?.id ?? '';
-}
-
-export async function getVoices(): Promise<VoiceInfo[]> {
-  try {
-    const timeout = new Promise<[]>((resolve) => setTimeout(() => resolve([]), 3000));
-    return listVoices(await Promise.race([Speech.getAvailableVoicesAsync(), timeout]));
-  } catch {
-    return [];
-  }
-}

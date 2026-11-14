@@ -1,15 +1,12 @@
 /**
- * V2.15 真机试用准备：版本号一致、只申请必要权限、声音检查。
+ * V2.15 真机试用准备：版本号一致、只申请必要权限、显示版本号。
  */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import * as Speech from 'expo-speech';
+import { render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import { ProgressProvider } from '@/progress/ProgressContext';
 import { VoiceCheckCard } from '@/screens/VoiceCheckCard';
-import { summarizeVoices } from '@/speech/speech';
 import { APP_VERSION } from '@/version';
 
-// 这里测手机语音：不带预先录好的录音（录音播放见 clips.test.ts）
 jest.mock('@/speech/voiceClips', () => ({ CLIP_VOICES: {}, CLIPS: { f: {}, m: {}, c: {} } }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -40,45 +37,15 @@ describe('打包配置', () => {
   });
 });
 
-describe('声音检查', () => {
-  it('按语言识别中文、英语语音（兼容 zh_CN、cmn、en-GB 等写法）', () => {
-    expect(summarizeVoices([])).toEqual({ total: 0, zh: false, en: false });
-    expect(summarizeVoices([{ language: 'zh_CN' }, { language: 'en-GB' }])).toEqual({ total: 2, zh: true, en: true });
-    expect(summarizeVoices([{ language: 'cmn-Hans-CN' }])).toMatchObject({ zh: true, en: false });
-  });
-
-  it('没检测到语音时显示设置方法；试听按钮用中文、英语朗读；显示版本号', async () => {
+describe('声音设置卡片显示版本号', () => {
+  // V5.1 起不用手机语音，“检查手机里有没有中文、英语语音”的功能已去掉（试听走云端童声，见 voice.test.tsx）
+  it('显示当前版本号', async () => {
     await render(
       <ProgressProvider>
         <VoiceCheckCard />
       </ProgressProvider>,
     );
-    await waitFor(() => expect(screen.getByTestId('voice-tip')).toBeTruthy());
-    expect(screen.getByTestId('voice-result').props.children).toContain('没检测到');
-    await fireEvent.press(screen.getByTestId('voice-test-zh'));
-    expect(Speech.speak).toHaveBeenLastCalledWith(
-      '小朋友你好，我们一起来学习吧！',
-      expect.objectContaining({ language: 'zh-CN' }),
-    );
-    await fireEvent.press(screen.getByTestId('voice-test-en'));
-    expect(Speech.speak).toHaveBeenLastCalledWith(
-      'Hello! Let’s learn together.',
-      expect.objectContaining({ language: 'en-US' }),
-    );
+    await waitFor(() => expect(screen.getByTestId('app-version')).toBeTruthy());
     expect(screen.getByTestId('app-version').props.children).toContain(APP_VERSION);
-  });
-
-  it('两种语音都有时不显示设置提示', async () => {
-    (Speech.getAvailableVoicesAsync as jest.Mock).mockResolvedValueOnce([
-      { identifier: 'a', name: 'a', language: 'zh-CN' },
-      { identifier: 'b', name: 'b', language: 'en-US' },
-    ]);
-    await render(
-      <ProgressProvider>
-        <VoiceCheckCard />
-      </ProgressProvider>,
-    );
-    await waitFor(() => expect(screen.getByTestId('voice-result').props.children).toContain('✅ 有'));
-    expect(screen.queryByTestId('voice-tip')).toBeNull();
   });
 });

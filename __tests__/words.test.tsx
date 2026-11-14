@@ -16,6 +16,7 @@ import { ALL_CARDS, CARD_BY_ID, UNIT_BY_ID, WORD_UNITS } from '@/words/catalog';
 import { isCorrectSpelling, letterTiles, pickDictation } from '@/words/dictation';
 import { forget, isDone, randomNext, remember, startRound, timesShown } from '@/words/session';
 import { COLOR_WORDS, confusables, families, hiddenWords, LOOK_WORDS, oneLetterDiff, segments } from '@/words/tricks';
+import { setCloudVoice } from '@/speech/speech';
 
 jest.mock('@/components/Mascot', () => ({ Mascot: () => null }));
 jest.mock('@/speech/voiceClips', () => ({ CLIP_VOICES: {}, CLIPS: { f: {}, m: {}, c: {} } }));
@@ -197,17 +198,21 @@ async function renderPage(grade = 1) {
 const frontWord = () => screen.getByTestId('wc-word').props.children?.props?.accessibilityLabel as string | undefined;
 
 afterEach(async () => {
+  setCloudVoice(null);
   await AsyncStorage.clear();
 });
 
 describe('单词卡页面', () => {
   it('一年级默认显示启蒙单元；点喇叭用美式英语读；翻转、收藏红心、没记住隔 3 张再出现', async () => {
     await renderPage(1);
+    const cloud = jest.fn(async () => 'https://oss.example/w.mp3');
+    setCloudVoice(cloud);
     expect(screen.getByTestId('wc-unit-talk-1').props.accessibilityState.selected).toBe(true);
     expect(screen.getByTestId('wc-progress')).toHaveTextContent(/本单元已记住 0\/4/);
     expect(screen.getByTestId('wc-ipa')).toHaveTextContent(/\/bɔɪ\//);
     await fireEvent.press(within(screen.getByTestId('wc-front')).getByTestId('wc-speak'));
-    expect(Speech.speak).toHaveBeenLastCalledWith('boy', expect.objectContaining({ language: 'en-US' }));
+    expect(cloud).toHaveBeenLastCalledWith(expect.objectContaining({ text: 'boy', lang: 'en-US' }));
+    expect(Speech.speak).not.toHaveBeenCalled();
     // 翻转 → 背面出现中文和“没记住/记住了”
     expect(screen.queryByTestId('wc-forget')).toBeNull();
     await fireEvent.press(screen.getByTestId('wc-flip'));
@@ -276,13 +281,15 @@ describe('单词卡页面', () => {
 
   it('听写：字母按键拼对、输入框拼错（显示正确拼写，自动进生词本）', async () => {
     await renderPage(1);
+    const cloud = jest.fn(async () => 'https://oss.example/w.mp3');
+    setCloudVoice(cloud);
     await fireEvent.press(screen.getByTestId('wc-dictation'));
     const modal = await screen.findByTestId('dict-modal');
     expect(within(modal).getByTestId('dict-progress')).toHaveTextContent(/第 1 \/ 4 题/);
     const zhText = String(within(modal).getByTestId('dict-zh').props.children);
     const answerOf = (z: string) => UNIT_BY_ID.get('talk-1')!.cards.find((c) => c.zh === z)!.w;
     const word = answerOf(zhText);
-    expect(Speech.speak).toHaveBeenLastCalledWith(word, expect.objectContaining({ language: 'en-US' }));
+    expect(cloud).toHaveBeenLastCalledWith(expect.objectContaining({ text: word, lang: 'en-US' }));
     // 按字母键拼出正确答案
     const tiles = within(modal).getAllByTestId(/^dict-tile-/);
     const used = new Set<number>();

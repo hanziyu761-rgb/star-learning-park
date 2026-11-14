@@ -1,18 +1,19 @@
 /**
  * 云端童声（阿里云百炼 CosyVoice 龙呼呼，经自家 AI 服务）：
- * V2.18 只用于星星宝的话；V2.21 起所有没有预录的句子都用它，念过的存在手机里；没开、没网、出错时改用手机语音。
+ * V2.18 只用于星星宝的话；V2.21 起所有没有预录的句子都用它，念过的存在手机里。
+ * V5.1 起不再用手机语音：没网、没设置服务、出错时不出声，并发出“朗读出问题”通知（页面上提示一句）。
  * 真实合成效果需要在服务端配置百炼密钥后用手机实测。
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { render, waitFor } from '@testing-library/react-native';
 import * as Audio from 'expo-audio';
-import * as Speech from 'expo-speech';
 import React from 'react';
 import { AI_VOICE, aiTts } from '@/ai/client';
 import { createEmptyProgress } from '@/progress/model';
 import { ProgressProvider } from '@/progress/ProgressContext';
 import { STORAGE_KEY } from '@/progress/storage';
-import { hasCloudVoice, setCloudVoice, speak } from '@/speech/speech';
+import * as Speech from 'expo-speech';
+import { CLOUD_WAIT_MS, hasCloudVoice, onSpeechProblem, onSpeakingChange, setCloudVoice, speak, type SpeechProblem } from '@/speech/speech';
 
 jest.mock('@/speech/voiceClips', () => ({ CLIP_VOICES: {}, CLIPS: { c: { '548a266d': 99 } } }));
 // 手机里的缓存：用内存代替文件
@@ -60,18 +61,39 @@ describe('朗读走云端语音', () => {
     expect(Speech.speak).not.toHaveBeenCalled();
   });
 
-  it('云端出错：改用手机语音；没开启：直接用手机语音', async () => {
+  it('云端出错、没设置服务、太久没回应：不用手机语音，不出声；提示一句，朗读照常结束（课程不卡住）', async () => {
+    const problems: SpeechProblem[] = [];
+    const off = onSpeechProblem((p) => problems.push(p));
+    const speaking: boolean[] = [];
+    const off2 = onSpeakingChange((v) => speaking.push(v));
+    const done = jest.fn();
     setCloudVoice(async () => {
       throw new Error('net');
     });
-    (Speech.speak as jest.Mock).mockClear();
-    speak({ text: '你真棒', lang: 'zh-CN', cloud: true });
+    speak({ text: '你真棒', lang: 'zh-CN', cloud: true }, done);
     await flush();
-    expect(Speech.speak).toHaveBeenCalledWith('你真棒', expect.anything());
+    expect(problems).toEqual(['offline']);
+    expect(done).toHaveBeenCalledTimes(1);
+    expect(speaking[speaking.length - 1]).toBe(false);
+
     setCloudVoice(null);
-    (Speech.speak as jest.Mock).mockClear();
-    speak({ text: '再想想', lang: 'zh-CN', cloud: true });
-    expect(Speech.speak).toHaveBeenCalledWith('再想想', expect.anything());
+    speak({ text: '再想想', lang: 'zh-CN', cloud: true }, done);
+    expect(problems).toEqual(['offline', 'no-service']);
+    expect(done).toHaveBeenCalledTimes(2);
+
+    jest.useFakeTimers();
+    setCloudVoice(() => new Promise<string>(() => undefined)); // 一直不回应
+    speak({ text: '慢慢来', lang: 'zh-CN', cloud: true }, done);
+    jest.advanceTimersByTime(CLOUD_WAIT_MS - 1);
+    expect(done).toHaveBeenCalledTimes(2);
+    jest.advanceTimersByTime(1);
+    expect(problems).toEqual(['offline', 'no-service', 'offline']);
+    expect(done).toHaveBeenCalledTimes(3);
+    jest.useRealTimers();
+
+    expect(Speech.speak).not.toHaveBeenCalled(); // 手机语音一次都没用
+    off();
+    off2();
   });
 
   it('请求服务端 /api/tts：带音色和语速；同一句话不重复请求', async () => {
@@ -95,11 +117,14 @@ describe('跟着家长设置', () => {
     await flush();
     return r;
   }
-  it('“联网童声朗读”开着就用云端童声（不需要先开 AI 老师）；关掉就不用；旧记录里的女声 / 男声改成童声', async () => {
+  it('设置了 AI 服务地址就用云端童声（不需要先开 AI 老师）；V5.1 起旧记录里关掉的“联网童声”也照样用；没有地址就没有', async () => {
     await mount({ aiEnabled: false, aiBaseUrl: 'https://ai.example.com', voiceGender: 'male' });
     await waitFor(() => expect(hasCloudVoice()).toBe(true));
     const r2 = await mount({ aiEnabled: true, aiBaseUrl: 'https://ai.example.com', aiCloudVoice: false });
-    await waitFor(() => expect(hasCloudVoice()).toBe(false));
+    await waitFor(() => expect(hasCloudVoice()).toBe(true));
     r2.unmount();
+    const r3 = await mount({ aiBaseUrl: '' });
+    await waitFor(() => expect(hasCloudVoice()).toBe(false));
+    r3.unmount();
   });
 });

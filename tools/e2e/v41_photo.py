@@ -10,6 +10,9 @@ V4.1 端到端验收（网页版）：家长中心 → 拍照错题
 import json, os, re, subprocess, threading, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from PIL import Image, ImageDraw
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import tts_spy  # noqa: F401  V5.1：朗读走云端童声，页面里拦截假服务地址
 from playwright.sync_api import expect, sync_playwright
 
 BASE = os.environ.get("BASE", "http://localhost:8081")

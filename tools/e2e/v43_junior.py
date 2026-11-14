@@ -5,6 +5,9 @@ V4.3 端到端验收（网页版）：初中
 3. 教材资源库：七年级默认打开“统编版（初中）”，能看到七年级上册目录；数学人教版（初中）九年级下册标“未修订版”；英语冀教版（初中）九年级下册提示没有资料
 """
 import os, re
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import tts_spy  # noqa: F401  V5.1：朗读走云端童声，页面里拦截假服务地址
 from playwright.sync_api import expect, sync_playwright
 
 BASE = os.environ.get("BASE", "http://localhost:8081")
@@ -31,6 +34,8 @@ with sync_playwright() as p:
         before = page.evaluate(PY)
         assert before > 0, "小学默认应该有拼音"
         gate(page)
+        expect(tid(page, "pinyin-switch")).to_be_visible()
+        tid(page, "pc-settings").click(); page.wait_for_selector('[data-testid="parent-settings"]')  # V5.1 家长中心分页
         assert tid(page, "grade-9").count() == 1
         tid(page, "grade-7").scroll_into_view_if_needed(); tid(page, "grade-7").click()
         expect(tid(page, "grade-junior-note")).to_have_text("初中：不标拼音。目前只有课本目录，没有初中的课程和练习。")
@@ -38,6 +43,8 @@ with sync_playwright() as p:
         ok(f"{w}×{h}：年级可选到九年级；选七年级后显示初中说明")
 
         # 教材资源库默认打开初中课本
+        tid(page, "back").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')  # V5.1：设置页回到家长中心首页
+        assert not tid(page, "pinyin-switch").locator("input").is_checked()  # 初中默认不标拼音
         tid(page, "parent-textbooks").scroll_into_view_if_needed(); tid(page, "parent-textbooks").click()
         page.wait_for_selector('[data-testid="textbooks-screen"]')
         tid(page, "tb-dd-term").click(); tid(page, "tb-dd-term-opt-上").click()
@@ -68,12 +75,25 @@ with sync_playwright() as p:
         assert page.evaluate(PY) == 0, f"初中首页不应有拼音，实际 {page.evaluate(PY)}"
         page.screenshot(path=f"{OUT}/v43-home-junior-{w}.png", full_page=True)
         gate(page)
+        tid(page, "pc-settings").click(); page.wait_for_selector('[data-testid="parent-settings"]')  # V5.1 家长中心分页
         tid(page, "grade-6").scroll_into_view_if_needed(); tid(page, "grade-6").click()
         assert tid(page, "grade-junior-note").count() == 0
         page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
         page.wait_for_timeout(500)
         assert page.evaluate(PY) > 0
         ok(f"{w}×{h}：七年级首页汉字不标拼音（原来 {before} 处拼音 → 0）；改回六年级拼音恢复")
+
+        # V5.1：家长中心首页“显示拼音”开关：关掉后小学也不标，打开恢复
+        gate(page)
+        tid(page, "pinyin-switch").click()
+        page.goto(BASE); page.wait_for_selector('[data-testid="home"]'); page.wait_for_timeout(500)
+        assert page.evaluate(PY) == 0, "关掉拼音后首页不应有拼音"
+        page.screenshot(path=f"{OUT}/v51-pinyin-off-{w}.png")
+        gate(page)
+        tid(page, "pinyin-switch").click()
+        page.goto(BASE); page.wait_for_selector('[data-testid="home"]'); page.wait_for_timeout(500)
+        assert page.evaluate(PY) > 0
+        ok(f"{w}×{h}：家长中心首页“显示拼音”关掉后首页不标拼音，再打开恢复")
         page.close()
     assert not errors, errors
     b.close()

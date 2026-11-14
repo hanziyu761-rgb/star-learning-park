@@ -4,6 +4,7 @@ import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { OrientationGate } from '@/components/OrientationGate';
+import { SpeechNotice } from '@/components/SpeechNotice';
 import { SplashGate } from '@/components/SplashGate';
 import { NavProvider } from '@/nav/Nav';
 import { expoRouterNav } from '@/nav/expoRouterNav';
@@ -41,6 +42,8 @@ function AppStack() {
           fullScreenGestureEnabled: true,
         }}
       />
+      {/* 朗读出问题时顶部提示一句（盖在页面上面） */}
+      <SpeechNotice />
     </>
   );
 }

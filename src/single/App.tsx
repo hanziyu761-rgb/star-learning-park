@@ -29,6 +29,7 @@ import MistakesScreen from '@/screens/MistakesScreen';
 import TextbooksScreen from '@/screens/TextbooksScreen';
 import { SplashGate } from '@/components/SplashGate';
 import { colors } from '@/theme';
+import { SpeechNotice } from '@/components/SpeechNotice';
 
 function renderRoute(route: Route) {
   switch (route.name) {
@@ -121,6 +122,7 @@ function Page({ pageKey, dir, children }: { pageKey: number; dir: 'push' | 'back
           {children}
         </Animated.View>
       </View>
+      <SpeechNotice />
     </>
   );
 }

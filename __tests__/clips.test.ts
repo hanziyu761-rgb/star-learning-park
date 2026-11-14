@@ -1,10 +1,10 @@
 /**
- * 预先录好的朗读：编号与生成脚本一致；有录音放录音，没有录音（又没开联网童声）用手机语音。
+ * 预先录好的朗读：编号与生成脚本一致；有录音放录音，没有录音就联网用云端童声（V5.1 起不用手机语音）。
  * V2.21 起只有一套童声录音（中英文同一个声音）。
  */
 import * as Speech from 'expo-speech';
 import { clipId } from '@/speech/clips';
-import { setVoicePrefs, speak } from '@/speech/speech';
+import { setCloudVoice, setVoicePrefs, speak } from '@/speech/speech';
 
 jest.mock('@/speech/voiceClips', () => {
   // 与 clipId('zh-CN', '你好') 相同的编号（由 tools/voice/generate.py 的 clip_id 算出）
@@ -60,13 +60,16 @@ describe('朗读时优先放录音', () => {
     expect(audio.createAudioPlayer).toHaveBeenLastCalledWith(313);
   });
 
-  it('没有录音又没开联网童声：用手机语音（音调调高接近童声）；试听某个手机声音时也用手机语音', () => {
+  it('没有录音：联网用云端童声念，不用手机语音', async () => {
     setVoicePrefs({ gender: 'child', zh: '', en: '', rate: 'slow' });
+    const cloud = jest.fn(async () => 'https://oss.example/q.mp3');
+    setCloudVoice(cloud);
     speak({ text: '一道题库题', lang: 'zh-CN' });
-    expect(audio.createAudioPlayer).not.toHaveBeenCalled();
-    expect(Speech.speak).toHaveBeenLastCalledWith('一道题库题', expect.objectContaining({ pitch: 1.3 }));
-    speak({ text: '你好', lang: 'zh-CN' }, undefined, { voice: 'x' });
-    expect(Speech.speak).toHaveBeenLastCalledWith('你好', expect.objectContaining({ voice: 'x' }));
+    expect(cloud).toHaveBeenCalledWith(expect.objectContaining({ text: '一道题库题', lang: 'zh-CN' }));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(audio.createAudioPlayer).toHaveBeenLastCalledWith({ uri: 'https://oss.example/q.mp3' });
+    expect(Speech.speak).not.toHaveBeenCalled();
+    setCloudVoice(null);
   });
 
   it('新的朗读会停掉正在放的录音', () => {

@@ -6,6 +6,10 @@ export const GRADE_CN = ['', '一', '二', '三', '四', '五', '六', '七', '�
 export const ALL_GRADES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 export const MAX_CONTENT_GRADE = 6;
 
+/** 要不要隐藏拼音（V5.1）：家长选了“显示 / 不显示”就按家长的；没选过时小学显示、初中不显示 */
+export const pinyinHidden = (s: { grade?: number; pinyin?: 'auto' | 'on' | 'off' }) =>
+  s.pinyin === 'off' || (s.pinyin !== 'on' && isJunior(s.grade));
+
 /** 初中：七年级及以上 */
 export const isJunior = (grade: number | undefined) => (grade ?? 1) >= 7;
 

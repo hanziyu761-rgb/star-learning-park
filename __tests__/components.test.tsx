@@ -17,8 +17,9 @@ import type {
 } from '@/lesson/types';
 import { ProgressProvider, useProgress } from '@/progress/ProgressContext';
 import { flushProgressWrites } from '@/progress/storage';
+import { setCloudVoice } from '@/speech/speech';
 
-// 这里测手机语音：不带预先录好的录音（录音播放见 clips.test.ts）
+// 不带预先录好的录音（录音播放见 clips.test.ts）：朗读走云端童声
 jest.mock('@/speech/voiceClips', () => ({ CLIP_VOICES: {}, CLIPS: { f: {}, m: {}, c: {} } }));
 
 const choice = (
@@ -70,9 +71,12 @@ describe('选择题', () => {
       listen: { text: '水', lang: 'zh-CN' },
     };
     await render(<ChoiceExercise exercise={ex} lang="zh" onFeedback={() => {}} onSolved={() => {}} />);
-    (Speech.speak as jest.Mock).mockClear();
+    const cloud = jest.fn(async () => 'https://oss.example/s.mp3');
+    setCloudVoice(cloud);
     await fireEvent.press(screen.getByTestId('listen-button'));
-    expect(Speech.speak).toHaveBeenCalledWith('水', expect.objectContaining({ language: 'zh-CN' }));
+    expect(cloud).toHaveBeenLastCalledWith(expect.objectContaining({ text: '水', lang: 'zh-CN' }));
+    expect(Speech.speak).not.toHaveBeenCalled(); // V5.1 起不用手机语音
+    setCloudVoice(null);
   });
 });
 

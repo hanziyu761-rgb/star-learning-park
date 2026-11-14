@@ -4,6 +4,9 @@
 → 去练根因 → 家长中心看到掌握情况、诊断结论、推荐复习计划与判断依据 → 重新打开数据仍在。
 """
 import os, re, json
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import tts_spy  # noqa: F401  V5.1：朗读走云端童声，页面里拦截假服务地址
 from playwright.sync_api import sync_playwright, expect
 
 BASE = os.environ.get("BASE", "http://localhost:8081")
@@ -135,7 +138,8 @@ with sync_playwright() as p:
     page.wait_for_selector('[data-testid="parent-gate"]')
     a, c = map(int, re.findall(r"\d+", tid(page, "gate-question").inner_text())[:2])
     for d in str(a * c): tid(page, f"key-{d}").click()
-    tid(page, "key-确定").click(); page.wait_for_selector('[data-testid="knowledge-card"]')
+    tid(page, "key-确定").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')
+    tid(page, "pc-report").click(); page.wait_for_selector('[data-testid="knowledge-card"]')  # V5.1
     card = tid(page, "knowledge-card")
     card.scroll_into_view_if_needed()
     expect(tid(page, "diag-row")).to_contain_text("需要先补：10 以内数的分与合")

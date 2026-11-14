@@ -13,6 +13,9 @@ import json
 import os
 import re
 
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import tts_spy  # noqa: F401  V5.1：朗读走云端童声，页面里拦截假服务地址
 from playwright.sync_api import expect, sync_playwright
 
 BASE = os.environ.get("BASE", "http://localhost:8081")
@@ -110,7 +113,11 @@ def parent(page):
     tid(page, "parent-entry").click(); page.wait_for_selector('[data-testid="parent-gate"]')
     a, c = map(int, re.findall(r"\d+", tid(page, "gate-question").inner_text())[:2])
     for d in str(a * c): tid(page, f"key-{d}").click()
-    tid(page, "key-确定").click(); page.wait_for_selector('[data-testid="knowledge-card"]')
+    tid(page, "key-确定").click(); page.wait_for_selector('[data-testid="parent-dashboard"]')
+
+def parent_open(page, section):
+    """V5.1：家长中心首页是短列表，点进“学习报告 / 错题 / 设置”"""
+    tid(page, f"pc-{section}").click(); page.wait_for_selector(f'[data-testid="parent-{section}"]')
 
 TONE = re.compile(r"[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]")
 SEEN_TEACH = {}
@@ -132,7 +139,7 @@ with sync_playwright() as p:
     page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
 
     # 1. 家长设置四年级
-    parent(page)
+    parent(page); parent_open(page, "settings")
     tid(page, "grade-4").scroll_into_view_if_needed(); tid(page, "grade-4").click()
     page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
     tid(page, "map-entry").click(); page.wait_for_selector('[data-testid="map-screen"]')
@@ -225,7 +232,7 @@ with sync_playwright() as p:
     ok("语文、英语知识点做题后小地图状态从“还没学”变化；练习前分别出现语文“学习方法”（提问策略）和英语“重点句型”讲解")
 
     # 5. 家长中心
-    parent(page)
+    parent(page); parent_open(page, "report")
     card = tid(page, "knowledge-card"); card.scroll_into_view_if_needed()
     expect(card).to_contain_text("四年级数学")
     expect(tid(page, "diag-row")).to_contain_text("除数是一位数")
