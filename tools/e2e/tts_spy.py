@@ -44,7 +44,8 @@ window.__tts = {};
   window.Audio = function (src) {
     const a = new RealAudio();
     const m = window.__tts[src];
-    if (!m) { a.src = src; return a; }
+    // 没带地址就不设（V5.2 修正：以前设成字符串 undefined，网页会请求 /…/undefined 报 404）
+    if (!m) { if (src !== undefined) a.src = src; return a; }
     a.play = function () {
       %s
       setTimeout(() => { try { a.onended && a.onended(new Event('ended')); } catch (e) {} }, 20);
@@ -65,13 +66,21 @@ def _auto_install() -> None:
         return
     new_page, new_context = G.Browser.new_page, G.Browser.new_context
 
+    import os
+
+    # E2E_DARK=1：所有页面按“手机是深色模式”打开（APP 外观默认跟随手机），用来把脚本在深色模式下再跑一遍
+    def dark(k):
+        if os.environ.get("E2E_DARK"):
+            k.setdefault("color_scheme", "dark")
+        return k
+
     def page(self, *a, **k):
-        p = new_page(self, *a, **k)
+        p = new_page(self, *a, **dark(k))
         p.context.add_init_script(tts_spy("obj"))
         return p
 
     def context(self, *a, **k):
-        c = new_context(self, *a, **k)
+        c = new_context(self, *a, **dark(k))
         c.add_init_script(tts_spy("obj"))
         return c
 

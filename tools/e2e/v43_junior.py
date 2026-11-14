@@ -1,6 +1,6 @@
 """
 V4.3 端到端验收（网页版）：初中
-1. 家长中心把年级设为七年级：出现“初中：不标拼音……没有初中的课程和练习”说明
+1. 家长中心把年级设为七年级：出现“初中：不标拼音……按七～九年级出题”说明（V5.2 起初中有练习）
 2. 回到首页：汉字上方不再有拼音；改回六年级后拼音恢复
 3. 教材资源库：七年级默认打开“统编版（初中）”，能看到七年级上册目录；数学人教版（初中）九年级下册标“未修订版”；英语冀教版（初中）九年级下册提示没有资料
 """
@@ -38,7 +38,7 @@ with sync_playwright() as p:
         tid(page, "pc-settings").click(); page.wait_for_selector('[data-testid="parent-settings"]')  # V5.1 家长中心分页
         assert tid(page, "grade-9").count() == 1
         tid(page, "grade-7").scroll_into_view_if_needed(); tid(page, "grade-7").click()
-        expect(tid(page, "grade-junior-note")).to_have_text("初中：不标拼音。目前只有课本目录，没有初中的课程和练习。")
+        expect(tid(page, "grade-junior-note")).to_have_text("初中：不标拼音。初中的知识点练习、题库、每日挑战、口算、阅读、单词卡、试卷按七～九年级出题（原创，待教师审核）。")  # V5.2 文案
         page.screenshot(path=f"{OUT}/v43-grade-{w}.png", full_page=True)
         ok(f"{w}×{h}：年级可选到九年级；选七年级后显示初中说明")
 
@@ -64,7 +64,7 @@ with sync_playwright() as p:
         expect(tid(page, "tb-not-ready")).to_contain_text("没有这一册的资料")
         tid(page, "tb-dd-term").click(); tid(page, "tb-dd-term-opt-上").click()
         expect(tid(page, "tb-units")).to_contain_text("Unit 6 Looking into science")
-        expect(tid(page, "tb-units")).to_contain_text("初中目前只有目录，没有课程和练习")
+        expect(tid(page, "tb-units")).to_contain_text("初中英语练习按语法项目编排")  # V5.2 文案
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
         page.screenshot(path=f"{OUT}/v43-textbooks-{w}.png", full_page=True)
         ok(f"{w}×{h}：教材资源库默认打开初中课本；三科初中目录能看；九年级下册如实标注（数学未修订版、英语没有这一册）；不超出屏幕")

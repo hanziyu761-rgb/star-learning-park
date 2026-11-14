@@ -120,7 +120,7 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
         >
           <Text style={styles.rowEmoji}>🎒</Text>
           <Text style={[styles.pillText, { flex: 1, color: colors.text }]}>
-            {subject === 'english' ? '小学英语启蒙课' : '小学一年级精做课程'}（{showPrimary ? '收起' : '展开'}）
+            {subject === 'english' ? '小学英语启蒙课' : subject === 'math' ? '小学一年级精做课程、图形乐园' : '小学一年级精做课程'}（{showPrimary ? '收起' : '展开'}）
           </Text>
         </Pressable>
       ) : null}
@@ -162,7 +162,7 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
       })}
       {subject === 'chinese' ? <ReadingHouse state={state} /> : null}
       {subject === 'chinese' ? <WriteSection state={state} /> : null}
-      {subject === 'math' ? <GraphicsSection state={state} /> : null}
+      {subject === 'math' && (!junior || showPrimary) ? <GraphicsSection state={state} /> : null}
       {subject === 'math' ? <OralSection state={state} /> : null}
       <BankSection subject={subject} state={state} />
     </Screen>
