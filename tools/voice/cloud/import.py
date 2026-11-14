@@ -1,7 +1,7 @@
 """
 导入“龙呼呼”童声录音（V2.21）：家长用 record.ps1 调用自家 AI 服务批量录好、打包成 tongsheng.zip 发回。
 用法：python3 tools/voice/cloud/import.py <tongsheng.zip>
-1. 解压到临时目录，按 list.json 核对每一句都有录音
+1. 解压到临时目录，按 list.json 核对每一句都有录音（压缩包里没有的，用已经导入过的录音；V5.2 起可以只发新增的句子）
 2. 转成单声道 24kHz 32kbps（和原来的预录一样省空间）放到 assets/voice/c/
 3. 去掉旧的 Kokoro 女声 / 男声录音（assets/voice/f、m），重写 src/speech/voiceClips.native.ts
 声音：阿里云百炼 CosyVoice（cosyvoice-v3-flash，音色 longhuhu_v3），由 APP 所有者用自己的百炼账号生成。
@@ -21,27 +21,31 @@ def main(zpath: str):
                 with open(os.path.join(tmp, base), "wb") as f:
                     f.write(z.read(n))
     have = {f[:-4] for f in os.listdir(tmp) if os.path.getsize(os.path.join(tmp, f)) > 1000}
-    missing = [x for x in LIST if x["id"] not in have]
+    out_dir = os.path.join(ROOT, "assets/voice/c")
+    existing = {f[:-4] for f in os.listdir(out_dir)} if os.path.isdir(out_dir) else set()
+    # V5.2：可以只补录新增的句子（压缩包里只有新句子），已经导入过的录音保留不动
+    missing = [x for x in LIST if x["id"] not in have and x["id"] not in existing]
     if missing:
         print(f"缺 {len(missing)} 句，例如：", [m["text"] for m in missing[:5]])
         sys.exit(1)
-    out_dir = os.path.join(ROOT, "assets/voice/c")
-    # 旧的童声（Kokoro）文件换掉；女声、男声不再使用
-    for g in ("f", "m", "c"):
+    # 旧的女声、男声（Kokoro）不再使用
+    for g in ("f", "m"):
         d = os.path.join(ROOT, "assets/voice", g)
         if os.path.isdir(d):
             subprocess.run(["git", "rm", "-rq", "--cached", "--ignore-unmatch", f"assets/voice/{g}"], cwd=ROOT, check=True)
             for f in os.listdir(d):
                 os.remove(os.path.join(d, f))
             os.rmdir(d)
-    os.makedirs(out_dir)
-    for i, x in enumerate(LIST):
+    os.makedirs(out_dir, exist_ok=True)
+    todo = [x for x in LIST if x["id"] in have]
+    for i, x in enumerate(todo):
         subprocess.run(
             ["ffmpeg", "-y", "-loglevel", "error", "-i", os.path.join(tmp, x["id"] + ".mp3"), "-ac", "1", "-ar", "24000", "-b:a", "32k", os.path.join(out_dir, x["id"] + ".mp3")],
             check=True,
         )
         if i % 300 == 0:
-            print(f"{i}/{len(LIST)}", flush=True)
+            print(f"{i}/{len(todo)}", flush=True)
+    print(f"导入新录音 {len(todo)} 句，保留原有 {len(LIST) - len(todo)} 句", flush=True)
     lines = [
         "// 自动生成：tools/voice/cloud/import.py，请勿手改。预先录好的朗读（V2.21 全 APP 统一童声）。",
         "// 声音：阿里云百炼 CosyVoice（cosyvoice-v3-flash，音色 longhuhu_v3“龙呼呼”），中文、英语同一个声音；由 APP 所有者用自己的百炼账号生成。",
