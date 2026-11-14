@@ -1,6 +1,6 @@
 """
 导入“龙呼呼”童声录音（V2.21）：家长用 record.ps1 调用自家 AI 服务批量录好、打包成 tongsheng.zip 发回。
-用法：python3 tools/voice/cloud/import.py <tongsheng.zip>
+用法：python3 tools/voice/cloud/import.py <tongsheng.zip> [更多分包.zip …]
 1. 解压到临时目录，按 list.json 核对每一句都有录音（压缩包里没有的，用已经导入过的录音；V5.2 起可以只发新增的句子）
 2. 转成单声道 24kHz 32kbps（和原来的预录一样省空间）放到 assets/voice/c/
 3. 去掉旧的 Kokoro 女声 / 男声录音（assets/voice/f、m），重写 src/speech/voiceClips.native.ts
@@ -12,14 +12,16 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")
 LIST = json.load(open(os.path.join(os.path.dirname(__file__), "list.json"), encoding="utf-8"))
 
 
-def main(zpath: str):
+def main(zpaths: list[str]):
     tmp = tempfile.mkdtemp(prefix="tongsheng-")
-    with zipfile.ZipFile(zpath) as z:
-        for n in z.namelist():
-            base = os.path.basename(n)
-            if base.endswith(".mp3") and len(base) == 12:
-                with open(os.path.join(tmp, base), "wb") as f:
-                    f.write(z.read(n))
+    # 可以分成几个小包发回（聊天里单个文件有大小限制），一起导入
+    for zpath in zpaths:
+        with zipfile.ZipFile(zpath) as z:
+            for n in z.namelist():
+                base = os.path.basename(n)
+                if base.endswith(".mp3") and len(base) == 12:
+                    with open(os.path.join(tmp, base), "wb") as f:
+                        f.write(z.read(n))
     have = {f[:-4] for f in os.listdir(tmp) if os.path.getsize(os.path.join(tmp, f)) > 1000}
     out_dir = os.path.join(ROOT, "assets/voice/c")
     existing = {f[:-4] for f in os.listdir(out_dir)} if os.path.isdir(out_dir) else set()
@@ -62,4 +64,4 @@ def main(zpath: str):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1:])
