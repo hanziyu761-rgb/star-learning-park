@@ -68,7 +68,7 @@ describe('一～六年级知识图谱覆盖', () => {
       for (const u of loadBook(b.id)!.units) {
         if (REVIEW_UNIT.test(u.title)) continue;
         // 初中语文题库《说明文与写作》在七年级上册课本里没有对应单元（V5.2，见 curriculum/junior.ts 说明），只这一个例外
-        if (u.id === 'chinese-g7a-u2' || u.id === 'chinese-g9a-u2') continue; // g9a-u2 剔除错题后只剩 1 道
+        if (u.id === 'chinese-g7a-u2') continue;
         if (!UNIT_TO_KP[u.id]) missing.push(`${u.id} ${u.title}`);
       }
     }

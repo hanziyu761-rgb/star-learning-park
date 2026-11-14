@@ -271,3 +271,48 @@ describe('初中阅读小屋', () => {
     }
   });
 });
+
+describe('初中数学朗读（V5.2）', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { sayMath } = require('@/knowledge/genJunior');
+  it('数学符号读成中文；题目连同算式一起读', () => {
+    expect(sayMath('|−15| 等于多少？')).toBe('负15的绝对值 等于多少？');
+    expect(sayMath('x² − 3x + 2 = 0')).toBe('x的平方 减 3x 加 2 等于 0');
+    expect(sayMath('△ABC ≌ △DEF')).toBe('三角形ABC 全等于 三角形DEF');
+    expect(sayMath('x ≥ −3')).toBe('x 大于或等于 负3');
+    expect(sayMath('-3/4')).toBe('负4分之3');
+    expect(sayMath('(−3)³ = ?')).toBe('(负3)的立方等于多少');
+    const e = kpExercise('m9.a1', 'root:2:1') as ChoiceExercise;
+    expect(e.prompt.speak.text).toBe('解方程，较大的根是多少：x的平方 减 3x 加 2 等于 0');
+    // 屏幕上仍显示原来的符号
+    expect(e.stem?.text).toBe('x² − 3x + 2 = 0');
+    // 所有初中数学题的朗读里不再有读不出的符号
+    const rand = seeded(3);
+    for (const k of MATH_JUNIOR)
+      for (let i = 0; i < 40; i++) {
+        const ex = kpExercise(k.id, JUNIOR_GENERATORS[k.id].make(rand)) as ChoiceExercise;
+        expect(ex.prompt.speak.text).not.toMatch(/[≌∽∠△⊙≥≤≠·√⁰¹²³⁴⁵⁶⁷⁸⁹|±°π−×÷=+]/);
+      }
+  });
+});
+
+describe('家长中心显示知识点名称和题目（V5.2 修正）', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { skillLabel } = require('@/content');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { mistakeLabel } = require('@/content/resolve');
+  it('知识点练习的错题显示题目，不显示编号；skill 显示知识点名称（小学也一样）', () => {
+    expect(skillLabel('m8.b2')).toBe('勾股定理');
+    expect(skillLabel('m2.addsub100')).toBe('100 以内的加法和减法（二）');
+    expect(mistakeLabel('kp:m8.b2', 'kp:m8.b2:hyp:0:1')).toBe('直角三角形两条直角边长 3 和 4，斜边长多少？');
+    expect(mistakeLabel('kp:m9.a1', 'kp:m9.a1:root:2:1')).toBe('解方程，较大的根是多少？ x² − 3x + 2 = 0');
+    expect(mistakeLabel('kp:c8.a3', 'kp:c8.a3:z:0')).toBe('《三峡》的作者是谁？');
+    expect(mistakeLabel('kp:m2.addsub100', 'kp:m2.addsub100:35+28')).toBe('35 + 28 = ?');
+  });
+});
+
+it('英语错题只显示句子，不带统一的英文指令', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { mistakeLabel } = require('@/content/resolve');
+  expect(mistakeLabel('kp:e8.a1', 'kp:e8.a1:p:0')).toBe('This box is ___ than that one.');
+});

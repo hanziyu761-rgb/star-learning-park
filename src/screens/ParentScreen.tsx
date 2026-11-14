@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BackHandler, StyleSheet, Switch, Text, View } from 'react-native';
 import { ListGroup, ListRow } from '@/components/List';
-import { GRADE_CN, pinyinHidden } from '@/progress/grade';
+import { GRADE_CN, isJunior, pinyinHidden } from '@/progress/grade';
 import { Pressable } from '@/components/Tappable';
 import { getLesson, LESSONS, skillLabel } from '@/content';
 import { plainText } from '@/content/zh';
@@ -186,6 +186,8 @@ function ReportPage() {
       <KnowledgeCard />
       <ThinkingCard />
 
+      {/* 初中（V5.2）不显示一、二年级英语启蒙主线 */}
+      {isJunior(state.settings.grade) ? null : (
       <Card>
         <SectionTitle>英语启蒙三条主线（一、二年级）</SectionTitle>
         <Text style={styles.small}>{STARTER_NOTE}</Text>
@@ -205,6 +207,7 @@ function ReportPage() {
           );
         })}
       </Card>
+      )}
 
       <Card>
         <SectionTitle>最近完成的课程</SectionTitle>

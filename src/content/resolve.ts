@@ -96,13 +96,17 @@ export function mistakeLabel(lessonId: string, exerciseId: string): string {
     const r = resolveExercise(lessonId, exerciseId);
     return r && r.exercise.kind === 'choice' ? `拼写：${r.exercise.answerId}` : exerciseId;
   }
-  if (!lessonId.startsWith('bank:') && !lessonId.startsWith('oral:') && !lessonId.startsWith('game:'))
-    return exerciseLabel(lessonId, exerciseId);
+  // 知识点练习、找原因（kp: / diag:）也按题目还原（V5.2 修正：以前只显示题目编号）
+  if (!/^(bank|oral|game|kp|diag):/.test(lessonId)) return exerciseLabel(lessonId, exerciseId);
   const r = resolveExercise(lessonId, exerciseId);
   if (!r) return exerciseId;
   const e = r.exercise;
   const text = (t: string | { char: string }[]) => (typeof t === 'string' ? t : t.map((x) => x.char).join(''));
   if (e.kind === 'truefalse') return text(e.statement.text);
-  if ((e.kind === 'choice' || e.kind === 'input') && e.stem?.text) return text(e.stem.text);
+  if ((e.kind === 'choice' || e.kind === 'input') && e.stem?.text) {
+    // “算一算”这类很短的指令、英语的“Choose the best answer.”只显示题目本身；“解方程，x 等于多少？”这类连同算式一起显示
+    const p = text(e.prompt.text);
+    return /\p{Script=Han}/u.test(p) && Array.from(p).length > 4 ? `${p} ${text(e.stem.text)}` : text(e.stem.text);
+  }
   return text(e.prompt.text);
 }

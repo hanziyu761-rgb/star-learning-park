@@ -17,6 +17,8 @@ import { thinkingProfile } from '@/thinking/profile';
 import { recommendedSubject } from '@/thinking/registry';
 import { dayKey } from '@/progress/srs';
 import { computeMastery } from '@/knowledge/mastery';
+import { kpsFor } from '@/knowledge/graph';
+import { contentGrade, GRADE_CN } from '@/progress/grade';
 import { recommendKps } from '@/knowledge/recommend';
 import { nextUp } from '@/progress/nextUp';
 import { completedSubjectToday, isSameLocalDay, SUBJECTS } from '@/progress/stats';
@@ -81,6 +83,17 @@ export default function HomeScreen() {
 
   const active = state.active ? getLesson(state.active.lessonId) : undefined;
   const completedLessons = LESSONS.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
+  const grade = contentGrade(state.settings.grade);
+  const junior = grade >= 7;
+  const juniorKps = junior ? (['math', 'chinese', 'english'] as const).flatMap((s) => kpsFor(s, grade)) : [];
+  const mastery = computeMastery(state, now);
+  const juniorMastery = mastery;
+  const juniorProgress = {
+    done: juniorKps.filter((k) => ['emerging', 'stable'].includes(juniorMastery[k.id]?.state ?? '')).length,
+    total: juniorKps.length,
+  };
+  const progressDone = junior ? juniorProgress.done : completedLessons;
+  const progressTotal = junior ? juniorProgress.total : LESSONS.length;
   // 今日复习：有到期错题时出现；今天复习过且已清空则显示完成
   const reviewCount = reviewQueue(state, resolveExercise, now).length;
   const thinking = thinkingProfile(state, now);
@@ -90,7 +103,7 @@ export default function HomeScreen() {
     SUBJECTS.filter((s) => completedSubjectToday(state, s, now)).length + (showReview && reviewCount === 0 ? 1 : 0);
   const todayTotal = SUBJECTS.length + (showReview ? 1 : 0);
   // 知识小地图上需要复习 / 找原因的本领数
-  const mapTodo = recommendKps(state, computeMastery(state, now), now, 10).filter(
+  const mapTodo = recommendKps(state, mastery, now, 10).filter(
     (r) => r.kind === 'review' || r.kind === 'diagnose',
   ).length;
 
@@ -250,13 +263,13 @@ export default function HomeScreen() {
         )}
       </Animated.View>
 
-      {/* 学习进度 */}
+      {/* 学习进度：小学按课程；初中（V5.2）按本年级三科知识点（掌握情况来自真实练习） */}
       <View style={styles.panel} testID="progress-panel">
         <View style={styles.barBg}>
-          <View style={[styles.barFill, { width: `${(completedLessons / LESSONS.length) * 100}%` }]} />
+          <View style={[styles.barFill, { width: `${(progressDone / Math.max(1, progressTotal)) * 100}%` }]} />
         </View>
         <Text style={styles.progressText} testID="lessons-completed">
-          {completedLessons} / {LESSONS.length} 节课
+          {junior ? `${GRADE_CN[grade]}年级学会了 ${progressDone} / ${progressTotal} 个本领` : `${completedLessons} / ${LESSONS.length} 节课`}
         </Text>
       </View>
 

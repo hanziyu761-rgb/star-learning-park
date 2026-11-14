@@ -1,14 +1,14 @@
 {
  "source": "https://github.com/tanle-mtr/ChinaStudyFree (MIT)，七～九年级",
- "importedAt": "2026-11-14T07:55:40.457Z",
- "kept": 349,
- "dropped": 39,
+ "importedAt": "2026-11-14T12:15:33.335Z",
+ "kept": 348,
+ "dropped": 40,
  "keptBySubjectGrade": {
   "math-7": 60,
   "math-9": 68,
   "math-8": 58,
   "chinese-7": 16,
-  "chinese-9": 24,
+  "chinese-9": 23,
   "chinese-8": 38,
   "english-7": 16,
   "english-9": 30,
@@ -17,6 +17,7 @@
  "droppedByReason": {
   "填空题（答案不是数）": 20,
   "人工抽查有错": 17,
-  "含无法转换的公式代码": 2
+  "含无法转换的公式代码": 2,
+  "所在单元不足 4 道（chinese-g9a-u2）": 1
  }
 }

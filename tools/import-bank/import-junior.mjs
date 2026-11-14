@@ -290,7 +290,12 @@ for (const subj of Object.keys(PREFIX)) {
       qs.push(conv);
       bump(kept, `${subj}-${grade}`);
     }
-    if (qs.length) book.units.push({ no: unitNo, id: `${bookId}-u${unitNo}`, title: unitTitle, questions: qs });
+    // 剔除错题后不足 4 道的单元不放进题库闯关（V5.2：语文九年级上册“文言文与古诗”只剩 1 道）
+    if (qs.length >= 4) book.units.push({ no: unitNo, id: `${bookId}-u${unitNo}`, title: unitTitle, questions: qs });
+    else if (qs.length) {
+      drop[`所在单元不足 4 道（${bookId}-u${unitNo}）`] = qs.length;
+      kept[`${subj}-${grade}`] -= qs.length;
+    }
   }
 }
 

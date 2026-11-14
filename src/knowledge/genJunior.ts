@@ -64,15 +64,42 @@ const pt = (x: number, y: number) => `(${lead(x)}, ${lead(y)})`;
 const valueOf = (t: string) => (/^-?\d+(\.\d+)?\/\d+$/.test(t) ? Number(t.split('/')[0]) / Number(t.split('/')[1]) : Number(t));
 const isNum = (t: string) => /^-?\d+(\.\d+)?(\/\d+)?$/.test(t);
 
-/** 朗读用：分数读“几分之几”，根号、正负号、负号读出来 */
+/** 朗读用（V5.2）：把数学符号读成中文，屏幕上显示的文字不变。分数读“几分之几”，负号、根号、绝对值、乘方、几何符号都读出来 */
 export function sayMath(t: string): string {
   return t
+    .replace(/\|([^|]+)\|/g, '$1的绝对值')
+    .replace(/³√\(?([^\s)]+)\)?/g, '$1的立方根')
+    .replace(/√\(([^)]+)\)/g, '根号下$1')
+    .replace(/(\d*)√(\d+)/g, (_, k: string, n: string) => `${k}根号${n}`)
     .replace(/(√?\d+)\/(\d+)/g, '$2分之$1')
-    .replace(/³√/g, '三次根号')
-    .replace(/√/g, '根号')
+    .replace(/([a-zA-Z0-9)])([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_, b: string, e: string) => {
+      const n = [...e].map((c) => '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)).join('');
+      return `${b}${n === '2' ? '的平方' : n === '3' ? '的立方' : `的${n}次方`}`;
+    })
+    .replace(/≠/g, '不等于')
+    .replace(/·/g, '乘')
     .replace(/±/g, '正负')
-    .replace(/(^|[\s(（,，])[-−](?=\d)/g, '$1负')
-    .replace(/[−-]/g, '减');
+    .replace(/≌/g, '全等于')
+    .replace(/∽/g, '相似于')
+    .replace(/∠/g, '角')
+    .replace(/△/g, '三角形')
+    .replace(/⊙/g, '圆')
+    .replace(/Rt/g, '直角')
+    .replace(/≥/g, '大于或等于')
+    .replace(/≤/g, '小于或等于')
+    .replace(/ > /g, '大于')
+    .replace(/ < /g, '小于')
+    .replace(/°/g, '度')
+    .replace(/π/g, '派')
+    .replace(/(^|[\s(（,，=：:])[-−](?=\d|[a-zA-Z])/g, '$1负')
+    .replace(/[−-]/g, '减')
+    .replace(/×/g, '乘')
+    .replace(/÷/g, '除以')
+    .replace(/ ?= ?\?/g, '等于多少')
+    .replace(/\+/g, '加')
+    .replace(/=/g, '等于')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 /** 选项：正确答案 + 干扰项（去重，可以有负数）；数字答案不足 4 个时用 ±1、±2 补齐，并从小到大排 */
 export function opts(ans: string, wrongs: (string | number)[]): ChoiceExercise['options'] {
@@ -96,7 +123,8 @@ export function opts(ans: string, wrongs: (string | number)[]): ChoiceExercise['
 function Q(prompt: string, stem: string | undefined, ans: string | number, wrongs: (string | number)[], explanation?: string): Built {
   const a = String(ans);
   return {
-    prompt: { text: prompt, speak: say(prompt) } as Prompt,
+    // 朗读题目和下面的算式（算式读成中文）
+    prompt: { text: prompt, speak: say(sayMath(stem ? `${prompt.replace(/[？?]$/, '')}：${stem}` : prompt)) } as Prompt,
     stem: stem ? { text: stem } : undefined,
     options: opts(a, wrongs),
     answerId: a,

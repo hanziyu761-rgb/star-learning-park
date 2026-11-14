@@ -7,6 +7,7 @@ import { englishFruitsLesson } from './english';
 import { STARTER_LESSONS } from './englishStarter';
 import { READING_LESSONS } from './chineseReading';
 import { mathAddLesson } from './math';
+import { getKp } from '@/knowledge/graph';
 
 export const LESSONS: Lesson[] = [mathAddLesson, chineseRiYueLesson, englishFruitsLesson, ...STARTER_LESSONS, ...READING_LESSONS];
 
@@ -61,7 +62,8 @@ const ORAL_LABELS: Record<string, string> = {
 export function skillLabel(skill: string): string {
   if (skill.startsWith('bank:')) return skill.split(':').slice(2).join(':'); // 题库知识点名称
   if (skill.startsWith('oral.')) return ORAL_LABELS[skill.slice(5)] ?? skill;
-  return SKILL_LABELS[skill] ?? skill;
+  // 知识点练习的题目 skill 就是知识点编号（如 m8.b2），显示知识点名称（V5.2 修正）
+  return SKILL_LABELS[skill] ?? getKp(skill)?.name ?? skill;
 }
 
 /** 找到某道题的题目文字（家长中心错题列表用） */
