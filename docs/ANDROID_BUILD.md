@@ -19,6 +19,7 @@
 - `npx expo prebuild --platform android --clean` 后，`./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a`（约 32 分钟，2 核）
 - Maven Central 偶尔返回 429（请求太多）：用本机缓存代理自动重试（Gradle init 脚本把 Maven Central 和插件仓库指向 127.0.0.1）
 - 产物为测试签名（Android Debug 证书）的 APK，约 49 MB，只适合内部试用；上架需正式签名
+- V5.2.0（2026-11-14）实际做法：环境放行 dl.google.com、huggingface.co、us.aws.cdn.hf.co 等；安卓 SDK 用命令行工具装 platforms;android-37.0、build-tools 37.0.0、NDK 27.1.12297006；JDK 17 用 Temurin 压缩包解压到用户目录（核对官方 SHA-256），编译时指定 `-Dorg.gradle.java.installations.paths`；Maven Central 和 Gradle 插件仓库限流严重（会回 429，偶尔回 404），用本机缓存代理（遇 429/404 退避重试、成功的文件缓存）+ Gradle init 脚本把仓库指向它，jitpack 不放行就让代理直接回“没有”；只打 arm64：`-PreactNativeArchitectures=arm64-v8a`，约 20 分钟，APK 约 75 MB
 
 ## 方法二：Expo 云打包（在自己电脑上）
 - （V2.17 起）云打包前也要先运行 `bash tools/asr/fetch.sh`；`.easignore` 已设置为会把下载的库和模型一起上传。
