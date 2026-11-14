@@ -1,6 +1,7 @@
 /**
  * V4.0 教材资源库底座：版本清单、第一批统编版语文登记、现有数据接入、完整度统计、数据校验、JSON 导入演示。
  */
+import { KP_BY_ID } from '@/knowledge/graph';
 import fs from 'fs';
 import path from 'path';
 import { BANK_INDEX } from '@/content/bank';
@@ -154,7 +155,7 @@ describe('第一批：统编版语文修订版 12 册登记', () => {
 describe('现有数据接入（不改原数据）', () => {
   it('题库每一册都接入了，单元目录标为待核实', () => {
     const bank = allVolumes().filter((v) => v.id.startsWith('bank.'));
-    expect(bank).toHaveLength(BANK_INDEX.length);
+    expect(bank).toHaveLength(BANK_INDEX.filter((b) => b.grade <= 6).length);
     for (const v of bank) {
       expect(v.tocProvenance).toBe('pending');
       expect(v.units.every((u) => u.provenance === 'pending')).toBe(true);
@@ -202,7 +203,7 @@ describe('数据校验', () => {
 it('汇总数字（汇报用）', () => {
   const s = summary();
   expect(s.volumes).toBe(187);
-  expect(s.bankVolumes).toBe(BANK_INDEX.length);
+  expect(s.bankVolumes).toBe(BANK_INDEX.filter((b) => b.grade <= 6).length);
   expect(s.verifiedVolumes).toBe(181);
   expect(s.verifiedUnits).toBe(1988);
   expect(s.lessons.verified).toBe(782);
@@ -554,7 +555,12 @@ describe('第七批：初中教材（V4.3）——统编版语文、人教版数
         expect(v.sources[0].note).toMatch(/教材 → 初中 →/);
         expect(v.sources[0].title).toMatch(/人民教育出版社/);
         expect(v.bankBookId).toBeUndefined();
-        expect(v.units.every((u) => u.lessons.length === 0 && u.kpIds.length === 0 && u.bankUnitIds.length === 0)).toBe(true);
+        expect(v.units.every((u) => u.lessons.length === 0 && u.bankUnitIds.length === 0)).toBe(true);
+        // V5.2：每一章 / 每个单元连到一个初中原创知识点，综合与实践、专题学习活动等不连
+        for (const u of v.units) {
+          expect(u.kpIds.length).toBe(/^第[一二三四五六七八九十]+(章|单元)/.test(u.title) ? 1 : 0);
+          for (const kp of u.kpIds) expect(KP_BY_ID[kp]?.grade).toBe(v.grade);
+        }
       }
     }
     expect(of('chinese.tongbian-jh')[0].officialName).toBe('（根据2022年版课程标准修订）义务教育教科书·语文 七年级上册');

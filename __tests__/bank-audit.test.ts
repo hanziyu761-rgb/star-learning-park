@@ -35,6 +35,8 @@ describe('验算规则', () => {
     expect(checkEquations('所以 800-356=544 确实是错的').bad).toEqual([]);
     expect(wrongComparisons('1/10 < 1/8，3/10 < 7/10，3² < 12')).toEqual([]);
     expect(wrongComparisons('因为 5 > 3，7 < 2')).toEqual(['7 < 2']);
+    expect(wrongComparisons('2²=4<5<9=3²，故 2<√5<3')).toEqual([]); // 根号后面的数不是单独的数（V5.2）
+    expect(wrongComparisons('√5<3，所以 9 < 4')).toEqual(['9 < 4']);
   });
 
   it('结构和答案检查', () => {

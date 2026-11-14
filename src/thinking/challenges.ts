@@ -57,11 +57,19 @@ export type ChallengeType =
   | 'enLogic'
   // V2.11
   | 'multiway'
-  | 'detective';
+  | 'detective'
+  // 初中（V5.2）
+  | 'jnSeq'
+  | 'jnCount'
+  | 'jnEq'
+  | 'jnPoem'
+  | 'jnRhet'
+  | 'jnRiddle'
+  | 'jnRead';
 
-/** 难度档：1 = 一年级，2 = 二年级，3 = 三、四年级，4 = 五、六年级 */
-export type Level = 1 | 2 | 3 | 4;
-export const levelOfGrade = (grade: number): Level => (grade <= 1 ? 1 : grade === 2 ? 2 : grade <= 4 ? 3 : 4);
+/** 难度档：1 = 一年级，2 = 二年级，3 = 三、四年级，4 = 五、六年级，5 = 初中（V5.2） */
+export type Level = 1 | 2 | 3 | 4 | 5;
+export const levelOfGrade = (grade: number): Level => (grade <= 1 ? 1 : grade === 2 ? 2 : grade <= 4 ? 3 : grade <= 6 ? 4 : 5);
 
 export interface ChallengeGen {
   type: ChallengeType;

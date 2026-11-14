@@ -20,7 +20,8 @@ const REV_NOTE = {
 
 /** 现有题库各册（旧版单元），id 形如 bank.chinese-g4a */
 export function bankVolumes(): Volume[] {
-  return BANK_INDEX.map((b): Volume => {
+  // 七～九年级题库（V5.2）按题库自己的单元分组，不对应哪一版课本，不放进教材资源库
+  return BANK_INDEX.filter((b) => b.grade <= 6).map((b): Volume => {
     const raw = loadRawBook(b.id);
     return {
       id: `bank.${b.id}`,

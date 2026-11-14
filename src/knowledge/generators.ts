@@ -10,6 +10,11 @@ import { bankExercise, findUnit } from '@/content/bank';
 import { getKp, UNIT_TO_KP } from './graph';
 import { GRAPHICS_GENERATORS, pickSig } from './graphics';
 import { UPPER_GENERATORS } from './genUpper';
+import { JUNIOR_GENERATORS as JUNIOR_MATH } from './genJunior';
+import { JUNIOR_LANG_GENERATORS } from './genJuniorLang';
+
+/** 七～九年级（V5.2）：数学出题程序 + 语文、英语原创小题库 */
+const JUNIOR_GENERATORS = { ...JUNIOR_MATH, ...JUNIOR_LANG_GENERATORS };
 
 type Rand = () => number;
 const r = (rand: Rand, lo: number, hi: number) => lo + Math.floor(rand() * (hi - lo + 1));
@@ -261,7 +266,7 @@ const GENERATORS: Record<string, Gen> = {
 
 /** 有原创生成器（答案由程序计算） */
 export function hasOriginalGenerator(kpId: string): boolean {
-  return kpId in GENERATORS || kpId in GRAPHICS_GENERATORS || kpId in UPPER_GENERATORS;
+  return kpId in GENERATORS || kpId in GRAPHICS_GENERATORS || kpId in UPPER_GENERATORS || kpId in JUNIOR_GENERATORS;
 }
 
 /** 有题可练：原创生成器，或对应的题库单元（V2.2：二～六年级、语文、英语） */
@@ -299,7 +304,7 @@ export function kpExercise(kpId: string, sig: string): Exercise {
   if (sig.startsWith('b:')) return bankKpExercise(kpId, sig);
   const full = GRAPHICS_GENERATORS[kpId];
   if (full) return { ...full.build(sig), id: kpExerciseId(kpId, sig), skill: kpId } as Exercise;
-  const g = GENERATORS[kpId] ?? UPPER_GENERATORS[kpId];
+  const g = GENERATORS[kpId] ?? UPPER_GENERATORS[kpId] ?? JUNIOR_GENERATORS[kpId];
   if (!g) throw new Error(`知识点 ${kpId} 没有题目生成器`);
   const built = g.build(sig);
   return {
@@ -319,7 +324,7 @@ export function kpRound(
   avoid: Set<string> = new Set(),
 ): Exercise[] {
   const full = GRAPHICS_GENERATORS[kpId];
-  let make = full ? (rd: Rand) => pickSig(full, rd) : (GENERATORS[kpId] ?? UPPER_GENERATORS[kpId])?.make;
+  let make = full ? (rd: Rand) => pickSig(full, rd) : (GENERATORS[kpId] ?? UPPER_GENERATORS[kpId] ?? JUNIOR_GENERATORS[kpId])?.make;
   if (!make) {
     // 只有题库的知识点：从对应单元抽题（题库题为 AI 生成、未逐题人工审核）
     const pool = bankSigs(kpId);

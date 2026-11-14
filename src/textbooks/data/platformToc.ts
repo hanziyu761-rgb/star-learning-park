@@ -97,3 +97,24 @@ export function buildPlatformVolumes(info: PlatformEditionInfo, plans: PlatformP
     };
   });
 }
+
+/**
+ * 初中（V5.2）：把“第几章 / 第几单元”连到 APP 的初中原创知识点（数学 m7.a1… 一章一个，语文 c7.a1… 一个单元一个）。
+ * 九年级下册（未修订版）第一章《反比例函数》在修订版里移到了九年级上册，连到 m9.a3。综合与实践、专题学习活动等小栏目不连。
+ */
+export function linkJuniorKps(subject: 'math' | 'chinese', volumes: Volume[]): Volume[] {
+  const mark = subject === 'math' ? /^第[一二三四五六七八九十]+章/ : /^第[一二三四五六]单元/;
+  return volumes.map((v) => {
+    let i = 0;
+    return {
+      ...v,
+      units: v.units.map((u) => {
+        if (!mark.test(u.title)) return u;
+        i += 1;
+        let kp = `${subject[0]}${v.grade}.${v.term === '上' ? 'a' : 'b'}${i}`;
+        if (kp === 'm9.b1') kp = 'm9.a3';
+        return { ...u, kpIds: [...u.kpIds, kp] };
+      }),
+    };
+  });
+}

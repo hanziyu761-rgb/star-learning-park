@@ -1,4 +1,4 @@
-/** 初中（V4.3）：年级可选到九年级；七年级起不标拼音；内容暂用六年级 */
+/** 初中（V4.3）：年级可选到九年级；七年级起不标拼音。V5.2 起初中有自己的内容，按初中年级取 */
 import React from 'react';
 import { act, render, screen } from '@testing-library/react-native';
 import { PinyinText } from '@/components/PinyinText';
@@ -20,8 +20,10 @@ describe('年级', () => {
     expect(ALL_GRADES.filter(isJunior)).toEqual([7, 8, 9]);
     expect(isJunior(undefined)).toBe(false);
   });
-  it('初中还没有自己的课程和练习：取内容时用六年级', () => {
-    expect([1, 3, 6, 7, 8, 9].map(contentGrade)).toEqual([1, 3, 6, 6, 6, 6]);
+  it('V5.2：初中有自己的练习，取内容时用初中年级（超出范围的收回 1～9）', () => {
+    expect([1, 3, 6, 7, 8, 9].map(contentGrade)).toEqual([1, 3, 6, 7, 8, 9]);
+    expect(contentGrade(12)).toBe(9);
+    expect(contentGrade(0)).toBe(1);
     expect(contentGrade(undefined)).toBe(1);
   });
   it('学习记录里的七年级能保存再读出来', () => {
@@ -58,7 +60,7 @@ describe('家长设置里选年级', () => {
     expect(screen.queryByTestId('grade-junior-note')).toBeNull();
     fireEvent.press(screen.getByTestId('grade-7'));
     await waitFor(() => expect(screen.getByTestId('grade-junior-note')).toBeTruthy());
-    expect(screen.getByTestId('grade-junior-note').props.children).toMatch(/不标拼音.*只有课本目录.*没有初中的课程和练习/);
+    expect(screen.getByTestId('grade-junior-note').props.children).toMatch(/不标拼音.*按七～九年级出题.*待教师审核/);
     expect(screen.queryByText('yǔ')).toBeNull();
     expect(screen.getByText('语')).toBeTruthy();
     fireEvent.press(screen.getByTestId('grade-6'));

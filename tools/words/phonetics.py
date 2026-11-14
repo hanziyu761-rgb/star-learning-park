@@ -107,7 +107,7 @@ def collect():
     src = open(os.path.join(ROOT, "src/words/data/starter.ts"), encoding="utf-8").read()
     for line in re.search(r"STARTER_DICT = `(.*?)`", src, re.S).group(1).strip().splitlines():
         words.setdefault(line.split("|")[0], set()).add("starter")
-    for f in ("pep34.ts", "pep56.ts"):
+    for f in ("pep34.ts", "pep56.ts", "junior.ts"):
         s = open(os.path.join(ROOT, "src/words/data", f), encoding="utf-8").read()
         for unit_id, body in re.findall(r"id: '([^']+)'.*?lines: `(.*?)`", s, re.S):
             for line in body.strip().splitlines():

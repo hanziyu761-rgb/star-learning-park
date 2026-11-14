@@ -10,7 +10,7 @@ import { isParentUnlocked, markParentUnlocked, ParentGate } from '@/components/P
 import { Header, LoadingView, Notice, Screen } from '@/components/Screen';
 import { BigButton, Card, SectionTitle } from '@/components/ui';
 import { VisualView } from '@/components/Figure';
-import { bookIdOf, buildExam, hasBook, newSeed, SIZE_INFO, type Exam, type ExamSize } from '@/exam/build';
+import { bookIdOf, buildExam, hasBook, juniorKps, kpUnitId, newSeed, SIZE_INFO, type Exam, type ExamSize } from '@/exam/build';
 import { examHtml } from '@/exam/html';
 import { printHtml } from '@/exam/print';
 import type { KpSubject } from '@/knowledge/graph';
@@ -18,9 +18,8 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
 import { colors, radius, space, themed } from '@/theme';
-import { contentGrade } from '@/progress/grade';
+import { contentGrade, GRADE_CN } from '@/progress/grade';
 
-const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
 const SUBJECTS: { id: KpSubject; name: string }[] = [
   { id: 'math', name: '数学' },
   { id: 'chinese', name: '语文' },
@@ -125,7 +124,7 @@ function ExamBody() {
         </View>
         <Text style={styles.label}>年级</Text>
         <View style={styles.chips}>
-          {[1, 2, 3, 4, 5, 6].map((g) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((g) => (
             <Chip
               key={g}
               label={`${GRADE_CN[g]}年级`}
@@ -147,11 +146,13 @@ function ExamBody() {
             />
           ))}
         </View>
-        {available && book ? (
+        {available && (book || grade >= 7) ? (
           <>
             <Text style={styles.label}>范围</Text>
             <Text style={styles.small} testID="exam-edition">
-              单元编排：{editionText(bookIdOf(cfgBase))}
+              {grade >= 7
+                ? `按${subject === 'english' ? '语法项目' : '教材章节 / 单元'}选范围：原创出题${book ? ' + 题库题' : ''}`
+                : `单元编排：${editionText(bookIdOf(cfgBase))}`}
             </Text>
             <View style={styles.chips}>
               <Chip
@@ -160,7 +161,23 @@ function ExamBody() {
                 onPress={() => (setUnits([]), setExam(null))}
                 testID="exam-unit-all"
               />
-              {book.units.map((u) => (
+              {/* 初中按章（单元）选：原创出题的知识点；小学按题库单元选 */}
+              {grade >= 7
+                ? juniorKps(cfgBase).map((k, i) => (
+                    <Chip
+                      key={k.id}
+                      label={`${i + 1}. ${k.kidName}`}
+                      on={units.includes(kpUnitId(k.id))}
+                      onPress={() => {
+                        setExam(null);
+                        const id = kpUnitId(k.id);
+                        setUnits((x) => (x.includes(id) ? x.filter((y) => y !== id) : [...x, id]));
+                      }}
+                      testID={`exam-kp-${k.id}`}
+                    />
+                  ))
+                : null}
+              {grade < 7 && book ? book.units.map((u) => (
                 <Chip
                   key={u.id}
                   label={/\d/.test(unitBadge(u)) ? `${u.no}. ${u.title}` : u.title}
@@ -171,7 +188,7 @@ function ExamBody() {
                   }}
                   testID={`exam-unit-${u.no}`}
                 />
-              ))}
+              )) : null}
             </View>
             <Text style={styles.label}>题量</Text>
             <View style={styles.chips}>

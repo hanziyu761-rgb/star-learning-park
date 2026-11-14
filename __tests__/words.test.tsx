@@ -27,10 +27,12 @@ function seeded(n: number) {
 }
 
 describe('单词数据', () => {
-  it('启蒙 15 个单元 + PEP 三～六年级 46 个单元，单词卡 id 唯一', () => {
+  it('启蒙 15 个单元 + PEP 三～六年级 46 个单元 + 初中 18 个话题单元（V5.2），单词卡 id 唯一', () => {
     expect(WORD_UNITS.filter((u) => u.book === '启蒙')).toHaveLength(15);
-    for (const g of [3, 4, 5, 6]) expect(WORD_UNITS.filter((u) => u.grade === g && u.book !== '启蒙').length).toBeGreaterThanOrEqual(4);
-    expect(WORD_UNITS).toHaveLength(61);
+    for (const g of [3, 4, 5, 6, 7, 8, 9]) expect(WORD_UNITS.filter((u) => u.grade === g && u.book !== '启蒙').length).toBeGreaterThanOrEqual(4);
+    expect(WORD_UNITS.filter((u) => u.grade >= 7)).toHaveLength(18);
+    expect(WORD_UNITS.filter((u) => u.grade >= 7).every((u) => u.source === 'original')).toBe(true);
+    expect(WORD_UNITS).toHaveLength(79);
     expect(new Set(ALL_CARDS.map((c) => c.id)).size).toBe(ALL_CARDS.length);
     expect(ALL_CARDS.length).toBeGreaterThan(900);
   });

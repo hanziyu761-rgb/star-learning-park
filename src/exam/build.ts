@@ -12,6 +12,7 @@ import { plainText, zh } from '@/content/zh';
 import { exerciseFromKpId, hasOriginalGenerator, kpRound } from '@/knowledge/generators';
 import { KNOWLEDGE_POINTS, kpSubject, type KpSubject } from '@/knowledge/graph';
 import type { DisplayText, Exercise, Visual } from '@/lesson/types';
+import { GRADE_CN, GRADE_PY } from '@/progress/grade';
 
 export type ExamSize = 20 | 25 | 50;
 export type ExamKind = 'calc' | 'choice' | 'tf' | 'order';
@@ -65,8 +66,6 @@ export const SIZE_INFO: Record<ExamSize, { name: string; py: string }> = {
   25: { name: '单元测试', py: 'dān yuán cè shì' },
   50: { name: '期末模拟卷', py: 'qī mò mó nǐ juàn' },
 };
-const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
-const GRADE_PY = ['', 'yī', 'èr', 'sān', 'sì', 'wǔ', 'liù'];
 const SUBJECT_CN: Record<KpSubject, [string, string]> = {
   math: ['数学', 'shù xué'],
   chinese: ['语文', 'yǔ wén'],
@@ -92,8 +91,15 @@ const RATIO: Record<KpSubject, Partial<Record<ExamKind, number>>> = {
 
 export const bookIdOf = (c: Pick<ExamConfig, 'subject' | 'grade' | 'term'>) =>
   `${c.subject}-g${c.grade}${c.term === '上' ? 'a' : 'b'}`;
+/** 这一册能不能组卷：有题库，或者（初中，V5.2）有原创出题的知识点 */
 export const hasBook = (c: Pick<ExamConfig, 'subject' | 'grade' | 'term'>) =>
-  BANK_INDEX.some((b) => b.id === bookIdOf(c));
+  BANK_INDEX.some((b) => b.id === bookIdOf(c)) || (c.grade >= 7 && juniorKps(c).length > 0);
+
+/** 初中这一册的知识点（试卷“范围”按章 / 单元选，V5.2） */
+export const juniorKps = (c: Pick<ExamConfig, 'subject' | 'grade' | 'term'>) =>
+  KNOWLEDGE_POINTS.filter((k) => kpSubject(k) === c.subject && k.grade === c.grade && k.term === c.term && hasOriginalGenerator(k.id));
+/** 试卷范围里选知识点用的 id */
+export const kpUnitId = (kpId: string) => `kp:${kpId}`;
 
 /** 可复现的随机数（mulberry32） */
 export function seededRandom(seed: number): () => number {
@@ -188,13 +194,23 @@ export function examPool(c: ExamConfig, rand: () => number): ExamItem[] {
   };
   const units = c.units?.length ? new Set(c.units) : null;
   const hidden = new Set(c.hidden ?? []);
+  // 初中按知识点选范围：选中的知识点 + 它们对应的题库单元
+  const kpUnits = new Set(
+    KNOWLEDGE_POINTS.filter((k) => units?.has(kpUnitId(k.id))).flatMap((k) => k.units ?? []),
+  );
 
   // 原创题：本学期、有原创生成器的知识点；选了单元时只取对应单元的知识点
   for (const k of KNOWLEDGE_POINTS) {
     if (kpSubject(k) !== c.subject || k.grade !== c.grade || k.term !== c.term || !hasOriginalGenerator(k.id)) continue;
-    if (units && !(k.units ?? []).some((u) => units.has(u)) && !editionKpUnits(c).some(([u, kps]) => units.has(u) && kps.includes(k.id)))
+    if (
+      units &&
+      !units.has(kpUnitId(k.id)) &&
+      !(k.units ?? []).some((u) => units.has(u)) &&
+      !editionKpUnits(c).some(([u, kps]) => units.has(u) && kps.includes(k.id))
+    )
       continue;
-    for (const e0 of kpRound(k.id, 8, rand)) {
+    // 初中（V5.2）没有精做课程、题库题少，每个知识点多出几道
+    for (const e0 of kpRound(k.id, c.grade >= 7 ? 12 : 8, rand)) {
       // 试卷上用原来的题形（填数题在纸上就是计算题或选择题）
       const e = e0.kind === 'input' ? (exerciseFromKpId(e0.id.replace(/:in$/, '')) ?? e0) : e0;
       add(toExamItem(e, 'original', k.id));
@@ -203,7 +219,7 @@ export function examPool(c: ExamConfig, rand: () => number): ExamItem[] {
   // 题库题
   const book = loadBook(bookIdOf(c));
   for (const u of book?.units ?? []) {
-    if (units && !units.has(u.id)) continue;
+    if (units && !units.has(u.id) && !kpUnits.has(u.id)) continue;
     for (const q of u.questions) if (!hidden.has(q.id)) add(toExamItem(bankExercise(book!, q), 'bank', u.id));
   }
   return out;

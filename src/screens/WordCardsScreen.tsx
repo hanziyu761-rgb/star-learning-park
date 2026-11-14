@@ -27,6 +27,9 @@ const BOOKS: { g: number; label: string }[] = [
   { g: 4, label: '四年级' },
   { g: 5, label: '五年级' },
   { g: 6, label: '六年级' },
+  { g: 7, label: '七年级' },
+  { g: 8, label: '八年级' },
+  { g: 9, label: '九年级' },
 ];
 
 const unitsOf = (g: number) => WORD_UNITS.filter((u) => (g === 1 ? u.book === '启蒙' : u.grade === g));

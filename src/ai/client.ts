@@ -3,6 +3,7 @@
  * 发送的内容只有：科目、年级、题目文字、孩子的问题；不发送名字、设备号等身份信息。
  */
 import type { Subject } from '@/lesson/types';
+import { aiGrade } from '@/progress/grade';
 
 export type AiErrorCode =
   | 'NOT_CONFIGURED' // 家长没有填写服务地址
@@ -42,6 +43,13 @@ export interface AiConfig {
   baseUrl: string;
 }
 
+/** 请求里的年级换成 { grade: 最多 6, gradeFull: 真实年级 }（V5.2，兼容只认 1～6 年级的旧版服务） */
+function withGrade(body: unknown): unknown {
+  if (!body || typeof body !== 'object' || !('grade' in body)) return body;
+  const g = (body as { grade?: unknown }).grade;
+  return typeof g === 'number' ? { ...body, ...aiGrade(g) } : body;
+}
+
 async function call<T>(cfg: AiConfig, path: string, body?: unknown, timeoutMs = 20000): Promise<T> {
   if (!cfg.enabled) throw new AiError('DISABLED', AI_ERROR_TEXT.DISABLED);
   const base = (cfg.baseUrl || DEFAULT_AI_BASE_URL).replace(/\/$/, '');
@@ -53,7 +61,7 @@ async function call<T>(cfg: AiConfig, path: string, body?: unknown, timeoutMs = 
     res = await fetch(base + path, {
       method: body === undefined ? 'GET' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : JSON.stringify(withGrade(body)),
       signal: ctrl.signal,
     });
   } catch {

@@ -4,7 +4,7 @@
 import * as Print from 'expo-print';
 import { BANK_INDEX, loadBook } from '@/content/bank';
 import { plainText } from '@/content/zh';
-import { buildExam, examPool, hasBook, seededRandom, type ExamConfig, type ExamSize } from '@/exam/build';
+import { buildExam, examPool, hasBook, juniorKps, kpUnitId, seededRandom, type ExamConfig, type ExamSize } from '@/exam/build';
 import { examHtml } from '@/exam/html';
 import { printHtml } from '@/exam/print';
 
@@ -26,10 +26,19 @@ const BANK_Q = new Map<string, { a: unknown; o?: string[]; t: string }>();
 for (const b of BANK_INDEX)
   for (const u of loadBook(b.id)!.units) for (const q of u.questions) BANK_Q.set(`${u.id}/${q.id}`, q);
 
+/** 能组卷的全部册：小学按题库，初中（V5.2）七～九年级每学期都有（有的册只有原创题，没有题库） */
+const ALL_BOOKS = [
+  ...BANK_INDEX.filter((b) => b.grade <= 6),
+  ...(['math', 'chinese', 'english'] as const).flatMap((subject) =>
+    [7, 8, 9].flatMap((grade) => (['上', '下'] as const).map((term) => ({ subject, grade, term }))),
+  ),
+];
+
 describe('组卷', () => {
-  it('32 册 × 3 种题量都能组卷，题量准确，只含能印在纸上的题型', () => {
+  it('小学 32 册 + 初中 18 册（V5.2）× 3 种题量都能组卷，题量准确，只含能印在纸上的题型', () => {
     let books = 0;
-    for (const b of BANK_INDEX) {
+    let junior = 0;
+    for (const b of ALL_BOOKS) {
       for (const size of [20, 25, 50] as ExamSize[]) {
         const c = cfg({
           subject: b.subject as ExamConfig['subject'],
@@ -45,12 +54,23 @@ describe('组卷', () => {
         expect(all.every((i) => ['calc', 'choice', 'tf', 'order'].includes(i.kind))).toBe(true);
         expect(e.perPoint * size).toBeCloseTo(100, 5);
       }
-      books++;
+      if (b.grade >= 7) junior++;
+      else books++;
     }
     expect(books).toBe(32);
+    expect(junior).toBe(18);
     // 一、二年级英语没有教材
     expect(hasBook(cfg({ subject: 'english', grade: 1 }))).toBe(false);
     expect(() => buildExam(cfg({ subject: 'english', grade: 2 }))).toThrow('暂无题目');
+  });
+
+  it('初中按章（知识点）选范围：只出选中的章，题库题跟着知识点走', () => {
+    const c = cfg({ subject: 'math', grade: 8, term: '下', size: 20, units: [kpUnitId('m8.b2')] });
+    const e = buildExam(c);
+    const groups = new Set(items(e).map((i) => i.group));
+    expect([...groups].every((g) => g === 'm8.b2' || g === 'math-g8b-u2')).toBe(true);
+    expect(juniorKps({ subject: 'chinese', grade: 7, term: '下' })).toHaveLength(6);
+    expect(hasBook({ subject: 'chinese', grade: 7, term: '下' })).toBe(true); // 没有题库，只有原创题
   });
 
   it('同一个编号组出同一套卷；换编号是另一套', () => {
@@ -97,7 +117,7 @@ describe('组卷', () => {
   it('参考答案正确：题库题与原题一致；计算题按算式独立计算', () => {
     let bank = 0;
     let calc = 0;
-    for (const b of BANK_INDEX) {
+    for (const b of ALL_BOOKS) {
       const e = buildExam(
         cfg({
           subject: b.subject as ExamConfig['subject'],
@@ -116,15 +136,17 @@ describe('组卷', () => {
           bank++;
         } else if (it.kind === 'calc') {
           const expr = plainText(it.stem[0]).replace(/ =$/, '');
+          // 初中的负数答案印成“−7”，核对时换成普通减号
+          const answer = it.answer.replace(/^−/, '-');
           let m = expr.match(/^([\d.]+) ([+−×÷]) ([\d.]+)$/);
           if (m) {
-            if (it.answer.includes('……')) {
-              const [q, r] = it.answer.split('……').map(Number);
+            if (answer.includes('……')) {
+              const [q, r] = answer.split('……').map(Number);
               expect(q * Number(m[3]) + r).toBe(Number(m[1]));
             } else {
               const [a, c] = [Number(m[1]), Number(m[3])];
               const v = { '+': a + c, '−': a - c, '×': a * c, '÷': a / c }[m[2] as '+'];
-              expect(Number(it.answer)).toBeCloseTo(v, 9);
+              expect(Number(answer)).toBeCloseTo(v, 9);
             }
             calc++;
             continue;
@@ -138,18 +160,29 @@ describe('组卷', () => {
               '×': [p * r, q * s],
               '÷': [p * s, q * r],
             }[m[3] as '+'];
-            const [x, y] = it.answer.split('/').map(Number);
+            const [x, y] = answer.split('/').map(Number);
             expect(x * d).toBe(n * (y ?? 1));
             if (!it.group.startsWith('m3.')) expect(gcd(x, y ?? 1)).toBe(1); // 三年级还没学约分
             calc++;
             continue;
           }
-          // 其它算式（混合运算、简便计算等）：用 JS 计算核对
-          const js = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
-          expect(/^[\d+\-*/(). ]+$/.test(js)).toBe(true);
-          const num = it.answer.includes('/')
-            ? Number(it.answer.split('/')[0]) / Number(it.answer.split('/')[1])
-            : Number(it.answer);
+          // 其它算式（混合运算、简便计算；初中的负数、乘方、开方）：用 JS 计算核对
+          const POW: Record<string, number> = { '²': 2, '³': 3, '⁴': 4 };
+          const js = expr
+            .replace(/³√\(?(−?\d+)\)?/g, 'Math.cbrt($1)')
+            .replace(/√(\d+)/g, 'Math.sqrt($1)')
+            .replace(/(\([^()]*\)|\d+)([²³⁴])/g, (_, base: string, p: string) => `(${base}**${POW[p]})`)
+            .replace(/×/g, '*')
+            .replace(/÷/g, '/')
+            .replace(/−/g, '-');
+          expect(/^([\d+\-*/(). ]|Math\.(sqrt|cbrt))+$/.test(js)).toBe(true);
+          const ans = answer;
+          const root = ans.match(/^(\d*)√(\d+)$/); // 化简二次根式的答案，如 5√2
+          const num = root
+            ? Number(root[1] || 1) * Math.sqrt(Number(root[2]))
+            : ans.includes('/')
+              ? Number(ans.split('/')[0]) / Number(ans.split('/')[1])
+              : Number(ans);
           expect(num).toBeCloseTo(Function(`return (${js})`)() as number, 9);
           calc++;
         }

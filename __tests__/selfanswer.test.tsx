@@ -352,7 +352,7 @@ describe('口算闯关三～六年级（V2.14）', () => {
 
   it('各主题 300 道：得数正确（分数为最简分数）、正确答案在选项中、选项不重复且不为负；填数版本答案相同', () => {
     const rand = seeded(9);
-    for (const t of ORAL_TOPICS.filter((x) => x.grade >= 3))
+    for (const t of ORAL_TOPICS.filter((x) => x.grade >= 3 && x.grade <= 6)) // 初中口算（可以有负数）见 junior-content.test.ts
       for (let k = 0; k < 300; k++) {
         const expr = t.make(rand);
         const e = oralExercise(t.id, expr) as ChoiceData;

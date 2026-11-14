@@ -1,4 +1,4 @@
-// 自动生成：tools/import-bank/import.mjs，请勿手改
+// 自动生成：tools/import-bank/import.mjs（一～六年级）、import-junior.mjs（七～九年级），请勿手改
 import type { BankBook } from './types';
 
 export const BANK_LOADERS: Record<string, () => BankBook> = {
@@ -14,6 +14,11 @@ export const BANK_LOADERS: Record<string, () => BankBook> = {
   'chinese-g5b': () => require('./chinese-g5b.json') as BankBook,
   'chinese-g6a': () => require('./chinese-g6a.json') as BankBook,
   'chinese-g6b': () => require('./chinese-g6b.json') as BankBook,
+  'chinese-g7a': () => require('./chinese-g7a.json') as BankBook,
+  'chinese-g8a': () => require('./chinese-g8a.json') as BankBook,
+  'chinese-g8b': () => require('./chinese-g8b.json') as BankBook,
+  'chinese-g9a': () => require('./chinese-g9a.json') as BankBook,
+  'chinese-g9b': () => require('./chinese-g9b.json') as BankBook,
   'english-g3a': () => require('./english-g3a.json') as BankBook,
   'english-g3b': () => require('./english-g3b.json') as BankBook,
   'english-g4a': () => require('./english-g4a.json') as BankBook,
@@ -22,6 +27,11 @@ export const BANK_LOADERS: Record<string, () => BankBook> = {
   'english-g5b': () => require('./english-g5b.json') as BankBook,
   'english-g6a': () => require('./english-g6a.json') as BankBook,
   'english-g6b': () => require('./english-g6b.json') as BankBook,
+  'english-g7a': () => require('./english-g7a.json') as BankBook,
+  'english-g8a': () => require('./english-g8a.json') as BankBook,
+  'english-g8b': () => require('./english-g8b.json') as BankBook,
+  'english-g9a': () => require('./english-g9a.json') as BankBook,
+  'english-g9b': () => require('./english-g9b.json') as BankBook,
   'math-g1a': () => require('./math-g1a.json') as BankBook,
   'math-g1b': () => require('./math-g1b.json') as BankBook,
   'math-g2a': () => require('./math-g2a.json') as BankBook,
@@ -34,4 +44,10 @@ export const BANK_LOADERS: Record<string, () => BankBook> = {
   'math-g5b': () => require('./math-g5b.json') as BankBook,
   'math-g6a': () => require('./math-g6a.json') as BankBook,
   'math-g6b': () => require('./math-g6b.json') as BankBook,
+  'math-g7a': () => require('./math-g7a.json') as BankBook,
+  'math-g7b': () => require('./math-g7b.json') as BankBook,
+  'math-g8a': () => require('./math-g8a.json') as BankBook,
+  'math-g8b': () => require('./math-g8b.json') as BankBook,
+  'math-g9a': () => require('./math-g9a.json') as BankBook,
+  'math-g9b': () => require('./math-g9b.json') as BankBook,
 };

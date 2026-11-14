@@ -19,7 +19,7 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { speak } from '@/speech/speech';
 import { colors, radius, shadow, space, themed } from '@/theme';
-import { contentGrade } from '@/progress/grade';
+import { contentGrade, GRADE_CN, GRADE_PY } from '@/progress/grade';
 
 /** 给孩子看的状态：颜色 + 图标 + 带拼音的短词 */
 export const KID_STATE: Record<MasteryState, { icon: string; color: string; bg: string; text: string; py: string }> = themed(() => ({
@@ -106,10 +106,10 @@ function MapBody() {
           <Pressable
             onPress={() => {
               setSelected(null);
-              setGrade((g) => Math.min(6, g + 1));
+              setGrade((g) => Math.min(9, g + 1));
             }}
-            disabled={grade >= 6}
-            style={[styles.gradeBtn, grade >= 6 && { opacity: 0.3 }]}
+            disabled={grade >= 9}
+            style={[styles.gradeBtn, grade >= 9 && { opacity: 0.3 }]}
             accessibilityRole="button"
             accessibilityLabel="下一个年级"
             testID="map-grade-next"
@@ -262,8 +262,6 @@ function KpCard({
   );
 }
 
-const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
-const GRADE_PY = ['', 'yī', 'èr', 'sān', 'sì', 'wǔ', 'liù'];
 const SUBJECTS: { id: KpSubject; name: string; py: string }[] = [
   { id: 'math', name: '数学', py: 'shù xué' },
   { id: 'chinese', name: '语文', py: 'yǔ wén' },

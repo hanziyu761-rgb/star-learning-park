@@ -4,6 +4,7 @@
  */
 import type { DisplayText, Exercise, Lesson, LessonStep } from '@/lesson/types';
 import { PASSAGES_UPPER } from './chineseReadingUpper';
+import { PASSAGES_JUNIOR } from './chineseReadingJunior';
 import { zh } from './zh';
 
 /** 一、二年级：[汉字, 拼音]；三年级起：普通文字（不注拼音） */
@@ -286,4 +287,6 @@ export function passageLesson(p: Passage, grade = 1): Lesson {
 export const READING_LESSONS: Lesson[] = [
   ...PASSAGES.map((p) => passageLesson(p, 1)),
   ...Object.entries(PASSAGES_UPPER).flatMap(([g, ps]) => ps.map((p) => passageLesson(p, Number(g)))),
+  // 七～九年级（V5.2）
+  ...Object.entries(PASSAGES_JUNIOR).flatMap(([g, ps]) => ps.map((p) => passageLesson(p, Number(g)))),
 ];

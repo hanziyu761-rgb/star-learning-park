@@ -199,9 +199,90 @@ export const ORAL_TOPICS: OralTopic[] = [
         : `${r(rand, 1, b - 1)}/${b}÷${r(rand, 1, d - 1)}/${d}`;
     },
   },
+  /* ── 初中（V5.2）：题目 id 以 n: / p: / r: / c: 开头，可以有负数 ── */
+  { id: 'ratadd', grade: 7, title: '有理数加法', emoji: '➕', make: (rand) => `n:${nz(rand, 30)}:+:${nz(rand, 30)}` },
+  { id: 'ratsub', grade: 7, title: '有理数减法', emoji: '➖', make: (rand) => `n:${nz(rand, 30)}:-:${nz(rand, 30)}` },
+  { id: 'ratmul', grade: 7, title: '有理数乘法', emoji: '✖️', make: (rand) => `n:${nz(rand, 12)}:×:${nz(rand, 12)}` },
+  {
+    id: 'ratdiv',
+    grade: 7,
+    title: '有理数除法',
+    emoji: '➗',
+    make: (rand) => {
+      const b = nz(rand, 9);
+      return `n:${b * nz(rand, 9)}:÷:${b}`;
+    },
+  },
+  { id: 'ratpow', grade: 7, title: '有理数乘方', emoji: '🔺', make: (rand) => `p:${nz(rand, 5)}:${r(rand, 2, rand() < 0.7 ? 3 : 4)}` },
+  {
+    id: 'roots',
+    grade: 7,
+    title: '平方根与立方根',
+    emoji: '√',
+    make: (rand) => (rand() < 0.6 ? `r:${r(rand, 1, 20) ** 2}` : `c:${nz(rand, 6) ** 3}`),
+  },
 ];
 
+/** 不为 0 的整数，−m～m */
+function nz(rand: () => number, m: number): number {
+  const v = r(rand, -m, m - 1);
+  return v >= 0 ? v + 1 : v;
+}
+const JUNIOR_EXPR = /^([nprc]):(-?\d+)(?::([+\-×÷]|\d+))?(?::(-?\d+))?$/;
+const isJuniorExpr = (expr: string) => JUNIOR_EXPR.test(expr);
+const M = '−';
+const show = (n: number, paren: boolean) => (n < 0 ? (paren ? `(${M}${-n})` : `${M}${-n}`) : String(n));
+const SUP: Record<string, string> = { 2: '²', 3: '³', 4: '⁴' };
+
+/** 初中口算：得数和显示 */
+function juniorCalc(expr: string): { value: number; display: string; speak: string } {
+  const m = expr.match(JUNIOR_EXPR);
+  if (!m) throw new Error(`算式格式错误：${expr}`);
+  const a = Number(m[2]);
+  const sayN = (n: number) => (n < 0 ? `负${-n}` : String(n));
+  if (m[1] === 'n') {
+    const b = Number(m[4]);
+    const op = m[3];
+    const value = op === '+' ? a + b : op === '-' ? a - b : op === '×' ? a * b : a / b;
+    return { value, display: `${show(a, false)} ${op === '-' ? M : op} ${show(b, true)}`, speak: `${sayN(a)}${OP_SAY[op]}${sayN(b)}等于多少？` };
+  }
+  if (m[1] === 'p') {
+    const n = Number(m[3]);
+    return { value: a ** n, display: `${show(a, true)}${SUP[n]}`, speak: `${sayN(a)}的${n}次方等于多少？` };
+  }
+  if (m[1] === 'r') return { value: Math.sqrt(a), display: `√${a}`, speak: `根号${a}等于多少？` };
+  return { value: Math.round(Math.cbrt(a)), display: `³√${show(a, false)}`, speak: `${sayN(a)}的立方根等于多少？` };
+}
+
+/** 初中口算题：干扰项是常见错误（符号错、把加减弄反、乘方当乘法） */
+function juniorExercise(topicId: string, expr: string): ChoiceExercise {
+  const { value, display, speak } = juniorCalc(expr);
+  const m = expr.match(JUNIOR_EXPR)!;
+  const a = Number(m[2]);
+  const wrong =
+    m[1] === 'n'
+      ? [-value, m[3] === '+' ? a - Number(m[4]) : m[3] === '-' ? a + Number(m[4]) : value + 1, Math.abs(value) + 1]
+      : m[1] === 'p'
+        ? [-value, a * Number(m[3]), value + 1]
+        : [-value, value * 2, value + 1];
+  const set = [...new Set([value, ...wrong])].slice(0, 4);
+  for (const d of [1, -1, 2, -2]) if (set.length < 4 && !set.includes(value + d)) set.push(value + d);
+  const ans = String(value);
+  return {
+    kind: 'choice',
+    id: expr,
+    skill: `oral.${topicId}`,
+    prompt: { text: '算一算', speak: { text: speak, lang: 'zh-CN' } },
+    stem: { text: `${display} = ?` },
+    options: set.sort((x, y) => x - y).map((n) => ({ id: String(n), text: show(n, false) })),
+    answerId: ans,
+    wrongHint: { text: '再算一算', speak: { text: '再算一算', lang: 'zh-CN' } },
+  };
+}
+
 export function topicsForGrade(grade: number): OralTopic[] {
+  // 初中：初中口算 + 六年级分数口算复习（V5.2）
+  if (grade >= 7) return ORAL_TOPICS.filter((t) => t.grade <= grade && t.grade >= 6);
   // 高年级也可以复习低年级口算
   return ORAL_TOPICS.filter((t) => t.grade <= grade);
 }
@@ -299,6 +380,7 @@ const OP_SAY: Record<string, string> = { '+': '加', '-': '减', '×': '乘', '�
 /** 口算题；题目 id 以 #in 结尾时改成自己填数（V2.9） */
 export function oralExercise(topicId: string, expr: string): ChoiceExercise | InputExercise {
   if (expr.endsWith('#in')) return asInput(oralExercise(topicId, expr.slice(0, -3)), expr)!;
+  if (isJuniorExpr(expr)) return juniorExercise(topicId, expr);
   const ans = oralAnswer(expr);
   const set = [ans, ...distractors(expr, ans)].slice(0, 4);
   const options = set.sort((a, b) => evalNum(a) - evalNum(b));

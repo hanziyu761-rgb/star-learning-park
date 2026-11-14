@@ -237,6 +237,8 @@ export interface InputExercise {
   prompt: Prompt;
   stem?: { visual?: Visual; text?: DisplayText };
   answer: string;
+  /** 总是显示负号键（初中，V5.2） */
+  signed?: boolean;
   wrongHint: Prompt;
 }
 

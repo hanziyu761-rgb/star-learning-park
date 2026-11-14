@@ -11,7 +11,8 @@ import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { NEXT_LABEL, nextUp } from '@/progress/nextUp';
 import { useProgress } from '@/progress/ProgressContext';
-import { BankSection, GraphicsSection, OralSection, WriteSection } from './PracticeSections';
+import { BankSection, GraphicsSection, JuniorKpSection, OralSection, WriteSection } from './PracticeSections';
+import { contentGrade } from '@/progress/grade';
 import { EnglishTracks, ReadingHouse } from './EnglishTracks';
 import { GAME_BY_ID } from '@/games/common';
 import { colors, radius, shadow, space, subjectTheme, themed } from '@/theme';
@@ -33,6 +34,8 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
   const { status, state } = useProgress();
   const goHome = nav.back;
   const [now] = useState(() => Date.now());
+  // 初中（V5.2）：一年级的精做课程收起来，点一下再展开
+  const [showPrimary, setShowPrimary] = useState(false);
 
   if (status === 'loading') return <LoadingView />;
   if (!isSubject(subject)) {
@@ -47,6 +50,7 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
   const theme = subjectTheme[subject];
   // 英语启蒙课按三条主线单独展示
   const lessons = lessonsFor(subject).filter((l) => !l.track);
+  const junior = contentGrade(state.settings.grade) >= 7;
   const wrong = openCount(state, subject);
   const next = nextUp(state, subject, now);
 
@@ -104,9 +108,24 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
           </Pressable>
         ) : null}
       </View>
-      {subject === 'english' ? <EnglishTracks state={state} /> : null}
+      <JuniorKpSection subject={subject} state={state} />
+      {subject === 'english' && !junior ? <EnglishTracks state={state} /> : null}
       {lessons.length === 0 && subject !== 'english' ? <Notice text="这个学科还没有课程。" /> : null}
-      {lessons.map((lesson) => {
+      {junior ? (
+        <Pressable
+          onPress={() => setShowPrimary((v) => !v)}
+          style={styles.row}
+          accessibilityRole="button"
+          testID="primary-toggle"
+        >
+          <Text style={styles.rowEmoji}>🎒</Text>
+          <Text style={[styles.pillText, { flex: 1, color: colors.text }]}>
+            {subject === 'english' ? '小学英语启蒙课' : '小学一年级精做课程'}（{showPrimary ? '收起' : '展开'}）
+          </Text>
+        </Pressable>
+      ) : null}
+      {subject === 'english' && junior && showPrimary ? <EnglishTracks state={state} /> : null}
+      {(junior && !showPrimary ? [] : lessons).map((lesson) => {
         const p = state.lessons[lesson.id];
         const isActive = state.active?.lessonId === lesson.id;
         return (

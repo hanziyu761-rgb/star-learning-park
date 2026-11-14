@@ -154,7 +154,7 @@ function SimpleView() {
             {vol!.units.some((u) => unitPracticeId(u, hasGenerator))
               ? '练习题是原创或开源题库题，不是课本原题'
               : isJunior(vol!.grade)
-                ? '初中目前只有目录，没有课程和练习'
+                ? '初中英语练习按语法项目编排（没有对应到课本单元），在英语乐园和知识地图里练'
                 : '这一册目前只有目录，还没有配套练习'}
           </Text>
         </View>

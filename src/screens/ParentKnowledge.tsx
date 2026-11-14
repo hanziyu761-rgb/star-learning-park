@@ -12,7 +12,7 @@ import { frequentMistakeTypes, recommendKps, type KpRec } from '@/knowledge/reco
 import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
 import { colors, radius, space, themed } from '@/theme';
-import { contentGrade } from '@/progress/grade';
+import { contentGrade, GRADE_CN } from '@/progress/grade';
 
 const STATE_COLOR: Record<MasteryState, string> = themed(() => ({
   'not-started': colors.textSoft,
@@ -22,7 +22,6 @@ const STATE_COLOR: Record<MasteryState, string> = themed(() => ({
   stable: colors.starDeep,
 }));
 
-const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
 const SUBJECT_NAME: Record<KpSubject, string> = { math: '数学', chinese: '语文', english: '英语' };
 
 const REC_TITLE: Record<KpRec['kind'], string> = {

@@ -206,7 +206,9 @@ describe('AI 老师客户端', () => {
     expect(text).toBe('想一想');
     const [url, init] = fn.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe('http://ai.test/api/tutor/hint');
-    expect(Object.keys(JSON.parse(String(init.body))).sort()).toEqual(['answer', 'grade', 'mode', 'options', 'question', 'subject']);
+    expect(Object.keys(JSON.parse(String(init.body))).sort()).toEqual(['answer', 'grade', 'gradeFull', 'mode', 'options', 'question', 'subject']);
+    // V5.2：旧版服务只认 1～6 年级，grade 最多发 6，真实年级放在 gradeFull
+    expect(JSON.parse(String(init.body))).toMatchObject({ grade: 1, gradeFull: 1 });
   });
 
   it('服务端错误映射为孩子能懂的提示', async () => {
@@ -228,5 +230,14 @@ describe('AI 老师客户端', () => {
     expect(d.question).toContain('3 + 4 = ?');
     expect(d.answer).toBe('7');
     expect(d.options).toContain('7');
+  });
+});
+
+describe('AI 服务的年级（V5.2）', () => {
+  it('初中：grade 发 6（兼容旧版服务），gradeFull 发真实年级', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { aiGrade } = require('@/progress/grade');
+    expect(aiGrade(8)).toEqual({ grade: 6, gradeFull: 8 });
+    expect(aiGrade(3)).toEqual({ grade: 3, gradeFull: 3 });
   });
 });

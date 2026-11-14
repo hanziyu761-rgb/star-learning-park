@@ -1,5 +1,5 @@
 """
-把 review-out/grade{1-6}-review.json 生成老师用的 Excel 审核表：review-out/{一～六}年级教师审核表.xlsx
+把 review-out/grade{1-9}-review.json 生成老师用的 Excel 审核表：review-out/{一～九}年级教师审核表.xlsx
 - “说明”页：怎么审、各部分有多少条、题库自动核查结果
 - 每个分类一页；每行最后两列“审核结论”（下拉：通过 / 需修改 / 删除）和“修改意见”留给老师填写
 运行：python3 tools/review/make_xlsx.py
@@ -56,7 +56,7 @@ def build(src, dst):
                       + (f"已自动纠正多音字拼音 {b['pinyinFixedQuestions']} 道；含易错多音字 {b['polyphoneQuestions']} 道（请核对）"
                          if b['pinyinFixedQuestions'] or b['polyphoneQuestions'] else "题目不注拼音"), False))
     lines += [("", False),
-              ("说明：知识点练习、每日挑战为程序出题，表中是抽样；口算闯关列出例题。题库为 ChinaStudyFree（MIT 许可）AI 生成题目（一年级已按 2024 新版教材单元编排，二～六年级仍按旧版单元）。", False),
+              ("说明：知识点练习、每日挑战为程序出题，表中是抽样；口算闯关列出例题。题库为 ChinaStudyFree（MIT 许可）AI 生成题目（一年级已按 2024 新版教材单元编排，二～六年级仍按旧版单元；七～九年级按题库自己的单元，另有原创出题）。", False),
               ("本表为“非官方”内容审核用，不包含教材原文。", False)]
     for i, (text, bold) in enumerate(lines, 1):
         cell = info.cell(row=i, column=1, value=text)
@@ -104,7 +104,7 @@ def build(src, dst):
     print(dst, len(rows), "条", file=sys.stderr)
 
 
-for g, name in enumerate(["一", "二", "三", "四", "五", "六"], 1):
+for g, name in enumerate(["一", "二", "三", "四", "五", "六", "七", "八", "九"], 1):
     src = os.path.join(OUT, f"grade{g}-review.json")
     if os.path.exists(src):
         build(src, os.path.join(OUT, f"{name}年级教师审核表.xlsx"))

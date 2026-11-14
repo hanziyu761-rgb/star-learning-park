@@ -1,13 +1,14 @@
 /**
- * 学科页下方的“口算闯关”和“题库闯关”列表。
+ * 学科页下方的“口算闯关”和“题库闯关”列表；初中的章节 / 单元 / 语法练习（V5.2）。
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Pressable } from '@/components/Tappable';
 import { BANK_SOURCE, bankLessonId, booksFor, editionText, loadBook, unitBadge } from '@/content/bank';
 import { oralLessonId, topicsForGrade } from '@/content/oral';
 import { ALL_WRITE_SETS, writeLessonId, writeSetGrade } from '@/content/writing';
-import { kpLabel, getKp } from '@/knowledge/graph';
+import { kpLabel, getKp, kpsFor } from '@/knowledge/graph';
+import { computeMastery, type MasteryState } from '@/knowledge/mastery';
 import { CONTENT_REVIEW, GRAPHICS_GENERATORS, GRAPHICS_KPS } from '@/knowledge/graphics';
 import { zh } from '@/content/zh';
 import { DisplayTextView } from '@/components/PinyinText';
@@ -17,10 +18,8 @@ import { useNav } from '@/nav/Nav';
 import type { ProgressState } from '@/progress/model';
 import { speak } from '@/speech/speech';
 import { colors, MIN_TOUCH, radius, shadow, space, subjectTheme, themed } from '@/theme';
-import { contentGrade } from '@/progress/grade';
+import { contentGrade, GRADE_CN, GRADE_PY } from '@/progress/grade';
 
-const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
-const GRADE_PY = ['', 'yī', 'èr', 'sān', 'sì', 'wǔ', 'liù'];
 
 function doneCount(state: ProgressState, lessonId: string): number {
   return new Set(state.results.filter((r) => r.lessonId === lessonId).map((r) => r.exerciseId)).size;
@@ -280,4 +279,76 @@ const styles = themed(() => StyleSheet.create({
   unitTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   unitMeta: { fontSize: 12, color: colors.textSoft },
   go: { fontSize: 18, fontWeight: '700', color: colors.text },
+}));
+
+const JUNIOR_STATE: Record<MasteryState, string> = {
+  'not-started': '没练过',
+  learning: '在学',
+  emerging: '初步掌握',
+  'needs-review': '要复习',
+  stable: '已掌握',
+};
+
+/**
+ * 初中知识点练习（V5.2）：本年级上、下册的全部知识点（数学一章一个、语文一个单元一个、英语一个语法点一个），
+ * 点进去先看小讲解再练习。掌握情况来自真实练习记录。
+ */
+export function JuniorKpSection({ subject, state }: { subject: Subject; state: ProgressState }) {
+  const nav = useNav();
+  const grade = contentGrade(state.settings.grade);
+  const [now] = useState(() => Date.now());
+  const mastery = useMemo(() => computeMastery(state, now), [state, now]);
+  const theme = subjectTheme[subject];
+  const kps = kpsFor(subject, grade);
+  if (grade < 7 || kps.length === 0) return null;
+  const learned = kps.filter((k) => mastery[k.id]?.state === 'stable').length;
+  return (
+    <View style={styles.card} testID="junior-kps">
+      <View style={styles.titleRow}>
+        <Text style={jStyles.jTitle}>{subject === 'english' ? '语法闯关' : subject === 'math' ? '章节练习' : '单元练习'}</Text>
+        <View style={[styles.gradePill, { backgroundColor: theme.soft }]}>
+          <Text style={[jStyles.jPill, { color: theme.color }]}>{GRADE_CN[grade]}年级</Text>
+        </View>
+      </View>
+      <Text style={styles.meta}>
+        掌握 {learned}/{kps.length} · 原创题目（答案{subject === 'math' ? '由程序计算' : '人工编写'}），待教师审核
+      </Text>
+      {(['上', '下'] as const).map((term) => {
+        const list = kps.filter((k) => k.term === term);
+        if (!list.length) return null;
+        return (
+          <View key={term}>
+            <Text style={[jStyles.jTerm, { color: theme.color }]}>{term}册</Text>
+            {list.map((k) => (
+              <Pressable
+                key={k.id}
+                testID={`jkp-${k.id}`}
+                accessibilityRole="button"
+                onPress={() => {
+                  tapFeedback();
+                  nav.push({ name: 'practice', id: `kp:${k.id}` });
+                }}
+                style={styles.unitRow}
+              >
+                <Text style={styles.tileEmoji}>{k.emoji}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.unitTitle}>{k.kidName}</Text>
+                  <Text style={styles.unitMeta} numberOfLines={2}>
+                    {JUNIOR_STATE[mastery[k.id]?.state ?? 'not-started']} · {k.canDo}
+                  </Text>
+                </View>
+                <Text style={[styles.go, { color: theme.color }]}>▶</Text>
+              </Pressable>
+            ))}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+const jStyles = themed(() => StyleSheet.create({
+  jTitle: { fontSize: 22, fontWeight: '700', color: colors.text },
+  jPill: { fontSize: 15, fontWeight: '600', color: colors.text },
+  jTerm: { fontSize: 15, fontWeight: '700', marginTop: space.sm, color: colors.text },
 }));

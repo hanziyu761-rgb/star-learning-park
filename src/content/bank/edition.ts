@@ -126,12 +126,16 @@ export function regroup(book: BankBook, ed: EditionBook, loadRaw: (id: string) =
 }
 
 const OLD_EDITION: Record<string, string> = { math: '人教版', chinese: '统编版', english: '人教版 PEP' };
+const JUNIOR_EDITION: Record<string, string> = { math: '人教版', chinese: '统编版', english: '人教版' };
 
 /** 试卷、题库页上的“依据哪个版本”说明 */
 export function editionText(bookId: string): string {
   const ed = NEW_EDITION[bookId];
   if (ed) return ed.name;
   const subject = bookId.split('-')[0];
+  // 初中题库（V5.2）：按题库自己的单元分组，不是某一册课本的章节
+  const g = Number(/-g(\d)/.exec(bookId)?.[1]);
+  if (g >= 7) return `${JUNIOR_EDITION[subject] ?? ''}（初中，按题库单元分组）`;
   return `${OLD_EDITION[subject] ?? ''}（旧版，新版单元待更新）`;
 }
 

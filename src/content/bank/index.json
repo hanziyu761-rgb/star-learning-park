@@ -108,6 +108,51 @@
   "questions": 194
  },
  {
+  "id": "chinese-g7a",
+  "subject": "chinese",
+  "grade": 7,
+  "term": "上",
+  "title": "统编版初中语文七年级上册",
+  "units": 2,
+  "questions": 16
+ },
+ {
+  "id": "chinese-g8a",
+  "subject": "chinese",
+  "grade": 8,
+  "term": "上",
+  "title": "统编版初中语文八年级上册",
+  "units": 3,
+  "questions": 22
+ },
+ {
+  "id": "chinese-g8b",
+  "subject": "chinese",
+  "grade": 8,
+  "term": "下",
+  "title": "统编版初中语文八年级下册",
+  "units": 2,
+  "questions": 16
+ },
+ {
+  "id": "chinese-g9a",
+  "subject": "chinese",
+  "grade": 9,
+  "term": "上",
+  "title": "统编版初中语文九年级上册",
+  "units": 2,
+  "questions": 9
+ },
+ {
+  "id": "chinese-g9b",
+  "subject": "chinese",
+  "grade": 9,
+  "term": "下",
+  "title": "统编版初中语文九年级下册",
+  "units": 2,
+  "questions": 15
+ },
+ {
   "id": "english-g3a",
   "subject": "english",
   "grade": 3,
@@ -178,6 +223,51 @@
   "title": "人教版 PEP 英语六年级下册",
   "units": 5,
   "questions": 163
+ },
+ {
+  "id": "english-g7a",
+  "subject": "english",
+  "grade": 7,
+  "term": "上",
+  "title": "人教版初中英语七年级上册",
+  "units": 2,
+  "questions": 16
+ },
+ {
+  "id": "english-g8a",
+  "subject": "english",
+  "grade": 8,
+  "term": "上",
+  "title": "人教版初中英语八年级上册",
+  "units": 3,
+  "questions": 21
+ },
+ {
+  "id": "english-g8b",
+  "subject": "english",
+  "grade": 8,
+  "term": "下",
+  "title": "人教版初中英语八年级下册",
+  "units": 3,
+  "questions": 18
+ },
+ {
+  "id": "english-g9a",
+  "subject": "english",
+  "grade": 9,
+  "term": "上",
+  "title": "人教版初中英语九年级上册",
+  "units": 2,
+  "questions": 15
+ },
+ {
+  "id": "english-g9b",
+  "subject": "english",
+  "grade": 9,
+  "term": "下",
+  "title": "人教版初中英语九年级下册",
+  "units": 2,
+  "questions": 15
  },
  {
   "id": "math-g1a",
@@ -286,5 +376,59 @@
   "title": "人教版小学数学六年级下册",
   "units": 6,
   "questions": 257
+ },
+ {
+  "id": "math-g7a",
+  "subject": "math",
+  "grade": 7,
+  "term": "上",
+  "title": "人教版初中数学七年级上册",
+  "units": 3,
+  "questions": 33
+ },
+ {
+  "id": "math-g7b",
+  "subject": "math",
+  "grade": 7,
+  "term": "下",
+  "title": "人教版初中数学七年级下册",
+  "units": 3,
+  "questions": 27
+ },
+ {
+  "id": "math-g8a",
+  "subject": "math",
+  "grade": 8,
+  "term": "上",
+  "title": "人教版初中数学八年级上册",
+  "units": 3,
+  "questions": 25
+ },
+ {
+  "id": "math-g8b",
+  "subject": "math",
+  "grade": 8,
+  "term": "下",
+  "title": "人教版初中数学八年级下册",
+  "units": 4,
+  "questions": 33
+ },
+ {
+  "id": "math-g9a",
+  "subject": "math",
+  "grade": 9,
+  "term": "上",
+  "title": "人教版初中数学九年级上册",
+  "units": 4,
+  "questions": 40
+ },
+ {
+  "id": "math-g9b",
+  "subject": "math",
+  "grade": 9,
+  "term": "下",
+  "title": "人教版初中数学九年级下册",
+  "units": 3,
+  "questions": 28
  }
 ]

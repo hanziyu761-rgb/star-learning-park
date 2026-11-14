@@ -1,10 +1,11 @@
 /**
- * 单词卡目录（V2.18）：启蒙 15 个单元 + PEP 三～六年级 47 个单元，全部单词一次整理好。
+ * 单词卡目录（V2.18）：启蒙 15 个单元 + PEP 三～六年级 47 个单元，全部单词一次整理好；V5.2 加初中七～九年级 18 个话题单元。
  * 音标由 tools/words/phonetics.py 从 CMU 发音词典自动生成（美式），不手写。
  */
 import { IPA } from './data/ipa.gen';
 import { PEP_34 } from './data/pep34';
 import { PEP_56 } from './data/pep56';
+import { JUNIOR_WORDS } from './data/junior';
 import { STARTER_DICT, STARTER_UNITS } from './data/starter';
 import type { UnitTheme } from './data/types';
 
@@ -82,7 +83,26 @@ function pepUnits(): WordUnit[] {
   }));
 }
 
-export const WORD_UNITS: WordUnit[] = [...starterUnits(), ...pepUnits()];
+/** 初中（V5.2）：按话题原创分组的常用词，不对应某一版课本 */
+function juniorUnits(): WordUnit[] {
+  return JUNIOR_WORDS.map((u) => ({
+    id: u.id,
+    grade: u.grade,
+    book: u.book,
+    title: u.title,
+    theme: u.theme,
+    source: 'original' as const,
+    cards: u.lines
+      .trim()
+      .split('\n')
+      .map((line) => {
+        const [w, zh, ex, exZh] = line.split('|');
+        return { id: `${u.id}/${w}`, w, zh, ex, exZh, ipa: ipaOf(u.id, w), unitId: u.id };
+      }),
+  }));
+}
+
+export const WORD_UNITS: WordUnit[] = [...starterUnits(), ...pepUnits(), ...juniorUnits()];
 export const UNIT_BY_ID = new Map(WORD_UNITS.map((u) => [u.id, u]));
 export const ALL_CARDS: WordCard[] = WORD_UNITS.flatMap((u) => u.cards);
 export const CARD_BY_ID = new Map(ALL_CARDS.map((c) => [c.id, c]));

@@ -1,7 +1,7 @@
 /**
  * 教师审核表导出（V2.12 一年级；V2.15 一～六年级各一份）：把 APP 里每个年级会出现的题目、讲解、短文整理成表格，交给一线老师逐条审核。
  * 运行：npm run review:export  （先用 Jest 运行环境导出 JSON，再由 tools/review/make_xlsx.py 生成 Excel）
- * 输出：review-out/grade{1-6}-review.json、review-out/{一～六}年级教师审核表.xlsx（构建产物，不提交）
+ * 输出：review-out/grade{1-9}-review.json、review-out/{一～九}年级教师审核表.xlsx（构建产物，不提交）
  */
 import fs from 'fs';
 import path from 'path';
@@ -18,7 +18,7 @@ import { kpsFor } from '@/knowledge/graph';
 import { KP_TEACH } from '@/knowledge/teach';
 import type { DisplayText, Exercise } from '@/lesson/types';
 import { levelOfGrade, seeded } from '@/thinking/challenges';
-import { gensFor } from '@/thinking/registry';
+import { genLevel, gensFor } from '@/thinking/registry';
 import { WORD_UNITS } from '@/words/catalog';
 import { POLY } from '@/games/fish';
 
@@ -77,7 +77,7 @@ function exRow(id: string, cat: string, subject: string, where: string, e: Exerc
 
 const OUT = path.join(process.cwd(), 'review-out');
 
-const CN = ['', '一', '二', '三', '四', '五', '六'];
+const CN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 
 function exportGrade(grade: number) {
   const rows: Row[] = [];
@@ -141,13 +141,15 @@ function exportGrade(grade: number) {
       );
 
   // 3. 知识点练习（程序出题，答案由程序计算）：每个知识点抽 6 道
-  for (const k of kpsFor('math', grade).filter((x) => hasOriginalGenerator(x.id))) {
-    const rand = seeded(1000 + grade * 100 + k.order);
-    for (const e of kpRound(k.id, 6, rand))
-      rows.push(
-        exRow(e.id, '知识点练习（程序出题）', '数学', k.name, e, '原创生成器', '答案由程序计算并有单元测试核对'),
-      );
-  }
+  // 初中（V5.2）语文、英语也有原创出题，三科都列
+  for (const subj of grade >= 7 ? (['math', 'chinese', 'english'] as const) : (['math'] as const))
+    for (const k of kpsFor(subj, grade).filter((x) => hasOriginalGenerator(x.id))) {
+      const rand = seeded(1000 + grade * 100 + k.order);
+      for (const e of kpRound(k.id, 6, rand))
+        rows.push(
+          exRow(e.id, '知识点练习（程序出题）', SUBJ[subj], k.name, e, '原创生成器', subj === 'math' ? '答案由程序计算并有单元测试核对' : '原创小题库 / 句型模板，有单元测试检查结构'),
+        );
+    }
 
   // 4. 口算闯关
   for (const topic of ORAL_TOPICS.filter((x) => x.grade === grade))
@@ -186,7 +188,7 @@ function exportGrade(grade: number) {
   for (const subj of ['math', 'chinese', 'english'] as const)
     for (const g of gensFor(subj, level))
       for (let k = 0; k < 4; k++) {
-        const sig = g.sig(rand, level);
+        const sig = g.sig(rand, genLevel(g, level));
         const e = { ...g.build(sig), id: `ch:${sig}`, skill: `thinking:${g.type}` } as Exercise;
         rows.push(exRow(e.id, '每日挑战', SUBJ[subj], g.name, e, '原创生成器', '答案由程序计算并有单元测试核对'));
       }
@@ -307,10 +309,10 @@ function exportGrade(grade: number) {
   return unique;
 }
 
-it('导出一～六年级教师审核表数据', () => {
-  for (const g of [1, 2, 3, 4, 5, 6]) {
+it('导出一～九年级教师审核表数据', () => {
+  for (const g of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
     const rows = exportGrade(g);
-    expect(rows.length).toBeGreaterThan(1000);
+    expect(rows.length).toBeGreaterThan(g >= 7 ? 500 : 1000);
     // 每个年级都有讲解、题库、每日挑战
     for (const cat of ['知识点小讲解', '题库（AI 生成）', '每日挑战', ...(g === 2 ? [] : ['英语单词卡'])])
       expect(rows.some((r) => r.分类 === cat)).toBe(true);

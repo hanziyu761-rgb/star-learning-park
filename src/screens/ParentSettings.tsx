@@ -37,7 +37,7 @@ export function GradeCard() {
       </View>
       {isJunior(state.settings.grade) ? (
         <Text style={styles.gradeNote} testID="grade-junior-note">
-          {`初中：${pinyinHidden(state.settings) ? '不标拼音' : '标拼音（家长打开了拼音）'}。目前只有课本目录，没有初中的课程和练习。`}
+          {`初中：${pinyinHidden(state.settings) ? '不标拼音' : '标拼音（家长打开了拼音）'}。初中的知识点练习、题库、每日挑战、口算、阅读、单词卡、试卷按七～九年级出题（原创，待教师审核）。`}
         </Text>
       ) : null}
     </Card>

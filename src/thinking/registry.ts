@@ -30,19 +30,24 @@ import {
   zhWordsLow,
 } from './challengesUpper';
 import { MATH_MULTI } from './challengesMulti';
+import { CHINESE_JUNIOR_CH, ENGLISH_JUNIOR_CH, MATH_JUNIOR_CH } from './challengesJunior';
 
 export { challengeId, levelOfGrade, seeded } from './challenges';
 
 export const CHALLENGES_BY_SUBJECT: Record<Subject, ChallengeGen[]> = {
-  math: [...MATH_CHALLENGES, ...MATH_MULTI, ...MATH_UPPER],
-  chinese: [zhRiddleAll, zhStoryAll, zhInferAll, zhWordsLow, ...CHINESE_UPPER],
-  english: [enGuessAll, enOddAll, enPatternAll, enSentenceAll, ...ENGLISH_UPPER],
+  math: [...MATH_CHALLENGES, ...MATH_MULTI, ...MATH_UPPER, ...MATH_JUNIOR_CH],
+  chinese: [zhRiddleAll, zhStoryAll, zhInferAll, zhWordsLow, ...CHINESE_UPPER, ...CHINESE_JUNIOR_CH],
+  english: [enGuessAll, enOddAll, enPatternAll, enSentenceAll, ...ENGLISH_UPPER, ...ENGLISH_JUNIOR_CH],
 };
 export const CHALLENGES: ChallengeGen[] = Object.values(CHALLENGES_BY_SUBJECT).flat();
 
-/** 某一档难度可以出的题型 */
+/** 某一档难度可以出的题型；初中（第 5 档）= 初中题型 + 五六年级的题型（按第 4 档出题） */
 export const gensFor = (subject: Subject, level: Level) =>
-  CHALLENGES_BY_SUBJECT[subject].filter((g) => !g.levels || g.levels.includes(level));
+  CHALLENGES_BY_SUBJECT[subject].filter(
+    (g) => !g.levels || g.levels.includes(level) || (level === 5 && g.levels.includes(4)),
+  );
+/** 出题时用的难度档：没有第 5 档的题型按第 4 档出 */
+export const genLevel = (g: ChallengeGen, level: Level): Level => (level === 5 && !g.levels?.includes(5) ? 4 : level);
 
 /** 三年级起不注拼音（与教材一致）：把带拼音的文字换成普通文字 */
 export function withoutPinyin(e: ChallengeExercise): ChallengeExercise {
@@ -111,7 +116,7 @@ export function dailyChallenge(
   const base = subj === 'math' ? `${day}#${extra}#${grade}` : `${day}#${extra}#${grade}#${subj}`;
   // 难度档不是按年级来的（调整过）时换一个种子，避免与原档同一道题
   const seedKey = level === levelOfGrade(grade) ? base : `${base}#L${level}`;
-  const sig = gen.sig(seeded(hash(seedKey)), level);
+  const sig = gen.sig(seeded(hash(seedKey)), genLevel(gen, level));
   const ex = challengeFromId(challengeId(sig))!;
   return level >= 3 ? withoutPinyin(ex) : ex;
 }

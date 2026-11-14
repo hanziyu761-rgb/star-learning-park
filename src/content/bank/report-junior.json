@@ -1,0 +1,22 @@
+{
+ "source": "https://github.com/tanle-mtr/ChinaStudyFree (MIT)，七～九年级",
+ "importedAt": "2026-11-14T07:55:40.457Z",
+ "kept": 349,
+ "dropped": 39,
+ "keptBySubjectGrade": {
+  "math-7": 60,
+  "math-9": 68,
+  "math-8": 58,
+  "chinese-7": 16,
+  "chinese-9": 24,
+  "chinese-8": 38,
+  "english-7": 16,
+  "english-9": 30,
+  "english-8": 39
+ },
+ "droppedByReason": {
+  "填空题（答案不是数）": 20,
+  "人工抽查有错": 17,
+  "含无法转换的公式代码": 2
+ }
+}

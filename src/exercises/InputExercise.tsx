@@ -33,19 +33,19 @@ export function inputMatches(typed: string, answer: string): boolean {
 }
 
 /** 根据答案的样子决定显示哪些特殊键 */
-export function keysFor(answer: string): string[] {
+export function keysFor(answer: string, signed = false): string[] {
   const extra: string[] = [];
   if (answer.includes('.')) extra.push('.');
   if (answer.includes('/')) extra.push('/');
   if (answer.includes('……')) extra.push('余');
-  if (answer.startsWith('-')) extra.push('-');
+  if (signed || answer.startsWith('-')) extra.push('-');
   return extra;
 }
 
 export function InputExercise({ exercise, lang, onFeedback, onSolved }: ExerciseProps<InputData>) {
   const { solved, wrong, correct } = useAttempts(lang, onFeedback, onSolved, exercise.explanation);
   const [typed, setTyped] = useState('');
-  const extra = keysFor(exercise.answer);
+  const extra = keysFor(exercise.answer, exercise.signed);
 
   const press = (k: string) => {
     if (solved) return;

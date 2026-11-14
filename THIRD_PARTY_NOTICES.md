@@ -6,6 +6,7 @@
 - 使用内容：
   - `src/progress/srs.ts`：Leitner 间隔复习算法（移植并改写为纯函数）
   - `src/content/bank/*.json`：小学语文、数学 1–6 年级、英语 3–6 年级题目（经 `tools/import-bank/import.mjs` 转换和自动质检）。原项目说明题目由 AI 基于教材知识点原创生成、非教材原题；**未经人工逐题审核**，APP 内已标注。
+  - V5.2 追加 7–9 年级题目（分析版本 d000bef，经 `tools/import-bank/import-junior.mjs` 转换和自动质检，语文、英语题人工抽看后剔除 17 道有错的题）。
   - `server/ai-worker`：参考其 OpenAI 兼容调用方式与“未配置返回 501、前端降级”的设计（代码重写）
 - 未使用：EdgeTTS 免费语音方案（逆向调用微软服务，存在合规风险）、教材 PDF、演示签名密钥。
 

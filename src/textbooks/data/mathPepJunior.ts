@@ -2,10 +2,10 @@
  * 第七批：人教版初中数学（七～九年级），6 册：七年级上册～九年级上册为修订版，九年级下册平台现有为未修订版——已核实目录（V4.3）。
  * 来源：国家中小学智慧教育平台“初中 → 数学 → 人教版”电子课本目录页，2026-11-13 逐册查看录入。录入方式见 platformToc.ts。
  * 每章一行：章名后面是各节名称（目录原样；阅读与思考、数学活动、小结等不录）；页码是章起始页（九年级下册目录没有章页码，录第一节页码）。
- * 只有目录，没有课程和练习。
+ * V5.2：每一章（单元）连到初中原创知识点练习（linkJuniorKps）。
  */
 import type { Volume } from '../types';
-import { buildPlatformVolumes, type PlatformPlan } from './platformToc';
+import { buildPlatformVolumes, linkJuniorKps, type PlatformPlan } from './platformToc';
 
 const PLANS: PlatformPlan[] = [
   {
@@ -85,4 +85,4 @@ const PLANS: PlatformPlan[] = [
   },
 ];
 
-export const MATH_PEP_JUNIOR: Volume[] = buildPlatformVolumes({"editionId": "math.pep-jh", "subject": "math", "publisher": "人民教育出版社", "platformName": "人教版", "subjectName": "数学", "checkedAt": "2026-11-13", "stage": "初中"}, PLANS, "教材正文、插图、例题、习题版权归出版社所有；这里只录入目录上的单元名、课名和页码，不复制教材内容。");
+export const MATH_PEP_JUNIOR: Volume[] = linkJuniorKps('math', buildPlatformVolumes({"editionId": "math.pep-jh", "subject": "math", "publisher": "人民教育出版社", "platformName": "人教版", "subjectName": "数学", "checkedAt": "2026-11-13", "stage": "初中"}, PLANS, "教材正文、插图、例题、习题版权归出版社所有；这里只录入目录上的单元名、课名和页码，不复制教材内容。"));

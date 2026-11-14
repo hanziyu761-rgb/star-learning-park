@@ -6,6 +6,7 @@ import React from 'react';
 import { LESSONS } from '@/content';
 import { PASSAGES, plainOf, READING_LESSONS } from '@/content/chineseReading';
 import { PASSAGES_UPPER } from '@/content/chineseReadingUpper';
+import { PASSAGES_JUNIOR } from '@/content/chineseReadingJunior';
 import { TeachPanel } from '@/components/TeachPanel';
 import { plainText } from '@/content/zh';
 import { kpsFor } from '@/knowledge/graph';
@@ -48,7 +49,7 @@ describe('知识点小讲解', () => {
       }
     // 没有对不上知识点的讲解
     const all = new Set(
-      [1, 2, 3, 4, 5, 6].flatMap((g) =>
+      [1, 2, 3, 4, 5, 6, 7, 8, 9].flatMap((g) =>
         (['math', 'chinese', 'english'] as const).flatMap((s) => kpsFor(s, g).map((k) => k.id)),
       ),
     );
@@ -79,13 +80,14 @@ describe('阅读小屋', () => {
   const all = [
     { grade: 1, ps: PASSAGES },
     ...Object.entries(PASSAGES_UPPER).map(([g, ps]) => ({ grade: Number(g), ps })),
+    ...Object.entries(PASSAGES_JUNIOR).map(([g, ps]) => ({ grade: Number(g), ps })),
   ];
 
-  it('一～六年级共 26 篇原创短文已加入课程目录，标注原创、待审核、年级', () => {
-    expect(READING_LESSONS).toHaveLength(26);
-    for (const g of [1, 2, 3, 4, 5, 6])
+  it('一～九年级共 38 篇原创短文已加入课程目录，标注原创、待审核、年级', () => {
+    expect(READING_LESSONS).toHaveLength(38);
+    for (const g of [1, 2, 3, 4, 5, 6, 7, 8, 9])
       expect(READING_LESSONS.filter((l) => (l.grade ?? 1) === g)).toHaveLength(g === 1 ? 6 : 4);
-    expect(new Set(READING_LESSONS.map((l) => l.id)).size).toBe(26);
+    expect(new Set(READING_LESSONS.map((l) => l.id)).size).toBe(38);
     for (const l of READING_LESSONS) {
       expect(LESSONS).toContain(l);
       expect(l).toMatchObject({ subject: 'chinese', track: 'zhread', source: 'original' });

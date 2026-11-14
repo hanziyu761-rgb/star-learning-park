@@ -2,10 +2,10 @@
  * 第七批：统编版初中语文（七～九年级），6 册：七年级上册～九年级上册为修订版，九年级下册平台现有为未修订版——已核实目录（V4.3）。
  * 来源：国家中小学智慧教育平台“初中 → 语文 → 统编版”电子课本目录页，2026-11-13 逐册查看录入。录入方式见 platformToc.ts。
  * 每个单元一行：单元名后面是这个单元的课文题目和写作题目（目录原样，作者、课文里的分篇不录）；页码是单元起始页（九年级下册目录没有单元页码，录第一课页码）。
- * 专题学习活动、整本书阅读、课外古诗词诵读等按小栏目录入。只有目录，没有课程和练习。
+ * 专题学习活动、整本书阅读、课外古诗词诵读等按小栏目录入。V5.2：每个单元连到初中原创知识点练习（linkJuniorKps）。
  */
 import type { Volume } from '../types';
-import { buildPlatformVolumes, type PlatformPlan } from './platformToc';
+import { buildPlatformVolumes, linkJuniorKps, type PlatformPlan } from './platformToc';
 
 const PLANS: PlatformPlan[] = [
   {
@@ -112,4 +112,4 @@ const PLANS: PlatformPlan[] = [
   },
 ];
 
-export const CHINESE_TONGBIAN_JUNIOR: Volume[] = buildPlatformVolumes({"editionId": "chinese.tongbian-jh", "subject": "chinese", "publisher": "人民教育出版社", "platformName": "统编版", "subjectName": "语文", "checkedAt": "2026-11-13", "stage": "初中"}, PLANS, "教材正文、插图、例题、习题版权归出版社所有；这里只录入目录上的单元名、课名和页码，不复制教材内容。");
+export const CHINESE_TONGBIAN_JUNIOR: Volume[] = linkJuniorKps('chinese', buildPlatformVolumes({"editionId": "chinese.tongbian-jh", "subject": "chinese", "publisher": "人民教育出版社", "platformName": "统编版", "subjectName": "语文", "checkedAt": "2026-11-13", "stage": "初中"}, PLANS, "教材正文、插图、例题、习题版权归出版社所有；这里只录入目录上的单元名、课名和页码，不复制教材内容。"));

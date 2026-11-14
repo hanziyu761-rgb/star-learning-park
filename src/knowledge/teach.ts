@@ -5,6 +5,7 @@
 import { zh } from '@/content/zh';
 import { LANG_TEACH } from './teachLang';
 import { MATH_TEACH_UPPER } from './teachMath';
+import { JUNIOR_TEACH } from './teachJunior';
 import type { TeachSlide } from './teachTypes';
 
 export type { TeachSlide } from './teachTypes';
@@ -143,5 +144,5 @@ export const KP_TEACH_G1: Record<string, TeachSlide[]> = {
   ],
 };
 
-/** 全部知识点讲解：一年级数学（V2.10）+ 二～六年级数学、二～六年级语文、三～六年级英语（V2.13） */
-export const KP_TEACH: Record<string, TeachSlide[]> = { ...KP_TEACH_G1, ...MATH_TEACH_UPPER, ...LANG_TEACH };
+/** 全部知识点讲解：一年级数学（V2.10）+ 二～六年级数学、二～六年级语文、三～六年级英语（V2.13）+ 七～九年级三科（V5.2） */
+export const KP_TEACH: Record<string, TeachSlide[]> = { ...KP_TEACH_G1, ...MATH_TEACH_UPPER, ...LANG_TEACH, ...JUNIOR_TEACH };

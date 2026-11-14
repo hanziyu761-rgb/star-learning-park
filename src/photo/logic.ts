@@ -8,10 +8,10 @@ import { toExamItem, type ExamItem } from '@/exam/build';
 import { exerciseFromKpId, hasOriginalGenerator, kpRound } from '@/knowledge/generators';
 import { getKp, kpsFor, kpSubject, type KpSubject } from '@/knowledge/graph';
 import type { PhotoMistake } from '@/progress/model';
+import { GRADE_CN } from '@/progress/grade';
 
 export const AI_LABEL = 'AI 生成，未经人工审核';
 export const SUBJECT_NAME: Record<KpSubject, string> = { math: '数学', chinese: '语文', english: '英语' };
-const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
 
 /** 交给 AI 的知识点候选：这一科这个年级的全部知识点（只发 id 和名称） */
 export function candidatesFor(subject: KpSubject, grade: number): { id: string; name: string }[] {

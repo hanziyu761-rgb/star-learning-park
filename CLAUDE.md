@@ -36,7 +36,12 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 
 ## 教师审核表
 
-`npm run review:export` 导出一～六年级内容审核表（每个年级一份 Excel）到 `review-out/`（构建产物，不提交）。题库自动核查在 `__tests__/bank-audit.test.ts`，不得为通过检查而放宽验算规则。
+`npm run review:export` 导出一～九年级内容审核表（每个年级一份 Excel）到 `review-out/`（构建产物，不提交）。题库自动核查在 `__tests__/bank-audit.test.ts`，不得为通过检查而放宽验算规则。
+
+## 初中（V5.2）
+
+- 年级 7～9 用初中内容（`contentGrade` 返回 1～9）。初中题库由 `node tools/import-bank/import-junior.mjs <ChinaStudyFree 目录>` 导入，只追加七～九年级，有错的题在脚本 `REJECT` 里登记原因。
+- 新增朗读内容后重新生成录音清单（`tools/voice/cloud/make_list.py`），由 APP 所有者运行 `record.ps1` 补录。
 
 ## 单文件 HTML 版
 
@@ -53,8 +58,8 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 src/app/            Expo Router 路由（只做参数读取，转给 src/screens）
 src/screens/        页面：首页、学科页、课程页、家长中心（跳转只用 useNav()，不要直接用 router）
 src/nav/            跳转抽象；src/single/ 单文件 HTML 版入口（内存页面栈）
-src/thinking/       思维训练：每日挑战题（challenges.ts 数学、challengesLang.ts 语文和英语、challengesUpper.ts + contentUpper.ts 三～六年级、registry.ts 总表/分档/三科轮换）、答对后选思路、家长中心统计
-src/knowledge/      知识图谱（原创）：一年级数学 graph.ts + curriculum/（二～六年级数学、一～六年级语文、三～六年级英语）、映射、题目生成器（genUpper.ts 二～六年级数学）、掌握度、诊断、推荐
+src/thinking/       思维训练：每日挑战题（challenges.ts 数学、challengesLang.ts 语文和英语、challengesUpper.ts + contentUpper.ts 三～六年级、challengesJunior.ts 初中第 5 档、registry.ts 总表/分档/三科轮换）、答对后选思路、家长中心统计
+src/knowledge/      知识图谱（原创）：一年级数学 graph.ts + curriculum/（二～六年级数学、一～六年级语文、三～六年级英语；junior.ts 七～九年级三科）、映射、题目生成器（genUpper.ts 二～六年级数学；genJunior.ts 初中数学；genJuniorLang.ts 初中语文英语）、掌握度、诊断、推荐
 src/ai/             AI 老师客户端（只连自家服务，无密钥）
 server/ai-worker/   AI 老师服务（Cloudflare Worker + DeepSeek）
 src/content/        课程数据（只写数据，不写界面）；zh.ts 拼音工具；index.ts 课程目录与知识点名称；bank/edition.ts 新版教材单元编排（V2.4：一年级）

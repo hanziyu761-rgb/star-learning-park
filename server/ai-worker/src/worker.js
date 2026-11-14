@@ -52,13 +52,15 @@ export function cleanOutput(text, maxLen = 160) {
   return t;
 }
 
-const GRADE_CN = ['', '一', '二', '三', '四', '五', '六'];
+const GRADE_CN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+/** 学段（V5.2）：七～九年级是初中 */
+const stage = (grade) => (grade >= 7 ? '初中' : '小学');
 const SUBJECT_CN = { math: '数学', chinese: '语文', english: '英语' };
 
 function persona(grade) {
   const g = GRADE_CN[grade] || '一';
   return (
-    `你是“星星宝”，一位温柔耐心的小学老师，正在辅导一位${g}年级的小朋友。` +
+    `你是“星星宝”，一位温柔耐心的${grade >= 7 ? '初中' : '小学'}老师，正在辅导一位${g}年级的${grade >= 7 ? '同学' : '小朋友'}。` +
     '规则：1. 用小朋友听得懂的简单短句，每句不超过 15 个字，总共不超过 80 个字；' +
     '2. 多鼓励，不批评，不说“错了”而说“再想想”；' +
     '3. 只聊学习和健康积极的话题，别的话题温柔地带回学习；' +
@@ -87,7 +89,10 @@ function subjectOf(v) {
   return v;
 }
 
-function gradeOf(v) {
+/** 年级：V5.2 起 APP 另外发 gradeFull（真实年级 1～9）；只有 grade 时按 1～6 */
+function gradeOf(v, full) {
+  const f = Number(full);
+  if (Number.isInteger(f) && f >= 1 && f <= 9) return f;
   const g = Number(v);
   return Number.isInteger(g) && g >= 1 && g <= 6 ? g : 1;
 }
@@ -204,7 +209,7 @@ export function _resetRateLimit() {
 /** 做题提示：mode=hint 不给答案；mode=explain 答对后讲解 */
 export async function handleHint(body, env) {
   const subject = subjectOf(body.subject);
-  const grade = gradeOf(body.grade);
+  const grade = gradeOf(body.grade, body.gradeFull);
   const mode = body.mode === 'explain' ? 'explain' : 'hint';
   const question = str(body.question, 300, 'question');
   const options = Array.isArray(body.options) ? body.options.slice(0, 6).map((o, i) => str(o, 60, `options[${i}]`)) : [];
@@ -242,7 +247,7 @@ function containsAnswer(text, ans) {
 /** 问问星星宝：最多 6 轮上下文，每句不超过 100 字 */
 export async function handleChat(body, env) {
   const subject = ['math', 'chinese', 'english'].includes(body.subject) ? body.subject : 'math';
-  const grade = gradeOf(body.grade);
+  const grade = gradeOf(body.grade, body.gradeFull);
   const msgs = Array.isArray(body.messages) ? body.messages.slice(-6) : [];
   if (msgs.length === 0) throw new BadRequest('缺少 messages');
   const history = msgs.map((m, i) => ({
@@ -264,7 +269,7 @@ export async function handleChat(body, env) {
 
 /** 给家长的学习分析：只接收知识点名称、正确率和错题题干，不接收任何个人信息 */
 export async function handleReport(body, env) {
-  const grade = gradeOf(body.grade);
+  const grade = gradeOf(body.grade, body.gradeFull);
   const weak = Array.isArray(body.weakSkills) ? body.weakSkills.slice(0, 8) : [];
   const mistakes = Array.isArray(body.mistakes) ? body.mistakes.slice(0, 8) : [];
   if (weak.length === 0 && mistakes.length === 0) {
@@ -275,7 +280,7 @@ export async function handleReport(body, env) {
     ...mistakes.map((m, i) => `- 错题：${str(m, 120, `mistakes[${i}]`)}`),
   ];
   const sys =
-    `你是小学${GRADE_CN[grade]}年级的教研老师，正在给家长写学习分析。` +
+    `你是${stage(grade)}${GRADE_CN[grade]}年级的教研老师，正在给家长写学习分析。` +
     '要求：中文，不超过 200 字；先用一句话概括孩子的薄弱点和可能原因，再给 3 条家长在家就能做的具体建议（每条一行，以“1.”开头）；语气积极，不贴标签，不制造焦虑；不使用 Markdown。';
   const text = cleanOutput(
     await callLLM(env, [{ role: 'system', content: sys }, { role: 'user', content: `孩子最近的练习情况：\n${lines.join('\n')}` }], {
@@ -367,14 +372,14 @@ async function callVL(env, messages) {
  */
 export async function handlePhotoAnalyze(body, env) {
   const image = imageOf(body.image);
-  const grade = gradeOf(body.grade);
+  const grade = gradeOf(body.grade, body.gradeFull);
   const hinted = ['math', 'chinese', 'english'].includes(body.subject) ? body.subject : '';
   const candidates = (Array.isArray(body.candidates) ? body.candidates.slice(0, 120) : [])
     .map((c, i) => ({ id: str(c?.id, 60, `candidates[${i}].id`), name: str(c?.name, 40, `candidates[${i}].name`) }));
   const ids = new Set(candidates.map((c) => c.id));
 
   const sys =
-    `你是小学${GRADE_CN[grade]}年级的教研老师，帮家长分析孩子做错的一道题。照片里可能有几道题，只看孩子做错（有红叉、圈出或明显写错）的那一道；看不出哪道错时取第一道。` +
+    `你是${stage(grade)}${GRADE_CN[grade]}年级的教研老师，帮家长分析孩子做错的一道题。照片里可能有几道题，只看孩子做错（有红叉、圈出或明显写错）的那一道；看不出哪道错时取第一道。` +
     '只输出一个 JSON 对象，不要任何说明，字段：' +
     '{"subject":"math|chinese|english","question":"题目原文（照抄，不超过200字）","childAnswer":"孩子写的答案，看不清写空","correctAnswer":"正确答案","kpId":"从候选知识点里选最贴切的一个 id，都不合适写空","reason":"一句话说明可能错在哪里（不超过60字）"}。' +
     '不要写出照片里出现的姓名、学校、班级、电话等个人信息。照片里不是题目时，question 写空。';
@@ -413,12 +418,12 @@ export async function handlePhotoAnalyze(body, env) {
 export async function handlePhotoSimilar(body, env) {
   if (!['chinese', 'english'].includes(body.subject)) throw new BadRequest('subject 只能是 chinese 或 english');
   const subject = body.subject;
-  const grade = gradeOf(body.grade);
+  const grade = gradeOf(body.grade, body.gradeFull);
   const question = str(body.question, 300, 'question');
   const kp = str(body.knowledgePoint, 40, 'knowledgePoint', false);
   const count = Math.min(5, Math.max(1, Number(body.count) || 5));
   const sys =
-    `你是小学${GRADE_CN[grade]}年级${SUBJECT_CN[subject]}老师，要根据一道孩子做错的题，出 ${count} 道考查同一知识点的选择题。` +
+    `你是${stage(grade)}${GRADE_CN[grade]}年级${SUBJECT_CN[subject]}老师，要根据一道孩子做错的题，出 ${count} 道考查同一知识点的选择题。` +
     '要求：难度和原题相当；题目不要照抄原题；每题 3 个选项，只有 1 个正确；内容健康积极；' +
     (subject === 'english' ? '题目和选项用英文，explain 用中文；' : '用简体中文；') +
     '只输出 JSON 数组，不要任何说明：[{"question":"题目","options":["A","B","C"],"answer":"与正确选项完全相同的文字","explain":"一句话讲解（不超过40字）"}]。';

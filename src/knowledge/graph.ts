@@ -14,6 +14,7 @@ import type { DisplayText } from '@/lesson/types';
 import { CHINESE } from './curriculum/chinese';
 import { ENGLISH } from './curriculum/english';
 import { MATH_UPPER } from './curriculum/math';
+import { CHINESE_JUNIOR, ENGLISH_JUNIOR, MATH_JUNIOR } from './curriculum/junior';
 
 export type Strength = 'hard' | 'soft';
 
@@ -391,12 +392,16 @@ const MATH_G1: KnowledgePoint[] = [
   }),
 ];
 
-/** 全部知识点：一年级数学（原有）+ 二～六年级数学 + 一～六年级语文 + 三～六年级英语（V2.2） */
+/** 全部知识点：一年级数学（原有）+ 二～六年级数学 + 一～六年级语文 + 三～六年级英语（V2.2）+ 七～九年级三科（V5.2） */
 export const KNOWLEDGE_POINTS: KnowledgePoint[] = [
   ...MATH_G1.map((k) => ({ ...k, subject: 'math' as const })),
   ...MATH_UPPER.map((k) => ({ ...k, practicable: true })),
   ...CHINESE.map((k) => ({ ...k, practicable: true })),
   ...ENGLISH.map((k) => ({ ...k, practicable: true })),
+  // 七～九年级（V5.2）
+  ...MATH_JUNIOR,
+  ...CHINESE_JUNIOR,
+  ...ENGLISH_JUNIOR,
 ];
 
 export const kpSubject = (k: KnowledgePoint): KpSubject => k.subject ?? 'math';
