@@ -63,5 +63,14 @@
     "testMatch": [
       "**/__tests__/**/*.test.ts?(x)"
     ]
+  },
+  "expo": {
+    "autolinking": {
+      "android": {
+        "exclude": [
+          "expo-blur"
+        ]
+      }
+    }
   }
 }
