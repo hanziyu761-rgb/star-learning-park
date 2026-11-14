@@ -25,7 +25,7 @@ import { contentGrade } from '@/progress/grade';
 import { colors, themed } from '@/theme';
 
 const LESSON: Record<GameId, string> = { kitchen: KITCHEN_LESSON, fish: FISH_LESSON, bubble: BUBBLE_LESSON };
-export const GAME_BG: Record<GameId, string> = { kitchen: '#FFF3E0', fish: '#E3F4FB', bubble: '#F1ECFF' };
+export const GAME_BG: Record<GameId, string> = themed(() => ({ kitchen: colors.orangeSoft, fish: colors.blueSoft, bubble: colors.parentSoft }));
 export const GAME_MAIN: Record<GameId, string> = themed(() => ({ kitchen: colors.orange, fish: colors.blue, bubble: colors.parent }));
 
 export interface GameAnswer {
@@ -196,16 +196,16 @@ const styles = themed(() => StyleSheet.create({
   root: { flex: 1 },
   top: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, gap: 8, minHeight: 56 },
   exit: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center' },
-  exitText: { fontSize: 22, fontWeight: '700', color: '#555' },
-  level: { fontSize: 14, fontWeight: '600', minWidth: 48, textAlign: 'right' },
+  exitText: { fontSize: 22, fontWeight: '700', color: colors.text },
+  level: { fontSize: 14, fontWeight: '600', minWidth: 48, textAlign: 'right', color: colors.text },
   summary: { padding: 20, gap: 16, alignItems: 'center', width: '100%', maxWidth: 640, alignSelf: 'center' },
-  stars: { fontSize: 48, color: '#F2B705' },
-  score: { fontSize: 18, fontWeight: '700', color: '#333', textAlign: 'center' },
+  stars: { fontSize: 48, color: colors.star },
+  score: { fontSize: 18, fontWeight: '700', color: colors.text, textAlign: 'center' },
   wrongBox: { alignSelf: 'stretch', backgroundColor: colors.card, borderRadius: 18, padding: 14, gap: 4 },
-  wrongTitle: { fontSize: 14, color: '#666' },
-  wrongItem: { fontSize: 18, fontWeight: '700', color: '#333' },
+  wrongTitle: { fontSize: 14, color: colors.textSoft },
+  wrongItem: { fontSize: 18, fontWeight: '700', color: colors.text },
   btn: { alignSelf: 'stretch', minHeight: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center' },
   light: { backgroundColor: colors.card },
   restNote: { backgroundColor: colors.card, borderRadius: 18, padding: 14, alignSelf: 'stretch', alignItems: 'center' },
-  round: { textAlign: 'center', fontSize: 12, color: '#888' },
+  round: { textAlign: 'center', fontSize: 12, color: colors.textSoft },
 }));

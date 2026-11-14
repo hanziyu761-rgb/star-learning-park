@@ -39,7 +39,7 @@ export default function ParentScreen() {
 
   if (status === 'loading') return <LoadingView />;
   return (
-    <Screen bg="#F2F1FF" testID="parent-screen">
+    <Screen bg={colors.bg} testID="parent-screen">
       <Header title="家长中心" onBack={goBack} />
       {passed ? (
         <ParentDashboard />
@@ -304,7 +304,7 @@ function Metric({ label, value, testID }: { label: string; value: string; testID
 const styles = themed(() => StyleSheet.create({
   bookRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginVertical: space.sm },
   bookBtn: { borderWidth: 2, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: 10, backgroundColor: colors.card },
-  bookBtnText: { fontSize: 14, fontWeight: '600' },
+  bookBtnText: { fontSize: 14, fontWeight: '600', color: colors.text },
   examBtn: {
     marginTop: space.sm,
     minHeight: 52,
@@ -328,7 +328,7 @@ const styles = themed(() => StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.line,
   },
-  rowEmoji: { fontSize: 24 },
+  rowEmoji: { fontSize: 24, color: colors.text },
   rowTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   bad: { fontSize: 15, fontWeight: '600', color: colors.wrong },
   reset: {

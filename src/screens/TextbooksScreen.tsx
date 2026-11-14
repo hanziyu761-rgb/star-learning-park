@@ -30,7 +30,7 @@ const TOC = themed(() => ({
   verified: { text: '目录已核实', color: colors.correct },
   original: { text: '原创', color: colors.blue },
   pending: { text: '目录待核实', color: colors.orange },
-  none: { text: '目录未录入', color: colors.textFaint },
+  none: { text: '目录未录入', color: colors.textSoft },
 }) as const);
 const STATUS = { current: '现行', historical: '历史版本', upcoming: '即将启用', unknown: '状态待核实' } as const;
 
@@ -40,7 +40,7 @@ export default function TextbooksScreen() {
   const nav = useNav();
   const [details, setDetails] = useState(false);
   return (
-    <Screen bg="#F6F8FB" testID="textbooks-screen">
+    <Screen bg={colors.bg} testID="textbooks-screen">
       <Header title="教材资源库" onBack={nav.back} />
       <SimpleView />
       <Pressable onPress={() => setDetails(!details)} style={styles.detailsBtn} accessibilityRole="button" testID="tb-details-toggle">

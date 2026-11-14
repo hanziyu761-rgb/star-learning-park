@@ -289,7 +289,7 @@ const styles = themed(() => StyleSheet.create({
     gap: 6,
     ...shadow,
   },
-  tileEmoji: { fontSize: 36 },
+  tileEmoji: { fontSize: 36, color: colors.text },
   tileNote: { ...type.caption, color: colors.textSoft },
   go: { fontSize: 28, fontWeight: '400', color: colors.textFaint },
   continue: {
@@ -304,9 +304,9 @@ const styles = themed(() => StyleSheet.create({
     borderWidth: 0,
     ...shadow,
   },
-  continueEmoji: { fontSize: 40 },
+  continueEmoji: { fontSize: 40, color: colors.text },
   continueSub: { ...type.footnote, color: colors.textSoft, marginTop: 2 },
-  play: { fontSize: 32 },
+  play: { fontSize: 32, color: colors.text },
   subjects: { flexDirection: 'row', gap: space.lg },
   subject: {
     flex: 1,
@@ -326,7 +326,7 @@ const styles = themed(() => StyleSheet.create({
     justifyContent: 'center',
     ...shadow,
   },
-  subjectEmoji: { fontSize: 38 },
+  subjectEmoji: { fontSize: 38, color: colors.text },
   panel: {
     backgroundColor: colors.card,
     borderRadius: radius.lg,
@@ -346,7 +346,7 @@ const styles = themed(() => StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.line,
   },
-  taskEmoji: { fontSize: 28 },
+  taskEmoji: { fontSize: 28, color: colors.text },
   badge: {
     minWidth: 24,
     height: 24,

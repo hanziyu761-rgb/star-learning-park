@@ -121,7 +121,7 @@ function WordCards() {
               accessibilityState={{ selected: grade === b.g }}
               testID={`wc-grade-${b.g}`}
             >
-              <Text style={[styles.bookText, grade === b.g && { color: colors.onAccent }]}>{b.label}</Text>
+              <Text style={[styles.bookText, grade === b.g && { color: '#fff' }]}>{b.label}</Text>
             </Pressable>
           ))}
         </View>
@@ -138,7 +138,7 @@ function WordCards() {
               testID={`wc-unit-${u.id}`}
             >
               {u.book !== '启蒙' ? <Text style={[styles.unitBook, u.id === unitId && { color: '#DDEBE2' }]}>{u.book.slice(-2)}</Text> : null}
-              <Text style={[styles.unitText, u.id === unitId && { color: colors.onAccent }]} numberOfLines={1}>
+              <Text style={[styles.unitText, u.id === unitId && { color: '#fff' }]} numberOfLines={1}>
                 {u.title}
               </Text>
             </Pressable>
@@ -369,20 +369,20 @@ const styles = themed(() => StyleSheet.create({
   unitText: { fontSize: 15, fontWeight: '600', color: WC.mainText },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   progressText: { fontSize: 15, fontWeight: '600', color: WC.mainText },
-  bar: { height: 14, borderRadius: 7, backgroundColor: '#D9E6DE', overflow: 'hidden' },
+  bar: { height: 10, borderRadius: 5, backgroundColor: WC.soft, overflow: 'hidden' },
   barFill: { height: '100%', backgroundColor: WC.accent, borderRadius: 7 },
   mapBtn: { minHeight: 44, paddingHorizontal: 12, borderRadius: 22, backgroundColor: WC.accent, justifyContent: 'center' },
-  mapText: { fontSize: 15, fontWeight: '700', color: WC.text },
+  mapText: { fontSize: 15, fontWeight: '700', color: '#1D1D1F' },
   judgeRow: { flexDirection: 'row', gap: 12 },
   judge: { flex: 1, minHeight: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center' },
-  forget: { backgroundColor: '#F28B82' },
-  remember: { backgroundColor: WC.ok },
-  judgeText: { color: colors.onAccent, fontSize: 20, fontWeight: '700' },
+  forget: { backgroundColor: '#B55A55' },
+  remember: { backgroundColor: '#4A7F5B' },
+  judgeText: { color: '#fff', fontSize: 20, fontWeight: '700' },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   action: { flexGrow: 1, flexBasis: 96, minHeight: 52, borderRadius: 18, backgroundColor: colors.card, borderWidth: 2, borderColor: WC.mainText, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
   actionText: { fontSize: 16, fontWeight: '600', color: WC.mainText, textAlign: 'center' },
   primary: { minHeight: 56, borderRadius: 28, backgroundColor: WC.main, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
-  primaryText: { color: colors.onAccent, fontSize: 18, fontWeight: '700' },
+  primaryText: { color: '#fff', fontSize: 18, fontWeight: '700' },
   doneCard: { height: 400, borderRadius: 28, backgroundColor: WC.soft, borderWidth: 3, borderColor: WC.mainText, alignItems: 'center', justifyContent: 'center', gap: 16, padding: 16 },
   doneText: { fontSize: 26, fontWeight: '700', color: WC.mainText },
   source: { fontSize: 12, color: WC.muted, lineHeight: 18 },

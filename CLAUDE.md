@@ -17,6 +17,12 @@
 4. **不破坏已有数据**：修改 `ProgressState` 结构时必须在 `parseProgress` 中写迁移，并补测试；存储键 `slp.progress.v1`。
 5. **检查不能作弊**：不得通过关闭规则、跳过或删除测试来让检查通过。
 
+## 视觉规范（V5.0，详见 docs/DESIGN.md）
+
+- 颜色只用 `src/theme.ts` 的 `colors` / `subjectTheme`，样式表写成 `themed(() => StyleSheet.create({...}))`，文字样式必须写 `color`（否则深色模式看不见）。
+- 按钮用 `@/components/Tappable` 的 `Pressable`（弹簧手感）；彩色按钮上的文字用 `colors.onAccent`。
+- `__tests__/design.test.tsx` 检查对比度和彩度，不得为通过而放宽。
+
 ## 每次改动后运行
 
 ```bash

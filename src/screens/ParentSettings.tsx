@@ -190,7 +190,7 @@ export function AiCard() {
       <Pressable
         onPress={() => speak({ text: '小朋友你好，我是星星宝！有不会的题就来问我吧。', lang: 'zh-CN', cloud: true })}
         disabled={!aiCloudVoice}
-        style={[styles.btn, !aiCloudVoice && { backgroundColor: colors.disabled }]}
+        style={[styles.btn, !aiCloudVoice && { opacity: 0.4 }]}
         accessibilityRole="button"
         testID="ai-voice-try"
       >
@@ -202,7 +202,7 @@ export function AiCard() {
       <Pressable
         onPress={analyze}
         disabled={!aiEnabled || report.loading}
-        style={[styles.btn, !aiEnabled && { backgroundColor: colors.disabled }]}
+        style={[styles.btn, !aiEnabled && { opacity: 0.4 }]}
         accessibilityRole="button"
         testID="ai-report"
       >
@@ -259,8 +259,7 @@ const styles = themed(() => StyleSheet.create({
     backgroundColor: colors.parentSoft,
     paddingHorizontal: space.md,
     fontSize: 15,
-    marginTop: 4,
-  },
+    marginTop: 4, color: colors.text },
   btn: {
     minHeight: 48,
     borderRadius: radius.md,

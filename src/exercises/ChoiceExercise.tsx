@@ -137,7 +137,7 @@ const styles = themed(() => StyleSheet.create({
   wrap: { gap: space.lg },
   listen: { alignItems: 'center', paddingVertical: space.sm },
   stem: { alignItems: 'center', backgroundColor: colors.card, borderRadius: radius.md, padding: space.md },
-  stemEmoji: { fontSize: 44, textAlign: 'center', letterSpacing: 4 },
+  stemEmoji: { fontSize: 44, textAlign: 'center', letterSpacing: 4, color: colors.text },
   options: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md },
   option: {
     minWidth: 130,
@@ -157,7 +157,7 @@ const styles = themed(() => StyleSheet.create({
   optionWrong: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft, opacity: 0.6 },
   optionRight: { borderColor: colors.correct, backgroundColor: colors.correctSoft },
   pressed: { transform: [{ scale: 0.96 }] },
-  optEmoji: { fontSize: 52 },
+  optEmoji: { fontSize: 52, color: colors.text },
   cooldown: { textAlign: 'center', fontSize: 15, fontWeight: '700', color: colors.textSoft },
   mark: { position: 'absolute', top: 6, right: 12, fontSize: 26, fontWeight: '700', color: colors.wrong },
 }));

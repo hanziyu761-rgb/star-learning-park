@@ -354,8 +354,8 @@ const styles = themed(() => StyleSheet.create({
   itemsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm, minHeight: 90 },
   demoItem: { alignItems: 'center' },
   itemNo: { fontSize: 18, fontWeight: '600', color: colors.textSoft },
-  bigEmoji: { fontSize: 52 },
-  midEmoji: { fontSize: 36 },
+  bigEmoji: { fontSize: 52, color: colors.text },
+  midEmoji: { fontSize: 36, color: colors.text },
   bigNumber: { fontSize: 84, fontWeight: '700', color: colors.primary },
   dragArea: { flexDirection: 'column-reverse', gap: space.lg },
   basket: {
@@ -370,8 +370,8 @@ const styles = themed(() => StyleSheet.create({
     padding: space.md,
   },
   basketDone: { borderStyle: 'solid', borderColor: colors.correct, backgroundColor: colors.correctSoft },
-  basketEmoji: { fontSize: 56 },
-  basketItems: { fontSize: 32, textAlign: 'center' },
+  basketEmoji: { fontSize: 56, color: colors.text },
+  basketItems: { fontSize: 32, textAlign: 'center', color: colors.text },
   basketCount: { fontSize: 40, fontWeight: '700', color: colors.primary },
   pile: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md, minHeight: 80 },
   pileItem: { width: MIN_TOUCH + 12, height: MIN_TOUCH + 12, alignItems: 'center', justifyContent: 'center' },
@@ -432,5 +432,5 @@ const styles = themed(() => StyleSheet.create({
   },
   btnRow: { flexDirection: 'row', gap: space.md },
   found: { backgroundColor: colors.correctSoft, borderRadius: radius.md, padding: space.md, gap: 4, alignItems: 'center' },
-  foundRow: { fontSize: 26 },
+  foundRow: { fontSize: 26, color: colors.text },
 }));

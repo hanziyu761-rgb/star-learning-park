@@ -14,9 +14,10 @@ import type { GameProps } from '@/screens/GameScreen';
 import { speak } from '@/speech/speech';
 import { clickTime } from '@/words/session';
 import { gt } from './text';
-import { themed } from '@/theme';
+import { colors, themed } from '@/theme';
 
-const MAIN = '#7A5AF8';
+/** 主色跟着配色（V5.0）；池塘、泡泡、锅等场景画面保留固定颜色 */
+const MAIN_OF = () => colors.parent;
 const COLORS = ['#FFD6E0', '#D6F0FF', '#E2FFD6', '#FFF3C4', '#EBDCFF', '#FFE2CC'];
 const sayWord = (w: string) => speak({ text: w, lang: 'en-US' });
 
@@ -74,7 +75,7 @@ export function BubbleGame({ level, grade, rand, onAnswer, onFinish }: GameProps
         </Text>
         <Pressable onPress={() => sayWord(cur.card.w)} style={styles.listen} accessibilityRole="button" testID="bubble-listen">
           <Text style={{ fontSize: 22 }}>🔊</Text>
-          <DisplayTextView text={gt('listen', grade)} size={15} color={MAIN} />
+          <DisplayTextView text={gt('listen', grade)} size={15} color={MAIN_OF()} />
         </Pressable>
         <View style={styles.slots} testID="bubble-slots">
           {[...cur.card.w].map((c, i) => (
@@ -90,16 +91,16 @@ export function BubbleGame({ level, grade, rand, onAnswer, onFinish }: GameProps
       {done ? (
         <View style={{ gap: 12 }}>
           <View style={styles.status} testID="bubble-done">
-            <DisplayTextView text={gt('great', grade)} size={22} color="#2E9E4F" />
+            <DisplayTextView text={gt('great', grade)} size={22} color={colors.correct} />
             <Text style={styles.word}>{cur.card.w}</Text>
           </View>
           <Pressable onPress={next} style={styles.nextBtn} accessibilityRole="button" testID="bubble-next">
-            <DisplayTextView text={q + 1 >= questions.length ? gt('finishedRound', grade) : gt('next', grade)} size={20} color="#fff" />
+            <DisplayTextView text={q + 1 >= questions.length ? gt('finishedRound', grade) : gt('next', grade)} size={20} color={colors.onAccent} />
           </Pressable>
         </View>
       ) : (
         <>
-          <DisplayTextView text={gt('bubbleTip', grade)} size={15} color="#6B5BA8" />
+          <DisplayTextView text={gt('bubbleTip', grade)} size={15} color={colors.textSoft} />
           <View style={styles.sky} testID="bubble-sky">
             {cur.bubbles.map((b, i) =>
               popped.includes(b.id) ? (
@@ -155,20 +156,20 @@ const styles = themed(() => StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 14, gap: 12 },
   tabletCol: { width: '100%', maxWidth: 760, alignSelf: 'center' },
   wideRoot: { flexDirection: 'row', gap: 28, paddingHorizontal: 28 },
-  progress: { textAlign: 'center', fontSize: 14, color: '#6B5BA8', fontWeight: '700' },
-  card: { backgroundColor: '#fff', borderRadius: 24, borderWidth: 3, borderColor: MAIN, padding: 14, alignItems: 'center', gap: 10 },
-  zh: { fontSize: 32, fontWeight: '700', color: '#2B2350' },
-  listen: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: 14, borderRadius: 22, backgroundColor: '#F1ECFF' },
+  progress: { textAlign: 'center', fontSize: 14, color: colors.textSoft, fontWeight: '700' },
+  card: { backgroundColor: colors.card, borderRadius: 24, borderWidth: 3, borderColor: MAIN_OF(), padding: 14, alignItems: 'center', gap: 10 },
+  zh: { fontSize: 32, fontWeight: '700', color: colors.text },
+  listen: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: 14, borderRadius: 22, backgroundColor: colors.parentSoft },
   slots: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' },
-  slot: { width: 36, height: 46, borderBottomWidth: 4, borderColor: '#C9BEF5', alignItems: 'center', justifyContent: 'flex-end' },
-  slotOn: { borderColor: MAIN },
-  slotText: { fontSize: 32, fontWeight: '700', color: MAIN },
+  slot: { width: 36, height: 46, borderBottomWidth: 4, borderColor: colors.line, alignItems: 'center', justifyContent: 'flex-end' },
+  slotOn: { borderColor: MAIN_OF() },
+  slotText: { fontSize: 32, fontWeight: '700', color: MAIN_OF() },
   sky: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignContent: 'center', gap: 14, minHeight: 240, paddingVertical: 12 },
   bubble: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: 'rgba(255,255,255,0.9)', shadowColor: '#7A5AF8', shadowOpacity: 0.25, shadowRadius: 6, elevation: 3 },
-  bubbleWrong: { borderColor: '#E53935' },
+  bubbleWrong: { borderColor: colors.wrong },
   bubbleSpace: { width: 72, height: 72 },
   bubbleText: { fontSize: 34, fontWeight: '700', color: '#2B2350' },
   status: { alignItems: 'center', gap: 4 },
-  word: { fontSize: 40, fontWeight: '700', color: MAIN },
-  nextBtn: { minHeight: 60, borderRadius: 30, backgroundColor: MAIN, alignItems: 'center', justifyContent: 'center' },
+  word: { fontSize: 40, fontWeight: '700', color: MAIN_OF() },
+  nextBtn: { minHeight: 60, borderRadius: 30, backgroundColor: MAIN_OF(), alignItems: 'center', justifyContent: 'center' },
 }));

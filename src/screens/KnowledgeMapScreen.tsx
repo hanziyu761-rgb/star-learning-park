@@ -23,7 +23,7 @@ import { contentGrade } from '@/progress/grade';
 
 /** 给孩子看的状态：颜色 + 图标 + 带拼音的短词 */
 export const KID_STATE: Record<MasteryState, { icon: string; color: string; bg: string; text: string; py: string }> = themed(() => ({
-  'not-started': { icon: '⚪', color: colors.textFaint, bg: colors.cardAlt, text: '还没学', py: 'hái méi xué' },
+  'not-started': { icon: '⚪', color: colors.textSoft, bg: colors.cardAlt, text: '还没学', py: 'hái méi xué' },
   learning: { icon: '✏️', color: colors.orange, bg: colors.orangeSoft, text: '在学习', py: 'zài xué xí' },
   emerging: { icon: '🌱', color: colors.correct, bg: colors.correctSoft, text: '学会了', py: 'xué huì le' },
   'needs-review': { icon: '🔔', color: colors.wrong, bg: colors.wrongSoft, text: '要复习', py: 'yào fù xí' },
@@ -59,7 +59,7 @@ function MapBody() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Screen bg="#E3F1FC" testID="map-screen">
+      <Screen bg={colors.blueSoft} testID="map-screen">
         <Header title={zh('我的知识小地图', 'wǒ de zhī shi xiǎo dì tú')} onBack={nav.back} />
         <View style={styles.summary}>
           <Mascot size={56} bounce={false} />
@@ -313,7 +313,7 @@ const styles = themed(() => StyleSheet.create({
     borderColor: colors.star,
   },
   todoRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 52 },
-  todoEmoji: { fontSize: 26 },
+  todoEmoji: { fontSize: 26, color: colors.text },
   legend: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -338,8 +338,8 @@ const styles = themed(() => StyleSheet.create({
     marginVertical: space.sm,
     ...shadow,
   },
-  stopEmoji: { fontSize: 32 },
-  badge: { position: 'absolute', top: -10, right: -6, fontSize: 24 },
+  stopEmoji: { fontSize: 32, color: colors.text },
+  badge: { position: 'absolute', top: -10, right: -6, fontSize: 24, color: colors.text },
   termTag: {
     position: 'absolute',
     top: -12,
@@ -370,7 +370,7 @@ const styles = themed(() => StyleSheet.create({
     ...shadow,
   },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  cardEmoji: { fontSize: 44 },
+  cardEmoji: { fontSize: 44, color: colors.text },
   close: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   cardNote: { fontSize: 15, color: colors.textSoft },
 }));

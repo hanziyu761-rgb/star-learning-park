@@ -177,7 +177,7 @@ const styles = themed(() => StyleSheet.create({
   cellHint: { borderColor: colors.parent, borderStyle: 'dashed', backgroundColor: colors.parentSoft },
   cellWrong: { borderColor: colors.wrong, backgroundColor: colors.wrongSoft },
   cellRight: { borderColor: colors.correct, backgroundColor: colors.correctSoft },
-  cellEmoji: { fontSize: 38 },
+  cellEmoji: { fontSize: 38, color: colors.text },
   mark: { position: 'absolute', top: 2, right: 6, fontSize: 18, fontWeight: '700', color: colors.correct },
   moverRow: { alignItems: 'center', minHeight: 96 },
   mover: {
@@ -192,5 +192,5 @@ const styles = themed(() => StyleSheet.create({
     ...shadow,
   },
   moverSelected: { borderColor: colors.parent, transform: [{ scale: 1.1 }] },
-  moverEmoji: { fontSize: 50 },
+  moverEmoji: { fontSize: 50, color: colors.text },
 }));

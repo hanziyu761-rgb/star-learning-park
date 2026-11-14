@@ -12,7 +12,7 @@ import { useNav } from '@/nav/Nav';
 import { useProgress } from '@/progress/ProgressContext';
 import { GAME_BG, GAME_MAIN } from './GameScreen';
 import { contentGrade } from '@/progress/grade';
-import { themed } from '@/theme';
+import { colors, themed } from '@/theme';
 
 export default function GamesScreen() {
   const nav = useNav();
@@ -25,7 +25,7 @@ export default function GamesScreen() {
   const can = canStartGame(state, now);
 
   return (
-    <Screen bg="#FFF8EC" testID="games-screen">
+    <Screen bg={colors.bg} testID="games-screen">
       <Header title={gt('hub', grade)} onBack={nav.back} />
       <Text style={styles.time} testID="games-time">
         {limit ? `${used} / ${limit} 分钟` : `${used} 分钟`}
@@ -62,10 +62,10 @@ export default function GamesScreen() {
 }
 
 const styles = themed(() => StyleSheet.create({
-  time: { fontSize: 15, fontWeight: '600', color: '#8A6A50', textAlign: 'center' },
+  time: { fontSize: 15, fontWeight: '600', color: colors.textSoft, textAlign: 'center' },
   card: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 24, borderWidth: 3, padding: 16, minHeight: 120 },
-  emoji: { fontSize: 52 },
-  intro: { fontSize: 14, color: '#555', lineHeight: 20 },
-  meta: { fontSize: 13, fontWeight: '600' },
-  note: { fontSize: 12, color: '#888', lineHeight: 18 },
+  emoji: { fontSize: 52, color: colors.text },
+  intro: { fontSize: 14, color: colors.text, lineHeight: 20 },
+  meta: { fontSize: 13, fontWeight: '600', color: colors.text },
+  note: { fontSize: 12, color: colors.textSoft, lineHeight: 18 },
 }));

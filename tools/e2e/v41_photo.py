@@ -83,8 +83,8 @@ try:
         assert len(url) < 1_800_000
         assert "m1.add10=" in vl["messages"][1]["content"][1]["text"]
         ok(f"照片经压缩后上传（{len(url) // 1024} KB base64），AI 服务按百炼 OpenAI 兼容格式转发，并带上一年级知识点候选")
-        # 识别出的知识点自动选中（选中的按钮填充成家长中心主色）
-        expect(tid(page, "photo-kp-m1.add10")).to_have_css("background-color", "rgb(108, 99, 255)")
+        # 识别出的知识点自动选中（选中的按钮填充成家长中心主色 colors.parent，V5.0 改为莫兰迪紫 #6E6AA8）
+        expect(tid(page, "photo-kp-m1.add10")).to_have_css("background-color", "rgb(110, 106, 168)")
         page.screenshot(path=f"{OUT}/v41-confirm.png", full_page=True)
         tid(page, "photo-generate").click()
         expect(page.locator('[data-testid="photo-item"]')).to_have_count(5)

@@ -85,7 +85,7 @@ const styles = themed(() => StyleSheet.create({
     gap: space.md,
     ...shadow,
   },
-  emoji: { fontSize: 80 },
+  emoji: { fontSize: 80, color: colors.text },
   sentence: { flexDirection: 'row', alignItems: 'center', gap: space.md, flexWrap: 'wrap', justifyContent: 'center' },
   row: { flexDirection: 'row', gap: space.lg, justifyContent: 'center' },
   btn: {
@@ -98,5 +98,5 @@ const styles = themed(() => StyleSheet.create({
     borderColor: 'transparent',
     ...shadow,
   },
-  btnIcon: { fontSize: 40 },
+  btnIcon: { fontSize: 40, color: colors.text },
 }));

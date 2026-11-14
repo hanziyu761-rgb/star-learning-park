@@ -15,7 +15,7 @@ import { colors, radius, space, themed } from '@/theme';
 import { contentGrade } from '@/progress/grade';
 
 const STATE_COLOR: Record<MasteryState, string> = themed(() => ({
-  'not-started': colors.textFaint,
+  'not-started': colors.textSoft,
   learning: colors.orange,
   emerging: colors.correct,
   'needs-review': colors.wrong,
@@ -220,7 +220,7 @@ const styles = themed(() => StyleSheet.create({
     marginTop: space.md,
   },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.xs },
-  legendText: { fontSize: 13, fontWeight: '600' },
+  legendText: { fontSize: 13, fontWeight: '600', color: colors.text },
   h: { fontSize: 16, fontWeight: '700', color: colors.text, marginTop: space.lg, marginBottom: space.xs },
   empty: { fontSize: 14, color: colors.textSoft },
   row: {
@@ -241,7 +241,7 @@ const styles = themed(() => StyleSheet.create({
     overflow: 'hidden',
   },
   rowTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
-  dot: { fontSize: 16, marginTop: 1 },
+  dot: { fontSize: 16, marginTop: 1, color: colors.text },
   evidence: { fontSize: 12, color: colors.textSoft, marginTop: 2 },
   bad: { fontSize: 14, fontWeight: '600', color: colors.wrong },
 }));

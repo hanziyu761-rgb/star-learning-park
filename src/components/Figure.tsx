@@ -126,7 +126,7 @@ export function ClockFace({
         y1={100}
         x2={100 + 42 * Math.sin((hourAngle * Math.PI) / 180)}
         y2={100 - 42 * Math.cos((hourAngle * Math.PI) / 180)}
-        stroke="#E8505B"
+        stroke="#C94650"
         strokeWidth={9}
         strokeLinecap="round"
       />
@@ -136,7 +136,7 @@ export function ClockFace({
         y1={100}
         x2={100 + 70 * Math.sin((minuteAngle * Math.PI) / 180)}
         y2={100 - 70 * Math.cos((minuteAngle * Math.PI) / 180)}
-        stroke="#4D9DE0"
+        stroke="#3A78B8"
         strokeWidth={5}
         strokeLinecap="round"
       />

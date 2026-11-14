@@ -35,7 +35,7 @@ export default function PhotoMistakeScreen() {
   const [passed, setPassed] = useState(isParentUnlocked);
   if (status === 'loading') return <LoadingView />;
   return (
-    <Screen bg="#F2F1FF" testID="photo-screen">
+    <Screen bg={colors.bg} testID="photo-screen">
       <Header title="拍照错题" onBack={nav.back} />
       {passed ? (
         <PhotoBody />
@@ -199,8 +199,8 @@ function PhotoBody() {
           <ItemsView subject={step.draft.subject} exerciseIds={step.exerciseIds} aiItems={step.aiItems} showAnswers />
           <View style={styles.btnRow}>
             <BigButton label="保存" size="md" color={colors.parent} onPress={() => save(step.draft, step.exerciseIds, step.aiItems)} testID="photo-save" />
-            <BigButton label="换一组" size="md" color="#999" onPress={() => generate(step.draft)} testID="photo-regen" />
-            <BigButton label="返回修改" size="md" color="#999" onPress={() => setStep({ s: 'confirm', draft: step.draft })} />
+            <BigButton label="换一组" size="md" color={colors.cardAlt} textColor={colors.text} onPress={() => generate(step.draft)} testID="photo-regen" />
+            <BigButton label="返回修改" size="md" color={colors.cardAlt} textColor={colors.text} onPress={() => setStep({ s: 'confirm', draft: step.draft })} />
           </View>
         </Card>
       ) : null}
@@ -316,7 +316,7 @@ function ConfirmView({ grade, initial, onCancel, onNext }: { grade: number; init
           onPress={() => onNext(d)}
           testID="photo-generate"
         />
-        <BigButton label="取消" size="md" color="#999" onPress={onCancel} />
+        <BigButton label="取消" size="md" color={colors.cardAlt} textColor={colors.text} onPress={onCancel} />
       </View>
     </Card>
   );
@@ -417,7 +417,7 @@ function DetailView({ id, onBack }: { id: string; onBack: () => void }) {
         ) : null}
       </View>
       <View style={styles.btnRow}>
-        <BigButton label="返回列表" size="md" color="#999" onPress={onBack} />
+        <BigButton label="返回列表" size="md" color={colors.cardAlt} textColor={colors.text} onPress={onBack} />
         {confirmDel ? (
           <BigButton
             label="确定删除"
@@ -430,7 +430,7 @@ function DetailView({ id, onBack }: { id: string; onBack: () => void }) {
             testID="photo-delete-confirm"
           />
         ) : (
-          <BigButton label="删除" size="md" color="#999" onPress={() => setConfirmDel(true)} testID="photo-delete" />
+          <BigButton label="删除" size="md" color={colors.cardAlt} textColor={colors.text} onPress={() => setConfirmDel(true)} testID="photo-delete" />
         )}
       </View>
     </Card>

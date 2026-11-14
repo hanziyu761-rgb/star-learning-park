@@ -13,9 +13,10 @@ import { fmt, makeOrder, orderExerciseId, potState, type Ingredient } from '@/ga
 import type { GameProps } from '@/screens/GameScreen';
 import { speak } from '@/speech/speech';
 import { gt } from './text';
-import { themed } from '@/theme';
+import { colors, themed } from '@/theme';
 
-const MAIN = '#E8772E';
+/** 主色跟着配色（V5.0）；池塘、泡泡、锅等场景画面保留固定颜色 */
+const MAIN_OF = () => colors.orange;
 const say = (t: string) => speak({ text: t.replace(/\./g, '点'), lang: 'zh-CN' });
 
 export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProps) {
@@ -100,7 +101,7 @@ export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProp
       </DropZone>
 
       <View style={styles.status} testID="kitchen-status">
-        {smoke ? <DisplayTextView text={gt('tooMuch', grade)} size={18} color="#C0392B" /> : null}
+        {smoke ? <DisplayTextView text={gt('tooMuch', grade)} size={18} color={colors.wrong} /> : null}
         {done ? (
           <Text style={styles.doneText} testID="kitchen-done">
             ✅ {inPot.map((x) => fmt(x.units, order.scale)).join(' + ')} = {target}
@@ -112,7 +113,7 @@ export function KitchenGame({ level, grade, rand, onAnswer, onFinish }: GameProp
       <View style={[{ gap: 10 }, L.wide && { flex: 1, justifyContent: 'center' }]}>
       {done ? (
         <Pressable onPress={next} style={styles.nextBtn} accessibilityRole="button" testID="kitchen-next">
-          <DisplayTextView text={q + 1 >= ROUND_SIZE ? gt('finishedRound', grade) : gt('nextGuest', grade)} size={20} color="#fff" />
+          <DisplayTextView text={q + 1 >= ROUND_SIZE ? gt('finishedRound', grade) : gt('nextGuest', grade)} size={20} color={colors.onAccent} />
         </Pressable>
       ) : (
         <View style={styles.shelf}>
@@ -159,11 +160,11 @@ const styles = themed(() => StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 14, gap: 10 },
   tabletCol: { width: '100%', maxWidth: 760, alignSelf: 'center', justifyContent: 'center' },
   wideRoot: { flexDirection: 'row', gap: 28, paddingHorizontal: 28, alignItems: 'stretch' },
-  progress: { textAlign: 'center', fontSize: 14, color: '#8A6A50', fontWeight: '700' },
+  progress: { textAlign: 'center', fontSize: 14, color: colors.textSoft, fontWeight: '700' },
   customerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
   customer: { fontSize: 64 },
-  orderCard: { backgroundColor: '#fff', borderRadius: 18, borderWidth: 3, borderColor: MAIN, paddingHorizontal: 18, paddingVertical: 8, alignItems: 'center', minWidth: 120 },
-  target: { fontSize: 44, fontWeight: '700', color: MAIN },
+  orderCard: { backgroundColor: colors.card, borderRadius: 18, borderWidth: 3, borderColor: MAIN_OF(), paddingHorizontal: 18, paddingVertical: 8, alignItems: 'center', minWidth: 120 },
+  target: { fontSize: 44, fontWeight: '700', color: MAIN_OF() },
   pot: { minHeight: 120, borderRadius: 60, backgroundColor: '#5B4636', alignItems: 'center', justifyContent: 'center', padding: 12, gap: 6 },
   potSmoke: { backgroundColor: '#8E8E8E' },
   potDone: { backgroundColor: '#2E9E4F' },
@@ -173,8 +174,8 @@ const styles = themed(() => StyleSheet.create({
   potChip: { backgroundColor: '#fff', borderRadius: 14, paddingHorizontal: 10, minHeight: 44, justifyContent: 'center' },
   potChipText: { fontSize: 20, fontWeight: '600', color: '#333' },
   status: { minHeight: 32, alignItems: 'center', justifyContent: 'center' },
-  doneText: { fontSize: 24, fontWeight: '700', color: '#2E9E4F' },
-  nextBtn: { minHeight: 60, borderRadius: 30, backgroundColor: MAIN, alignItems: 'center', justifyContent: 'center' },
+  doneText: { fontSize: 24, fontWeight: '700', color: colors.correct },
+  nextBtn: { minHeight: 60, borderRadius: 30, backgroundColor: MAIN_OF(), alignItems: 'center', justifyContent: 'center' },
   shelf: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center' },
   foodWrap: { width: '30%', minWidth: 96 },
   food: { backgroundColor: '#fff', borderRadius: 18, borderWidth: 2, borderColor: '#F2C9A8', padding: 8, minHeight: 88, alignItems: 'center', justifyContent: 'center' },

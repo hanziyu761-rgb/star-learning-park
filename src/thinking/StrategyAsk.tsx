@@ -82,5 +82,5 @@ const styles = themed(() => StyleSheet.create({
   },
   optOn: { backgroundColor: colors.parent },
   optDim: { opacity: 0.45 },
-  emoji: { fontSize: 24 },
+  emoji: { fontSize: 24, color: colors.text },
 }));

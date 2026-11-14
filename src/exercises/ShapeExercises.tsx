@@ -287,6 +287,6 @@ const styles = themed(() => StyleSheet.create({
     ...shadow,
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 20 },
-  turnHint: { position: 'absolute', top: 4, right: 8, fontSize: 22 },
+  turnHint: { position: 'absolute', top: 4, right: 8, fontSize: 22, color: colors.text },
   hidden: { height: 0, opacity: 0 },
 }));

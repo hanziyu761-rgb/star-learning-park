@@ -20,7 +20,7 @@ const LIGHT = {
 
 const DARK: typeof LIGHT = {
   main: '#3D6A56',
-  mainLight: '#8DB8A2',
+  mainLight: '#5A8672',
   mainText: '#8DB8A2',
   soft: '#17251E',
   bg: '#000000',

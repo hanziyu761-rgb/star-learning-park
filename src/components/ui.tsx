@@ -151,7 +151,7 @@ const styles = themed(() => StyleSheet.create({
   },
   bigButtonMd: { minHeight: MIN_TOUCH, paddingHorizontal: space.lg },
   pressed: { opacity: 0.92 },
-  btnEmoji: { fontSize: 28 },
+  btnEmoji: { fontSize: 28, color: colors.text },
   speaker: { alignItems: 'center', justifyContent: 'center', ...shadow },
   speakerActive: { transform: [{ scale: 1.08 }] },
   starBadge: {
@@ -164,7 +164,7 @@ const styles = themed(() => StyleSheet.create({
     gap: 4,
     ...shadow,
   },
-  starEmoji: { fontSize: 20 },
+  starEmoji: { fontSize: 20, color: colors.text },
   starCount: { fontSize: 20, fontWeight: '700', color: colors.text, fontVariant: ['tabular-nums'] },
   card: { backgroundColor: colors.card, borderRadius: radius.md, borderCurve: 'continuous', padding: space.xl - 4, ...shadow },
   sectionTitle: { ...type.title3, color: colors.text, marginBottom: space.xs },

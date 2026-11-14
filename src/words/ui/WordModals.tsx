@@ -207,7 +207,7 @@ const styles = themed(() => StyleSheet.create({
   btn: { minHeight: 56, borderRadius: 28, backgroundColor: WC.main, alignItems: 'center', justifyContent: 'center' },
   light: { backgroundColor: colors.card, borderWidth: 3, borderColor: WC.mainText },
   btnText: { color: '#fff', fontSize: 19, fontWeight: '700' },
-  party: { fontSize: 44, textAlign: 'center' },
+  party: { fontSize: 44, textAlign: 'center', color: colors.text },
   node: { borderRadius: 16, backgroundColor: WC.main, paddingHorizontal: 14, paddingVertical: 8, minHeight: 44, justifyContent: 'center' },
   nodeLight: { backgroundColor: WC.mainLight },
   nodeText: { color: '#fff', fontSize: 17, fontWeight: '600' },
@@ -221,5 +221,5 @@ const styles = themed(() => StyleSheet.create({
   chainItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   arrow: { fontSize: 20, color: WC.accentDark, fontWeight: '700' },
   hub: { borderRadius: 40, backgroundColor: WC.accent, paddingHorizontal: 18, paddingVertical: 12 },
-  hubText: { fontSize: 18, fontWeight: '700', color: WC.text },
+  hubText: { fontSize: 18, fontWeight: '700', color: '#1D1D1F' },
 }));

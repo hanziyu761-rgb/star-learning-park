@@ -35,7 +35,7 @@ export default function ExamScreen() {
   const [passed, setPassed] = useState(isParentUnlocked);
   if (status === 'loading') return <LoadingView />;
   return (
-    <Screen bg="#F2F1FF" testID="exam-screen">
+    <Screen bg={colors.bg} testID="exam-screen">
       <Header title="试卷生成" onBack={nav.back} />
       {passed ? (
         <ExamBody />

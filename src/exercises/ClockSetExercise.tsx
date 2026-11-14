@@ -125,12 +125,12 @@ export function ClockSetExercise({ exercise, lang, onFeedback, onSolved }: Exerc
       </View>
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: '#E8505B' }]} />
-          <DisplayTextView text={zh('短的是时针', 'duǎn de shì shí zhēn')} size={16} color="#E8505B" />
+          <View style={[styles.dot, { backgroundColor: '#C94650' }]} />
+          <DisplayTextView text={zh('短的是时针', 'duǎn de shì shí zhēn')} size={16} color="#C94650" />
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: '#4D9DE0' }]} />
-          <DisplayTextView text={zh('长的是分针', 'cháng de shì fēn zhēn')} size={16} color="#4D9DE0" />
+          <View style={[styles.dot, { backgroundColor: '#3A78B8' }]} />
+          <DisplayTextView text={zh('长的是分针', 'cháng de shì fēn zhēn')} size={16} color="#3A78B8" />
         </View>
       </View>
       {!solved ? (
@@ -140,7 +140,7 @@ export function ClockSetExercise({ exercise, lang, onFeedback, onSolved }: Exerc
               size="md"
               emoji="⏪"
               label={zh('时针', 'shí zhēn')}
-              color="#E8505B"
+              color="#C94650"
               onPress={() => step(-60)}
               testID="clock-hour-minus"
               accessibilityLabel="时针退一格"
@@ -149,7 +149,7 @@ export function ClockSetExercise({ exercise, lang, onFeedback, onSolved }: Exerc
               size="md"
               emoji="⏩"
               label={zh('时针', 'shí zhēn')}
-              color="#E8505B"
+              color="#C94650"
               onPress={() => step(60)}
               testID="clock-hour-plus"
               accessibilityLabel="时针进一格"
@@ -160,7 +160,7 @@ export function ClockSetExercise({ exercise, lang, onFeedback, onSolved }: Exerc
               size="md"
               emoji="◀️"
               label={zh('分针', 'fēn zhēn')}
-              color="#4D9DE0"
+              color="#3A78B8"
               onPress={() => step(-5)}
               testID="clock-minute-minus"
               accessibilityLabel="分针退5分"
@@ -169,7 +169,7 @@ export function ClockSetExercise({ exercise, lang, onFeedback, onSolved }: Exerc
               size="md"
               emoji="▶️"
               label={zh('分针', 'fēn zhēn')}
-              color="#4D9DE0"
+              color="#3A78B8"
               onPress={() => step(5)}
               testID="clock-minute-plus"
               accessibilityLabel="分针进5分"

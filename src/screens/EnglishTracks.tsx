@@ -83,10 +83,10 @@ const styles = themed(() => StyleSheet.create({
   note: { fontSize: 13, color: colors.textSoft, lineHeight: 19 },
   card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.md, gap: space.sm, ...shadow },
   head: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.xs },
-  headEmoji: { fontSize: 36 },
+  headEmoji: { fontSize: 36, color: colors.text },
   title: { fontSize: 20, fontWeight: '700', color: colors.text },
   sub: { fontSize: 12, color: colors.textSoft },
-  count: { fontSize: 18, fontWeight: '700' },
+  count: { fontSize: 18, fontWeight: '700', color: colors.text },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -98,9 +98,9 @@ const styles = themed(() => StyleSheet.create({
     paddingHorizontal: space.sm,
     paddingVertical: 4,
   },
-  rowEmoji: { fontSize: 24 },
+  rowEmoji: { fontSize: 24, color: colors.text },
   rowTitle: { fontSize: 16, fontWeight: '600', color: colors.text },
-  go: { fontSize: 15, fontWeight: '600' },
+  go: { fontSize: 15, fontWeight: '600', color: colors.text },
 }));
 
 /** 语文“阅读小屋”（V2.10）：原创带拼音短文，一行一篇 */

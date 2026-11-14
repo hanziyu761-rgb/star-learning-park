@@ -35,7 +35,7 @@ export function GameParentCard() {
               accessibilityState={{ selected: limit === m }}
               testID={`game-limit-${m}`}
             >
-              <Text style={[styles.chipText, limit === m && { color: '#fff' }]}>{m ? `${m} 分钟` : '不限制'}</Text>
+              <Text style={[styles.chipText, limit === m && { color: colors.onAccent }]}>{m ? `${m} 分钟` : '不限制'}</Text>
             </Pressable>
           ))}
         </View>
@@ -65,6 +65,6 @@ const styles = themed(() => StyleSheet.create({
   line: { fontSize: 14, color: colors.text, marginTop: space.xs },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.sm },
   chip: { borderRadius: radius.lg, borderWidth: 2, borderColor: colors.line, paddingHorizontal: space.md, paddingVertical: 8 },
-  chipOn: { borderColor: '#E8772E', backgroundColor: '#E8772E' },
+  chipOn: { borderColor: colors.primary, backgroundColor: colors.primary },
   chipText: { fontSize: 15, fontWeight: '700', color: colors.text },
 }));

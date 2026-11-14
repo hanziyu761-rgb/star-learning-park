@@ -157,7 +157,7 @@ const styles = themed(() => StyleSheet.create({
   targetDone: { borderStyle: 'solid', borderColor: colors.correct, backgroundColor: colors.correctSoft },
   slot: { width: 40, height: 32, borderRadius: 10, backgroundColor: colors.cardAlt },
   placedItem: { flexDirection: 'row', alignItems: 'center' },
-  emoji: { fontSize: 34, textAlign: 'center' },
-  smallEmoji: { fontSize: 28 },
-  manyEmoji: { fontSize: 20, lineHeight: 26 },
+  emoji: { fontSize: 34, textAlign: 'center', color: colors.text },
+  smallEmoji: { fontSize: 28, color: colors.text },
+  manyEmoji: { fontSize: 20, lineHeight: 26, color: colors.text },
 }));

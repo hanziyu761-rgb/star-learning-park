@@ -171,7 +171,7 @@ const styles = themed(() => StyleSheet.create({
     paddingVertical: space.md,
   },
   stat: { flex: 1, alignItems: 'center' },
-  num: { fontSize: 40, fontWeight: '700' },
+  num: { fontSize: 40, fontWeight: '700', color: colors.text },
   statLabel: { fontSize: 15, fontWeight: '600', color: colors.textSoft },
   actions: { flexDirection: 'row', gap: space.md },
   action: { flex: 1, minHeight: 60, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center' },
@@ -192,6 +192,6 @@ const styles = themed(() => StyleSheet.create({
   },
   cardTitle: { fontSize: 17, fontWeight: '600', color: colors.text, lineHeight: 24 },
   small: { fontSize: 13, color: colors.textSoft, lineHeight: 19, flexShrink: 1 },
-  tag: { fontSize: 12, fontWeight: '600' },
-  note: { fontSize: 12, color: '#888', lineHeight: 18 },
+  tag: { fontSize: 12, fontWeight: '600', color: colors.text },
+  note: { fontSize: 12, color: colors.textSoft, lineHeight: 18 },
 }));

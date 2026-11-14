@@ -13,7 +13,7 @@ import { COLOR_WORDS, confusables, families, hiddenWords, LOOK_WORDS, segments, 
 import { WC_CARD } from './theme';
 import { themed } from '@/theme';
 
-const SEG_COLORS = ['#1E7F5C', '#E07A1F', '#2F6FD6', '#B83280', '#7A5AF8'];
+const SEG_COLORS = ['#1E7F5C', '#B5621A', '#2F6FD6', '#B83280', '#7A5AF8'];
 
 const LOOK_STYLE: Record<WordLook, TextStyle> = {
   big: { fontSize: 84 },
@@ -143,7 +143,7 @@ export function WordCardView({
             <Text style={styles.backWord}>{card.w}</Text>
             <View testID="wc-zh">
               {card.py ? (
-                <DisplayTextView text={zh(card.zh, card.py)} size={30} />
+                <DisplayTextView text={zh(card.zh, card.py)} size={30} color={WC_CARD.text} />
               ) : (
                 <Text style={styles.zh}>{card.zh}</Text>
               )}
@@ -320,13 +320,13 @@ const styles = themed(() => StyleSheet.create({
   trickHead: { fontSize: 14, fontWeight: '600', color: WC_CARD.main },
   trickRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
   trickWord: { fontSize: 20, fontWeight: '700', color: WC_CARD.text },
-  hidden: { fontSize: 26, fontWeight: '700', color: '#E07A1F' },
+  hidden: { fontSize: 26, fontWeight: '700', color: '#B5621A' },
   trickText: { fontSize: 15, color: WC_CARD.text, lineHeight: 21 },
   trickLine: { fontSize: 15, color: WC_CARD.text, lineHeight: 21 },
   linkWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   link: { borderRadius: 14, borderWidth: 2, borderColor: WC_CARD.line, paddingHorizontal: 10, paddingVertical: 4, backgroundColor: WC_CARD.soft, minHeight: 36, justifyContent: 'center' },
   linkText: { fontSize: 17, fontWeight: '700', color: WC_CARD.main },
   linkSub: { fontSize: 12, color: WC_CARD.muted },
-  markPart: { color: '#E07A1F', fontWeight: '700' },
+  markPart: { color: '#B5621A', fontWeight: '700' },
   red: { color: WC_CARD.heart, fontWeight: '700' },
 }));

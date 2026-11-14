@@ -13,9 +13,10 @@ import { fishRound } from '@/games/fish';
 import type { GameProps } from '@/screens/GameScreen';
 import { speak } from '@/speech/speech';
 import { gt } from './text';
-import { themed } from '@/theme';
+import { colors, themed } from '@/theme';
 
-const MAIN = '#1C7FB5';
+/** 主色跟着配色（V5.0）；池塘、泡泡、锅等场景画面保留固定颜色 */
+const MAIN_OF = () => colors.blue;
 const FISH = ['🐟', '🐠', '🐡', '🐟'];
 
 export function FishGame({ level, grade, rand, onAnswer, onFinish }: GameProps) {
@@ -78,21 +79,21 @@ export function FishGame({ level, grade, rand, onAnswer, onFinish }: GameProps) 
             {cur.char}
           </Text>
         )}
-        <DisplayTextView text={cur.sentence ? `红色的“${cur.char}”在这里怎么读？` : gt('fishTip', grade)} size={16} color="#3A6B85" />
+        <DisplayTextView text={cur.sentence ? `红色的“${cur.char}”在这里怎么读？` : gt('fishTip', grade)} size={16} color={colors.textSoft} />
         {!cur.sentence ? <Text style={styles.speakHint}>🔊 点这里再听一遍</Text> : null}
       </Pressable>
       {L.wide ? (
         <>
       <View style={styles.status} testID="fish-status">
         {caught ? (
-          <DisplayTextView text={gt('caught', grade)} size={22} color="#2E9E4F" />
+          <DisplayTextView text={gt('caught', grade)} size={22} color={colors.correct} />
         ) : missed.length ? (
-          <DisplayTextView text={gt('swimAway', grade)} size={18} color="#C0392B" />
+          <DisplayTextView text={gt('swimAway', grade)} size={18} color={colors.wrong} />
         ) : null}
       </View>
       {caught ? (
         <Pressable onPress={next} style={styles.nextBtn} accessibilityRole="button" testID="fish-next">
-          <DisplayTextView text={q + 1 >= questions.length ? gt('finishedRound', grade) : gt('next', grade)} size={20} color="#fff" />
+          <DisplayTextView text={q + 1 >= questions.length ? gt('finishedRound', grade) : gt('next', grade)} size={20} color={colors.onAccent} />
         </Pressable>
       ) : null}
         </>
@@ -115,14 +116,14 @@ export function FishGame({ level, grade, rand, onAnswer, onFinish }: GameProps) 
         <>
       <View style={styles.status} testID="fish-status">
         {caught ? (
-          <DisplayTextView text={gt('caught', grade)} size={22} color="#2E9E4F" />
+          <DisplayTextView text={gt('caught', grade)} size={22} color={colors.correct} />
         ) : missed.length ? (
-          <DisplayTextView text={gt('swimAway', grade)} size={18} color="#C0392B" />
+          <DisplayTextView text={gt('swimAway', grade)} size={18} color={colors.wrong} />
         ) : null}
       </View>
       {caught ? (
         <Pressable onPress={next} style={styles.nextBtn} accessibilityRole="button" testID="fish-next">
-          <DisplayTextView text={q + 1 >= questions.length ? gt('finishedRound', grade) : gt('next', grade)} size={20} color="#fff" />
+          <DisplayTextView text={q + 1 >= questions.length ? gt('finishedRound', grade) : gt('next', grade)} size={20} color={colors.onAccent} />
         </Pressable>
       ) : null}
         </>
@@ -179,12 +180,12 @@ const styles = themed(() => StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 14, gap: 12 },
   tabletCol: { width: '100%', maxWidth: 760, alignSelf: 'center' },
   wideRoot: { flexDirection: 'row', gap: 28, paddingHorizontal: 28 },
-  progress: { textAlign: 'center', fontSize: 14, color: '#3A6B85', fontWeight: '700' },
-  card: { backgroundColor: '#fff', borderRadius: 24, borderWidth: 3, borderColor: MAIN, padding: 14, alignItems: 'center', gap: 6 },
-  char: { fontSize: 72, fontWeight: '700', color: '#1B2B34' },
-  sentence: { fontSize: 30, fontWeight: '600', color: '#1B2B34', textAlign: 'center', lineHeight: 42 },
-  target: { color: '#E53935', fontSize: 38 },
-  speakHint: { fontSize: 13, color: '#6A8FA3' },
+  progress: { textAlign: 'center', fontSize: 14, color: colors.textSoft, fontWeight: '700' },
+  card: { backgroundColor: colors.card, borderRadius: 24, borderWidth: 3, borderColor: MAIN_OF(), padding: 14, alignItems: 'center', gap: 6 },
+  char: { fontSize: 72, fontWeight: '700', color: colors.text },
+  sentence: { fontSize: 30, fontWeight: '600', color: colors.text, textAlign: 'center', lineHeight: 42 },
+  target: { color: colors.wrong, fontSize: 38 },
+  speakHint: { fontSize: 13, color: colors.textSoft },
   pond: { flex: 1, backgroundColor: '#7EC8E3', borderRadius: 28, padding: 12, justifyContent: 'space-around', minHeight: 260 },
   fishWrap: { alignItems: 'center' },
   fish: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 28, paddingHorizontal: 18, minHeight: 56 },
@@ -192,5 +193,5 @@ const styles = themed(() => StyleSheet.create({
   fishEmoji: { fontSize: 32 },
   fishPy: { fontSize: 28, fontWeight: '600', color: '#0F4C6B', minWidth: 80, textAlign: 'center' },
   status: { minHeight: 34, alignItems: 'center', justifyContent: 'center' },
-  nextBtn: { minHeight: 60, borderRadius: 30, backgroundColor: MAIN, alignItems: 'center', justifyContent: 'center' },
+  nextBtn: { minHeight: 60, borderRadius: 30, backgroundColor: MAIN_OF(), alignItems: 'center', justifyContent: 'center' },
 }));

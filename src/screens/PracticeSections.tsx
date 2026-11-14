@@ -242,7 +242,7 @@ const styles = themed(() => StyleSheet.create({
     padding: space.sm,
     gap: 2,
   },
-  tileEmoji: { fontSize: 28 },
+  tileEmoji: { fontSize: 28, color: colors.text },
   writeChars: { fontSize: 26, fontWeight: '700', color: colors.text, letterSpacing: 2 },
   gTile: { backgroundColor: colors.orangeSoft, flexBasis: '30%', minWidth: 140 },
   review: { fontSize: 12, fontWeight: '600', color: colors.orange },
@@ -279,5 +279,5 @@ const styles = themed(() => StyleSheet.create({
   },
   unitTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   unitMeta: { fontSize: 12, color: colors.textSoft },
-  go: { fontSize: 18, fontWeight: '700' },
+  go: { fontSize: 18, fontWeight: '700', color: colors.text },
 }));
