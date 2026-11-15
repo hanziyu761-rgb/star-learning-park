@@ -54,8 +54,28 @@ def calc_answer(kp, sig):
         a, d = map(int, sig.split(":")); return f"{a // d}……{a % d}"
     raise ValueError(kp + " " + sig)
 
+_cards = None
+def word_answer(kp, sig):
+    """三～六年级英语单词卡题（V5.2.5）：答案就是单元第 i 个单词，从单词卡数据独立读出"""
+    global _cards
+    if _cards is None:
+        _cards = {}
+        for f in ("pep34.ts", "pep56.ts"):
+            src = open(os.path.join(ROOT, "src/words/data", f), encoding="utf-8").read()
+            for m in re.finditer(r"id: '(pep\d[ab]-\d)'.*?lines: `(.*?)`", src, re.S):
+                _cards[m[1]] = [l.strip().split("|")[0] for l in m[2].strip().splitlines()]
+    g, t, n = re.match(r"^e(\d)\.([ab])(\d)$", kp).groups()
+    return _cards[f"pep{g}{t}-{n}"][int(sig.split(":")[1])]
+
 def solve(page, ex_id, correct):
     _, kp, sig = ex_id.split(":", 2)
+    if sig.startswith("w:"):
+        ans = word_answer(kp, sig)
+        if not correct:
+            wrong = next(e.get_attribute("data-testid")[7:] for e in page.locator('[data-testid^="option-"]').all() if e.get_attribute("data-testid")[7:] != ans)
+            tid(page, f"option-{wrong}").click(); expect(tid(page, "feedback-wrong")).to_be_visible()
+        tid(page, f"option-{ans}").click()
+        return
     if sig.startswith("b:"):
         _, unit, qid = sig.split(":")
         q = bank_answer(unit, qid)
@@ -218,9 +238,13 @@ with sync_playwright() as p:
         teach_then_skip(page, kp)
         page.screenshot(path=f"{OUT}/c-07-{subj}-practice.png")
         seen = practice_round(page, lambda i: True)
-        assert all(s.startswith(f"kp:{kp}:b:") for s in seen), seen[:2]
-        unit = seen[0].split(":")[3]
-        ok(f"{'语文' if subj == 'chinese' else '英语'}“{kp}”练一练：{len(seen)} 题全部来自题库单元 {unit}，" + tid(page, "practice-score").inner_text())
+        # 语文全部来自题库；三～六年级英语（V5.2.5）是题库题 + 同单元单词卡题
+        if subj == "chinese": assert all(s.startswith(f"kp:{kp}:b:") for s in seen), seen[:2]
+        else: assert all(s.startswith(f"kp:{kp}:b:") or s.startswith(f"kp:{kp}:w:") for s in seen), seen[:2]
+        bank = [s for s in seen if ":b:" in s]
+        unit = bank[0].split(":")[3] if bank else "（本轮都是单词卡题）"
+        words = len(seen) - len(bank)
+        ok(f"{'语文' if subj == 'chinese' else '英语'}“{kp}”练一练：{len(seen)} 题，题库单元 {unit} {len(bank)} 题" + (f"、单词卡 {words} 题（答案从单词卡数据独立读出）" if subj == "english" else "") + "，" + tid(page, "practice-score").inner_text())
         tid(page, "practice-home").click(); page.wait_for_selector('[data-testid="home"]')
         tid(page, "map-entry").click(); page.wait_for_selector('[data-testid="map-screen"]')
         tid(page, f"map-subject-{subj}").click()

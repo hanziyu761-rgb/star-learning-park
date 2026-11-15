@@ -56,11 +56,15 @@ def solve_current(page, ex_id, saw_minus):
         for ch in calc(ex_id): tid(page, f"num-{ch}").click()
         tid(page, "num-ok").click()
     else:
+        # 上一题的“答对了”提示条可能还没消失，先等它消失再答（否则会误以为已经答对）
+        expect(page.locator('[data-testid="feedback-correct"]')).to_have_count(0, timeout=5000)
         opts = page.locator('[data-testid^="option-"], [data-testid^="tf-"]')
-        for i in range(opts.count()):
+        for _ in range(opts.count()):
             if page.locator('[data-testid="feedback-correct"]').count(): break
             expect(page.locator('[data-testid="choice-cooldown"]')).to_have_count(0, timeout=5000)
-            opts.nth(i).click(); page.wait_for_timeout(200)
+            nxt = next((opts.nth(i) for i in range(opts.count()) if opts.nth(i).is_enabled()), None)
+            if nxt is None: break
+            nxt.click(); page.wait_for_timeout(250)
     expect(tid(page, "feedback-correct")).to_be_visible()
 
 def practice_round(page):
