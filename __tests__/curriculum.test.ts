@@ -312,7 +312,9 @@ describe('语文、英语和其它只有题库的知识点', () => {
       expect(round.length).toBe(8);
       expect(new Set(round.map((e) => e.id)).size).toBe(8);
       for (const e of round) {
-        expect(e.id.startsWith(`kp:${kp}:b:${unit}:`)).toBe(true);
+        // 三～六年级英语（V5.2.5）还有同单元单词卡出的题 w:编号:题型
+        const fromWords = kp.startsWith('e') && /^kp:e[3-6]\.[ab]\d:w:\d+:[01]$/.test(e.id);
+        expect(e.id.startsWith(`kp:${kp}:b:${unit}:`) || fromWords).toBe(true);
         expect(e.skill).toBe(kp);
         expect(exerciseFromKpId(e.id)).toEqual(e);
         const r = resolveExercise(`kp:${kp}`, e.id)!;

@@ -626,3 +626,72 @@ describe('V5.2.4 英语词表 + 句型组合题', () => {
     }
   });
 });
+
+describe('V5.2.5 新题用完后先复习做错的题', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { reviewOrder, kpRoundWithReview } = require('@/knowledge/refill');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createEmptyProgress } = require('@/progress/model');
+  const rec = (id: string, ok: boolean, at: number) => ({ lessonId: 'x', exerciseId: id, subject: 'math', skill: 'm9.b4', firstTryCorrect: ok, attempts: 1, at });
+  it('顺序：最近做错的 → 做错过的 → 一直对的里隔得最久的', () => {
+    const s = createEmptyProgress();
+    s.results.push(
+      rec('kp:m9.b4:c:0', true, 1), // 一直对，最早
+      rec('kp:m9.b4:c:1', false, 2), // 做错过，后来对了
+      rec('kp:m9.b4:c:1', true, 5),
+      rec('kp:m9.b4:c:2', true, 3), // 一直对
+      rec('kp:m9.b4:c:3', true, 1), // 先对后错 → 最近做错
+      rec('kp:m9.b4:c:3', false, 6),
+      rec('kp:m8.b2:hyp:0:2', false, 7), // 别的知识点，不算
+    );
+    expect(reviewOrder(s, ['m9.b4'])).toEqual(['kp:m9.b4:c:3', 'kp:m9.b4:c:1', 'kp:m9.b4:c:0', 'kp:m9.b4:c:2']);
+  });
+  it('一轮练习：先出没做过的，不够时用做错的题补', () => {
+    const s = createEmptyProgress();
+    // 把投影与视图的概念题全做过，只有 c:4 做错
+    for (let i = 0; i < 17; i++) s.results.push(rec(`kp:m9.b4:c:${i}`, i !== 4, 10 + i));
+    const round = kpRoundWithReview(s, 'm9.b4', 10, seeded(3));
+    expect(round).toHaveLength(10);
+    const ids = round.map((e: { id: string }) => e.id.replace(/:in$/, ''));
+    expect(new Set(ids).size).toBe(10);
+    // 影长计算题还有很多没做过，所以不用旧题
+    expect(ids.every((id: string) => id.startsWith('kp:m9.b4:shadow:'))).toBe(true);
+  });
+  it('投影与视图影长计算', () => {
+    expect((kpExercise('m9.b4', 'shadow:2:3:4') as ChoiceExercise).answerId).toBe('8'); // 2 米竿影 3 米，树影 12 米 → 8 米
+  });
+});
+
+describe('V5.2.5 三～六年级英语单词卡出题', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { wordSigs, misspellings } = require('@/knowledge/genWords');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { ALL_CARDS } = require('@/words/catalog');
+  const known = new Set(ALL_CARDS.map((c: { w: string }) => c.w.toLowerCase()));
+  it('每个单元都有单词题；答案在选项里，错拼写不是已知单词；填空放回去就是例句', () => {
+    let n = 0;
+    for (const g of [3, 4, 5, 6])
+      for (const t of ['a', 'b'])
+        for (let u = 1; u <= 6; u++) {
+          const kp = `e${g}.${t}${u}`;
+          if (!KP_BY_ID[kp]) continue;
+          const sigs = wordSigs(kp);
+          expect([kp, sigs.length > 5]).toEqual([kp, true]);
+          for (const sig of sigs) {
+            const e = kpExercise(kp, sig) as ChoiceExercise;
+            n++;
+            const ids = e.options.map((o) => o.id);
+            expect(new Set(ids).size).toBe(4);
+            expect(ids).toContain(e.answerId);
+            for (const w of misspellings(e.answerId)) {
+              expect(w).not.toBe(e.answerId);
+              expect(known.has(w.toLowerCase())).toBe(false);
+            }
+            expect(plainText(e.prompt.text)).toMatch(/^[A-Za-z]/);
+            if (sig.endsWith(':1')) expect(e.stem!.text!.toString().replace('___', e.answerId)).toBe(e.prompt.speak!.text);
+            expect(exerciseFromKpId(e.id)?.id).toBe(e.id);
+          }
+        }
+    expect(n).toBeGreaterThan(1200);
+  });
+});

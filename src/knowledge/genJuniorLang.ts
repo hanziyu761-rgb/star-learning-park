@@ -961,7 +961,8 @@ He had ___ little money that he couldn't buy a ticket.|so|such/too/very|little �
  */
 type Dims = number[];
 type CombFn = (ix: number[]) => EnItem | null;
-function enComb(list: [Dims, CombFn][]): UpperGen {
+type CombGen = UpperGen & { patterns: [Dims, CombFn][] };
+function enComb(list: [Dims, CombFn][]): CombGen {
   const at = (sig: string) => {
     const [, t, ...ix] = sig.split(':').map(Number);
     const it = list[t]?.[1](ix);
@@ -969,6 +970,7 @@ function enComb(list: [Dims, CombFn][]): UpperGen {
     return it;
   };
   return {
+    patterns: list,
     make: (rand) => {
       for (let k = 0; k < 30; k++) {
         const t = pickI(rand, list.length);
@@ -1298,7 +1300,7 @@ const WHERE: Record<string, string[]> = {
   watch: ['At home.', 'In the living room.', "At my grandma's."],
 };
 
-const COMB: Record<string, UpperGen> = {
+const COMB: Record<string, CombGen> = {
   /* 名词与冠词 */
   'e7.a1': enComb([
     [[NOUNS.length, 9], ([i, n]) => {
@@ -1680,6 +1682,22 @@ const COMB: Record<string, UpperGen> = {
     }],
   ]),
 };
+
+/** 教师审核表用：每种句型抽 per 道（签名） */
+export function combPatternSigs(kp: string, per: number, rand: () => number): string[] {
+  const c = COMB[kp];
+  if (!c) return [];
+  const out: string[] = [];
+  c.patterns.forEach(([dims, f], t) => {
+    const got = new Set<string>();
+    for (let k = 0; k < 200 && got.size < per; k++) {
+      const ix = dims.map((n) => pickI(rand, n));
+      if (f(ix)) got.add(`c:${t}:${ix.join(':')}`);
+    }
+    out.push(...got);
+  });
+  return out;
+}
 
 /** 每个英语知识点：原来的题 + 组合题 */
 const ENGLISH_ALL: Record<string, UpperGen> = Object.fromEntries(

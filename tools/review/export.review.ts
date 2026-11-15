@@ -13,7 +13,9 @@ import { fixBankPinyin, polyphonesOf } from '@/content/bank/pyfix';
 import { ORAL_TOPICS, oralRound } from '@/content/oral';
 import { WRITE_CHARS, WRITE_CHARS_G2 } from '@/content/writing';
 import { plainText } from '@/content/zh';
-import { hasOriginalGenerator, kpRound } from '@/knowledge/generators';
+import { hasOriginalGenerator, kpExercise, kpRound } from '@/knowledge/generators';
+import { zhDataSigs } from '@/knowledge/genJuniorZh';
+import { combPatternSigs } from '@/knowledge/genJuniorLang';
 import { kpsFor } from '@/knowledge/graph';
 import { KP_TEACH } from '@/knowledge/teach';
 import type { DisplayText, Exercise } from '@/lesson/types';
@@ -145,11 +147,30 @@ function exportGrade(grade: number) {
   for (const subj of grade >= 7 ? (['math', 'chinese', 'english'] as const) : (['math'] as const))
     for (const k of kpsFor(subj, grade).filter((x) => hasOriginalGenerator(x.id))) {
       const rand = seeded(1000 + grade * 100 + k.order);
-      for (const e of kpRound(k.id, 6, rand))
+      for (const e of kpRound(k.id, 6, rand)) {
+        // 初中语文资料题、英语句型题在下面单独的表里全部（逐句型）列出
+        if (subj !== 'math' && /^kp:[^:]+:(w|l|v|k|q|c):/.test(e.id)) continue;
         rows.push(
           exRow(e.id, '知识点练习（程序出题）', SUBJ[subj], k.name, e, '原创生成器', subj === 'math' ? '答案由程序计算并有单元测试核对' : '原创小题库 / 句型模板，有单元测试检查结构'),
         );
+      }
     }
+
+  // 3b. 初中语文积累资料题（V5.2.4）：资料有限，全部列出逐题审核；英语句型每种抽 3 道
+  if (grade >= 7) {
+    for (const k of kpsFor('chinese', grade))
+      for (const sig of zhDataSigs(k.id))
+        rows.push(
+          exRow(`kp:${k.id}:${sig}`, '初中语文资料题（全部）', '语文', k.name, kpExercise(k.id, sig), '本项目整理的积累资料（待教师审核）', '答案在选项里；干扰项排除同作者作品、重叠朝代等“也算对”的情况'),
+        );
+    for (const k of kpsFor('english', grade)) {
+      const rand = seeded(5000 + grade * 100 + k.order);
+      for (const sig of combPatternSigs(k.id, 3, rand))
+        rows.push(
+          exRow(`kp:${k.id}:${sig}`, '初中英语句型（每种抽 3 道）', '英语', k.name, kpExercise(k.id, sig), '词表 + 句型模板（本项目原创，待教师审核）', '同一句型的题由同一个模板生成，答案由词表算出'),
+        );
+    }
+  }
 
   // 4. 口算闯关
   for (const topic of ORAL_TOPICS.filter((x) => x.grade === grade))
@@ -316,5 +337,9 @@ it('导出一～九年级教师审核表数据', () => {
     // 每个年级都有讲解、题库、每日挑战
     for (const cat of ['知识点小讲解', '题库（AI 生成）', '每日挑战', ...(g === 2 ? [] : ['英语单词卡'])])
       expect(rows.some((r) => r.分类 === cat)).toBe(true);
+    if (g >= 7) {
+      expect(rows.filter((r) => r.分类 === '初中语文资料题（全部）').length).toBeGreaterThan(300);
+      expect(rows.filter((r) => r.分类 === '初中英语句型（每种抽 3 道）').length).toBeGreaterThan(40);
+    }
   }
 });

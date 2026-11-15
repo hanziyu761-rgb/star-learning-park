@@ -12,7 +12,7 @@ import { BANK_SOURCE, bankExercise, findUnit, pickRound } from '@/content/bank';
 import { ORAL_TOPICS, oralExercise, oralRound } from '@/content/oral';
 import { sourceName } from '@/content/resolve';
 import { ALL_WRITE_SETS, isWriteLessonId, traceExercise } from '@/content/writing';
-import { kpRound } from '@/knowledge/generators';
+import { kpRoundWithReview } from '@/knowledge/refill';
 import { dailyMix, parseDailyMixId } from '@/knowledge/dailyMix';
 import type { ProgressState } from '@/progress/model';
 import { zh } from '@/content/zh';
@@ -73,7 +73,8 @@ function buildRound(id: string, done: Set<string>, hidden: Set<string>, state: P
     // 知识点练习：原创题目生成器，优先出没做过的题
     const kpId = id.slice(3);
     // 图形类是动手操作题，每轮 6 题，避免孩子疲劳
-    const exercises = kpRound(kpId, kpId in GRAPHICS_GENERATORS ? 6 : 10, Math.random, done);
+    // 新题不够时，用该复习的旧题补：先最近做错的，再做错过的，再隔得最久的（V5.2.5）
+    const exercises = kpRoundWithReview(state, kpId, kpId in GRAPHICS_GENERATORS ? 6 : 10, Math.random);
     return exercises.length
       ? { subject: getKp(kpId)?.subject ?? 'math', title: sourceName(id), isBank: false, exercises }
       : null;

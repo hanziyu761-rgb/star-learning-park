@@ -12,6 +12,7 @@ import { GRAPHICS_GENERATORS, pickSig } from './graphics';
 import { UPPER_GENERATORS } from './genUpper';
 import { JUNIOR_GENERATORS as JUNIOR_MATH } from './genJunior';
 import { JUNIOR_LANG_GENERATORS } from './genJuniorLang';
+import { isWordSig, wordExercise, wordSigs } from './genWords';
 
 /** 七～九年级（V5.2）：数学出题程序 + 语文、英语原创小题库 */
 const JUNIOR_GENERATORS = { ...JUNIOR_MATH, ...JUNIOR_LANG_GENERATORS };
@@ -274,9 +275,12 @@ export function hasGenerator(kpId: string): boolean {
   return hasOriginalGenerator(kpId) || (getKp(kpId)?.units?.length ?? 0) > 0;
 }
 
-/** 题库题的签名：b:单元id:题目id */
+/** 题库题的签名：b:单元id:题目id；三～六年级英语再加单词卡出的题 w:编号:题型（V5.2.5） */
 function bankSigs(kpId: string): string[] {
-  return (getKp(kpId)?.units ?? []).flatMap((u) => (findUnit(u)?.unit.questions ?? []).map((q) => `b:${u}:${q.id}`));
+  return [
+    ...(getKp(kpId)?.units ?? []).flatMap((u) => (findUnit(u)?.unit.questions ?? []).map((q) => `b:${u}:${q.id}`)),
+    ...wordSigs(kpId),
+  ];
 }
 
 function bankKpExercise(kpId: string, sig: string): Exercise {
@@ -302,6 +306,7 @@ export function kpExercise(kpId: string, sig: string): Exercise {
     return inp;
   }
   if (sig.startsWith('b:')) return bankKpExercise(kpId, sig);
+  if (isWordSig(kpId, sig)) return wordExercise(kpId, sig, kpExerciseId(kpId, sig));
   const full = GRAPHICS_GENERATORS[kpId];
   if (full) return { ...full.build(sig), id: kpExerciseId(kpId, sig), skill: kpId } as Exercise;
   const g = GENERATORS[kpId] ?? UPPER_GENERATORS[kpId] ?? JUNIOR_GENERATORS[kpId];

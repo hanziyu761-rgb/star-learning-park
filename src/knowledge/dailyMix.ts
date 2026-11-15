@@ -5,6 +5,7 @@
  * - 选知识点：先“要复习 / 在学”的，再“学过的”巩固，最后按教学顺序补“还没学的”（每天最多 2 个新的）
  * - 同一类里按日期打乱，所以每天轮到的知识点不同；每个知识点出题时优先出没做过的题
  * - V5.2.4：选中的知识点没有新题了，就从本年级别的知识点补新题，都做过了才出旧题
+ * - V5.2.5：出旧题时先出最近做错的，再出做错过的，再出隔得最久的
  * - 题目 id 仍是 kp:知识点:签名，所以记录照常归到知识点（掌握度、错题本、复习都能用）
  * 纯函数，只看真实学习记录。
  */
@@ -14,6 +15,7 @@ import { hash, seeded, shuffle } from '@/thinking/challenges';
 import { hasGenerator, kpRound } from './generators';
 import { kpsFor } from './graph';
 import { computeMastery } from './mastery';
+import { reviewPicks } from './refill';
 
 export const DAILY_COUNT = 10;
 
@@ -80,7 +82,11 @@ export function dailyMix(state: ProgressState, subject: Subject, grade: number, 
     if (out.length >= DAILY_COUNT) break;
     take(kpRound(id, per, rand, done), per, false);
   }
-  // 全部都做过了，才出做过的题
+  // 全部都做过了，才出做过的题：先出最近做错的，再出做错过的，再出隔得最久的（V5.2.5）
+  const gradeKps = kpsFor(subject, grade)
+    .filter((k) => hasGenerator(k.id))
+    .map((k) => k.id);
+  take(reviewPicks(state, gradeKps, DAILY_COUNT, new Set(seen)), DAILY_COUNT, true);
   for (const id of ids) take(kpRound(id, per, rand), per, true);
   // 打乱顺序，几个知识点交替出现
   return shuffle(out, rand);
