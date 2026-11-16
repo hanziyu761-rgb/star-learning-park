@@ -194,7 +194,8 @@ with sync_playwright() as p:
 
         page.goto(BASE); page.wait_for_selector('[data-testid="home"]')
         tid(page, "challenge-entry").click(); page.wait_for_selector('[data-testid="challenge-screen"]')
-        page.wait_for_selector('[data-testid^="option-"], [data-testid^="sort-"]')
+        # 每日挑战按日期换题型（选择、排序、多选等），等题目出来即可
+        page.wait_for_selector('[data-testid^="challenge-exercise-"]')
         no_overflow(page)
         page.screenshot(path=f"{OUT}/v52-challenge9-{w}.png", full_page=True)
         ok(f"{w}×{h}：九年级每日挑战能打开出题")
