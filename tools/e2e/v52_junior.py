@@ -241,6 +241,17 @@ with sync_playwright() as p:
         page.wait_for_selector('[data-testid="textbooks-screen"]')
         expect(tid(page, "tb-book-title")).to_contain_text("（初中） · 九年级")
         ok(f"{w}×{h}：游戏乐园初中档（小厨房平方凑平方、钓鱼易读错的字）；教材资源库直接打开初中九年级课本")
+        # V5.2.6：年级下拉框一～九年级都有；选三年级换回小学课本，再选八年级打开初中课本
+        tid(page, "tb-dd-grade").click(); tid(page, "tb-dd-grade-opt-3").click()
+        expect(tid(page, "tb-book-title")).to_have_text(re.compile(r"^统编版 · 三年级"))
+        tid(page, "tb-dd-grade").click()
+        for x in range(1, 10): expect(tid(page, f"tb-dd-grade-opt-{x}")).to_have_count(1)
+        tid(page, "tb-dd-grade-opt-8").click()
+        expect(tid(page, "tb-book-title")).to_contain_text("统编版（初中） · 八年级")
+        n_units = page.locator('[data-testid="tb-unit"]').count()
+        assert n_units >= 6, n_units
+        page.screenshot(path=f"{OUT}/v526-textbook-g8-{w}.png")
+        ok(f"{w}×{h}：教材资源库年级下拉框有一～九年级；选三年级打开小学统编版，选八年级打开初中统编版（{n_units} 个单元）")
         ctx.close()
     assert not errors, errors
     b.close()

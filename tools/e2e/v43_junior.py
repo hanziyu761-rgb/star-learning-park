@@ -38,7 +38,7 @@ with sync_playwright() as p:
         tid(page, "pc-settings").click(); page.wait_for_selector('[data-testid="parent-settings"]')  # V5.1 家长中心分页
         assert tid(page, "grade-9").count() == 1
         tid(page, "grade-7").scroll_into_view_if_needed(); tid(page, "grade-7").click()
-        expect(tid(page, "grade-junior-note")).to_have_text("初中：不标拼音。初中的知识点练习、题库、每日挑战、口算、阅读、单词卡、试卷按七～九年级出题（原创，待教师审核）。")  # V5.2 文案
+        expect(tid(page, "grade-junior-note")).to_have_text("初中：不标拼音。初中的知识点练习、题库、每日挑战、口算、阅读、单词卡、试卷按七～九年级出题（原创，已通过教师审核）。")  # V5.2 文案
         page.screenshot(path=f"{OUT}/v43-grade-{w}.png", full_page=True)
         ok(f"{w}×{h}：年级可选到九年级；选七年级后显示初中说明")
 

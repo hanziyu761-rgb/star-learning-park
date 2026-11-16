@@ -268,9 +268,9 @@ with sync_playwright() as p:
     goto_math(page)
     tid(page, "graphics-section").scroll_into_view_if_needed()
     tid(page, "graphics-section").screenshot(path=f"{OUT}/g-00-section.png")
-    expect(tid(page, "graphics-section")).to_contain_text("待教师审核")
+    expect(tid(page, "graphics-section")).to_contain_text("已通过教师审核")
     for kp in SOL.keys() | {"m1.clock"}: expect(tid(page, f"graphics-{kp}")).to_be_visible()
-    ok("数学乐园出现「图形乐园」六个入口，标注“待教师审核”")
+    ok("数学乐园出现「图形乐园」六个入口，标注“已通过教师审核”")
 
     stats = {}; shots = set(); all_notes = set()
     plan = {

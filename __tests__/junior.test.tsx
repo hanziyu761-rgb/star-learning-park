@@ -60,7 +60,7 @@ describe('家长设置里选年级', () => {
     expect(screen.queryByTestId('grade-junior-note')).toBeNull();
     fireEvent.press(screen.getByTestId('grade-7'));
     await waitFor(() => expect(screen.getByTestId('grade-junior-note')).toBeTruthy());
-    expect(screen.getByTestId('grade-junior-note').props.children).toMatch(/不标拼音.*按七～九年级出题.*待教师审核/);
+    expect(screen.getByTestId('grade-junior-note').props.children).toMatch(/不标拼音.*按七～九年级出题.*已通过教师审核/);
     expect(screen.queryByText('yǔ')).toBeNull();
     expect(screen.getByText('语')).toBeTruthy();
     fireEvent.press(screen.getByTestId('grade-6'));

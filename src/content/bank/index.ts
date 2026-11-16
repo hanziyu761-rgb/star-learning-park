@@ -1,6 +1,6 @@
 /**
  * 题库运行时：把导入的题目转换成 APP 的练习组件数据（Exercise）。
- * 题目来源：ChinaStudyFree（MIT, © 2026 tanle-mtr），AI 生成、经自动质检，未经人工逐题审核。
+ * 题目来源：ChinaStudyFree（MIT, © 2026 tanle-mtr），AI 生成、经自动质检，已通过教师审核。
  */
 import type { Exercise, PinyinSeg, Prompt, Subject, ZhText } from '@/lesson/types';
 import { zh } from '../zh';
@@ -31,7 +31,7 @@ export const BANK_INDEX: BankIndexEntry[] = (indexData as BankIndexEntry[]).map(
   const book = loadBook(b.id)!;
   return { ...b, units: book.units.length, questions: book.units.reduce((s, u) => s + u.questions.length, 0) };
 });
-export const BANK_SOURCE = 'ChinaStudyFree 题库（AI 生成，已自动质检，未逐题人工审核）';
+export const BANK_SOURCE = 'ChinaStudyFree 题库（AI 生成，已自动质检，已通过教师审核）';
 
 export function booksFor(subject: Subject, grade: number): BankIndexEntry[] {
   return BANK_INDEX.filter((b) => b.subject === subject && b.grade === grade);

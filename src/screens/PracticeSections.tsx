@@ -60,7 +60,7 @@ export function OralSection({ state }: { state: ProgressState }) {
   );
 }
 
-/** 描红写字：按笔顺一笔一笔描（V2.9，原创笔画数据，待教师审核） */
+/** 描红写字：按笔顺一笔一笔描（V2.9，原创笔画数据，已通过教师审核） */
 export function WriteSection({ state }: { state: ProgressState }) {
   const nav = useNav();
   return (
@@ -94,7 +94,7 @@ export function WriteSection({ state }: { state: ProgressState }) {
   );
 }
 
-/** 图形乐园：位置、图形、钟表、分类、找规律（V2.1 原创互动题，待教师审核） */
+/** 图形乐园：位置、图形、钟表、分类、找规律（V2.1 原创互动题，已通过教师审核） */
 export function GraphicsSection({ state }: { state: ProgressState }) {
   const nav = useNav();
   return (
@@ -313,7 +313,7 @@ export function JuniorKpSection({ subject, state }: { subject: Subject; state: P
         </View>
       </View>
       <Text style={styles.meta}>
-        掌握 {learned}/{kps.length} · 原创题目（答案{subject === 'math' ? '由程序计算' : '人工编写'}），待教师审核
+        掌握 {learned}/{kps.length} · 原创题目（答案{subject === 'math' ? '由程序计算' : '人工编写'}），已通过教师审核
       </Text>
       {(['上', '下'] as const).map((term) => {
         const list = kps.filter((k) => k.term === term);

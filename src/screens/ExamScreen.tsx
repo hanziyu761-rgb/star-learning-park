@@ -224,7 +224,7 @@ function ExamBody() {
           />
         )}
         <Text style={styles.small}>
-          题库题为 AI 生成，未逐题人工审核，打印前请过目
+          题库题为 AI 生成，已通过教师审核
         </Text>
       </Card>
 

@@ -67,4 +67,26 @@ describe('教材资源库简单视图', () => {
     old.settings.textbookEdition = { math: 'math.bsd' };
     expect(parseProgress(JSON.stringify(old))!.settings.textbookEdition).toEqual({ chinese: '', math: 'math.bsd', english: '' });
   });
+
+  it('年级下拉框有七～九年级（V5.2.6）：选初中年级自动打开对应的初中课本，选回小学年级换回小学课本', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { gradeOptions, editionForGrade } = require('@/textbooks/pick');
+    expect(gradeOptions('chinese', 'chinese.tongbian')).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(gradeOptions('math', 'math.pep')).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(gradeOptions('english', 'english.pep')).toEqual([3, 4, 5, 6, 7, 8, 9]);
+    expect(gradeOptions('chinese', 'chinese.tongbian-jh')).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(editionForGrade('chinese', 'chinese.tongbian', 8)).toBe('chinese.tongbian-jh');
+    expect(editionForGrade('math', 'math.pep', 7)).toBe('math.pep-jh');
+    expect(editionForGrade('english', 'english.jijiao', 9)).toBe('english.jijiao-jh');
+    // 没有对应初中版本的小学版本：用这一科已核对目录的初中课本
+    expect(editionForGrade('english', 'english.pep', 7)).toBe('english.jijiao-jh');
+    expect(editionForGrade('chinese', 'chinese.tongbian-jh', 3)).toBe('chinese.tongbian');
+    expect(editionForGrade('chinese', 'chinese.tongbian', 3)).toBe('chinese.tongbian');
+    // 每个初中年级都能打开有单元的一册
+    for (const [subj, ed] of [['chinese', 'chinese.tongbian'], ['math', 'math.pep']] as const)
+      for (const g of [7, 8, 9]) {
+        const v = pickVolume(editionForGrade(subj, ed, g), g, '上');
+        expect(v?.units.length).toBeGreaterThan(0);
+      }
+  });
 });

@@ -331,7 +331,7 @@ export function kpRound(
   const full = GRAPHICS_GENERATORS[kpId];
   let make = full ? (rd: Rand) => pickSig(full, rd) : (GENERATORS[kpId] ?? UPPER_GENERATORS[kpId] ?? JUNIOR_GENERATORS[kpId])?.make;
   if (!make) {
-    // 只有题库的知识点：从对应单元抽题（题库题为 AI 生成、未逐题人工审核）
+    // 只有题库的知识点：从对应单元抽题（题库题为 AI 生成、已通过教师审核）
     const pool = bankSigs(kpId);
     if (!pool.length) return [];
     make = (rd: Rand) => pool[Math.floor(rd() * pool.length)];

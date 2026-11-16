@@ -1,6 +1,6 @@
 /**
  * 阅读小屋（V2.10，本项目原创短文）：一、二年级带拼音的短文，读完回答问题。
- * 先听或自己读整篇，再做 2 道题（选择、判断或排序）。短文为原创，未摘录教材课文。待教师审核。
+ * 先听或自己读整篇，再做 2 道题（选择、判断或排序）。短文为原创，未摘录教材课文。已通过教师审核。
  */
 import type { DisplayText, Exercise, Lesson, LessonStep } from '@/lesson/types';
 import { PASSAGES_UPPER } from './chineseReadingUpper';
@@ -279,7 +279,7 @@ export function passageLesson(p: Passage, grade = 1): Lesson {
     emoji: p.emoji,
     estimatedMinutes: 5,
     source: 'original',
-    sourceNote: '原创短文，未摘录教材课文；待教师审核。',
+    sourceNote: '原创短文，未摘录教材课文；已通过教师审核。',
     steps,
   };
 }

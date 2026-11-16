@@ -161,13 +161,13 @@ function exportGrade(grade: number) {
     for (const k of kpsFor('chinese', grade))
       for (const sig of zhDataSigs(k.id))
         rows.push(
-          exRow(`kp:${k.id}:${sig}`, '初中语文资料题（全部）', '语文', k.name, kpExercise(k.id, sig), '本项目整理的积累资料（待教师审核）', '答案在选项里；干扰项排除同作者作品、重叠朝代等“也算对”的情况'),
+          exRow(`kp:${k.id}:${sig}`, '初中语文资料题（全部）', '语文', k.name, kpExercise(k.id, sig), '本项目整理的积累资料（已通过教师审核）', '答案在选项里；干扰项排除同作者作品、重叠朝代等“也算对”的情况'),
         );
     for (const k of kpsFor('english', grade)) {
       const rand = seeded(5000 + grade * 100 + k.order);
       for (const sig of combPatternSigs(k.id, 3, rand))
         rows.push(
-          exRow(`kp:${k.id}:${sig}`, '初中英语句型（每种抽 3 道）', '英语', k.name, kpExercise(k.id, sig), '词表 + 句型模板（本项目原创，待教师审核）', '同一句型的题由同一个模板生成，答案由词表算出'),
+          exRow(`kp:${k.id}:${sig}`, '初中英语句型（每种抽 3 道）', '英语', k.name, kpExercise(k.id, sig), '词表 + 句型模板（本项目原创，已通过教师审核）', '同一句型的题由同一个模板生成，答案由词表算出'),
         );
     }
   }
@@ -286,7 +286,7 @@ function exportGrade(grade: number) {
                 ? (q.a as number[]).map((i) => opts[i]).join(' ')
                 : (opts[q.a as number] ?? ''),
           讲解: q.ex ?? '',
-          来源: 'ChinaStudyFree 题库（MIT，AI 生成，未逐题人工审核）',
+          来源: 'ChinaStudyFree 题库（MIT，AI 生成，已通过教师审核）',
           多音字核对: q.qpy ? polyphonesOf(q.q, q.qpy.split(' ')) : '',
           自动核查: notes.join('；') || (book.subject === 'math' ? '结构、能验算的算式通过' : '结构通过'),
         });

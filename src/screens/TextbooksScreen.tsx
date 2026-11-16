@@ -12,7 +12,7 @@ import { Dropdown } from '@/components/Dropdown';
 import { Header, Screen } from '@/components/Screen';
 import { hasGenerator } from '@/knowledge/generators';
 import { useProgress } from '@/progress/ProgressContext';
-import { currentTerm, defaultEdition, editionOptions, gradesOf, pickVolume, unitPracticeId } from '@/textbooks/pick';
+import { currentTerm, defaultEdition, editionForGrade, editionOptions, gradeOptions, gradesOf, pickVolume, unitPracticeId } from '@/textbooks/pick';
 import type { Subject } from '@/lesson/types';
 import { useNav } from '@/nav/Nav';
 import { EDITIONS } from '@/textbooks/editions';
@@ -59,10 +59,12 @@ function SimpleView() {
   const [subject, setSubject] = useState<Subject>('chinese');
   // 打开时按孩子的年级选版本（V5.2.3）；家长在这一页里改了版本，就按家长选的
   const [picked, setPicked] = useState<Partial<Record<Subject, string>>>({});
-  const editionId = picked[subject] ?? defaultEdition(subject, saved[subject], state.settings.grade);
-  const grades = gradesOf(editionId);
+  const chosen = picked[subject] ?? defaultEdition(subject, saved[subject], state.settings.grade);
+  // 年级下拉框包含七～九年级（V5.2.6）：选初中年级时自动打开对应的初中课本，选回小学年级换回小学课本
+  const grades = gradeOptions(subject, chosen);
   const [grade, setGrade] = useState(state.settings.grade ?? 1);
-  const g = grades.includes(grade) ? grade : grades[0];
+  const g = grades.includes(grade) ? grade : grades.reduce((a, b) => (Math.abs(b - grade) < Math.abs(a - grade) ? b : a), grades[0]);
+  const editionId = editionForGrade(subject, chosen, g);
   const [term, setTerm] = useState<Term>(currentTerm());
   const vol = pickVolume(editionId, g, term);
   const ready = !!vol && vol.tocProvenance === 'verified' && vol.units.length > 0;
@@ -88,6 +90,9 @@ function SimpleView() {
             options={editionOptions(subject)}
             onChange={(v) => {
               setPicked((x) => ({ ...x, [subject]: v }));
+              // 换了版本、原来的年级这套书里没有时，换到这套书里最接近的年级
+              const gs = gradesOf(v);
+              if (!gs.includes(grade)) setGrade(gs.reduce((a, b) => (Math.abs(b - grade) < Math.abs(a - grade) ? b : a), gs[0]));
               dispatch({ type: 'settings/set', settings: { textbookEdition: { ...saved, [subject]: v } } });
             }}
             testID="tb-dd-edition"

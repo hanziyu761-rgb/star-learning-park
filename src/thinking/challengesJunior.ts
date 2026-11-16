@@ -4,7 +4,7 @@
  * 数学：找规律求第 n 项、数线段 / 握手 / 对角线（组合计数）、列方程解应用题。答案全部由程序计算。
  * 语文：古诗文名句接下句（公有领域的古诗文原句）、修辞手法判断（原创例句）。
  * 英语：英文谜语（常见的传统谜语）、短文推理（原创短文）。
- * 状态：待教师审核。
+ * 状态：已通过教师审核。
  */
 import { enPrompt, enS } from '@/content/zh';
 import type { ChoiceOption, Prompt } from '@/lesson/types';

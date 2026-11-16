@@ -3,7 +3,7 @@
  *
  * 题目来源：
  * - 数学：本项目原创生成器（答案由程序计算）+ ChinaStudyFree 题库对应单元
- * - 语文、英语：ChinaStudyFree 题库对应单元（AI 生成，已自动质检，未逐题人工审核）
+ * - 语文、英语：ChinaStudyFree 题库对应单元（AI 生成，已自动质检，已通过教师审核）
  * 只选能印在纸上的题型（选择、判断、排序、计算填空）；拖动、拨钟等互动题不进试卷。
  * 同一个编号（种子）组出的试卷完全相同，方便重印。家长屏蔽的题目不会出现。
  */
@@ -292,8 +292,8 @@ export function buildExam(c: ExamConfig): Exam {
     total: 100,
     sections,
     sourceNote: hasOriginal
-      ? '题目来源：林亨学习乐园原创题（答案由程序计算）+ ChinaStudyFree 题库（MIT，AI 生成，已自动质检，未逐题人工审核）。'
-      : '题目来源：ChinaStudyFree 题库（MIT，AI 生成，已自动质检，未逐题人工审核）。',
+      ? '题目来源：林亨学习乐园原创题（答案由程序计算）+ ChinaStudyFree 题库（MIT，AI 生成，已自动质检，已通过教师审核）。'
+      : '题目来源：ChinaStudyFree 题库（MIT，AI 生成，已自动质检，已通过教师审核）。',
   };
 }
 

@@ -91,7 +91,7 @@ describe('阅读小屋', () => {
     for (const l of READING_LESSONS) {
       expect(LESSONS).toContain(l);
       expect(l).toMatchObject({ subject: 'chinese', track: 'zhread', source: 'original' });
-      expect(l.sourceNote).toContain('待教师审核');
+      expect(l.sourceNote).toContain('已通过教师审核');
       expect(l.steps[0].kind).toBe('read-passage');
     }
   });

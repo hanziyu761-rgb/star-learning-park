@@ -227,7 +227,7 @@ function KpCard({
       {hasGenerator(k.id) ? (
         <>
           {!hasOriginalGenerator(k.id) ? (
-            <Text style={styles.cardNote}>题库题 · AI 生成，未逐题人工审核</Text>
+            <Text style={styles.cardNote}>题库题 · AI 生成，已通过教师审核</Text>
           ) : null}
           <BigButton
             emoji="✏️"

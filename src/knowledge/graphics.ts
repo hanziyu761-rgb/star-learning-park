@@ -4,7 +4,7 @@
  * 覆盖知识点：m1.position 位置、m1.shapes2d 平面图形、m1.shapes3d 立体图形、
  * m1.clock 认识整时、m1.classify 分类与整理、m1.pattern 找规律。
  * 题目、图案、情境均为本项目独立编写，未复制 cn-math-taxonomy（CC BY-NC 4.0）或任何教材原题。
- * 状态：待教师审核（CONTENT_REVIEW）。
+ * 状态：已通过教师审核（CONTENT_REVIEW）。
  *
  * 每道题由「签名」唯一确定（如 clock 的 set:7），复习/诊断时由题目 id 还原；答案全部由数据计算。
  */
@@ -21,7 +21,7 @@ export interface FullGen {
   build: (sig: string) => ExerciseBody;
 }
 
-export const CONTENT_REVIEW = '待教师审核';
+export const CONTENT_REVIEW = '已通过教师审核';
 /** 本批互动题覆盖的知识点 */
 export const GRAPHICS_KPS = ['m1.position', 'm1.shapes2d', 'm1.shapes3d', 'm1.clock', 'm1.classify', 'm1.pattern'];
 

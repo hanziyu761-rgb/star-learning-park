@@ -5,7 +5,7 @@
  * 每道题由签名唯一确定（题目 id = kp:知识点:签名），复习、诊断时由 id 还原。
  * 小数、分数一律用整数运算，避免浮点误差。
  * 二年级题目带拼音；三年级起不再注音（与题库一致）。
- * 状态：待教师审核；题型参考课程标准与人教版单元目录（未核对教材原题）。
+ * 状态：已通过教师审核；题型参考课程标准与人教版单元目录（未核对教材原题）。
  */
 import { zh } from '@/content/zh';
 import type { ChoiceExercise, DisplayText, Prompt, Visual } from '@/lesson/types';

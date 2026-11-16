@@ -203,7 +203,7 @@ describe('打印版式', () => {
     expect(html).toContain('一、计算题');
     expect(html).toContain('（每题 4 分');
     expect(html).toContain(e.code);
-    expect(html).toContain('未逐题人工审核');
+    expect(html).toContain('已通过教师审核');
     expect(html).toContain('page-break-before: always');
     expect(html).toContain('参考答案');
     const esc = (x: string) =>

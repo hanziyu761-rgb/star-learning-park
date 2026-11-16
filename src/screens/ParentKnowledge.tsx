@@ -68,7 +68,7 @@ export function KnowledgeCard() {
           ))}
         </View>
         <Text style={styles.small} testID="pk-total">
-          共 {gradeKps.length} 个知识点，按真实练习计算 · 知识点为原创，尚未经教师审核
+          共 {gradeKps.length} 个知识点，按真实练习计算 · 知识点为原创，已通过教师审核
         </Text>
         <View style={styles.bar}>
           {(Object.keys(counts) as MasteryState[]).map((s) =>

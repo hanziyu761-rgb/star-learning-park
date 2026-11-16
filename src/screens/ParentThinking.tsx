@@ -26,7 +26,7 @@ export function ThinkingCard() {
       <View testID="pt-section">
         <SectionTitle>🧠 思维能力</SectionTitle>
         <Text style={styles.note}>
-          真实做题记录，不是心理或智力测评 · 题目为原创，待教师审核
+          真实做题记录，不是心理或智力测评 · 题目为原创，已通过教师审核
         </Text>
         <View style={styles.adaptRow}>
           <Text style={[styles.dimName, { flex: 1 }]}>挑战难度跟着孩子调整</Text>

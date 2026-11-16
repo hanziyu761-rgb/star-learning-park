@@ -36,7 +36,7 @@ export function bankVolumes(): Volume[] {
       tocProvenance: 'pending',
       sources: [],
       bankBookId: b.id,
-      copyright: '题库为 ChinaStudyFree（MIT 许可，AI 生成、自动质检、未逐题人工审核）。',
+      copyright: '题库为 ChinaStudyFree（MIT 许可，AI 生成、自动质检、已通过教师审核）。',
       units: (raw?.units ?? []).map((u) => ({
         id: `bank.${b.id}.u${u.no}`,
         order: u.no,

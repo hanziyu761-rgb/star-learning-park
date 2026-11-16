@@ -5,7 +5,7 @@
  * 语文：成语填空、关联词、选出没有毛病的句子。
  * 英语：短文阅读（Read and answer）、比较推理（Who is the tallest?）。
  * 三年级起的中文不注拼音（与教材一致）。答案全部由程序计算或按数据给出；逻辑题用穷举确认答案唯一。
- * 状态：待教师审核。
+ * 状态：已通过教师审核。
  */
 import { enPrompt, enS } from '@/content/zh';
 import type { ChoiceOption, Figure, Prompt, Visual } from '@/lesson/types';

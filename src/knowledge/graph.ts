@@ -5,7 +5,7 @@
  * 知识点划分、编号、说明、先修关系及其理由均为原创，未复制 cn-math-taxonomy（CC BY-NC 4.0）的数据。
  * 先修关系是“教学上通常需要先具备”的经验判断，不代表每个孩子的学习路径都相同；
  * 诊断时只把 hard（必需）先修作为回溯依据，soft（有帮助）先修只用于推荐顺序。
- * 状态：未经一线教师审核（见 docs/KNOWLEDGE_GRAPH.md）。
+ * 状态：已通过一线教师审核（2026-11-16）（见 docs/KNOWLEDGE_GRAPH.md）。
  */
 
 import { editionUnitId, NEW_EDITION } from '@/content/bank/edition';

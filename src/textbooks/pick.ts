@@ -40,6 +40,36 @@ export function gradesOf(editionId: string): number[] {
   return g.length ? g : [1, 2, 3, 4, 5, 6];
 }
 
+/** 小学版本和对应的初中版本：x ↔ x-jh（统编版 ↔ 统编版（初中）等，V5.2.6） */
+const exists = (id: string) => EDITIONS.some((e) => e.id === id);
+const isJuniorEdition = (id: string) => id.endsWith('-jh');
+function primaryOf(subject: Subj, editionId: string): string {
+  const base = editionId.replace(/-jh$/, '');
+  return isJuniorEdition(editionId) ? (exists(base) ? base : defaultEdition(subject, undefined, 1)) : editionId;
+}
+function juniorOf(subject: Subj, editionId: string): string | null {
+  const jh = `${editionId.replace(/-jh$/, '')}-jh`;
+  if (exists(jh)) return jh;
+  const any = EDITIONS.find((e) => e.subject === subject && isJuniorEdition(e.id) && hasVerifiedToc(e.id));
+  return any?.id ?? null;
+}
+
+/** 年级下拉框：小学这套书的年级 + 初中（七～九年级，用对应的初中课本） */
+export function gradeOptions(subject: Subj, editionId: string): number[] {
+  const jh = juniorOf(subject, editionId);
+  const all = [...gradesOf(primaryOf(subject, editionId)), ...(jh ? gradesOf(jh) : [])];
+  return [...new Set(all)].sort((a, b) => a - b);
+}
+
+/** 选了某个年级时实际打开哪套书：七～九年级换成对应的初中版本，一～六年级换回小学版本 */
+export function editionForGrade(subject: Subj, editionId: string, grade: number): string {
+  if (grade >= 7) {
+    if (isJuniorEdition(editionId)) return editionId;
+    return juniorOf(subject, editionId) ?? editionId;
+  }
+  return isJuniorEdition(editionId) ? primaryOf(subject, editionId) : editionId;
+}
+
 /** 2～7 月是下册，8 月～次年 1 月是上册 */
 export function currentTerm(d = new Date()): Term {
   const m = d.getMonth() + 1;
