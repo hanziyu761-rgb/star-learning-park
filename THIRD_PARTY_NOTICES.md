@@ -44,3 +44,9 @@ MIT License 全文：
 - 许可证：BSD 2-Clause 风格许可，Copyright (C) 1993-2015 Carnegie Mellon University. All rights reserved.
 - 使用方式：开发时用 `tools/words/phonetics.py` 查词典，把美式读音（ARPAbet）转换成国际音标，生成 `src/words/data/ipa.gen.ts`；APP 内只包含转换后的单词音标，不包含整本词典。
 - 许可要求保留版权声明：Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. THIS SOFTWARE IS PROVIDED BY CARNEGIE MELLON UNIVERSITY "AS IS" AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+
+## TweetNaCl.js（会员开通码签名核对，V5.3）
+- 来源：https://github.com/dchest/tweetnacl-js （npm 包 tweetnacl 1.0.3）
+- 许可证：The Unlicense（公有领域，允许商用，无需署名）
+- 使用方式：APP 内用公钥核对会员开通码；管理员开通工具（不随 APP 发布）用私钥生成开通码。
+

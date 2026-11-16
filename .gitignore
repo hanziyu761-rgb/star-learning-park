@@ -61,3 +61,7 @@ __pycache__/
 modules/offline-asr/android/maven/
 modules/offline-asr/android/src/main/assets/asr/
 modules/*/android/build/
+
+# 会员开通工具（含管理员私钥，V5.3）：不提交
+*.admin.html
+member-secret*.json

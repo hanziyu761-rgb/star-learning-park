@@ -7,6 +7,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { MemberNavGate, MemberProvider } from '@/member/MemberContext';
 import { NavProvider, type Nav, type Route } from '@/nav/Nav';
 import { ProgressProvider, useProgress } from '@/progress/ProgressContext';
 import Animated, { SlideInLeft, SlideInRight } from 'react-native-reanimated';
@@ -98,12 +99,16 @@ export default function SingleApp() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ProgressProvider>
-          <NavProvider nav={nav}>
-            <Page pageKey={top.key} dir={dir}>
-              {renderRoute(top.route)}
-            </Page>
-            <SplashGate />
-          </NavProvider>
+          <MemberProvider>
+            <NavProvider nav={nav}>
+              <MemberNavGate>
+                <Page pageKey={top.key} dir={dir}>
+                  {renderRoute(top.route)}
+                </Page>
+                <SplashGate />
+              </MemberNavGate>
+            </NavProvider>
+          </MemberProvider>
         </ProgressProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

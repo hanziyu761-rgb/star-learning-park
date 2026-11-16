@@ -344,3 +344,23 @@ describe('拍照错题：语文、英语出同类题', () => {
     assert.equal(extractJson('没有'), null);
   });
 });
+
+describe('会员核对（V5.3）', () => {
+  const get = (q, env) => worker.fetch(new Request(`http://x/api/member/check${q}`), env);
+  it('没有关闭名单时都没关闭；返回服务器时间', async () => {
+    const r = await (await get('?d=7K2M9QXA', {})).json();
+    assert.equal(r.ok, true);
+    assert.equal(r.revoked, false);
+    assert.equal(typeof r.now, 'number');
+  });
+  it('关闭名单里的设备号（带横线、小写、O 写成 0 都认）', async () => {
+    const env = { MEMBER_REVOKED: '7k2m-9qxa， 3H8P2WZD' };
+    assert.equal((await (await get('?d=7K2M-9QXA', env)).json()).revoked, true);
+    assert.equal((await (await get('?d=3H8P2WZD', env)).json()).revoked, true);
+    assert.equal((await (await get('?d=ABCDEFGH', env)).json()).revoked, false);
+  });
+  it('设备号格式不对返回 400', async () => {
+    assert.equal((await get('?d=abc', {})).status, 400);
+    assert.equal((await get('', {})).status, 400);
+  });
+});

@@ -461,6 +461,10 @@ const CORS = {
   'Access-Control-Max-Age': '86400',
 };
 
+/** 设备号整理：去掉横线空格、转大写、O→0、I/L→1（和 APP 里一样） */
+export const normDevice = (s) => String(s).toUpperCase().replace(/[\s-]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
+export const revokedSet = (env) => new Set(String(env.MEMBER_REVOKED || '').split(/[\s,，;；]+/).map(normDevice).filter(Boolean));
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS } });
 }
@@ -487,6 +491,13 @@ export default {
         photo: !!env.DASHSCOPE_API_KEY,
         vlModel: env.DASHSCOPE_VL_MODEL || DEFAULT_VL_MODEL,
       });
+    }
+    // 会员核对（V5.3）：管理员在服务器环境变量 MEMBER_REVOKED 里写要关闭的设备号（逗号或空格分开）。
+    // 只收设备号，不记录、不保存；返回服务器时间，防止把手机时间往回调。
+    if (url.pathname === '/api/member/check' && request.method === 'GET') {
+      const d = normDevice(url.searchParams.get('d') || '');
+      if (!/^[0-9A-Z]{8}$/.test(d)) return json({ ok: false, error: '设备号不对', code: 'BAD_DEVICE' }, 400);
+      return json({ ok: true, revoked: revokedSet(env).has(d), now: Date.now() });
     }
     const handler = ROUTES[url.pathname];
     if (!handler || request.method !== 'POST') return json({ ok: false, error: '接口不存在', code: 'NOT_FOUND' }, 404);

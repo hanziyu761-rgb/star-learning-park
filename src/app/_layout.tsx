@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { OrientationGate } from '@/components/OrientationGate';
 import { SpeechNotice } from '@/components/SpeechNotice';
 import { SplashGate } from '@/components/SplashGate';
+import { MemberNavGate, MemberProvider } from '@/member/MemberContext';
 import { NavProvider } from '@/nav/Nav';
 import { expoRouterNav } from '@/nav/expoRouterNav';
 import { ProgressProvider, useProgress } from '@/progress/ProgressContext';
@@ -16,10 +17,15 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ProgressProvider>
-          <NavProvider nav={expoRouterNav}>
-            <AppStack />
-            <SplashGate />
-          </NavProvider>
+          {/* 会员（V5.3）：页面跳转前检查能不能打开 */}
+          <MemberProvider>
+            <NavProvider nav={expoRouterNav}>
+              <MemberNavGate>
+                <AppStack />
+                <SplashGate />
+              </MemberNavGate>
+            </NavProvider>
+          </MemberProvider>
         </ProgressProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>林亨学习乐园 · 会员开通工具</title>
+<style>
+  :root { --bg:#F5F3EF; --card:#fff; --text:#1D1D1F; --soft:#6B6B70; --line:rgba(60,60,67,.14); --main:#6E6AA8; --mainSoft:#E9E8F3; --ok:#4A7F5B; --bad:#AD5A56; --warn:#F6EDD3; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111113; --card:#1C1C1F; --text:#F2F2F4; --soft:#A1A1A8; --line:rgba(255,255,255,.14); --main:#A9A5E0; --mainSoft:#2A2940; --ok:#7FBF92; --bad:#E29A95; --warn:#3A3220; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+  h1 { font-size: 22px; margin: 8px 0 0; }
+  .card { background: var(--card); border-radius: 20px; padding: 18px; }
+  .warn { background: var(--warn); border-radius: 14px; padding: 10px 14px; font-size: 14px; }
+  label { display:block; font-weight:600; margin-top: 10px; }
+  input, select, textarea { width:100%; font: inherit; color: var(--text); background: var(--mainSoft); border: 0; border-radius: 12px; padding: 10px 12px; margin-top: 4px; }
+  textarea { min-height: 90px; font-size: 13px; word-break: break-all; }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 12px; padding: 10px 16px; margin-top: 10px; background: var(--main); color: #fff; cursor: pointer; }
+  button.alt { background: var(--mainSoft); color: var(--main); }
+  .msg { font-size: 14px; margin-top: 8px; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td button { margin: 0 4px 4px 0; padding: 6px 10px; font-size: 13px; }
+  .soft { color: var(--soft); font-size: 14px; }
+  code { font-size: 13px; word-break: break-all; }
+</style>
+</head>
+<body>
+<main>
+  <h1>👑 会员开通工具（管理员专用）</h1>
+  <div class="warn">⚠️ 这个文件里有管理员私钥：<b>只给自己用，不要发给别人</b>，也不要上传到网盘的公开链接。请在电脑和手机上各存一份备份；丢了以后不能再开通（只能换新密钥、重新打包 APP）。开通记录只保存在这个浏览器里，记得定期“导出备份”。</div>
+
+  <section class="card">
+    <h2 style="margin:0;font-size:18px">开通 / 续费</h2>
+    <label>设备号（家长在 APP“家长中心 → 会员”里看到的 8 位，例如 7K2M-9QXA）</label>
+    <input id="dev" autocomplete="off" placeholder="7K2M-9QXA">
+    <label>备注（家长或孩子的名字，方便自己记）</label>
+    <input id="note" autocomplete="off" placeholder="例如：张三 · 二年级">
+    <label>开通时长</label>
+    <select id="months">
+      <option value="1">1 个月</option>
+      <option value="3">3 个月</option>
+      <option value="6">6 个月</option>
+      <option value="12">12 个月</option>
+      <option value="120">长期（10 年，例如自己家的孩子）</option>
+    </select>
+    <button id="make">生成开通码</button>
+    <div id="makeMsg" class="msg"></div>
+    <div id="out" style="display:none">
+      <label>发给家长的话（已包含开通码）</label>
+      <textarea id="outText" readonly></textarea>
+      <button id="copy">复制，粘贴到微信发给家长</button>
+    </div>
+    <p class="soft">续费：输入同一个设备号再生成一次，会从原来的到期日往后延。码只能在这台手机上用，别的手机用不了。</p>
+  </section>
+
+  <section class="card">
+    <h2 style="margin:0;font-size:18px">开通记录</h2>
+    <div id="list"></div>
+  </section>
+
+  <section class="card">
+    <h2 style="margin:0;font-size:18px">关闭会员（提前停用）</h2>
+    <p class="soft">在上面的记录里点“关闭”，然后把下面这一行复制到阿里云函数计算的环境变量 <b>MEMBER_REVOKED</b> 里保存（具体步骤见《会员使用说明》）。那台手机下次联网打开 APP 时就会关闭；没联网的话，最多 7 天后也会停用。要恢复，点“恢复”后同样更新一次环境变量。</p>
+    <textarea id="revoked" readonly></textarea>
+    <button id="copyRevoked" class="alt">复制关闭名单</button>
+  </section>
+
+  <section class="card">
+    <h2 style="margin:0;font-size:18px">备份</h2>
+    <button id="export" class="alt">导出备份（复制文字）</button>
+    <button id="import" class="alt">从备份恢复（粘贴文字）</button>
+    <textarea id="backup" placeholder="导出的备份文字会出现在这里；恢复时把备份文字粘贴到这里再点“从备份恢复”"></textarea>
+    <div id="backupMsg" class="msg"></div>
+  </section>
+  <p class="soft">林亨学习乐园 · 开通码格式 LH1（签名：Ed25519）</p>
+</main>
+
+<script>
+/*__TWEETNACL__*/
+</script>
+<script>
+const SECRET_KEY_B64 = '__SECRET_KEY__';
+const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const EPOCH = Date.UTC(2026, 0, 1);
+const DAY = 86400000;
+const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+const STORE = 'lh-admin-records-v1';
+
+const $ = (id) => document.getElementById(id);
+function b64std(s) { const bin = atob(s); return Uint8Array.from(bin, (c) => c.charCodeAt(0)); }
+function b64url(bytes) {
+  let out = '';
+  for (let i = 0; i < bytes.length; i += 3) {
+    const n = (bytes[i] << 16) | ((bytes[i + 1] ?? 0) << 8) | (bytes[i + 2] ?? 0);
+    const chars = [(n >> 18) & 63, (n >> 12) & 63, (n >> 6) & 63, n & 63].map((k) => B64[k]);
+    out += chars.slice(0, Math.min(4, bytes.length - i + 1)).join('');
+  }
+  return out;
+}
+function checkChar(body) { let s = 0; for (let i = 0; i < body.length; i++) s += (ALPHABET.indexOf(body[i]) + 1) * (i + 3); return ALPHABET[s % ALPHABET.length]; }
+const norm = (s) => s.toUpperCase().replace(/[\s-]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
+const valid = (id) => /^[0-9A-HJKMNP-TV-Z]{8}$/.test(id) && checkChar(id.slice(0, 7)) === id[7];
+const show = (id) => id.slice(0, 4) + '-' + id.slice(4);
+function todayDay() { const d = new Date(); return Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - EPOCH) / DAY); }
+const dayToDate = (n) => new Date(EPOCH + n * DAY).toISOString().slice(0, 10);
+function addMonths(day, m) {
+  const d = new Date(EPOCH + day * DAY);
+  const t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + m, d.getUTCDate());
+  return Math.round((t - EPOCH) / DAY) - 1;
+}
+function sign(id, untilDay) {
+  const sk = b64std(SECRET_KEY_B64);
+  const msg = new Uint8Array(11);
+  msg[0] = 1;
+  for (let i = 0; i < 8; i++) msg[1 + i] = id.charCodeAt(i);
+  msg[9] = (untilDay >> 8) & 255; msg[10] = untilDay & 255;
+  const sig = nacl.sign.detached(msg, sk);
+  const all = new Uint8Array(75); all.set(msg); all.set(sig, 11);
+  return 'LH1.' + b64url(all);
+}
+const load = () => { try { return JSON.parse(localStorage.getItem(STORE) || '{}'); } catch { return {}; } };
+const save = (r) => localStorage.setItem(STORE, JSON.stringify(r));
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function render() {
+  const r = load();
+  const ids = Object.keys(r).sort((a, b) => (r[a].untilDay ?? 0) - (r[b].untilDay ?? 0));
+  const today = todayDay();
+  $('list').innerHTML = ids.length ? '<table><tr><th>设备号</th><th>备注</th><th>到期</th><th></th></tr>' + ids.map((id) => {
+    const x = r[id];
+    const st = x.closed ? '<span class="bad">已关闭</span>' : x.untilDay < today ? '<span class="bad">已过期</span>' : '<span class="ok">有效</span>';
+    return `<tr><td><code>${show(id)}</code></td><td>${esc(x.note || '')}</td><td>${dayToDate(x.untilDay)}<br>${st}</td><td>`
+      + `<button class="alt" data-renew="${id}">续费</button>`
+      + `<button class="alt" data-toggle="${id}">${x.closed ? '恢复' : '关闭'}</button></td></tr>`;
+  }).join('') + '</table>' : '<p class="soft">还没有开通记录。</p>';
+  $('revoked').value = ids.filter((id) => r[id].closed).map(show).join(',');
+}
+
+$('make').onclick = () => {
+  const id = norm($('dev').value);
+  const msg = $('makeMsg');
+  if (!valid(id)) { msg.className = 'msg bad'; msg.textContent = '设备号不对：应该是 8 位（例如 7K2M-9QXA），请让家长复制 APP 里显示的设备号。'; return; }
+  const months = Number($('months').value);
+  const r = load();
+  const old = r[id];
+  const today = todayDay();
+  const start = old && !old.closed && old.untilDay >= today ? old.untilDay + 1 : today;
+  const until = addMonths(start, months);
+  const code = sign(id, until);
+  r[id] = { note: $('note').value.trim() || old?.note || '', untilDay: until, closed: false, history: [...(old?.history || []), { at: new Date().toISOString(), months, until: dayToDate(until) }] };
+  save(r);
+  $('outText').value = `您好！林亨学习乐园会员已开通，有效期到 ${dayToDate(until)}。\n请打开 APP → 家长中心 → 会员，把下面这串开通码粘贴进去，点“开通”：\n${code}`;
+  $('out').style.display = '';
+  msg.className = 'msg ok'; msg.textContent = `已为 ${show(id)} 生成开通码，有效期到 ${dayToDate(until)}${old && old.closed ? '（这台手机之前被关闭过，记得在关闭名单里把它去掉）' : ''}。`;
+  render();
+};
+async function copy(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch { return false; }
+}
+$('copy').onclick = async () => { const ok = await copy($('outText').value); if (!ok) { $('outText').select(); document.execCommand('copy'); } $('makeMsg').textContent = '已复制，可以粘贴到微信了。'; };
+$('copyRevoked').onclick = async () => { const ok = await copy($('revoked').value); if (!ok) { $('revoked').select(); document.execCommand('copy'); } };
+$('list').onclick = (e) => {
+  const t = e.target;
+  const r = load();
+  if (t.dataset.renew) { $('dev').value = show(t.dataset.renew); $('note').value = r[t.dataset.renew].note || ''; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  if (t.dataset.toggle) { r[t.dataset.toggle].closed = !r[t.dataset.toggle].closed; save(r); render(); }
+};
+$('export').onclick = () => { $('backup').value = JSON.stringify(load()); $('backup').select(); $('backupMsg').className = 'msg ok'; $('backupMsg').textContent = '备份文字已生成，请复制保存到自己的备忘录或文件里。'; };
+$('import').onclick = () => {
+  try { const data = JSON.parse($('backup').value); if (typeof data !== 'object' || Array.isArray(data)) throw 0; save({ ...load(), ...data }); render(); $('backupMsg').className = 'msg ok'; $('backupMsg').textContent = '已恢复。'; }
+  catch { $('backupMsg').className = 'msg bad'; $('backupMsg').textContent = '备份文字不对，请粘贴完整的导出内容。'; }
+};
+render();
+</script>
+</body>
+</html>

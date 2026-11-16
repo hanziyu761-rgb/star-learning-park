@@ -48,6 +48,12 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 - `__tests__/daily-variety.test.ts` 模拟一～九年级三科连续每天做题、数重复，门槛按实测设定，不得为通过而调低；内容变少导致不通过时应补内容。
 - 三～六年级英语单词题的错拼写由 `python tools/words/misspell.py` 生成（用 CMU 词典排除真实单词），改单词卡后重新运行。
 
+## 会员（V5.3）
+
+- 收费方式见 `docs/MEMBER.md`：管理员用“会员开通工具”（`tools/member/make_admin.mjs` 由模板生成，含私钥，`*.admin.html` 不提交）签发开通码；APP 用 `src/member/key.ts` 的公钥核对。**私钥不得进入代码仓库或 APP**。
+- 页面跳转经 `MemberNavGate` 检查（`src/member/model.ts` 的 `gate`）；新增页面时决定是否需要会员。会员信息存 `slp.member.v1`，不放进 ProgressState。
+- 服务器 `GET /api/member/check?d=设备号` 按环境变量 `MEMBER_REVOKED` 返回是否关闭。
+
 ## 单文件 HTML 版
 
 `npm run build:html` 生成 `star-learning-park.html`。改动页面后要同时验证 APP 版和 HTML 版。
@@ -71,6 +77,7 @@ src/content/        课程数据（只写数据，不写界面）；zh.ts 拼音
 src/lesson/         课程数据类型、课程播放器、各类环节（演示、拖动、跟读、对话、绘本）、反馈语
 src/exercises/      可复用练习组件：选择、正误判断、拖动配对、排序；V2.1 图形互动：拖到方格、地图点选、点选图形、分类篮、旋转、拨钟、找规律
 src/drag/           拖动与放置区（gesture-handler + reanimated）
+src/member/         会员：设备号、开通码核对、试用与放行规则、家长中心会员卡
 src/progress/       学习记录：数据模型（纯函数）、本地存储、统计、React Context
 src/speech/         发音（V5.1 起只用星星宝童声：预录音 + 阿里云联网合成，不用手机自带语音；读不出时 SpeechNotice 提示）
 src/components/     通用界面组件：上注音、按钮、吉祥物、反馈条、家长验证
