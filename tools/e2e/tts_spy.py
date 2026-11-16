@@ -6,6 +6,7 @@ V5.1 起 APP 不用手机自带语音：没有录音的句子都请求自家 AI 
 （见 CLAUDE.md：EXPO_PUBLIC_AI_BASE_URL=http://tts.e2e.invalid npx expo export --platform web），这里在页面里：
 - 拦截 /api/tts：按要读的文字生成一个专属的空白声音地址（blob:），回给 APP
 - 拦截 /api/health（只拦截假地址）：回“服务正常”
+- 拦截 /api/member/check（只拦截假地址）：回“没有关闭”（V5.3 会员）
 - 接管 Audio：每次播放这些声音地址时记下文字（同一句读两次就记两次），然后马上“播放完”
 记录放在 window.__spoken，格式按各脚本原来的写法：
 pair=[文字, 语言]，obj={text, lang}，objrate={text, lang, rate}，text=文字。语言按有没有汉字判断。
@@ -37,6 +38,10 @@ window.__tts = {};
     }
     if (url.startsWith('http://tts.e2e.invalid') && url.endsWith('/api/health')) {
       return json({ ok: true, llm: true, tts: true, photo: true, model: 'e2e', vlModel: 'e2e' });
+    }
+    // 会员核对（V5.3，只拦截假地址）：默认没有关闭；测试可以设 window.__memberRevoked = true 模拟管理员关闭
+    if (url.startsWith('http://tts.e2e.invalid') && url.includes('/api/member/check')) {
+      return json({ ok: true, revoked: window.__memberRevoked === true, now: Date.now() });
     }
     return realFetch(input, init);
   };
