@@ -79,7 +79,8 @@ export function kpForBankLabel(label: string, question: string): string | null {
  */
 export function kpForRecord(lessonId: string, exerciseId: string, skill: string): string | null {
   // 今日一练（mix:，V5.2.3）的题目 id 也是 kp:知识点:签名
-  if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:') || lessonId.startsWith('mix:')) {
+  // 单元小测（quiz:，V5.4）同样
+  if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:') || lessonId.startsWith('mix:') || lessonId.startsWith('quiz:')) {
     const m = exerciseId.match(/^kp:([a-z]\d\.[\w]+):/);
     return m ? m[1] : null;
   }

@@ -9,6 +9,7 @@ import { exerciseFromKpId } from '@/knowledge/generators';
 import { getKp } from '@/knowledge/graph';
 import { findOralExercise, ORAL_TOPICS } from './oral';
 import { dictationTitle, findDictation, isDictationId } from './zhDictation';
+import { quizTitle } from '@/knowledge/quiz';
 import { plainText } from './zh';
 import { ALL_WRITE_SETS, isWriteLessonId, traceExercise } from './writing';
 import { bubbleExercise } from '@/games/bubble';
@@ -36,10 +37,11 @@ export const resolveExercise: ExerciseResolver = (lessonId, exerciseId) => {
     const ex = game.make(exerciseId);
     return ex ? { exercise: ex, subject: game.subject, source: game.name } : null;
   }
-  if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:') || lessonId.startsWith('mix:')) {
+  if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:') || lessonId.startsWith('mix:') || lessonId.startsWith('quiz:')) {
     const ex = exerciseFromKpId(exerciseId);
     // 今日一练（mix:）的知识点从题目 id 里取
-    const kp = getKp(lessonId.startsWith('mix:') ? (exerciseId.split(':')[1] ?? '') : lessonId.split(':')[1]);
+    // 单元小测（quiz:，V5.4）也从题目 id 里取（综合小测里有好几个知识点）
+    const kp = getKp(lessonId.startsWith('mix:') || lessonId.startsWith('quiz:') ? (exerciseId.split(':')[1] ?? '') : lessonId.split(':')[1]);
     return ex ? { exercise: ex, subject: kp?.subject ?? 'math', source: `知识点 · ${kp?.name ?? ''}` } : null;
   }
   const bank = findBankExercise(lessonId, exerciseId);
@@ -79,6 +81,7 @@ export function sourceName(lessonId: string): string {
     return f ? `${f.book.title} · ${f.unit.title}` : lessonId;
   }
   if (lessonId.startsWith('mix:')) return '今日一练';
+  if (lessonId.startsWith('quiz:')) return quizTitle(lessonId);
   if (lessonId.startsWith('kp:') || lessonId.startsWith('diag:')) {
     const k = getKp(lessonId.split(':')[1]);
     return k ? `${lessonId.startsWith('diag:') ? '找原因' : '知识点练习'} · ${k.name}` : lessonId;
@@ -107,7 +110,7 @@ export function mistakeLabel(lessonId: string, exerciseId: string): string {
     return r && r.exercise.kind === 'choice' ? `拼写：${r.exercise.answerId}` : exerciseId;
   }
   // 知识点练习、找原因（kp: / diag:）也按题目还原（V5.2 修正：以前只显示题目编号）
-  if (!/^(bank|oral|game|kp|diag|mix|zdict):/.test(lessonId)) return exerciseLabel(lessonId, exerciseId);
+  if (!/^(bank|oral|game|kp|diag|mix|zdict|quiz):/.test(lessonId)) return exerciseLabel(lessonId, exerciseId);
   const r = resolveExercise(lessonId, exerciseId);
   if (!r) return exerciseId;
   const e = r.exercise;

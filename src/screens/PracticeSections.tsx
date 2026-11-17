@@ -14,6 +14,8 @@ import { dayKey } from '@/progress/srs';
 import { CONTENT_REVIEW, GRAPHICS_GENERATORS, GRAPHICS_KPS } from '@/knowledge/graphics';
 import { zh } from '@/content/zh';
 import { dictationId, dictationItems, dictationTitle } from '@/content/zhDictation';
+import { QUIZ_SIZE, quizId, termKps, termQuizId } from '@/knowledge/quiz';
+import { currentTerm } from '@/textbooks/pick';
 import { DisplayTextView } from '@/components/PinyinText';
 import { Stars, tapFeedback } from '@/components/ui';
 import type { Subject } from '@/lesson/types';
@@ -431,3 +433,75 @@ export function DictationCard({ state }: { state: ProgressState }) {
     </Pressable>
   );
 }
+
+/**
+ * 单元小测（V5.4）：点开选这一册的某个单元（知识点），或本学期综合；10 道题、计时、交卷给分。
+ */
+export function QuizCard({ subject, state }: { subject: Subject; state: ProgressState }) {
+  const nav = useNav();
+  const grade = contentGrade(state.settings.grade);
+  const [open, setOpen] = useState(false);
+  const [term, setTerm] = useState<'上' | '下'>(() => currentTerm());
+  const theme = subjectTheme[subject];
+  const kps = termKps(subject, grade, term);
+  if (!termKps(subject, grade, '上').length && !termKps(subject, grade, '下').length) return null;
+  const plain = grade >= 3;
+  const go = (id: string) => {
+    tapFeedback();
+    nav.push({ name: 'practice', id });
+  };
+  return (
+    <View style={styles.card} testID={`quiz-${subject}`}>
+      <Pressable onPress={() => setOpen((x) => !x)} style={mixStyles.row} accessibilityRole="button" testID={`quiz-toggle-${subject}`}>
+        <Text style={mixStyles.emoji}>📝</Text>
+        <View style={{ flex: 1, gap: 2 }}>
+          <DisplayTextView text={plain ? '单元小测' : zh('单元小测', 'dān yuán xiǎo cè')} size={22} />
+          <Text style={styles.meta}>{`${QUIZ_SIZE} 道题 · 计时 · 交卷给分`}</Text>
+        </View>
+        <Text style={[styles.go, { color: theme.color }]}>{open ? '▲' : '▼'}</Text>
+      </Pressable>
+      {open ? (
+        <View style={{ gap: space.sm, marginTop: space.sm }}>
+          <View style={{ flexDirection: 'row', gap: space.sm }}>
+            {(['上', '下'] as const).map((t) => (
+              <Pressable
+                key={t}
+                onPress={() => setTerm(t)}
+                style={[quizStyles.chip, term === t && { backgroundColor: theme.color }]}
+                accessibilityRole="button"
+                testID={`quiz-term-${t}`}
+              >
+                <Text style={[quizStyles.chipText, term === t && { color: colors.onAccent }]}>{`${GRADE_CN[grade]}年级${t}册`}</Text>
+              </Pressable>
+            ))}
+          </View>
+          {kps.length ? (
+            <>
+              <Pressable onPress={() => go(termQuizId(subject, grade, term))} style={quizStyles.row} accessibilityRole="button" testID={`quiz-start-term-${subject}`}>
+                <Text style={quizStyles.rowText}>⭐ 本学期综合小测</Text>
+                <Text style={[styles.go, { color: theme.color }]}>▶</Text>
+              </Pressable>
+              {kps.map((k) => (
+                <Pressable key={k.id} onPress={() => go(quizId(k.id))} style={quizStyles.row} accessibilityRole="button" testID={`quiz-start-${k.id}`}>
+                  <Text style={quizStyles.rowText} numberOfLines={1}>{`${k.emoji ?? '📘'} ${k.name}`}</Text>
+                  <Text style={[styles.go, { color: theme.color }]}>▶</Text>
+                </Pressable>
+              ))}
+            </>
+          ) : (
+            <Text style={styles.meta}>这一册还没有可以小测的单元。</Text>
+          )}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+const quizStyles = themed(() =>
+  StyleSheet.create({
+    chip: { paddingHorizontal: space.md, minHeight: 36, borderRadius: radius.round, backgroundColor: colors.cardAlt, justifyContent: 'center' },
+    chipText: { fontSize: 14, fontWeight: '600', color: colors.text },
+    row: { flexDirection: 'row', alignItems: 'center', minHeight: 44, borderTopWidth: 1, borderTopColor: colors.line, gap: space.sm },
+    rowText: { flex: 1, fontSize: 16, color: colors.text },
+  }),
+);

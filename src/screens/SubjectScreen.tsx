@@ -11,7 +11,7 @@ import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { NEXT_LABEL, nextUp } from '@/progress/nextUp';
 import { useProgress } from '@/progress/ProgressContext';
-import { BankSection, DailyMixCard, DictationCard, GraphicsSection, JuniorKpSection, OralSection, WriteSection } from './PracticeSections';
+import { BankSection, DailyMixCard, DictationCard, QuizCard, GraphicsSection, JuniorKpSection, OralSection, WriteSection } from './PracticeSections';
 import { contentGrade } from '@/progress/grade';
 import { EnglishTracks, ReadingHouse } from './EnglishTracks';
 import { GAME_BY_ID } from '@/games/common';
@@ -112,6 +112,8 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
         ) : null}
       </View>
       <JuniorKpSection subject={subject} state={state} />
+      {/* 单元小测（V5.4） */}
+      <QuizCard subject={subject} state={state} />
       {subject === 'english' && !junior ? <EnglishTracks state={state} /> : null}
       {lessons.length === 0 && subject !== 'english' ? <Notice text="这个学科还没有课程。" /> : null}
       {junior ? (

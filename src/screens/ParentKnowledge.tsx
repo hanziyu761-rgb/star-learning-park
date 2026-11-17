@@ -195,6 +195,7 @@ function sourceLabel(source: string, lessonId: string): string {
   if (lessonId.startsWith('mix:')) return '今日一练';
   if (lessonId.startsWith('oral:')) return '口算闯关';
   if (lessonId.startsWith('zdict:')) return '听写默写';
+  if (lessonId.startsWith('quiz:')) return '单元小测';
   if (lessonId.startsWith('bank:')) return '题库闯关';
   return '课程';
 }

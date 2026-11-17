@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BANK_SOURCE, bankExercise, findUnit, pickRound } from '@/content/bank';
 import { ORAL_TOPICS, oralExercise, oralRound } from '@/content/oral';
 import { dictationRound, dictationTitle, isDictationId } from '@/content/zhDictation';
+import { isQuizId, QUIZ_MINUTES, quizResult, quizRound, quizTitle, type QuizAnswer } from '@/knowledge/quiz';
 import { sourceName } from '@/content/resolve';
 import { ALL_WRITE_SETS, isWriteLessonId, traceExercise } from '@/content/writing';
 import { kpRoundWithReview } from '@/knowledge/refill';
@@ -52,7 +53,13 @@ export default function PracticeScreen({ id }: { id: string | undefined }) {
   return <PracticeSession id={String(id ?? '')} />;
 }
 
-function buildRound(id: string, done: Set<string>, hidden: Set<string>, state: ProgressState, now: number): Round | null {
+function buildRound(
+  id: string,
+  done: Set<string>,
+  hidden: Set<string>,
+  state: ProgressState,
+  now: number,
+): Round | null {
   // 今日一练（V5.2.3）：按年级每天组一套混合练习
   const mix = parseDailyMixId(id);
   if (mix) {
@@ -86,10 +93,20 @@ function buildRound(id: string, done: Set<string>, hidden: Set<string>, state: P
       ? { subject: 'chinese', title: sourceName(id), isBank: false, exercises: set.map((c) => traceExercise(c.char)) }
       : null;
   }
+  // 单元小测（V5.4）：计时、只算第一次作答
+  if (isQuizId(id)) {
+    const q = quizRound(id, state, now);
+    return q ? { subject: q.subject, title: quizTitle(id), isBank: false, exercises: q.exercises } : null;
+  }
   // 语文听写、古诗文默写（V5.4）：先出没做过的
   if (isDictationId(id)) {
     const g = Number(id.slice(7));
-    return { subject: 'chinese', title: dictationTitle(g), isBank: false, exercises: dictationRound(g, done, Math.random) };
+    return {
+      subject: 'chinese',
+      title: dictationTitle(g),
+      isBank: false,
+      exercises: dictationRound(g, done, Math.random),
+    };
   }
   if (id.startsWith('oral:')) {
     const topic = ORAL_TOPICS.find((t) => `oral:${t.id}` === id);
@@ -122,6 +139,16 @@ function PracticeSession({ id }: { id: string }) {
   /** 本轮一次答对的题数；第 1、4、7… 道一次答对的题问“你是怎么想的” */
   const [correctCount, setCorrectCount] = useState(0);
   const [askKp, setAskKp] = useState<string | null>(null);
+  // 单元小测（V5.4）：计时，交卷后按第一次作答算分
+  const quiz = isQuizId(id);
+  const [answers, setAnswers] = useState<QuizAnswer[]>([]);
+  const [clock, setClock] = useState(() => Date.now());
+  const [endedAt, setEndedAt] = useState<number | null>(null);
+  useEffect(() => {
+    if (!quiz) return;
+    const t = setInterval(() => setClock(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [quiz]);
   // 先教后练：知识点练习有小讲解；第一次练这个知识点时先看讲解（V2.10）
   const teachKp = id.startsWith('kp:') ? id.slice(3) : null;
   const slides = teachKp ? KP_TEACH[teachKp] : undefined;
@@ -156,6 +183,7 @@ function PracticeSession({ id }: { id: string }) {
   const last = index >= total - 1;
 
   const finish = () => {
+    setEndedAt(Date.now());
     dispatch({ type: 'practice/complete', lessonId: id, subject: round.subject, startedAt, now: Date.now() });
     speak({ text: '闯关完成！', lang: 'zh-CN' });
     setFinished(true);
@@ -181,7 +209,8 @@ function PracticeSession({ id }: { id: string }) {
       attempts: o.attempts,
       now: Date.now(),
     });
-    if (o.firstTryCorrect) {
+    if (quiz) setAnswers((a) => [...a, { exerciseId: ex.id, firstTryCorrect: o.firstTryCorrect }]);
+    if (o.firstTryCorrect && !quiz) {
       const n = correctCount + 1;
       setCorrectCount(n);
       const kp = kpForRecord(id, ex.id, ex.skill);
@@ -189,6 +218,42 @@ function PracticeSession({ id }: { id: string }) {
     }
     setDone(true);
   };
+
+  if (finished && quiz) {
+    const r = quizResult(answers);
+    const sec = Math.round(((endedAt ?? clock) - startedAt) / 1000);
+    return (
+      <ScrollView
+        contentContainerStyle={[styles.center, { paddingTop: insets.top + space.xl, backgroundColor: theme.soft }]}
+        testID="practice-summary"
+      >
+        <Mascot size={110} mood={r.score >= 80 ? 'cheer' : 'happy'} />
+        <Text style={[styles.quizScore, { color: theme.color }]} testID="quiz-score">
+          {r.score} 分
+        </Text>
+        <Text style={styles.summary} testID="practice-score">
+          一次答对 {r.right} / {r.total} 题 · 用时 {Math.floor(sec / 60)} 分 {sec % 60} 秒
+        </Text>
+        <View style={styles.quizBox} testID="quiz-kps">
+          {r.kps.map((k) => (
+            <Text key={k.kp} style={[styles.quizLine, { color: k.right === k.total ? colors.correct : colors.text }]}>
+              {`${k.right === k.total ? '✓' : '△'} ${k.name}：${k.right}/${k.total}`}
+            </Text>
+          ))}
+          <Text style={styles.quizNote}>只算第一次作答；做错的题已放进错题本。</Text>
+        </View>
+        <BigButton
+          emoji="🏠"
+          label={zh('回首页', 'huí shǒu yè')}
+          color={colors.textSoft}
+          size="md"
+          onPress={nav.home}
+          style={{ alignSelf: 'stretch' }}
+          testID="practice-home"
+        />
+      </ScrollView>
+    );
+  }
 
   if (finished) {
     const session = [...state.sessions].reverse().find((s) => s.lessonId === id && s.startedAt === startedAt);
@@ -250,6 +315,9 @@ function PracticeSession({ id }: { id: string }) {
           right={
             <Text style={styles.count} testID="practice-progress">
               {index + 1}/{total}
+              {quiz
+                ? ` · ⏱ ${Math.floor((clock - startedAt) / 60000)}:${String(Math.floor(((clock - startedAt) / 1000) % 60)).padStart(2, '0')}`
+                : ''}
             </Text>
           }
         />
@@ -282,13 +350,22 @@ function PracticeSession({ id }: { id: string }) {
                 />
               </View>
             )}
+            {quiz && index === 0 && !done ? (
+              <Text
+                style={styles.quizNote}
+                testID="quiz-intro"
+              >{`单元小测：${total} 道题，建议 ${QUIZ_MINUTES} 分钟内做完；只算第一次作答（答错了可以改，但不算分），不能问星星宝。`}</Text>
+            ) : null}
             {askKp && done ? <StrategyAsk key={`st-${index}`} kp={askKp} lessonId={id} exerciseId={ex.id} /> : null}
-            <AskTeacher
-              key={`ai-${index}-${ex.id}`}
-              exercise={ex}
-              subject={round.subject}
-              solved={done && !skipped.includes(index)}
-            />
+            {/* 小测时不能问星星宝 */}
+            {quiz ? null : (
+              <AskTeacher
+                key={`ai-${index}-${ex.id}`}
+                exercise={ex}
+                subject={round.subject}
+                solved={done && !skipped.includes(index)}
+              />
+            )}
             {round.isBank ? (
               <View style={styles.sourceRow}>
                 <Text style={styles.source}>{BANK_SOURCE}</Text>
@@ -324,29 +401,35 @@ function PracticeSession({ id }: { id: string }) {
   );
 }
 
-const styles = themed(() => StyleSheet.create({
-  root: { flex: 1 },
-  headerWrap: { paddingHorizontal: space.lg },
-  content: { padding: space.lg, gap: space.md, width: '100%', maxWidth: 720, alignSelf: 'center' },
-  count: { fontSize: 18, fontWeight: '600', color: colors.textSoft },
-  bottom: {
-    paddingHorizontal: space.lg,
-    paddingTop: space.sm,
-    gap: space.sm,
-    backgroundColor: colors.glass,
-  },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingHorizontal: space.xl },
-  summary: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    padding: space.lg,
-  },
-  teachOpen: { alignSelf: 'flex-end', paddingHorizontal: space.sm, paddingVertical: 4 },
-  teachOpenText: { fontSize: 14, fontWeight: '700', color: colors.parent },
-  sourceRow: { alignItems: 'center', gap: 4, marginTop: space.sm },
-  source: { fontSize: 12, color: colors.textSoft, textAlign: 'center' },
-  report: { fontSize: 13, color: colors.textSoft, padding: 4 },
-}));
+const styles = themed(() =>
+  StyleSheet.create({
+    root: { flex: 1 },
+    headerWrap: { paddingHorizontal: space.lg },
+    quizScore: { fontSize: 56, fontWeight: '800' },
+    quizBox: { alignSelf: 'stretch', backgroundColor: colors.card, borderRadius: radius.md, padding: space.md, gap: 6 },
+    quizLine: { fontSize: 16, fontWeight: '600' },
+    quizNote: { fontSize: 13, color: colors.textSoft, lineHeight: 19 },
+    content: { padding: space.lg, gap: space.md, width: '100%', maxWidth: 720, alignSelf: 'center' },
+    count: { fontSize: 18, fontWeight: '600', color: colors.textSoft },
+    bottom: {
+      paddingHorizontal: space.lg,
+      paddingTop: space.sm,
+      gap: space.sm,
+      backgroundColor: colors.glass,
+    },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingHorizontal: space.xl },
+    summary: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text,
+      backgroundColor: colors.card,
+      borderRadius: radius.lg,
+      padding: space.lg,
+    },
+    teachOpen: { alignSelf: 'flex-end', paddingHorizontal: space.sm, paddingVertical: 4 },
+    teachOpenText: { fontSize: 14, fontWeight: '700', color: colors.parent },
+    sourceRow: { alignItems: 'center', gap: 4, marginTop: space.sm },
+    source: { fontSize: 12, color: colors.textSoft, textAlign: 'center' },
+    report: { fontSize: 13, color: colors.textSoft, padding: 4 },
+  }),
+);
