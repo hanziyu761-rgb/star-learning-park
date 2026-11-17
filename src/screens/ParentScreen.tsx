@@ -12,6 +12,7 @@ import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { MemberCard } from '@/member/MemberCard';
 import { WeeklyCard } from './ParentWeekly';
+import { ChildrenCard } from './ProfileUI';
 import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
 import { AiCard, AiReportCard, AppearanceCard, EyeCareCard, GradeCard, HiddenCard } from './ParentSettings';
@@ -301,6 +302,7 @@ function SettingsPage() {
   const [confirmReset, setConfirmReset] = useState(false);
   return (
     <View style={{ gap: space.lg }} testID="parent-settings">
+      <ChildrenCard />
       <GradeCard />
       <EyeCareCard />
       <AppearanceCard />

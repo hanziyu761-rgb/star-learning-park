@@ -9,6 +9,7 @@ import { ParentGate } from '@/components/ParentGate';
 import { PinyinText } from '@/components/PinyinText';
 import { Pressable } from '@/components/Tappable';
 import { zh } from '@/content/zh';
+import { keyFor } from '@/progress/profiles';
 import { useProgress } from '@/progress/ProgressContext';
 import { colors, font, radius, space, themed } from '@/theme';
 import {
@@ -26,7 +27,9 @@ import {
 const TICK_MS = 5000;
 
 export function ScreenTimeGate() {
-  const { status: loadStatus, state } = useProgress();
+  const { status: loadStatus, state, profiles } = useProgress();
+  // 每个孩子单独计时（V5.4 多个孩子）
+  const storeKey = keyFor(SCREEN_STORAGE_KEY, profiles.active);
   const limits = { dailyMinutes: state.settings.dailyMinutes ?? 0, breakMinutes: state.settings.breakMinutes ?? 20 };
   const limitsRef = useRef(limits);
   useEffect(() => {
@@ -36,15 +39,19 @@ export function ScreenTimeGate() {
   const stRef = useRef<ScreenTime | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
-  const save = useCallback((s: ScreenTime) => {
-    stRef.current = s;
-    setSt(s);
-    AsyncStorage.setItem(SCREEN_STORAGE_KEY, JSON.stringify(s)).catch(() => undefined);
-  }, []);
+  const save = useCallback(
+    (s: ScreenTime) => {
+      stRef.current = s;
+      setSt(s);
+      AsyncStorage.setItem(storeKey, JSON.stringify(s)).catch(() => undefined);
+    },
+    [storeKey],
+  );
 
   useEffect(() => {
     let cancelled = false;
-    AsyncStorage.getItem(SCREEN_STORAGE_KEY)
+    stRef.current = null;
+    AsyncStorage.getItem(storeKey)
       .catch(() => null)
       .then((raw) => {
         if (!cancelled) save(parseScreenTime(raw, Date.now()));
@@ -52,7 +59,7 @@ export function ScreenTimeGate() {
     return () => {
       cancelled = true;
     };
-  }, [save]);
+  }, [save, storeKey]);
 
   useEffect(() => {
     const t = setInterval(() => {

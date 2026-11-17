@@ -1,4 +1,5 @@
 import { StreakCard } from './StreakCard';
+import { ProfileSwitcher } from './ProfileUI';
 import React, { useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Pressable } from '@/components/Tappable';
@@ -110,6 +111,8 @@ export default function HomeScreen() {
 
   return (
     <Screen testID="home">
+      {/* 一台手机多个孩子（V5.4）：两个及以上孩子时显示头像，点一下切换 */}
+      <ProfileSwitcher />
       {/* 顶部：吉祥物、问候、星星；点问候语或小喇叭都会读出来 */}
       <View style={styles.top}>
         <Mascot size={narrow ? 60 : 72} />

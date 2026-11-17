@@ -2,7 +2,18 @@ import { AI_VOICE, aiHealth, aiTts, DEFAULT_AI_BASE_URL } from '@/ai/client';
 import { setCloudVoice, setVoicePrefs } from '@/speech/speech';
 import React, { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createEmptyProgress, progressReducer, type ProgressAction, type ProgressState } from './model';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loadProgress, saveProgress } from './storage';
+import {
+  addProfile as addP,
+  defaultIndex,
+  loadProfiles,
+  progressKeyOf,
+  removeProfile as removeP,
+  renameProfile as renameP,
+  saveProfiles,
+  type ProfileIndex,
+} from './profiles';
 import { setPinyinOff } from '@/components/pinyinMode';
 import { pinyinHidden } from './grade';
 import { useColorScheme } from 'react-native';
@@ -20,6 +31,14 @@ interface ProgressContextValue {
   dispatch: (action: ProgressAction) => void;
   /** 当前配色（V5.0） */
   scheme: Scheme;
+  /** 一台手机多个孩子（V5.4） */
+  profiles: ProfileIndex;
+  switchProfile: (id: string) => Promise<void>;
+  /** 新加一个孩子（复制当前孩子的设置，年级用给定的），并切换过去；满了返回 null */
+  addProfile: (name: string, emoji: string, grade: number) => Promise<string | null>;
+  renameProfile: (id: string, name: string, emoji?: string) => void;
+  /** 删除孩子和他的学习记录（第一个孩子不能删） */
+  removeProfile: (id: string) => Promise<void>;
 }
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
@@ -30,20 +49,88 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   const [loadProblem, setLoadProblem] = useState<'corrupt' | 'read-failed' | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
   const loaded = useRef(false);
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+  const [profiles, setProfiles] = useState<ProfileIndex>(defaultIndex);
+  const profilesRef = useRef<ProfileIndex>(defaultIndex());
+  /** 当前孩子的存储键：保存时用它 */
+  const keyRef = useRef(progressKeyOf(defaultIndex().active));
+
+  const loadFor = useCallback(async (idx: ProfileIndex) => {
+    loaded.current = false;
+    setStatus('loading');
+    const key = progressKeyOf(idx.active);
+    const res = await loadProgress(key);
+    keyRef.current = key;
+    profilesRef.current = idx;
+    setProfiles(idx);
+    setState(res.state);
+    setLoadProblem(res.ok ? null : res.reason);
+    loaded.current = true;
+    setStatus('ready');
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
-    loadProgress().then((res) => {
-      if (cancelled) return;
-      setState(res.state);
-      setLoadProblem(res.ok ? null : res.reason);
-      loaded.current = true;
-      setStatus('ready');
+    loadProfiles().then((idx) => {
+      if (!cancelled) loadFor(idx);
     });
     return () => {
       cancelled = true;
     };
+  }, [loadFor]);
+
+  const switchProfile = useCallback(
+    async (id: string) => {
+      const idx = profilesRef.current;
+      if (id === idx.active || !idx.list.some((p) => p.id === id)) return;
+      const next = { ...idx, active: id };
+      await saveProfiles(next);
+      await loadFor(next);
+    },
+    [loadFor],
+  );
+
+  const addProfile = useCallback(
+    async (name: string, emoji: string, grade: number) => {
+      const r = addP(profilesRef.current, name, emoji, Date.now());
+      if (!r) return null;
+      // 新孩子：设置沿用当前孩子的（声音、外观、AI 服务地址等），年级用家长选的
+      const fresh = createEmptyProgress();
+      fresh.settings = { ...stateRef.current.settings, grade };
+      await saveProgress(fresh, progressKeyOf(r.id));
+      const next = { ...r.idx, active: r.id };
+      await saveProfiles(next);
+      await loadFor(next);
+      return r.id;
+    },
+    [loadFor],
+  );
+
+  const renameProfile = useCallback((id: string, name: string, emoji?: string) => {
+    const next = renameP(profilesRef.current, id, name, emoji);
+    profilesRef.current = next;
+    setProfiles(next);
+    saveProfiles(next);
   }, []);
+
+  const removeProfile = useCallback(
+    async (id: string) => {
+      const before = profilesRef.current;
+      const next = removeP(before, id);
+      if (next === before) return;
+      await saveProfiles(next);
+      await AsyncStorage.removeItem(progressKeyOf(id)).catch(() => undefined);
+      if (before.active === id) await loadFor(next);
+      else {
+        profilesRef.current = next;
+        setProfiles(next);
+      }
+    },
+    [loadFor],
+  );
 
   // 朗读声音跟着家长的设置走（V2.16）
   const s = state.settings;
@@ -73,7 +160,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => {
       const next = progressReducer(prev, action);
       if (next !== prev) {
-        saveProgress(next).then(
+        saveProgress(next, keyRef.current).then(
           () => setSaveFailed(false),
           () => setSaveFailed(true),
         );
@@ -89,8 +176,8 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   setScheme(scheme);
 
   const value = useMemo(
-    () => ({ status, state, loadProblem, saveFailed, dispatch, scheme }),
-    [status, state, loadProblem, saveFailed, dispatch, scheme],
+    () => ({ status, state, loadProblem, saveFailed, dispatch, scheme, profiles, switchProfile, addProfile, renameProfile, removeProfile }),
+    [status, state, loadProblem, saveFailed, dispatch, scheme, profiles, switchProfile, addProfile, renameProfile, removeProfile],
   );
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
