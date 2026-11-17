@@ -119,6 +119,10 @@ export interface Settings {
   appearance: Appearance;
   /** 拼音（V5.1）：auto = 小学标、初中不标；on = 一直标；off = 都不标 */
   pinyin: PinyinMode;
+  /** 护眼（V5.4）：每天最多学几分钟（0 = 不限，默认不限） */
+  dailyMinutes: number;
+  /** 护眼（V5.4）：连续学几分钟提醒休息 5 分钟（0 = 不提醒，默认 20） */
+  breakMinutes: number;
 }
 
 export type PinyinMode = 'auto' | 'on' | 'off';
@@ -270,6 +274,8 @@ export function createEmptyProgress(): ProgressState {
       textbookEdition: { chinese: '', math: '', english: '' },
       appearance: 'system',
       pinyin: 'auto',
+      dailyMinutes: 0,
+      breakMinutes: 20,
     },
     hidden: [],
     diagnoses: [],
@@ -599,6 +605,9 @@ function completeSession(
 /**
  * 把旧版本数据升级到当前版本。只增加字段，不删除任何已有记录。
  */
+/** 分钟数设置：0～600 的整数，否则用默认值 */
+const minutesOr = (v: unknown, d: number) => (typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 600 ? v : d);
+
 export function migrateProgress(data: ProgressState, now: number = Date.now()): ProgressState {
   const mistakes: Record<string, MistakeEntry> = {};
   for (const [k, m] of Object.entries(data.mistakes ?? {})) {
@@ -634,6 +643,9 @@ export function migrateProgress(data: ProgressState, now: number = Date.now()): 
       appearance: APPEARANCES.includes(data.settings?.appearance as Appearance) ? (data.settings!.appearance as Appearance) : 'system',
       // V5.1：旧记录没有拼音设置，按“自动”（和以前一样：小学标、初中不标）
       pinyin: PINYIN_MODES.includes(data.settings?.pinyin as PinyinMode) ? (data.settings!.pinyin as PinyinMode) : 'auto',
+      // V5.4：旧记录没有护眼设置：每天不限，连续 20 分钟提醒休息；不认识的值也按默认
+      dailyMinutes: minutesOr(data.settings?.dailyMinutes, 0),
+      breakMinutes: minutesOr(data.settings?.breakMinutes, 20),
     },
     hidden: Array.isArray(data.hidden) ? data.hidden : [],
     diagnoses: Array.isArray(data.diagnoses) ? data.diagnoses : [],

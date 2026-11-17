@@ -10,6 +10,7 @@ import { displayHtml, itemHtml, paperCss, visualHtml } from '@/exam/html';
 import type { ExerciseResolver } from '@/content/resolve';
 import type { DisplayText, Exercise, Subject } from '@/lesson/types';
 import type { MistakeEntry, ProgressState } from '@/progress/model';
+import { inGrade } from './grade';
 
 export const SUBJECT_CN: Record<Subject, string> = { math: '数学', chinese: '语文', english: '英语' };
 
@@ -26,10 +27,11 @@ export interface MistakeBook {
   mastered: BookEntry[];
 }
 
-export function mistakeBook(state: ProgressState, subject: Subject, resolve: ExerciseResolver): MistakeBook {
+/** grade：只看这个年级的错题（V5.4）；不传 = 全部 */
+export function mistakeBook(state: ProgressState, subject: Subject, resolve: ExerciseResolver, grade?: number): MistakeBook {
   const hidden = new Set(state.hidden);
   const all = Object.values(state.mistakes)
-    .filter((m) => m.subject === subject && !hidden.has(m.exerciseId))
+    .filter((m) => m.subject === subject && !hidden.has(m.exerciseId) && inGrade(m, grade))
     .sort((a, b) => b.lastWrongAt - a.lastWrongAt)
     .map((m): BookEntry => {
       const r = resolve(m.lessonId, m.exerciseId);
@@ -39,9 +41,9 @@ export function mistakeBook(state: ProgressState, subject: Subject, resolve: Exe
 }
 
 /** 每科错题数（还没掌握的） */
-export function openCount(state: ProgressState, subject: Subject): number {
+export function openCount(state: ProgressState, subject: Subject, grade?: number): number {
   const hidden = new Set(state.hidden);
-  return Object.values(state.mistakes).filter((m) => m.subject === subject && !m.resolved && !hidden.has(m.exerciseId)).length;
+  return Object.values(state.mistakes).filter((m) => m.subject === subject && !m.resolved && !hidden.has(m.exerciseId) && inGrade(m, grade)).length;
 }
 
 const plain = (t: DisplayText) => (typeof t === 'string' ? t : t.map((x) => x.char).join(''));

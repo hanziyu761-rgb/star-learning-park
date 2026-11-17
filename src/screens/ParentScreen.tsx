@@ -13,7 +13,7 @@ import { useNav } from '@/nav/Nav';
 import { MemberCard } from '@/member/MemberCard';
 import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
-import { AiCard, AiReportCard, AppearanceCard, GradeCard, HiddenCard } from './ParentSettings';
+import { AiCard, AiReportCard, AppearanceCard, EyeCareCard, GradeCard, HiddenCard } from './ParentSettings';
 import { KnowledgeCard } from './ParentKnowledge';
 import { ThinkingCard } from './ParentThinking';
 import { VoiceCheckCard } from './VoiceCheckCard';
@@ -300,6 +300,7 @@ function SettingsPage() {
   return (
     <View style={{ gap: space.lg }} testID="parent-settings">
       <GradeCard />
+      <EyeCareCard />
       <AppearanceCard />
       <VoiceCheckCard />
       <GameParentCard />

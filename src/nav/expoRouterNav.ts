@@ -15,7 +15,9 @@ function toHref(route: Route) {
     case 'parent':
       return '/parent' as const;
     case 'review':
-      return route.subject ? { pathname: '/review' as const, params: { subject: route.subject } } : ('/review' as const);
+      return route.subject
+        ? { pathname: '/review' as const, params: route.grade ? { subject: route.subject, grade: String(route.grade) } : { subject: route.subject } }
+        : ('/review' as const);
     case 'textbooks':
       return '/textbooks' as const;
     case 'mistakes':

@@ -21,7 +21,7 @@ import { useProgress } from '@/progress/ProgressContext';
 import { formatDateTime } from '@/progress/stats';
 import { clickTime } from '@/words/session';
 import { colors, radius, space, subjectTheme, themed } from '@/theme';
-import { contentGrade } from '@/progress/grade';
+import { contentGrade, GRADE_CN } from '@/progress/grade';
 
 const TITLE = {
   math: zh('数学错题本', 'shù xué cuò tí běn'),
@@ -41,11 +41,15 @@ export default function MistakesScreen({ subject }: { subject: Subject }) {
   const [withAnswers, setWithAnswers] = useState(true);
   const [printing, setPrinting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // V5.4：默认只看孩子现在这个年级的错题，可以切到“全部”
+  const [onlyGrade, setOnlyGrade] = useState(true);
   if (status === 'loading') return <LoadingView />;
   const theme = subjectTheme[subject] ?? subjectTheme.math;
-  const book = mistakeBook(state, subject, resolveExercise);
-  const list = tab === 'open' ? book.open : book.mastered;
   const grade = contentGrade(state.settings.grade);
+  const book = mistakeBook(state, subject, resolveExercise, onlyGrade ? grade : undefined);
+  const all = onlyGrade ? mistakeBook(state, subject, resolveExercise) : book;
+  const otherGrades = all.open.length + all.mastered.length > book.open.length + book.mastered.length || !onlyGrade;
+  const list = tab === 'open' ? book.open : book.mastered;
 
   const print = async () => {
     setError(null);
@@ -80,7 +84,7 @@ export default function MistakesScreen({ subject }: { subject: Subject }) {
 
       <View style={styles.actions}>
         <Pressable
-          onPress={() => nav.push({ name: 'review', subject })}
+          onPress={() => nav.push({ name: 'review', subject, grade: onlyGrade ? grade : undefined })}
           disabled={book.open.length === 0}
           style={[styles.action, { backgroundColor: theme.color }, book.open.length === 0 && styles.disabled]}
           accessibilityRole="button"
@@ -109,6 +113,25 @@ export default function MistakesScreen({ subject }: { subject: Subject }) {
             📷 拍照错题 {state.photoMistakes.filter((m) => m.subject === subject).length} 道 ›
           </Text>
         </Pressable>
+      ) : null}
+
+      {otherGrades ? (
+        <View style={styles.scopeRow} testID="mistakes-scope">
+          {[true, false].map((g) => (
+            <Pressable
+              key={String(g)}
+              onPress={() => setOnlyGrade(g)}
+              style={[styles.scope, onlyGrade === g && { backgroundColor: theme.color }]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: onlyGrade === g }}
+              testID={g ? 'mistakes-scope-grade' : 'mistakes-scope-all'}
+            >
+              <Text style={[styles.scopeText, onlyGrade === g && { color: colors.onAccent }]}>
+                {g ? `只看${GRADE_CN[grade]}年级` : `全部（${all.open.length + all.mastered.length}）`}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       ) : null}
 
       <View style={styles.tabs}>
@@ -180,6 +203,9 @@ const styles = themed(() => StyleSheet.create({
   actionText: { color: colors.onAccent, fontSize: 18, fontWeight: '700' },
   answerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
   tabs: { flexDirection: 'row', gap: space.sm, backgroundColor: colors.card, borderRadius: radius.round, padding: 4 },
+  scopeRow: { flexDirection: 'row', gap: space.sm },
+  scope: { paddingHorizontal: space.md, minHeight: 36, borderRadius: radius.round, backgroundColor: colors.card, justifyContent: 'center' },
+  scopeText: { fontSize: 14, fontWeight: '600', color: colors.text },
   tab: { flex: 1, borderRadius: radius.round, paddingVertical: 10, alignItems: 'center' },
   tabText: { fontSize: 15, fontWeight: '600', color: colors.text },
   empty: { alignItems: 'center', gap: space.sm, paddingVertical: space.xl },

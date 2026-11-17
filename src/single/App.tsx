@@ -8,6 +8,7 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MemberNavGate, MemberProvider } from '@/member/MemberContext';
+import { ScreenTimeGate } from '@/screentime/ScreenTimeGate';
 import { NavProvider, type Nav, type Route } from '@/nav/Nav';
 import { ProgressProvider, useProgress } from '@/progress/ProgressContext';
 import Animated, { SlideInLeft, SlideInRight } from 'react-native-reanimated';
@@ -43,7 +44,7 @@ function renderRoute(route: Route) {
     case 'parent':
       return <ParentScreen />;
     case 'review':
-      return <ReviewScreen subject={route.subject} />;
+      return <ReviewScreen subject={route.subject} grade={route.grade} />;
     case 'textbooks':
       return <TextbooksScreen />;
     case 'mistakes':
@@ -105,6 +106,7 @@ export default function SingleApp() {
                 <Page pageKey={top.key} dir={dir}>
                   {renderRoute(top.route)}
                 </Page>
+                <ScreenTimeGate />
                 <SplashGate />
               </MemberNavGate>
             </NavProvider>

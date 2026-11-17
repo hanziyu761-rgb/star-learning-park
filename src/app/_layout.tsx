@@ -7,6 +7,7 @@ import { OrientationGate } from '@/components/OrientationGate';
 import { SpeechNotice } from '@/components/SpeechNotice';
 import { SplashGate } from '@/components/SplashGate';
 import { MemberNavGate, MemberProvider } from '@/member/MemberContext';
+import { ScreenTimeGate } from '@/screentime/ScreenTimeGate';
 import { NavProvider } from '@/nav/Nav';
 import { expoRouterNav } from '@/nav/expoRouterNav';
 import { ProgressProvider, useProgress } from '@/progress/ProgressContext';
@@ -22,6 +23,8 @@ export default function RootLayout() {
             <NavProvider nav={expoRouterNav}>
               <MemberNavGate>
                 <AppStack />
+                {/* 护眼（V5.4）：该休息、今天用满时盖住页面 */}
+                <ScreenTimeGate />
                 <SplashGate />
               </MemberNavGate>
             </NavProvider>

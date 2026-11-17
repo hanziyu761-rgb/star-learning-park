@@ -134,12 +134,42 @@ describe('错题本页面', () => {
     expect(screen.getAllByTestId('mistake-entry')).toHaveLength(2);
     expect(screen.getByTestId('mistake-app-only')).toBeTruthy();
     fireEvent.press(screen.getByTestId('mistakes-redo'));
-    expect(push).toHaveBeenCalledWith({ name: 'review', subject: 'math' });
+    expect(push).toHaveBeenCalledWith({ name: 'review', subject: 'math', grade: 1 }); // V5.4：默认只重做本年级的错题
     await act(async () => {
       fireEvent.press(screen.getByTestId('mistakes-print'));
     });
     expect(globalThis.__lastPrintHtml).toContain('数学错题本');
     await fireEvent.press(screen.getByTestId('mistakes-tab-mastered'));
     await waitFor(() => expect(screen.getByTestId('mistakes-empty')).toBeTruthy());
+  });
+});
+
+describe('V5.4 错题本按年级', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { mistakeGrade } = require('@/mistakes/grade');
+  it('从题目来源判断年级：知识点、今日一练、课程、题库单元、口算、知识点 skill', () => {
+    expect(mistakeGrade({ lessonId: 'kp:m7.a2', exerciseId: 'kp:m7.a2:add:1:2', skill: 'm7.a2' })).toBe(7);
+    expect(mistakeGrade({ lessonId: 'mix:math:8:2026-11-16', exerciseId: 'kp:m8.b2:hyp:0:2', skill: 'm8.b2' })).toBe(8);
+    expect(mistakeGrade({ lessonId: 'bank:math-g3a-u2', exerciseId: 'q12', skill: 'x' })).toBe(3);
+    expect(mistakeGrade({ lessonId: 'game:fish', exerciseId: 'fish:1', skill: 'c2.a1' })).toBe(2);
+    expect(mistakeGrade({ lessonId: 'game:fish', exerciseId: 'fish:1', skill: '不知道' })).toBeNull();
+  });
+});
+
+describe('V5.4 只看本年级：错题本、错题数、重做错题都按年级筛', () => {
+  it('七年级孩子：小学的旧错题只在“全部”里', () => {
+    let s = createEmptyProgress();
+    const bad = (lessonId: string, exerciseId: string, skill: string) => {
+      s = progressReducer(s, { type: 'exercise/result', lessonId, exerciseId, subject: 'math', skill, firstTryCorrect: false, attempts: 2, now: 1000 });
+    };
+    bad('kp:m7.a2', 'kp:m7.a2:add:-8:-6', 'm7.a2');
+    bad('kp:m3.mul2d', 'kp:m3.mul2d:12×13', 'm3.mul2d');
+    const g7 = mistakeBook(s, 'math', resolveExercise, 7);
+    const all = mistakeBook(s, 'math', resolveExercise);
+    expect(g7.open.map((e) => e.mistake.exerciseId)).toEqual(['kp:m7.a2:add:-8:-6']);
+    expect(all.open).toHaveLength(2);
+    expect(openCount(s, 'math', 7)).toBe(1);
+    expect(openCount(s, 'math')).toBe(2);
+    expect(mistakeQueue(s, resolveExercise, 'math', 10, 7).map((i) => i.mistake.exerciseId)).toEqual(['kp:m7.a2:add:-8:-6']);
   });
 });

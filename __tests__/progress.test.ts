@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createEmptyProgress,
   MAX_SESSION_SEC,
+  parseProgress,
   progressReducer,
   starsForAccuracy,
   type ProgressAction,
@@ -179,5 +180,20 @@ describe('本地存储（模拟关闭后重新打开 APP）', () => {
     if (!res.ok) expect(res.reason).toBe('corrupt');
     expect(res.state).toEqual(createEmptyProgress());
     expect(await AsyncStorage.getItem(CORRUPT_BACKUP_KEY)).toBe('{not json');
+  });
+});
+
+describe('V5.4 护眼设置迁移', () => {
+  it('旧记录没有护眼设置：每天不限、连续 20 分钟提醒休息；乱写的值也用默认；正常值保留', () => {
+    const old = { ...createEmptyProgress() } as Record<string, unknown>;
+    const settings = { ...(old.settings as object) } as Record<string, unknown>;
+    delete settings.dailyMinutes;
+    delete settings.breakMinutes;
+    const a = parseProgress(JSON.stringify({ ...old, settings }))!;
+    expect([a.settings.dailyMinutes, a.settings.breakMinutes]).toEqual([0, 20]);
+    const b = parseProgress(JSON.stringify({ ...old, settings: { ...settings, dailyMinutes: '很多', breakMinutes: -3 } }))!;
+    expect([b.settings.dailyMinutes, b.settings.breakMinutes]).toEqual([0, 20]);
+    const c = parseProgress(JSON.stringify({ ...old, settings: { ...settings, dailyMinutes: 40, breakMinutes: 0 } }))!;
+    expect([c.settings.dailyMinutes, c.settings.breakMinutes]).toEqual([40, 0]);
   });
 });

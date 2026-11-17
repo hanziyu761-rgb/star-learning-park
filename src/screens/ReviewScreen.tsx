@@ -23,20 +23,20 @@ import { useProgress } from '@/progress/ProgressContext';
 import { prefetchSpeech, speak, speakablesOf, stopSpeaking } from '@/speech/speech';
 import { colors, radius, space, subjectTheme, themed } from '@/theme';
 
-export default function ReviewScreen({ subject }: { subject?: Subject } = {}) {
+export default function ReviewScreen({ subject, grade }: { subject?: Subject; grade?: number } = {}) {
   const { status } = useProgress();
   if (status === 'loading') return <LoadingView />;
-  return <ReviewSession subject={subject} />;
+  return <ReviewSession subject={subject} grade={grade} />;
 }
 
 /** subject：从错题本进来时只重做这一科还没掌握的错题（V2.21）；不传 = 今日复习（到期的错题） */
-function ReviewSession({ subject }: { subject?: Subject }) {
+function ReviewSession({ subject, grade }: { subject?: Subject; grade?: number }) {
   const nav = useNav();
   const insets = useSafeAreaInsets();
   const { state, dispatch } = useProgress();
   // 进入页面时确定本轮题目，作答过程中不再变化
   const [queue] = useState<ReviewItem[]>(() =>
-    subject ? mistakeQueue(state, resolveExercise, subject) : reviewQueue(state, resolveExercise, Date.now()),
+    subject ? mistakeQueue(state, resolveExercise, subject, 10, grade) : reviewQueue(state, resolveExercise, Date.now()),
   );
   const title = subject ? zh('重做错题', 'chóng zuò cuò tí') : zh('今日复习', 'jīn rì fù xí');
   const [index, setIndex] = useState(0);

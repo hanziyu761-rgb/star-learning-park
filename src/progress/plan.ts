@@ -9,6 +9,7 @@
 import type { Exercise, Lesson, Subject } from '@/lesson/types';
 import type { MistakeEntry, ProgressState } from './model';
 import { dueMistakes, weakSkills } from './stats';
+import { inGrade } from '@/mistakes/grade';
 
 export interface ReviewItem {
   mistake: MistakeEntry;
@@ -41,11 +42,11 @@ export function reviewQueue(state: ProgressState, resolve: ExerciseResolver, now
 }
 
 /** 错题本“重做错题”（V2.21）：这一科还没掌握的错题（不管有没有到复习日），最近答错的在前 */
-export function mistakeQueue(state: ProgressState, resolve: ExerciseResolver, subject: Subject, limit = 10): ReviewItem[] {
+export function mistakeQueue(state: ProgressState, resolve: ExerciseResolver, subject: Subject, limit = 10, grade?: number): ReviewItem[] {
   const hidden = new Set(state.hidden);
   const items: ReviewItem[] = [];
   const list = Object.values(state.mistakes)
-    .filter((m) => m.subject === subject && !m.resolved && !hidden.has(m.exerciseId))
+    .filter((m) => m.subject === subject && !m.resolved && !hidden.has(m.exerciseId) && inGrade(m, grade))
     .sort((a, b) => b.lastWrongAt - a.lastWrongAt);
   for (const m of list) {
     const found = resolve(m.lessonId, m.exerciseId);

@@ -12,7 +12,7 @@ export type Route =
   | { name: 'lesson'; id: string; resume?: boolean }
   | { name: 'parent' }
   /** 今日复习；带 subject = 错题本里重做这一科的错题（V2.21） */
-  | { name: 'review'; subject?: Subject }
+  | { name: 'review'; subject?: Subject; grade?: number }
   /** 错题本（V2.21） */
   | { name: 'mistakes'; subject: Subject }
   /** 家长中心 · 教材资源库（V4.0） */

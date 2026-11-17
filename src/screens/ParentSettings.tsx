@@ -1,6 +1,7 @@
 /**
  * 家长中心：孩子年级、AI 老师开关与连接测试、AI 学习分析、题库屏蔽管理。
  */
+import { BREAK_CHOICES, DAILY_CHOICES } from '@/screentime/model';
 import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { Pressable } from '@/components/Tappable';
@@ -40,6 +41,43 @@ export function GradeCard() {
           {`初中：${pinyinHidden(state.settings) ? '不标拼音' : '标拼音（家长打开了拼音）'}。初中的知识点练习、题库、每日挑战、口算、阅读、单词卡、试卷按七～九年级出题（原创，已通过教师审核）。`}
         </Text>
       ) : null}
+    </Card>
+  );
+}
+
+/** 护眼与学习时长（V5.4）：每天最多学几分钟、连续学几分钟休息 5 分钟 */
+export function EyeCareCard() {
+  const { state, dispatch } = useProgress();
+  const row = (label: string, key: 'dailyMinutes' | 'breakMinutes', choices: number[], none: string) => (
+    <>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.chips}>
+        {choices.map((m) => {
+          const on = state.settings[key] === m;
+          return (
+            <Pressable
+              key={m}
+              onPress={() => dispatch({ type: 'settings/set', settings: { [key]: m } })}
+              style={[styles.chip, on && styles.chipOn]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              testID={`${key}-${m}`}
+            >
+              <Text style={[styles.chipText, on && { color: colors.onAccent }]}>{m ? `${m} 分钟` : none}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </>
+  );
+  return (
+    <Card>
+      <SectionTitle>👀 护眼与学习时长</SectionTitle>
+      {row('每天最多学', 'dailyMinutes', DAILY_CHOICES, '不限')}
+      {row('连续学多久休息 5 分钟', 'breakMinutes', BREAK_CHOICES, '不提醒')}
+      <Text style={styles.small}>
+        只在打开 APP 时计时，离开 APP 超过 5 分钟算休息过了。到时间会出现休息画面，家长做一道乘法题后可以跳过休息、再学 15 分钟或今天不限。
+      </Text>
     </Card>
   );
 }

@@ -51,7 +51,8 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
   // 英语启蒙课按三条主线单独展示
   const lessons = lessonsFor(subject).filter((l) => !l.track);
   const junior = contentGrade(state.settings.grade) >= 7;
-  const wrong = openCount(state, subject);
+  // 角标只数现在这个年级的错题（V5.4，错题本默认也只看本年级）
+  const wrong = openCount(state, subject, contentGrade(state.settings.grade));
   const next = nextUp(state, subject, now);
 
   return (
