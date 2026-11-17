@@ -14,6 +14,7 @@ import { Header, LoadingView } from '@/components/Screen';
 import { BigButton, Stars } from '@/components/ui';
 import type { ExerciseOutcome } from '@/exercises/common';
 import { ExerciseView } from '@/exercises/ExerciseView';
+import { StepsPanel } from '@/exercises/StepsPanel';
 import { AskTeacher } from '@/ai/AskTeacher';
 import { langForSubject, type FeedbackMessage } from '@/lesson/feedback';
 import type { Subject } from '@/lesson/types';
@@ -141,6 +142,10 @@ function ReviewSession({ subject, grade }: { subject?: Subject; grade?: number }
           onFeedback={setFeedback}
           onSolved={onSolved}
         />
+        {/* 应用题分步讲解（V5.4） */}
+        {'steps' in item.exercise && item.exercise.steps?.length && (done || feedback?.kind === 'wrong') ? (
+          <StepsPanel key={`steps-${item.mistake.key}`} steps={item.exercise.steps} color={theme.color} />
+        ) : null}
         <AskTeacher key={`ai-${item.mistake.key}`} exercise={item.exercise} subject={item.subject} solved={done} />
       </ScrollView>
       <View style={[styles.bottom, { paddingBottom: insets.bottom + space.md }]}>

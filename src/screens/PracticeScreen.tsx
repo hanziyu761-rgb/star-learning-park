@@ -26,6 +26,7 @@ import { BigButton, Stars } from '@/components/ui';
 import { AskTeacher } from '@/ai/AskTeacher';
 import type { ExerciseOutcome } from '@/exercises/common';
 import { ExerciseView } from '@/exercises/ExerciseView';
+import { StepsPanel } from '@/exercises/StepsPanel';
 import { GRAPHICS_GENERATORS } from '@/knowledge/graphics';
 import { getKp } from '@/knowledge/graph';
 import { kpForRecord } from '@/knowledge/mapping';
@@ -355,6 +356,10 @@ function PracticeSession({ id }: { id: string }) {
                 style={styles.quizNote}
                 testID="quiz-intro"
               >{`单元小测：${total} 道题，建议 ${QUIZ_MINUTES} 分钟内做完；只算第一次作答（答错了可以改，但不算分），不能问星星宝。`}</Text>
+            ) : null}
+            {/* 应用题分步讲解（V5.4）：做错一次或做完后出现；小测时做完才出现 */}
+            {'steps' in ex && ex.steps?.length && (done || (!quiz && feedback?.kind === 'wrong')) ? (
+              <StepsPanel key={`steps-${index}`} steps={ex.steps} color={theme.color} />
             ) : null}
             {askKp && done ? <StrategyAsk key={`st-${index}`} kp={askKp} lessonId={id} exerciseId={ex.id} /> : null}
             {/* 小测时不能问星星宝 */}

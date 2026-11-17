@@ -120,6 +120,9 @@ export function opts(ans: string, wrongs: (string | number)[]): ChoiceExercise['
   // 显示时负号用 −（选项 id 保持普通减号）
   return set.map((t) => ({ id: t, text: t.replace(/^-/, M), speak: say(sayMath(t)) }));
 }
+/** 分步讲解（V5.4）：每一步都用这道题自己的数算出来 */
+const withSteps = (b: Built, steps: string[]): Built => ({ ...b, steps });
+
 function Q(prompt: string, stem: string | undefined, ans: string | number, wrongs: (string | number)[], explanation?: string): Built {
   const a = String(ans);
   return {
@@ -334,7 +337,10 @@ const m7a5 = mix({
     make: (rand) => sig('word', r(rand, 2, 5), r(rand, 3, 20), r(rand, 2, 12)),
     build: (s) => {
       const [k, x, b] = nums(s);
-      return Q(`一个数的 ${k} 倍再加 ${b} 等于 ${k * x + b}，这个数是多少？`, undefined, x, [(k * x + b + b) / k, k * x, x + b], `设这个数为 x，列方程 ${k}x + ${b} = ${k * x + b}。`);
+      return withSteps(
+        Q(`一个数的 ${k} 倍再加 ${b} 等于 ${k * x + b}，这个数是多少？`, undefined, x, [(k * x + b + b) / k, k * x, x + b], `设这个数为 x，列方程 ${k}x + ${b} = ${k * x + b}。`),
+        [`设这个数为 x，“${k} 倍再加 ${b}”就是 ${k}x + ${b}。`, `列方程：${k}x + ${b} = ${k * x + b}。`, `移项：${k}x = ${k * x + b} − ${b} = ${k * x}。`, `系数化为 1：x = ${k * x} ÷ ${k} = ${x}。`],
+      );
     },
   },
 });
@@ -470,9 +476,17 @@ const m7b4 = mix({
       const x = (sm + df) / 2;
       const y = (sm - df) / 2;
       const stem = `{ x + y = ${lead(sm)}，x ${M} y = ${lead(df)} }`;
-      return askY
-        ? Q('解方程组，y 等于多少？', stem, y, [x, -y, sm - y], '两个方程相减，消去 x：2y = 两式右边相减。')
-        : Q('解方程组，x 等于多少？', stem, x, [y, -x, sm + df], '两个方程相加，消去 y：2x = 两式右边相加。');
+      const steps = [
+        `两个方程相加，消去 y：2x = ${lead(sm)} + ${df < 0 ? `(${lead(df)})` : df} = ${lead(sm + df)}，所以 x = ${lead(x)}。`,
+        `把 x = ${lead(x)} 代入 x + y = ${lead(sm)}：y = ${lead(sm)} ${M} ${x < 0 ? `(${lead(x)})` : x} = ${lead(y)}。`,
+        `检查：x ${M} y = ${lead(x)} ${M} ${y < 0 ? `(${lead(y)})` : y} = ${lead(df)}，对了。`,
+      ];
+      return withSteps(
+        askY
+          ? Q('解方程组，y 等于多少？', stem, y, [x, -y, sm - y], '两个方程相减，消去 x：2y = 两式右边相减。')
+          : Q('解方程组，x 等于多少？', stem, x, [y, -x, sm + df], '两个方程相加，消去 y：2x = 两式右边相加。'),
+        steps,
+      );
     },
   },
   gen: {
@@ -1228,7 +1242,10 @@ const m9b4 = mix({
       const [p, q, m] = nums(s);
       const ans = p * m;
       const wrongs = [...new Set([q * m, ans + p, ans - p, ans + 1].map(String))].filter((x) => x !== String(ans) && Number(x) > 0).slice(0, 3);
-      return Q(`同一时刻，太阳光下一根高 ${p} 米的竹竿影长 ${q} 米，旁边一棵树的影长是 ${q * m} 米。这棵树高多少米？`, undefined, String(ans), wrongs, `同一时刻物高与影长成正比：树高 = ${q * m} × ${p} ÷ ${q} = ${ans}（米）。`);
+      return withSteps(
+        Q(`同一时刻，太阳光下一根高 ${p} 米的竹竿影长 ${q} 米，旁边一棵树的影长是 ${q * m} 米。这棵树高多少米？`, undefined, String(ans), wrongs, `同一时刻物高与影长成正比：树高 = ${q * m} × ${p} ÷ ${q} = ${ans}（米）。`),
+        ['同一时刻太阳光是平行光，物体的高和影长成正比：物高 ÷ 影长 相等。', `设树高 x 米，列比例：${p} ÷ ${q} = x ÷ ${q * m}。`, `x = ${q * m} × ${p} ÷ ${q} = ${ans}（米）。`],
+      );
     },
   },
 });

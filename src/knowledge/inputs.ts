@@ -29,5 +29,6 @@ export function asInput(e: Exercise, id: string = `${e.id}:in`): InputExercise |
     ...(SIGNED_SKILL.test(e.skill) ? { signed: true } : {}),
     wrongHint: e.wrongHint,
     explanation: e.explanation,
+    ...(e.steps ? { steps: e.steps } : {}),
   };
 }

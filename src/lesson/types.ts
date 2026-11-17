@@ -81,6 +81,8 @@ export interface ChoiceOption {
 export interface ChoiceExercise {
   /** 答对后显示的讲解（可选） */
   explanation?: string;
+  /** 分步讲解（V5.4，应用题）：做错或做完后可以一步一步看 */
+  steps?: string[];
   kind: 'choice';
   id: string;
   skill: string;
@@ -231,6 +233,8 @@ export interface PatternToken {
 /** 自己作答：用数字键盘填答案（V2.9）。answer 例：12、3.5、3/4、7……2 */
 export interface InputExercise {
   explanation?: string;
+  /** 分步讲解（V5.4，应用题） */
+  steps?: string[];
   kind: 'input';
   id: string;
   skill: string;

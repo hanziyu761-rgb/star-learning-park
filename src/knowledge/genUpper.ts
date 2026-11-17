@@ -68,6 +68,9 @@ function q(text: string, ans: string, wrongs: (string | number)[], stem?: string
     answerId: ans,
   };
 }
+/** 应用题的分步讲解（V5.4）：每一步都用这道题自己的数算出来 */
+const withSteps = (b: ReturnType<UpperGen['build']>, steps: string[]): ReturnType<UpperGen['build']> => ({ ...b, steps });
+
 /** 二年级：带拼音的题目（拼音只对应汉字，数字和符号不注音） */
 function qz(
   chars: string,
@@ -270,11 +273,16 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       const start = Number(a) * 60 + Number(b);
       const end = start + Number(c);
       const tt = (x: number) => `${Math.floor(x / 60)}:${String(x % 60).padStart(2, '0')}`;
-      return q(`从 ${tt(start)} 到 ${tt(end)}，经过了几分钟？`, String(Number(c)), [
-        Number(c) + 40,
-        Number(c) + 10,
-        60 - Number(c),
-      ]);
+      return withSteps(
+        q(`从 ${tt(start)} 到 ${tt(end)}，经过了几分钟？`, String(Number(c)), [Number(c) + 40, Number(c) + 10, 60 - Number(c)]),
+        [
+          `把时刻都换成“几时几分”：开始 ${tt(start)}，结束 ${tt(end)}。`,
+          Math.floor(start / 60) === Math.floor(end / 60)
+            ? `同一个小时里，直接用分相减：${end % 60} − ${start % 60} = ${Number(c)}（分钟）。`
+            : `先算到整点：${tt(start)} 到 ${Math.floor(end / 60)}:00 是 ${60 - (start % 60)} 分钟；再加上 ${tt(end)} 多出的 ${end % 60} 分钟：${60 - (start % 60)} + ${end % 60} = ${Number(c)}（分钟）。`,
+          `答：经过了 ${Number(c)} 分钟。`,
+        ],
+      );
     },
   },
   'm3.addsub1': {
@@ -335,7 +343,11 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       const x = Number(a);
       const k = Number(b);
       if (t === 'how')
-        return q(`🔵 有 ${x} 个，🔴 有 ${x * k} 个。🔴 的个数是 🔵 的几倍？`, String(k), [x * k - x, x * k + x, k + 1]);
+        return withSteps(q(`🔵 有 ${x} 个，🔴 有 ${x * k} 个。🔴 的个数是 🔵 的几倍？`, String(k), [x * k - x, x * k + x, k + 1]), [
+          `求“🔴 是 🔵 的几倍”，就是看 ${x * k} 里面有几个 ${x}，用除法。`,
+          `${x * k} ÷ ${x} = ${k}。`,
+          `答：🔴 的个数是 🔵 的 ${k} 倍。`,
+        ]);
       return q(`${x} 的 ${k} 倍是多少？`, String(x * k), [x + k, x * k + x, x * (k - 1)]);
     },
   },
@@ -354,10 +366,19 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       if (t === 'rect') {
         const l = Math.max(Number(a), Number(b) + 1);
         const w = Number(b);
-        return q(`长方形长 ${l} 厘米、宽 ${w} 厘米，周长是多少厘米？`, String((l + w) * 2), [l + w, l * w, l * 2 + w]);
+        return withSteps(q(`长方形长 ${l} 厘米、宽 ${w} 厘米，周长是多少厘米？`, String((l + w) * 2), [l + w, l * w, l * 2 + w]), [
+          '长方形的周长 =（长 + 宽）× 2。',
+          `先算一条长加一条宽：${l} + ${w} = ${l + w}（厘米）。`,
+          `再乘 2：${l + w} × 2 = ${(l + w) * 2}（厘米）。`,
+          `答：周长是 ${(l + w) * 2} 厘米。`,
+        ]);
       }
       const s = Number(a);
-      return q(`正方形边长 ${s} 厘米，周长是多少厘米？`, String(s * 4), [s * 2, s * s, s + 4]);
+      return withSteps(q(`正方形边长 ${s} 厘米，周长是多少厘米？`, String(s * 4), [s * 2, s * s, s + 4]), [
+        '正方形的 4 条边一样长，周长 = 边长 × 4。',
+        `${s} × 4 = ${s * 4}（厘米）。`,
+        `答：周长是 ${s * 4} 厘米。`,
+      ]);
     },
   },
   'm3.fraction1': {
@@ -446,9 +467,18 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       if (t === 'rect') {
         const l = Math.max(x, Number(b) + 1);
         const w = Number(b);
-        return q(`长方形长 ${l} 米、宽 ${w} 米，面积是多少平方米？`, String(l * w), [(l + w) * 2, l + w, l * w + l]);
+        return withSteps(q(`长方形长 ${l} 米、宽 ${w} 米，面积是多少平方米？`, String(l * w), [(l + w) * 2, l + w, l * w + l]), [
+          '长方形的面积 = 长 × 宽（注意不是周长）。',
+          `${l} × ${w} = ${l * w}（平方米）。`,
+          `答：面积是 ${l * w} 平方米。`,
+        ]);
       }
-      if (t === 'sq') return q(`正方形边长 ${x} 分米，面积是多少平方分米？`, String(x * x), [x * 4, x * 2, x * x + x]);
+      if (t === 'sq')
+        return withSteps(q(`正方形边长 ${x} 分米，面积是多少平方分米？`, String(x * x), [x * 4, x * 2, x * x + x]), [
+          '正方形的面积 = 边长 × 边长。',
+          `${x} × ${x} = ${x * x}（平方分米）。`,
+          `答：面积是 ${x * x} 平方分米。`,
+        ]);
       if (t === 'm2dm') return q(`${x}平方米 = ( )平方分米`, String(x * 100), [x * 10, x * 1000, x]);
       return q(`${x * 100}平方厘米 = ( )平方分米`, String(x), [x * 10, x * 100, x * 1000]);
     },
@@ -652,16 +682,14 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       const [t, x, y] = parts(sig);
       const [a, b] = [Number(x), Number(y)];
       if (t === 'third')
-        return q(`三角形的两个角分别是 ${a}° 和 ${b}°，第三个角是多少度？`, `${180 - a - b}°`, [
-          `${360 - a - b}°`,
-          `${90 - Math.min(a, b)}°`,
-          `${180 - a - b + 10}°`,
-        ]);
-      return q(`等腰三角形的顶角是 ${a}°，一个底角是多少度？`, `${(180 - a) / 2}°`, [
-        `${180 - a}°`,
-        `${a / 2}°`,
-        `${(180 - a) / 2 + 10}°`,
-      ]);
+        return withSteps(
+          q(`三角形的两个角分别是 ${a}° 和 ${b}°，第三个角是多少度？`, `${180 - a - b}°`, [`${360 - a - b}°`, `${90 - Math.min(a, b)}°`, `${180 - a - b + 10}°`]),
+          ['三角形的三个内角加起来是 180°。', `已知两个角一共：${a}° + ${b}° = ${a + b}°。`, `第三个角：180° − ${a + b}° = ${180 - a - b}°。`],
+        );
+      return withSteps(
+        q(`等腰三角形的顶角是 ${a}°，一个底角是多少度？`, `${(180 - a) / 2}°`, [`${180 - a}°`, `${a / 2}°`, `${(180 - a) / 2 + 10}°`]),
+        ['三角形内角和是 180°，等腰三角形的两个底角相等。', `两个底角一共：180° − ${a}° = ${180 - a}°。`, `一个底角：${180 - a}° ÷ 2 = ${(180 - a) / 2}°。`],
+      );
     },
   },
   'm4.decaddsub': {
@@ -709,10 +737,11 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
     build: (sig) => {
       const [h, l] = nums(sig);
       const rabbit = (l - 2 * h) / 2;
-      return q(`笼子里有鸡和兔共 ${h} 只，脚共 ${l} 只。兔有几只？`, String(rabbit), [
-        h - rabbit,
-        (4 * h - l) / 2 + 1,
-        rabbit + 2,
+      return withSteps(q(`笼子里有鸡和兔共 ${h} 只，脚共 ${l} 只。兔有几只？`, String(rabbit), [h - rabbit, (4 * h - l) / 2 + 1, rabbit + 2]), [
+        `假设 ${h} 只全是鸡，应该有 ${h} × 2 = ${2 * h} 只脚。`,
+        `实际有 ${l} 只脚，少算了 ${l} − ${2 * h} = ${l - 2 * h} 只脚。`,
+        `每把 1 只鸡换成 1 只兔，脚多 4 − 2 = 2 只，所以兔有 ${l - 2 * h} ÷ 2 = ${rabbit}（只）。`,
+        `检查：鸡有 ${h - rabbit} 只，${h - rabbit} × 2 + ${rabbit} × 4 = ${l}（只脚），对了。`,
       ]);
     },
   },
@@ -787,16 +816,15 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
           [(a * b) / 2, (a + b) * 2, a * b + a].filter(Number.isInteger),
         );
       if (t === 'tri')
-        return q(`三角形的底是 ${a} 厘米，高是 ${b} 厘米，面积是多少平方厘米？`, String((a * b) / 2), [
-          a * b,
-          a + b,
-          (a * b) / 2 + b,
+        return withSteps(q(`三角形的底是 ${a} 厘米，高是 ${b} 厘米，面积是多少平方厘米？`, String((a * b) / 2), [a * b, a + b, (a * b) / 2 + b]), [
+          '三角形的面积 = 底 × 高 ÷ 2（两个一样的三角形能拼成一个平行四边形）。',
+          `底 × 高：${a} × ${b} = ${a * b}。`,
+          `再除以 2：${a * b} ÷ 2 = ${(a * b) / 2}（平方厘米）。`,
         ]);
-      return q(`梯形的上底是 ${a} 米，下底是 ${b} 米，高是 ${h} 米，面积是多少平方米？`, String(((a + b) * h) / 2), [
-        (a + b) * h,
-        a * b * h,
-        ((a + b) * h) / 2 + h,
-      ]);
+      return withSteps(
+        q(`梯形的上底是 ${a} 米，下底是 ${b} 米，高是 ${h} 米，面积是多少平方米？`, String(((a + b) * h) / 2), [(a + b) * h, a * b * h, ((a + b) * h) / 2 + h]),
+        ['梯形的面积 =（上底 + 下底）× 高 ÷ 2。', `上底 + 下底：${a} + ${b} = ${a + b}。`, `乘高：${a + b} × ${h} = ${(a + b) * h}。`, `再除以 2：${(a + b) * h} ÷ 2 = ${((a + b) * h) / 2}（平方米）。`],
+      );
     },
   },
   'm5.trees': {
@@ -808,18 +836,22 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       const [t, len, d] = nums(sig);
       const n = len / d;
       if (t === 0)
-        return q(`一条小路长 ${len} 米，每隔 ${d} 米种一棵树，两端都种，一共种几棵？`, String(n + 1), [
-          n,
-          n - 1,
-          n + 2,
+        return withSteps(q(`一条小路长 ${len} 米，每隔 ${d} 米种一棵树，两端都种，一共种几棵？`, String(n + 1), [n, n - 1, n + 2]), [
+          `先算这条路被分成几段：${len} ÷ ${d} = ${n}（段）。`,
+          '两端都种：棵数 = 段数 + 1。',
+          `${n} + 1 = ${n + 1}（棵）。`,
         ]);
       if (t === 1)
-        return q(`一条小路长 ${len} 米，每隔 ${d} 米种一棵树，两端都不种，一共种几棵？`, String(n - 1), [
-          n,
-          n + 1,
-          n - 2,
+        return withSteps(q(`一条小路长 ${len} 米，每隔 ${d} 米种一棵树，两端都不种，一共种几棵？`, String(n - 1), [n, n + 1, n - 2]), [
+          `先算这条路被分成几段：${len} ÷ ${d} = ${n}（段）。`,
+          '两端都不种：棵数 = 段数 − 1。',
+          `${n} − 1 = ${n - 1}（棵）。`,
         ]);
-      return q(`一个圆形花坛周长 ${len} 米，每隔 ${d} 米摆一盆花，一共摆几盆？`, String(n), [n + 1, n - 1, n + 2]);
+      return withSteps(q(`一个圆形花坛周长 ${len} 米，每隔 ${d} 米摆一盆花，一共摆几盆？`, String(n), [n + 1, n - 1, n + 2]), [
+        `先算一圈被分成几段：${len} ÷ ${d} = ${n}（段）。`,
+        '围成一圈（封闭图形）：盆数 = 段数。',
+        `答：一共摆 ${n} 盆。`,
+      ]);
     },
   },
   'm5.factors': {
@@ -866,13 +898,16 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       const [t, x, y, z] = parts(sig);
       const [a, b, c] = [Number(x), Number(y), Number(z)];
       if (t === 'vol')
-        return q(`长方体长 ${a} 厘米、宽 ${b} 厘米、高 ${c} 厘米，体积是多少立方厘米？`, String(a * b * c), [
-          2 * (a * b + a * c + b * c),
-          a * b,
-          a + b + c,
-        ]);
+        return withSteps(
+          q(`长方体长 ${a} 厘米、宽 ${b} 厘米、高 ${c} 厘米，体积是多少立方厘米？`, String(a * b * c), [2 * (a * b + a * c + b * c), a * b, a + b + c]),
+          ['长方体的体积 = 长 × 宽 × 高。', `${a} × ${b} = ${a * b}，${a * b} × ${c} = ${a * b * c}（立方厘米）。`],
+        );
       if (t === 'cubeS')
-        return q(`正方体棱长 ${a} 分米，表面积是多少平方分米？`, String(6 * a * a), [a * a * a, 4 * a * a, 12 * a]);
+        return withSteps(q(`正方体棱长 ${a} 分米，表面积是多少平方分米？`, String(6 * a * a), [a * a * a, 4 * a * a, 12 * a]), [
+          '正方体有 6 个面，每个面都是一样大的正方形。',
+          `一个面的面积：${a} × ${a} = ${a * a}（平方分米）。`,
+          `6 个面：${a * a} × 6 = ${6 * a * a}（平方分米）。`,
+        ]);
       if (t === 'surf')
         return q(
           `长方体长 ${a} 米、宽 ${b} 米、高 ${c} 米，表面积是多少平方米？`,
@@ -987,10 +1022,10 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       const [t, x, y, z, w] = parts(sig);
       if (t === 'whole') {
         const [m, a, b] = [Number(x), Number(y), Number(z)];
-        return q(`一个数的 ${a}/${b} 是 ${m}，这个数是多少？`, String((m * b) / a), [
-          frac(m * a, b),
-          String(m * b),
-          String(m),
+        return withSteps(q(`一个数的 ${a}/${b} 是 ${m}，这个数是多少？`, String((m * b) / a), [frac(m * a, b), String(m * b), String(m)]), [
+          `已知一个数的几分之几是多少，求这个数，用除法：这个数 = ${m} ÷ ${a}/${b}。`,
+          `除以一个分数等于乘它的倒数：${m} × ${b}/${a}。`,
+          `${m} × ${b} ÷ ${a} = ${(m * b) / a}。`,
         ]);
       }
       const [a, b, c, d] = [Number(x), Number(y), Number(z), Number(w)];
@@ -1037,21 +1072,19 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
     build: (sig) => {
       const [t, n] = nums(sig);
       if (t === 0)
-        return q(`圆的半径是 ${n} 厘米，周长是多少厘米？（π 取 3.14）`, fmt(314 * 2 * n, 2), [
-          fmt(314 * n, 2),
-          fmt(314 * n * n, 2),
-          fmt(314 * 4 * n, 2),
+        return withSteps(q(`圆的半径是 ${n} 厘米，周长是多少厘米？（π 取 3.14）`, fmt(314 * 2 * n, 2), [fmt(314 * n, 2), fmt(314 * n * n, 2), fmt(314 * 4 * n, 2)]), [
+          '圆的周长 = 2 × π × 半径。',
+          `2 × 3.14 × ${n} = ${fmt(314 * 2 * n, 2)}（厘米）。`,
         ]);
       if (t === 1)
-        return q(`圆的直径是 ${n} 米，周长是多少米？（π 取 3.14）`, fmt(314 * n, 2), [
-          fmt(314 * 2 * n, 2),
-          fmt(314 * n * n, 2),
-          fmt(314 * (n + 1), 2),
+        return withSteps(q(`圆的直径是 ${n} 米，周长是多少米？（π 取 3.14）`, fmt(314 * n, 2), [fmt(314 * 2 * n, 2), fmt(314 * n * n, 2), fmt(314 * (n + 1), 2)]), [
+          '圆的周长 = π × 直径。',
+          `3.14 × ${n} = ${fmt(314 * n, 2)}（米）。`,
         ]);
-      return q(`圆的半径是 ${n} 分米，面积是多少平方分米？（π 取 3.14）`, fmt(314 * n * n, 2), [
-        fmt(314 * 2 * n, 2),
-        fmt(314 * n, 2),
-        fmt(314 * 4 * n * n, 2),
+      return withSteps(q(`圆的半径是 ${n} 分米，面积是多少平方分米？（π 取 3.14）`, fmt(314 * n * n, 2), [fmt(314 * 2 * n, 2), fmt(314 * n, 2), fmt(314 * 4 * n * n, 2)]), [
+        '圆的面积 = π × 半径 × 半径（不是乘 2）。',
+        `半径 × 半径：${n} × ${n} = ${n * n}。`,
+        `3.14 × ${n * n} = ${fmt(314 * n * n, 2)}（平方分米）。`,
       ]);
     },
   },
@@ -1129,19 +1162,21 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       const [t, x, y, z] = parts(sig);
       const [p, k, n] = [Number(x), Number(y), Number(z)];
       if (t === 'zhe')
-        return q(
-          `一件衣服原价 ${p} 元，打 ${k} 折出售，现价多少元？`,
-          String((p * k) / 10),
-          [p - k, (p * (10 - k)) / 10, (p * k) / 100].filter(Number.isInteger),
+        return withSteps(
+          q(`一件衣服原价 ${p} 元，打 ${k} 折出售，现价多少元？`, String((p * k) / 10), [p - k, (p * (10 - k)) / 10, (p * k) / 100].filter(Number.isInteger)),
+          [`打 ${k} 折就是按原价的 ${k * 10}% 卖（${k}/10）。`, `${p} × ${k}/10 = ${(p * k) / 10}（元）。`, `答：现价 ${(p * k) / 10} 元。`],
         );
       if (t === 'rate')
-        return q(`把 ${p} 元存入银行，年利率 ${k}%，存 ${n} 年，到期利息是多少元？`, String((p * k * n) / 100), [
-          (p * k) / 100,
-          p + (p * k * n) / 100,
-          (p * k * n) / 10,
-        ]);
+        return withSteps(
+          q(`把 ${p} 元存入银行，年利率 ${k}%，存 ${n} 年，到期利息是多少元？`, String((p * k * n) / 100), [(p * k) / 100, p + (p * k * n) / 100, (p * k * n) / 10]),
+          ['利息 = 本金 × 利率 × 存期（问的是利息，不加本金）。', `一年的利息：${p} × ${k}% = ${(p * k) / 100}（元）。`, `${n} 年：${(p * k) / 100} × ${n} = ${(p * k * n) / 100}（元）。`],
+        );
       const now = (p * k) / 10;
-      return q(`原价 ${p} 元的书包，现价 ${now} 元，打了几折？`, `${k}折`, [`${10 - k}折`, `${k + 1}折`, `${k - 1}折`]);
+      return withSteps(q(`原价 ${p} 元的书包，现价 ${now} 元，打了几折？`, `${k}折`, [`${10 - k}折`, `${k + 1}折`, `${k - 1}折`]), [
+        '现价是原价的百分之几，就是打几折。',
+        `${now} ÷ ${p} = ${k / 10}，也就是 ${k * 10}%。`,
+        `${k * 10}% 就是 ${k} 折。`,
+      ]);
     },
   },
   'm6.cylinder': {
@@ -1152,16 +1187,14 @@ export const UPPER_GENERATORS: Record<string, UpperGen> = {
       const [rad, h] = [Number(x), Number(y)];
       const cyl = 314 * rad * rad * h; // ×100
       if (t === 'cyl')
-        return q(`圆柱的底面半径是 ${rad} 厘米，高是 ${h} 厘米，体积是多少立方厘米？（π 取 3.14）`, fmt(cyl, 2), [
-          fmt(cyl / 3, 2),
-          fmt(314 * 2 * rad * h, 2),
-          fmt(314 * rad * h, 2),
-        ]);
-      return q(`圆锥的底面半径是 ${rad} 米，高是 ${h} 米，体积是多少立方米？（π 取 3.14）`, fmt(cyl / 3, 2), [
-        fmt(cyl, 2),
-        fmt(314 * rad * h, 2),
-        fmt((cyl * 2) / 3, 2),
-      ]);
+        return withSteps(
+          q(`圆柱的底面半径是 ${rad} 厘米，高是 ${h} 厘米，体积是多少立方厘米？（π 取 3.14）`, fmt(cyl, 2), [fmt(cyl / 3, 2), fmt(314 * 2 * rad * h, 2), fmt(314 * rad * h, 2)]),
+          ['圆柱的体积 = 底面积 × 高。', `底面积：3.14 × ${rad} × ${rad} = ${fmt(314 * rad * rad, 2)}（平方厘米）。`, `乘高：${fmt(314 * rad * rad, 2)} × ${h} = ${fmt(cyl, 2)}（立方厘米）。`],
+        );
+      return withSteps(
+        q(`圆锥的底面半径是 ${rad} 米，高是 ${h} 米，体积是多少立方米？（π 取 3.14）`, fmt(cyl / 3, 2), [fmt(cyl, 2), fmt(314 * rad * h, 2), fmt((cyl * 2) / 3, 2)]),
+        ['圆锥的体积 = 底面积 × 高 ÷ 3（是等底等高圆柱的三分之一）。', `底面积：3.14 × ${rad} × ${rad} = ${fmt(314 * rad * rad, 2)}（平方米）。`, `${fmt(314 * rad * rad, 2)} × ${h} ÷ 3 = ${fmt(cyl / 3, 2)}（立方米）。`],
+      );
     },
   },
   'm6.proportion': {
