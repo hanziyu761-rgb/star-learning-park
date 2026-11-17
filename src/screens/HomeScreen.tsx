@@ -1,3 +1,4 @@
+import { StreakCard } from './StreakCard';
 import React, { useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Pressable } from '@/components/Tappable';
@@ -262,6 +263,9 @@ export default function HomeScreen() {
           </Tile>
         )}
       </Animated.View>
+
+      {/* 连续打卡（V5.4） */}
+      <StreakCard now={now} />
 
       {/* 学习进度：小学按课程；初中（V5.2）按本年级三科知识点（掌握情况来自真实练习） */}
       <View style={styles.panel} testID="progress-panel">

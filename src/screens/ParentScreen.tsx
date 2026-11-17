@@ -11,6 +11,7 @@ import { Card, SectionTitle, Stars } from '@/components/ui';
 import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { MemberCard } from '@/member/MemberCard';
+import { WeeklyCard } from './ParentWeekly';
 import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
 import { AiCard, AiReportCard, AppearanceCard, EyeCareCard, GradeCard, HiddenCard } from './ParentSettings';
@@ -93,6 +94,7 @@ function ParentHome({ open }: { open: (s: Section) => void }) {
       {/* 会员（V5.3）：状态、设备号、开通码 */}
       <MemberCard />
       {!hasData ? <Notice text="还没有学习记录" /> : null}
+      {hasData ? <WeeklyCard now={now} /> : null}
 
       <View style={styles.grid}>
         <Metric label="累计星星" value={String(state.totalStars)} testID="m-stars" />
