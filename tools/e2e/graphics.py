@@ -235,8 +235,11 @@ def run_round(page, kp, wrong_pattern, use_drag_pattern, stats, shots):
         if page.locator('[data-testid="practice-summary"]').count(): break
         ex_id = current_id(page, "practice-exercise-")
         assert ex_id != prev, "换题失败"
-        # 不残留：新题出现时没有上一题的反馈
-        assert page.locator('[data-testid^="feedback-"]').count() == 0, f"{ex_id} 出现上一题残留反馈"
+        # 不残留：新题出现时没有上一题的反馈（反馈条有 120 毫秒淡出动画，给它 1 秒消失；真残留仍会被发现）
+        try:
+            expect(page.locator('[data-testid^="feedback-"]')).to_have_count(0, timeout=1000)
+        except AssertionError:
+            raise AssertionError(f"{ex_id} 出现上一题残留反馈")
         cf = wrong_pattern(i); ud = use_drag_pattern(i)
         kind = solve(page, ex_id, cf, ud, notes)
         stats.setdefault(kp, []).append((ex_id, kind, cf))
