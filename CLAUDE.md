@@ -54,6 +54,12 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 - 页面跳转经 `MemberNavGate` 检查（`src/member/model.ts` 的 `gate`）；新增页面时决定是否需要会员。会员信息存 `slp.member.v1`，不放进 ProgressState。
 - 服务器 `GET /api/member/check?d=设备号` 按环境变量 `MEMBER_REVOKED` 返回是否关闭。
 
+## 多个孩子与备份（V5.4）
+
+- 孩子名单存 `slp.profiles.v1`；第一个孩子（p1）用原来的 `slp.progress.v1`，其他孩子用 `slp.progress.v1.<id>`。护眼计时等按孩子分开存（`keyFor`）。
+- 备份文件格式见 `src/progress/backup.ts`，导入前逐个孩子用 `parseProgress` 检查；改 ProgressState 结构时备份导入也要能迁移旧记录。
+- 初中英语阅读（track `enread`）的朗读还没预录：录音覆盖测试对它单独检查“已写进录音清单”，APP 所有者补录导入后恢复统一检查。
+
 ## 单文件 HTML 版
 
 `npm run build:html` 生成 `star-learning-park.html`。改动页面后要同时验证 APP 版和 HTML 版。
@@ -77,6 +83,7 @@ src/content/        课程数据（只写数据，不写界面）；zh.ts 拼音
 src/lesson/         课程数据类型、课程播放器、各类环节（演示、拖动、跟读、对话、绘本）、反馈语
 src/exercises/      可复用练习组件：选择、正误判断、拖动配对、排序；V2.1 图形互动：拖到方格、地图点选、点选图形、分类篮、旋转、拨钟、找规律
 src/drag/           拖动与放置区（gesture-handler + reanimated）
+src/screentime/     护眼与学习时长（计时、休息、每天上限）
 src/member/         会员：设备号、开通码核对、试用与放行规则、家长中心会员卡
 src/progress/       学习记录：数据模型（纯函数）、本地存储、统计、React Context
 src/speech/         发音（V5.1 起只用星星宝童声：预录音 + 阿里云联网合成，不用手机自带语音；读不出时 SpeechNotice 提示）

@@ -74,7 +74,7 @@ describe('提前合成朗读', () => {
 });
 
 describe('接着学：初中（V5.2）', () => {
-  it('八年级数学不推荐一年级的课，直接给八年级的知识点练习；语文先给八年级的阅读小屋', () => {
+  it('八年级数学不推荐一年级的课，直接给八年级的知识点练习；语文、英语先给八年级的阅读', () => {
     const s = createEmptyProgress();
     s.settings.grade = 8;
     const n = nextUp(s, 'math', NOW)!;
@@ -82,7 +82,8 @@ describe('接着学：初中（V5.2）', () => {
     expect((n.route as { id: string }).id).toMatch(/^kp:m[78]\./);
     const z = nextUp(s, 'chinese', NOW)!;
     expect(z).toMatchObject({ kind: 'lesson', route: { name: 'lesson', id: 'zh-read-g8-1' } });
+    // V5.4：英语和语文一样，先给本年级的英语阅读（还没读过时）
     const e = nextUp(s, 'english', NOW)!;
-    expect((e.route as { id: string }).id).toMatch(/^kp:e[78]\./);
+    expect(e).toMatchObject({ kind: 'lesson', route: { name: 'lesson', id: 'en-read-g8-1' } });
   });
 });
