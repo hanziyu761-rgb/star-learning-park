@@ -2,7 +2,7 @@
   "expo": {
     "name": "林亨学习乐园",
     "slug": "star-learning-park",
-    "version": "5.4.0",
+    "version": "5.4.1",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -19,7 +19,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.starlearningpark.app",
-      "versionCode": 27,
+      "versionCode": 28,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",

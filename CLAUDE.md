@@ -58,7 +58,7 @@ npx expo export --platform android --output-dir dist-android   # 验证安卓包
 
 - 孩子名单存 `slp.profiles.v1`；第一个孩子（p1）用原来的 `slp.progress.v1`，其他孩子用 `slp.progress.v1.<id>`。护眼计时等按孩子分开存（`keyFor`）。
 - 备份文件格式见 `src/progress/backup.ts`，导入前逐个孩子用 `parseProgress` 检查；改 ProgressState 结构时备份导入也要能迁移旧记录。
-- 初中英语阅读（track `enread`）的朗读还没预录：录音覆盖测试对它单独检查“已写进录音清单”，APP 所有者补录导入后恢复统一检查。
+- 朗读服务一次最多合成 300 字：长短文用 `speakParts` 分段（测试会检查每句不超过 300 字）。
 
 ## 单文件 HTML 版
 
