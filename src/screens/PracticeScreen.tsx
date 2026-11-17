@@ -10,6 +10,7 @@ import { Pressable } from '@/components/Tappable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BANK_SOURCE, bankExercise, findUnit, pickRound } from '@/content/bank';
 import { ORAL_TOPICS, oralExercise, oralRound } from '@/content/oral';
+import { dictationRound, dictationTitle, isDictationId } from '@/content/zhDictation';
 import { sourceName } from '@/content/resolve';
 import { ALL_WRITE_SETS, isWriteLessonId, traceExercise } from '@/content/writing';
 import { kpRoundWithReview } from '@/knowledge/refill';
@@ -84,6 +85,11 @@ function buildRound(id: string, done: Set<string>, hidden: Set<string>, state: P
     return set
       ? { subject: 'chinese', title: sourceName(id), isBank: false, exercises: set.map((c) => traceExercise(c.char)) }
       : null;
+  }
+  // 语文听写、古诗文默写（V5.4）：先出没做过的
+  if (isDictationId(id)) {
+    const g = Number(id.slice(7));
+    return { subject: 'chinese', title: dictationTitle(g), isBank: false, exercises: dictationRound(g, done, Math.random) };
   }
   if (id.startsWith('oral:')) {
     const topic = ORAL_TOPICS.find((t) => `oral:${t.id}` === id);

@@ -13,6 +13,7 @@ import { DAILY_COUNT, dailyMixId, dailyMixKps } from '@/knowledge/dailyMix';
 import { dayKey } from '@/progress/srs';
 import { CONTENT_REVIEW, GRAPHICS_GENERATORS, GRAPHICS_KPS } from '@/knowledge/graphics';
 import { zh } from '@/content/zh';
+import { dictationId, dictationItems, dictationTitle } from '@/content/zhDictation';
 import { DisplayTextView } from '@/components/PinyinText';
 import { Stars, tapFeedback } from '@/components/ui';
 import type { Subject } from '@/lesson/types';
@@ -395,3 +396,38 @@ const mixStyles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   emoji: { fontSize: 34, color: colors.text },
 }));
+
+/**
+ * 语文生字听写（一～六年级）/ 古诗文默写（七～九年级）（V5.4）：听一听，选出正确的字。
+ */
+export function DictationCard({ state }: { state: ProgressState }) {
+  const nav = useNav();
+  const grade = contentGrade(state.settings.grade);
+  const id = dictationId(grade);
+  const theme = subjectTheme.chinese;
+  const total = dictationItems(grade).length;
+  const done = new Set(state.results.filter((r) => r.lessonId === id).map((r) => r.exerciseId)).size;
+  const junior = grade >= 7;
+  const title = dictationTitle(grade);
+  return (
+    <Pressable
+      onPress={() => {
+        tapFeedback();
+        nav.push({ name: 'practice', id });
+      }}
+      style={[styles.card, mixStyles.row]}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      testID="zh-dictation"
+    >
+      <Text style={mixStyles.emoji}>{junior ? '📜' : '✍️'}</Text>
+      <View style={{ flex: 1, gap: 2 }}>
+        <DisplayTextView text={grade >= 3 ? title : zh(title, 'shēng zì tīng xiě')} size={22} />
+        <Text style={styles.meta}>
+          {junior ? '听名句，选出容易写错的字' : '听词语，从形近字、同音字里选出正确的字'} · 已练 {done}/{total}
+        </Text>
+      </View>
+      <Text style={[styles.go, { color: theme.color }]}>▶</Text>
+    </Pressable>
+  );
+}

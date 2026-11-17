@@ -13,6 +13,8 @@ export function mistakeGrade(m: Pick<MistakeEntry, 'lessonId' | 'exerciseId' | '
   if (kp && getKp(kp)) return getKp(kp)!.grade;
   const mix = /^mix:\w+:(\d):/.exec(m.lessonId);
   if (mix) return Number(mix[1]);
+  const dict = /^zdict:g(\d)$/.exec(m.lessonId);
+  if (dict) return Number(dict[1]);
   const lesson = getLesson(m.lessonId);
   if (lesson) return lesson.grade ?? 1;
   const bank = /-g(\d)[ab]-/.exec(m.lessonId) ?? /-g(\d)[ab]-/.exec(m.exerciseId);

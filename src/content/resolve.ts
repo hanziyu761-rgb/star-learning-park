@@ -8,6 +8,7 @@ import { exerciseLabel, getLesson } from './index';
 import { exerciseFromKpId } from '@/knowledge/generators';
 import { getKp } from '@/knowledge/graph';
 import { findOralExercise, ORAL_TOPICS } from './oral';
+import { dictationTitle, findDictation, isDictationId } from './zhDictation';
 import { plainText } from './zh';
 import { ALL_WRITE_SETS, isWriteLessonId, traceExercise } from './writing';
 import { bubbleExercise } from '@/games/bubble';
@@ -57,6 +58,9 @@ export const resolveExercise: ExerciseResolver = (lessonId, exerciseId) => {
   }
   const oral = findOralExercise(lessonId, exerciseId);
   if (oral) return { exercise: oral.exercise, subject: 'math', source: `口算 · ${oral.topic.title}` };
+  // 语文听写、古诗文默写（V5.4）
+  const dict = findDictation(lessonId, exerciseId);
+  if (dict) return { exercise: dict, subject: 'chinese', source: sourceName(lessonId) };
   const lesson = getLesson(lessonId);
   if (!lesson) return null;
   for (const s of lesson.steps) {
@@ -87,6 +91,10 @@ export function sourceName(lessonId: string): string {
     const t = ORAL_TOPICS.find((x) => `oral:${x.id}` === lessonId);
     return t ? `口算 · ${t.title}` : lessonId;
   }
+  if (isDictationId(lessonId)) {
+    const g = Number(lessonId.slice(7));
+    return `${dictationTitle(g)}（${g}年级）`;
+  }
   const l = getLesson(lessonId);
   return l ? plainText(l.title) : lessonId;
 }
@@ -99,7 +107,7 @@ export function mistakeLabel(lessonId: string, exerciseId: string): string {
     return r && r.exercise.kind === 'choice' ? `拼写：${r.exercise.answerId}` : exerciseId;
   }
   // 知识点练习、找原因（kp: / diag:）也按题目还原（V5.2 修正：以前只显示题目编号）
-  if (!/^(bank|oral|game|kp|diag|mix):/.test(lessonId)) return exerciseLabel(lessonId, exerciseId);
+  if (!/^(bank|oral|game|kp|diag|mix|zdict):/.test(lessonId)) return exerciseLabel(lessonId, exerciseId);
   const r = resolveExercise(lessonId, exerciseId);
   if (!r) return exerciseId;
   const e = r.exercise;

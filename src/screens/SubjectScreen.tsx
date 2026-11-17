@@ -11,7 +11,7 @@ import { openCount } from '@/mistakes/book';
 import { useNav } from '@/nav/Nav';
 import { NEXT_LABEL, nextUp } from '@/progress/nextUp';
 import { useProgress } from '@/progress/ProgressContext';
-import { BankSection, DailyMixCard, GraphicsSection, JuniorKpSection, OralSection, WriteSection } from './PracticeSections';
+import { BankSection, DailyMixCard, DictationCard, GraphicsSection, JuniorKpSection, OralSection, WriteSection } from './PracticeSections';
 import { contentGrade } from '@/progress/grade';
 import { EnglishTracks, ReadingHouse } from './EnglishTracks';
 import { GAME_BY_ID } from '@/games/common';
@@ -163,6 +163,7 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
           </View>
         );
       })}
+      {subject === 'chinese' ? <DictationCard state={state} /> : null}
       {subject === 'chinese' ? <ReadingHouse state={state} /> : null}
       {subject === 'english' && junior ? <ReadingHouse state={state} subject="english" /> : null}
       {subject === 'chinese' ? <WriteSection state={state} /> : null}
