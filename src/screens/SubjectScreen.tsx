@@ -164,6 +164,7 @@ export default function SubjectScreen({ subject }: { subject: string | undefined
         );
       })}
       {subject === 'chinese' ? <ReadingHouse state={state} /> : null}
+      {subject === 'english' && junior ? <ReadingHouse state={state} subject="english" /> : null}
       {subject === 'chinese' ? <WriteSection state={state} /> : null}
       {subject === 'math' && (!junior || showPrimary) ? <GraphicsSection state={state} /> : null}
       {subject === 'math' ? <OralSection state={state} /> : null}

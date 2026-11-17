@@ -6,10 +6,11 @@ import { chineseRiYueLesson } from './chinese';
 import { englishFruitsLesson } from './english';
 import { STARTER_LESSONS } from './englishStarter';
 import { READING_LESSONS } from './chineseReading';
+import { EN_READING_LESSONS } from './englishReadingJunior';
 import { mathAddLesson } from './math';
 import { getKp } from '@/knowledge/graph';
 
-export const LESSONS: Lesson[] = [mathAddLesson, chineseRiYueLesson, englishFruitsLesson, ...STARTER_LESSONS, ...READING_LESSONS];
+export const LESSONS: Lesson[] = [mathAddLesson, chineseRiYueLesson, englishFruitsLesson, ...STARTER_LESSONS, ...READING_LESSONS, ...EN_READING_LESSONS];
 
 export function getLesson(id: string): Lesson | undefined {
   return LESSONS.find((l) => l.id === id);

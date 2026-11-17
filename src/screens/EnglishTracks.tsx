@@ -103,20 +103,22 @@ const styles = themed(() => StyleSheet.create({
   go: { fontSize: 15, fontWeight: '600', color: colors.text },
 }));
 
-/** 语文“阅读小屋”（V2.10）：原创带拼音短文，一行一篇 */
-export function ReadingHouse({ state }: { state: ProgressState }) {
+/** 语文“阅读小屋”（V2.10）：原创带拼音短文，一行一篇；初中英语阅读与完形填空（V5.4）也用它 */
+export function ReadingHouse({ state, subject = 'chinese' }: { state: ProgressState; subject?: 'chinese' | 'english' }) {
   const nav = useNav();
-  const theme = subjectTheme.chinese;
+  const theme = subjectTheme[subject];
   // 按家长设的年级显示这一年级的短文（V2.14）
   const grade = contentGrade(state.settings.grade);
-  const lessons = lessonsFor('chinese').filter((l) => l.track === 'zhread' && (l.grade ?? 1) === grade);
+  const track = subject === 'english' ? 'enread' : 'zhread';
+  const lessons = lessonsFor(subject).filter((l) => l.track === track && (l.grade ?? 1) === grade);
+  if (!lessons.length) return null;
   const done = lessons.filter((l) => (state.lessons[l.id]?.completedCount ?? 0) > 0).length;
   return (
-    <View style={styles.card} testID="reading-house">
+    <View style={styles.card} testID={subject === 'english' ? 'en-reading-house' : 'reading-house'}>
       <View style={styles.head}>
-        <Text style={styles.headEmoji}>🏡</Text>
+        <Text style={styles.headEmoji}>{subject === 'english' ? '📖' : '🏡'}</Text>
         <View style={{ flex: 1 }}>
-          <Text style={styles.title}>阅读小屋</Text>
+          <Text style={styles.title}>{subject === 'english' ? '英语阅读 · 完形填空' : '阅读小屋'}</Text>
         </View>
         <Text style={[styles.count, { color: theme.color }]} testID="reading-progress">
           {done}/{lessons.length}

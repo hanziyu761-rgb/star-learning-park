@@ -334,7 +334,7 @@ export interface Lesson {
   subject: Subject;
   order: number;
   /** 英语启蒙主线（V2.8）：交流 / 拼读 / 分级阅读 */
-  track?: 'talk' | 'phonics' | 'reading' | 'zhread';
+  track?: 'talk' | 'phonics' | 'reading' | 'zhread' | 'enread';
   /** 适用年级（V2.14 阅读小屋按年级显示；不填为一年级） */
   grade?: number;
   title: DisplayText;

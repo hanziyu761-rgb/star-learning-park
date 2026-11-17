@@ -695,3 +695,40 @@ describe('V5.2.5 三～六年级英语单词卡出题', () => {
     expect(n).toBeGreaterThan(1200);
   });
 });
+
+describe('V5.4 初中英语阅读与完形填空', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { EN_READING_LESSONS, EN_READING_DATA, clozeSentence } = require('@/content/englishReadingJunior');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { LESSONS } = require('@/content');
+  it('七～九年级各 4 篇（3 篇阅读 + 1 篇完形），都在课程目录里', () => {
+    for (const g of [7, 8, 9]) expect(EN_READING_LESSONS.filter((l: { grade: number }) => l.grade === g)).toHaveLength(4);
+    for (const l of EN_READING_LESSONS) expect(LESSONS).toContain(l);
+    expect(new Set(EN_READING_LESSONS.map((l: { id: string }) => l.id)).size).toBe(12);
+  });
+  it('每道题：答案在选项里、选项不重复、指令是英文、中文只在 hintZh', () => {
+    for (const l of EN_READING_LESSONS)
+      for (const st of l.steps) {
+        if (st.kind !== 'exercise') continue;
+        const e = st.exercise;
+        expect(plainText(e.prompt.text)).toMatch(/^[A-Za-z]/);
+        expect(plainText(e.prompt.text)).not.toMatch(/[一-鿿]/);
+        expect(e.prompt.hintZh).toBeTruthy();
+        if (e.kind === 'choice') {
+          const texts = e.options.map((o: { text: string }) => o.text);
+          expect(new Set(texts).size).toBe(texts.length);
+          expect(e.options.map((o: { id: string }) => o.id)).toContain(e.answerId);
+          for (const t of texts) expect(t).not.toMatch(/[一-鿿]/);
+        }
+      }
+  });
+  it('完形填空：每空的题干就是这一空所在的句子；把答案填回去是完整的短文', () => {
+    for (const g of [7, 8, 9]) {
+      const c = EN_READING_DATA.CLOZE[g];
+      c.blanks.forEach((_: unknown, i: number) => expect(clozeSentence(c.text, i + 1)).toContain(`(${i + 1}) ______`));
+      const full = c.text.replace(/\{(\d)\}/g, (_: string, k: string) => c.blanks[Number(k) - 1].ans);
+      expect(full).not.toMatch(/[{}]/);
+      for (const b of c.blanks) expect(b.others).not.toContain(b.ans);
+    }
+  });
+});
