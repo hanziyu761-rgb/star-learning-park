@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useLayoutEffe
 import { createEmptyProgress, progressReducer, type ProgressAction, type ProgressState } from './model';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loadProgress, saveProgress } from './storage';
+import { BEFORE_IMPORT_KEY, makeBackup, parseBackup, type Backup } from './backup';
 import {
   addProfile as addP,
   defaultIndex,
@@ -39,6 +40,12 @@ interface ProgressContextValue {
   renameProfile: (id: string, name: string, emoji?: string) => void;
   /** 删除孩子和他的学习记录（第一个孩子不能删） */
   removeProfile: (id: string) => Promise<void>;
+  /** 备份（V5.4）：所有孩子的学习记录 */
+  exportAll: () => Promise<{ profiles: ProfileIndex; data: Record<string, ProgressState> }>;
+  /** 用备份替换这台手机上的全部学习记录（替换前自动留一份，可以撤销） */
+  restoreAll: (b: Backup) => Promise<void>;
+  /** 撤销上次导入：换回导入前的记录；没有可撤销的返回 false */
+  undoRestore: () => Promise<boolean>;
 }
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
@@ -175,9 +182,46 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   const scheme: Scheme = s.appearance === 'light' || s.appearance === 'dark' ? s.appearance : system === 'dark' ? 'dark' : 'light';
   setScheme(scheme);
 
+  const exportAll = useCallback(async () => {
+    const idx = profilesRef.current;
+    const data: Record<string, ProgressState> = {};
+    for (const p of idx.list) data[p.id] = p.id === idx.active ? stateRef.current : (await loadProgress(progressKeyOf(p.id))).state;
+    return { profiles: idx, data };
+  }, []);
+
+  const writeAll = useCallback(
+    async (b: Backup) => {
+      const before = profilesRef.current;
+      for (const p of b.profiles.list) await saveProgress(b.data[p.id], progressKeyOf(p.id));
+      // 这台手机上有、备份里没有的孩子：删掉他的记录
+      for (const p of before.list) if (!b.profiles.list.some((x) => x.id === p.id)) await AsyncStorage.removeItem(progressKeyOf(p.id)).catch(() => undefined);
+      await saveProfiles(b.profiles);
+      await loadFor(b.profiles);
+    },
+    [loadFor],
+  );
+
+  const restoreAll = useCallback(
+    async (b: Backup) => {
+      const cur = await exportAll();
+      await AsyncStorage.setItem(BEFORE_IMPORT_KEY, makeBackup(cur.profiles, cur.data, Date.now(), '')).catch(() => undefined);
+      await writeAll(b);
+    },
+    [exportAll, writeAll],
+  );
+
+  const undoRestore = useCallback(async () => {
+    const raw = await AsyncStorage.getItem(BEFORE_IMPORT_KEY).catch(() => null);
+    const r = raw ? parseBackup(raw) : null;
+    if (!r || !r.ok) return false;
+    await writeAll(r.backup);
+    await AsyncStorage.removeItem(BEFORE_IMPORT_KEY).catch(() => undefined);
+    return true;
+  }, [writeAll]);
+
   const value = useMemo(
-    () => ({ status, state, loadProblem, saveFailed, dispatch, scheme, profiles, switchProfile, addProfile, renameProfile, removeProfile }),
-    [status, state, loadProblem, saveFailed, dispatch, scheme, profiles, switchProfile, addProfile, renameProfile, removeProfile],
+    () => ({ status, state, loadProblem, saveFailed, dispatch, scheme, profiles, switchProfile, addProfile, renameProfile, removeProfile, exportAll, restoreAll, undoRestore }),
+    [status, state, loadProblem, saveFailed, dispatch, scheme, profiles, switchProfile, addProfile, renameProfile, removeProfile, exportAll, restoreAll, undoRestore],
   );
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;

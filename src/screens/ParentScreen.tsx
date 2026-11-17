@@ -13,6 +13,7 @@ import { useNav } from '@/nav/Nav';
 import { MemberCard } from '@/member/MemberCard';
 import { WeeklyCard } from './ParentWeekly';
 import { ChildrenCard } from './ProfileUI';
+import { BackupCard } from './BackupCard';
 import { mistakeLabel, resolveExercise, sourceName } from '@/content/resolve';
 import { suggestNext, type Suggestion } from '@/progress/plan';
 import { AiCard, AiReportCard, AppearanceCard, EyeCareCard, GradeCard, HiddenCard } from './ParentSettings';
@@ -303,6 +304,7 @@ function SettingsPage() {
   return (
     <View style={{ gap: space.lg }} testID="parent-settings">
       <ChildrenCard />
+      <BackupCard />
       <GradeCard />
       <EyeCareCard />
       <AppearanceCard />
@@ -311,7 +313,7 @@ function SettingsPage() {
       <AiCard />
       <HiddenCard />
 
-      <Notice text="学习数据只保存在这台设备上。朗读和 AI 老师只发送要朗读的文字、题目内容和孩子的提问，不上传个人信息。" />
+      <Notice text="学习数据只保存在这台设备上（可以用“学习记录备份”导出）。朗读和 AI 老师只发送要朗读的文字、题目内容和孩子的提问，不上传个人信息。" />
 
       <Pressable
         accessibilityRole="button"
