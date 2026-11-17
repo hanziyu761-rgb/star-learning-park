@@ -4010,14 +4010,29 @@
 "text": "老城改造时，小巷被拆掉了。"
 },
 {
-"id": "e42a8aa1",
+"id": "a06ef55f",
 "lang": "en-US",
-"text": "Li Ming is a new student at Green Hill Middle School. On his first day, he felt shy and did not know anyone in his class. At lunch time, a boy named Tom sat next to him. \"Hi, I'm Tom. Do you like football?\" he asked with a smile. Li Ming nodded. They talked about their favourite players and found that they both liked the same team. After school, Tom showed Li Ming the school library and the sports field. Now they play football together every Friday afternoon."
+"text": "Li Ming is a new student at Green Hill Middle School. On his first day, he felt shy and did not know anyone in his class."
 },
 {
 "id": "982bb720",
 "lang": "en-US",
 "text": "A New Friend"
+},
+{
+"id": "1f7e309a",
+"lang": "en-US",
+"text": "At lunch time, a boy named Tom sat next to him. \"Hi, I'm Tom. Do you like football?\" he asked with a smile."
+},
+{
+"id": "e5d54e38",
+"lang": "en-US",
+"text": "Li Ming nodded. They talked about their favourite players and found that they both liked the same team."
+},
+{
+"id": "041c0e2d",
+"lang": "en-US",
+"text": "After school, Tom showed Li Ming the school library and the sports field. Now they play football together every Friday afternoon."
 },
 {
 "id": "2f0792e0",
@@ -4075,14 +4090,24 @@
 "text": "Li Ming and Tom play football together every Friday afternoon."
 },
 {
-"id": "6035b944",
-"lang": "en-US",
-"text": "School Art Festival Date: Friday, May 20th. Time: 2:00 p.m. to 5:00 p.m. Place: the School Hall. Students can show their paintings, photos and handmade crafts. Each class should bring at least three works. Please give your works to Ms Wang in Room 302 before Wednesday. Parents are welcome to visit."
-},
-{
 "id": "0b77d7de",
 "lang": "en-US",
 "text": "School Art Festival"
+},
+{
+"id": "3cf25a23",
+"lang": "en-US",
+"text": "Date: Friday, May 20th. Time: 2:00 p.m. to 5:00 p.m. Place: the School Hall."
+},
+{
+"id": "5bea719e",
+"lang": "en-US",
+"text": "Students can show their paintings, photos and handmade crafts. Each class should bring at least three works."
+},
+{
+"id": "0e34492a",
+"lang": "en-US",
+"text": "Please give your works to Ms Wang in Room 302 before Wednesday. Parents are welcome to visit."
 },
 {
 "id": "f75a830e",
@@ -4125,14 +4150,29 @@
 "text": "Parents cannot visit the festival."
 },
 {
-"id": "e6053be1",
+"id": "51cae575",
 "lang": "en-US",
-"text": "Sleep is very important for our health. Children and teenagers need more sleep than adults, usually eight to ten hours a night. When we sleep, our body grows and repairs itself. Our brain also sorts out what we learned during the day, so sleep helps us remember things better. If we do not get enough sleep, we may feel tired and find it hard to pay attention in class. To sleep well, try to go to bed at the same time every day, and stop using phones or computers an hour before bed."
+"text": "Sleep is very important for our health. Children and teenagers need more sleep than adults, usually eight to ten hours a night."
 },
 {
 "id": "2df11a60",
 "lang": "en-US",
 "text": "Why Do We Need Sleep?"
+},
+{
+"id": "dc55daf2",
+"lang": "en-US",
+"text": "When we sleep, our body grows and repairs itself. Our brain also sorts out what we learned during the day, so sleep helps us remember things better."
+},
+{
+"id": "a600df2c",
+"lang": "en-US",
+"text": "If we do not get enough sleep, we may feel tired and find it hard to pay attention in class."
+},
+{
+"id": "bb147969",
+"lang": "en-US",
+"text": "To sleep well, try to go to bed at the same time every day, and stop using phones or computers an hour before bed."
 },
 {
 "id": "10776e14",
@@ -4195,14 +4235,19 @@
 "text": "Do more homework"
 },
 {
-"id": "6bc52554",
+"id": "c04f65ac",
 "lang": "en-US",
-"text": "Last Saturday, I blank my grandparents in the countryside. They live in a small house blank a river. In the morning, my grandpa taught me blank to fish. I caught two small fish! In the afternoon, we picked apples in the garden. The apples were very blank. I had a great time, and I blank to visit them again soon."
+"text": "Last Saturday, I blank my grandparents in the countryside. They live in a small house blank a river. In the morning, my grandpa taught me blank to fish. I caught two small fish! In the afternoon, we picked apples in the garden. The apples were very blank."
 },
 {
 "id": "4201e01c",
 "lang": "en-US",
 "text": "My Weekend"
+},
+{
+"id": "a63d8541",
+"lang": "en-US",
+"text": "I had a great time, and I blank to visit them again soon."
 },
 {
 "id": "77cb3ca4",
@@ -4335,14 +4380,29 @@
 "text": "hoping"
 },
 {
-"id": "0985fb72",
+"id": "47eb2881",
 "lang": "en-US",
-"text": "It was raining heavily one evening. An old woman with two heavy bags was waiting at the bus stop. When the bus came, she tried to get on, but her bags were too heavy. The driver, Mr Zhang, got off the bus and helped her carry the bags. Some passengers looked unhappy because they were in a hurry. But Mr Zhang said, \"It only takes one minute to help someone. One day we will all be old.\" After hearing this, a young man stood up and gave his seat to the old woman. The whole bus became warm and quiet."
+"text": "It was raining heavily one evening. An old woman with two heavy bags was waiting at the bus stop."
 },
 {
 "id": "cdc20db4",
 "lang": "en-US",
 "text": "The Kind Bus Driver"
+},
+{
+"id": "53964a46",
+"lang": "en-US",
+"text": "When the bus came, she tried to get on, but her bags were too heavy. The driver, Mr Zhang, got off the bus and helped her carry the bags."
+},
+{
+"id": "b83d7525",
+"lang": "en-US",
+"text": "Some passengers looked unhappy because they were in a hurry. But Mr Zhang said, \"It only takes one minute to help someone. One day we will all be old.\""
+},
+{
+"id": "cc744749",
+"lang": "en-US",
+"text": "After hearing this, a young man stood up and gave his seat to the old woman. The whole bus became warm and quiet."
 },
 {
 "id": "69123d76",
@@ -4400,14 +4460,29 @@
 "text": "Old people should not take buses"
 },
 {
-"id": "84bdd963",
+"id": "a3647910",
 "lang": "en-US",
-"text": "Plastic bags are cheap and easy to use, so people use millions of them every day. However, they cause serious problems. Most plastic bags are used for only a few minutes, but they can take hundreds of years to break down. Many of them end up in rivers and seas, where animals may eat them by mistake. Some cities have started to charge money for plastic bags in shops. As a result, more people now bring their own cloth bags when they go shopping. Each of us can help. Say no to plastic bags whenever you can, and reuse the bags you already have."
+"text": "Plastic bags are cheap and easy to use, so people use millions of them every day. However, they cause serious problems."
 },
 {
 "id": "ca5ec0f9",
 "lang": "en-US",
 "text": "Say No to Plastic Bags"
+},
+{
+"id": "2ac4ec32",
+"lang": "en-US",
+"text": "Most plastic bags are used for only a few minutes, but they can take hundreds of years to break down. Many of them end up in rivers and seas, where animals may eat them by mistake."
+},
+{
+"id": "87815ddf",
+"lang": "en-US",
+"text": "Some cities have started to charge money for plastic bags in shops. As a result, more people now bring their own cloth bags when they go shopping."
+},
+{
+"id": "f29c8b0d",
+"lang": "en-US",
+"text": "Each of us can help. Say no to plastic bags whenever you can, and reuse the bags you already have."
 },
 {
 "id": "abab8a4b",
@@ -4455,14 +4530,29 @@
 "text": "Plastic bags break down in a few weeks."
 },
 {
-"id": "a86330b3",
+"id": "bd3fecb9",
 "lang": "en-US",
-"text": "Dear Jenny, Thank you for inviting me to your birthday party next Sunday. I'm sorry, but I can't come. My cousin is getting married that day, and my whole family is going to the wedding in Shanghai. I have bought you a small gift, a book about animals, because I know you love them. I will give it to you at school on Monday. I hope you have a wonderful party! Best wishes, Lucy"
+"text": "Dear Jenny,"
 },
 {
 "id": "71bfd2c1",
 "lang": "en-US",
 "text": "An Email to Jenny"
+},
+{
+"id": "45156b22",
+"lang": "en-US",
+"text": "Thank you for inviting me to your birthday party next Sunday. I'm sorry, but I can't come. My cousin is getting married that day, and my whole family is going to the wedding in Shanghai."
+},
+{
+"id": "2e7cef48",
+"lang": "en-US",
+"text": "I have bought you a small gift, a book about animals, because I know you love them. I will give it to you at school on Monday."
+},
+{
+"id": "7de74bc9",
+"lang": "en-US",
+"text": "I hope you have a wonderful party!"
 },
 {
 "id": "134584e2",
@@ -4525,14 +4615,19 @@
 "text": "On Sunday at the party"
 },
 {
-"id": "b77bd415",
+"id": "7417c3da",
 "lang": "en-US",
-"text": "Last summer, I decided to learn blank to cook. At first, it was not easy. The first time I made fried eggs, I blank them! My mother said, \"Don't give up. Practice makes perfect.\" So I kept going. I watched cooking videos and wrote down the steps blank. Now I can cook several dishes, and my family says my tomato and egg soup is blank than my dad's. Cooking has taught me that if you keep blank, you will succeed."
+"text": "Last summer, I decided to learn blank to cook. At first, it was not easy. The first time I made fried eggs, I blank them! My mother said, \"Don't give up. Practice makes perfect.\" So I kept going. I watched cooking videos and wrote down the steps blank."
 },
 {
 "id": "3cf339a2",
 "lang": "en-US",
 "text": "Learning to Cook"
+},
+{
+"id": "9f166c50",
+"lang": "en-US",
+"text": "Now I can cook several dishes, and my family says my tomato and egg soup is blank than my dad's. Cooking has taught me that if you keep blank, you will succeed."
 },
 {
 "id": "3116b680",
@@ -4625,14 +4720,29 @@
 "text": "tries"
 },
 {
-"id": "27ccb947",
+"id": "d28af299",
 "lang": "en-US",
-"text": "For weeks, Chen Yu worked on a small robot for the school science fair. He wanted it to pick up rubbish by itself. On the day of the fair, the robot suddenly stopped working in front of the judges. Chen Yu felt his face turn red. He wanted to run away. Instead, he took a deep breath and explained what he had planned and why he thought the robot had failed. He also told the judges how he would fix it. To his surprise, the judges gave him a prize for \"Best Thinking\". One judge said, \"Real scientists learn from failure. You showed us how to think like a scientist.\""
+"text": "For weeks, Chen Yu worked on a small robot for the school science fair. He wanted it to pick up rubbish by itself."
 },
 {
 "id": "0318d45f",
 "lang": "en-US",
 "text": "A Lesson from the Science Fair"
+},
+{
+"id": "f0d2a93c",
+"lang": "en-US",
+"text": "On the day of the fair, the robot suddenly stopped working in front of the judges. Chen Yu felt his face turn red. He wanted to run away."
+},
+{
+"id": "f6d7633b",
+"lang": "en-US",
+"text": "Instead, he took a deep breath and explained what he had planned and why he thought the robot had failed. He also told the judges how he would fix it."
+},
+{
+"id": "123370a8",
+"lang": "en-US",
+"text": "To his surprise, the judges gave him a prize for \"Best Thinking\". One judge said, \"Real scientists learn from failure. You showed us how to think like a scientist.\""
 },
 {
 "id": "4b7c52a6",
@@ -4695,14 +4805,29 @@
 "text": "Judges only like perfect projects"
 },
 {
-"id": "f2e9a07a",
+"id": "1e1925f9",
 "lang": "en-US",
-"text": "Volunteers Wanted! The City Library needs student volunteers for the summer holiday. What you will do: help younger children choose books, read stories to them, and keep the shelves tidy. Time: every Saturday morning, 9:00 to 11:30, from July 6th to August 24th. Who can apply: students aged 14 to 16 who are friendly, patient and good at speaking. Send an email to library@example.com before June 30th. Tell us about yourself and why you want to help."
+"text": "Volunteers Wanted! The City Library needs student volunteers for the summer holiday."
 },
 {
 "id": "2c5a4173",
 "lang": "en-US",
 "text": "Volunteers Wanted"
+},
+{
+"id": "5ceb721c",
+"lang": "en-US",
+"text": "What you will do: help younger children choose books, read stories to them, and keep the shelves tidy."
+},
+{
+"id": "80e1f4c1",
+"lang": "en-US",
+"text": "Time: every Saturday morning, 9:00 to 11:30, from July 6th to August 24th."
+},
+{
+"id": "7c51640d",
+"lang": "en-US",
+"text": "Who can apply: students aged 14 to 16 who are friendly, patient and good at speaking. Send an email to library@example.com before June 30th. Tell us about yourself and why you want to help."
 },
 {
 "id": "8f42a291",
@@ -4765,14 +4890,29 @@
 "text": "June 30th"
 },
 {
-"id": "8d6ccf45",
+"id": "32417f7c",
 "lang": "en-US",
-"text": "Many people think success comes from talent. In fact, good habits often matter more. A habit is something we do again and again until it becomes automatic. Reading for twenty minutes a day may not seem like much, but over a year it adds up to more than a hundred hours. Bad habits work in the same way. Staying up late once or twice may not hurt, but doing it every night can damage our health and our studies. Experts suggest starting small. If you want to exercise more, begin with ten minutes a day. Once it becomes part of your life, you can slowly do more."
+"text": "Many people think success comes from talent. In fact, good habits often matter more."
 },
 {
 "id": "8d54114f",
 "lang": "en-US",
 "text": "The Power of Habits"
+},
+{
+"id": "bb664a42",
+"lang": "en-US",
+"text": "A habit is something we do again and again until it becomes automatic. Reading for twenty minutes a day may not seem like much, but over a year it adds up to more than a hundred hours."
+},
+{
+"id": "e490b9f1",
+"lang": "en-US",
+"text": "Bad habits work in the same way. Staying up late once or twice may not hurt, but doing it every night can damage our health and our studies."
+},
+{
+"id": "417555a5",
+"lang": "en-US",
+"text": "Experts suggest starting small. If you want to exercise more, begin with ten minutes a day. Once it becomes part of your life, you can slowly do more."
 },
 {
 "id": "37a7e728",
@@ -4835,14 +4975,19 @@
 "text": "Change all your habits at once"
 },
 {
-"id": "2f24f32d",
+"id": "ae5a0dee",
 "lang": "en-US",
-"text": "Dear future me, when you read this letter, you blank already be in senior high school. I wonder blank you still remember how nervous you were before the final exams. This year, I learned that blank matters most is not the score, but the effort you make. I also found that helping others makes me happy. I hope you blank kind and curious, and never stop blank new things. Love, me."
+"text": "Dear future me, when you read this letter, you blank already be in senior high school. I wonder blank you still remember how nervous you were before the final exams. This year, I learned that blank matters most is not the score, but the effort you make."
 },
 {
 "id": "eddb2144",
 "lang": "en-US",
 "text": "A Letter to My Future Self"
+},
+{
+"id": "a890c428",
+"lang": "en-US",
+"text": "I also found that helping others makes me happy. I hope you blank kind and curious, and never stop blank new things. Love, me."
 },
 {
 "id": "1d5b79e7",

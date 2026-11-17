@@ -335,7 +335,7 @@ export function ReadPassageStep({ step, onDone }: StepProps<'read-passage'>) {
             <DisplayTextView text={p} size={typeof p === 'string' ? 20 : 24} />
           </View>
         ))}
-        <SpeakerButton item={step.speak} size={56} testID="read-listen" />
+        <SpeakerButton item={step.speak} sequence={step.speakParts} size={56} testID="read-listen" />
       </View>
     </View>
   );

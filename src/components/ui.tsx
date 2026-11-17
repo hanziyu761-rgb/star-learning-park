@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-na
 import { Pressable } from '@/components/Tappable';
 import * as Haptics from 'expo-haptics';
 import type { DisplayText, Speakable } from '@/lesson/types';
-import { onSpeakingChange, speak } from '@/speech/speech';
+import { onSpeakingChange, speak, speakSequence } from '@/speech/speech';
 import { colors, MIN_TOUCH, radius, shadow, space, themed, type } from '@/theme';
 import { DisplayTextView } from './PinyinText';
 
@@ -71,11 +71,14 @@ export function SpeakerButton({
   size = 72,
   color = colors.primary,
   testID,
+  sequence,
 }: {
   item: Speakable;
   size?: number;
   color?: string;
   testID?: string;
+  /** 依次读完这几段（长短文，V5.4.1） */
+  sequence?: Speakable[];
 }) {
   const [active, setActive] = useState(false);
   // 朗读结束时恢复按钮状态
@@ -94,7 +97,8 @@ export function SpeakerButton({
       onPress={() => {
         tapFeedback();
         setActive(true);
-        speak(item);
+        if (sequence?.length) speakSequence(sequence);
+        else speak(item);
       }}
       style={({ pressed }) => [
         styles.speaker,

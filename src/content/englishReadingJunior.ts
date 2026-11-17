@@ -221,12 +221,31 @@ const CLOZE: Record<number, Cloze> = {
 };
 
 const en = (text: string) => ({ text, lang: 'en-US' as const });
+/** 朗读分段：自家朗读服务一次最多 300 字，按句子拼成不超过 280 字的段 */
+export function speechChunks(text: string, max = 280): string[] {
+  const sentences = text.match(/[^.!?]+[.!?]+["']?\s*/g) ?? [text];
+  const out: string[] = [];
+  let cur = '';
+  for (const s of sentences) {
+    if (cur && (cur + s).trim().length > max) {
+      out.push(cur.trim());
+      cur = '';
+    }
+    cur += s;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+const passageSpeech = (paras: string[]) => {
+  const parts = paras.flatMap((p) => speechChunks(p)).map(en);
+  return { speak: parts[0], speakParts: parts };
+};
 const rotate = <X>(a: X[], k: number) => a.map((_, i) => a[(i + k) % a.length]);
 const HINT = { text: 'Read the passage again.', speak: en('Read the passage again.'), hintZh: '回到短文里找一找依据。' };
 
 function readingLesson(grade: number, r: Reading): Lesson {
   const steps: LessonStep[] = [
-    { kind: 'read-passage', id: 'p-read', title: { text: `Read: ${r.title}`, speak: en(r.title) }, visual: { emoji: r.emoji }, paragraphs: r.paras, speak: en(r.paras.join(' ')) },
+    { kind: 'read-passage', id: 'p-read', title: { text: `Read: ${r.title}`, speak: en(r.title) }, visual: { emoji: r.emoji }, paragraphs: r.paras, ...passageSpeech(r.paras) },
     ...r.questions.map((q, i): LessonStep => {
       const id = `enread-g${grade}-${r.n}-q${i}`;
       let exercise: Exercise;
@@ -269,7 +288,7 @@ export function clozeSentence(text: string, k: number): string {
 function clozeLesson(grade: number, c: Cloze): Lesson {
   const full = c.text.replace(/\{(\d)\}/g, (_, k) => c.blanks[Number(k) - 1].ans);
   const steps: LessonStep[] = [
-    { kind: 'read-passage', id: 'p-read', title: { text: c.title, speak: en(c.title.replace('Cloze: ', '')) }, visual: { emoji: c.emoji }, paragraphs: [blankText(c.text)], speak: en(blankText(c.text).replace(/\(\d\) _+/g, 'blank')) },
+    { kind: 'read-passage', id: 'p-read', title: { text: c.title, speak: en(c.title.replace('Cloze: ', '')) }, visual: { emoji: c.emoji }, paragraphs: [blankText(c.text)], ...passageSpeech([blankText(c.text).replace(/\(\d\) _+/g, 'blank')]) },
     ...c.blanks.map((b, i): LessonStep => {
       const opts = rotate([b.ans, ...b.others], i + grade);
       const prompt = `Choose the best answer for blank (${i + 1}).`;

@@ -57,3 +57,8 @@ it('单词卡（含初中单元）每个单词和例句都有童声录音（英�
   const missing = all.filter((s) => !findClip(s));
   expect(missing.map((s) => s.text).slice(0, 5)).toEqual([]);
 });
+
+it('课程里每一句朗读都不超过 300 字（自家朗读服务一次最多合成 300 字，长短文要分段，V5.4.1）', () => {
+  const long = speakables(LESSONS).filter((s) => Array.from(s.text).length > 300);
+  expect(long.map((s) => s.text.slice(0, 40))).toEqual([]);
+});

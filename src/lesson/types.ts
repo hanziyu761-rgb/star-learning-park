@@ -329,7 +329,16 @@ export type LessonStep =
   /** 情境对话 */
   | { kind: 'dialogue'; id: string; title: Prompt; lines: { speaker: string; text: string; speak: Speakable }[] }
   /** 中文短文阅读（V2.10）：一段带拼音的短文，可以听整篇 */
-  | { kind: 'read-passage'; id: string; title: Prompt; visual: Visual; paragraphs: DisplayText[]; speak: Speakable }
+  | {
+      kind: 'read-passage';
+      id: string;
+      title: Prompt;
+      visual: Visual;
+      paragraphs: DisplayText[];
+      speak: Speakable;
+      /** 长短文分段朗读（V5.4.1）：每段不超过 300 字，依次读完；有它时 speak 是第一段 */
+      speakParts?: Speakable[];
+    }
   /** 互动绘本：每页一张图和一句话，点单词可听读 */
   | { kind: 'picture-book'; id: string; title: Prompt; pages: { visual: Visual; text: string; speak: Speakable }[] };
 

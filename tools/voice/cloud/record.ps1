@@ -40,7 +40,7 @@ foreach ($item in $List) {
 $done = (Get-ChildItem $Out -Filter *.mp3 | Where-Object { $_.Length -gt 1000 }).Count
 Write-Host ""
 Write-Host "录好 $done / $($List.Count) 句" -ForegroundColor Green
-if ($Sample) { Write-Host "试听完觉得可以，就去掉 -Sample 再运行一次，录全部 2656 句" -ForegroundColor Green }
+if ($Sample) { Write-Host "试听完觉得可以，就去掉 -Sample 再运行一次，录 list.json 里的全部句子" -ForegroundColor Green }
 elseif ($Fail.Count) { Write-Host "还有 $($Fail.Count) 句没录上，再运行一次本脚本即可补录" -ForegroundColor Yellow }
 else {
   $zip = Join-Path $Here 'tongsheng.zip'
