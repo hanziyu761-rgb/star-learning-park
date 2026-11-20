@@ -3,6 +3,16 @@
   "version": "4.4.0",
   "private": true,
   "description": "Family-only US ELA English, Chinese and math learning with a protected DeepSeek tutor",
-  "scripts": {"start":"node server.js","check":"node --check server.js"},
-  "engines": {"node": ">=20"}
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check server/academy.js",
+    "test:legacy": "node --test tests/regression/legacy.test.js",
+    "build:academy": "cd academy && npm ci --include=dev && npm run build",
+    "test:academy": "cd academy && npm test",
+    "test:server": "node --test tests/regression/legacy.test.js tests/academy-server.test.js",
+    "test": "npm run test:server && npm run test:academy"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

@@ -5,6 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const ROOT=__dirname;
+const academy=require('./server/academy'); // AI 少年学院: /academy/ + /api/academy/* (behind the same parent login)
 if(fs.existsSync(path.join(ROOT,'.env'))){for(const line of fs.readFileSync(path.join(ROOT,'.env'),'utf8').split(/\r?\n/)){const m=line.trim().match(/^([A-Z][A-Z0-9_]*)\s*=\s*(.*)$/);if(m&&!(m[1] in process.env))process.env[m[1]]=m[2].replace(/^("|')(.*)\1$/,'$2');}}
 const HOST=process.env.HOST||'0.0.0.0';
 const PORT=Number(process.env.PORT)||10000;
@@ -86,6 +87,7 @@ const server=http.createServer(async(req,res)=>{
  if(pathname==='/logout'&&req.method==='POST'){res.setHeader('Set-Cookie','star_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure');res.writeHead(303,{'Location':'/login'});res.end();return;}
  const session=cookieUser(req);
  if(!session){if(pathname.startsWith('/api/'))return json(res,401,{error:'请让家长先输入访问码'});res.writeHead(302,{'Location':'/login','Cache-Control':'no-store'});res.end();return;}
+ if(academy.handle(req,res,pathname))return;
  if(pathname==='/api/tutor/status'&&req.method==='GET')return json(res,200,{available:!!DEEPSEEK_KEY,model:DEEPSEEK_KEY?MODEL:null,limits:{globalDaily:AI_LIMIT}});
  if(pathname==='/api/tutor/chat'){
   if(req.method!=='POST')return json(res,405,{error:'POST only'});
